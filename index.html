@@ -8,6 +8,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4158,16 +4159,30 @@ function initDefaultFilters(){
 
 async function verifyTeacherPassword(password, teacher){
   const stored = String(teacher.password_hash || teacher.password || '').trim();
+  const rawPassword = String(password || '');
 
   if(!stored) return false;
 
-  // fallback สำหรับฐานข้อมูลเก่าที่เก็บรหัสผ่านแบบ plain text
-  if(stored === password) return true;
+  // 1) fallback สำหรับฐานข้อมูลเก่าที่เก็บรหัสผ่านแบบ plain text
+  if(stored === rawPassword) return true;
 
-  // รองรับ bcrypt hash เช่น $2a$ / $2b$ / $2y$
+  // 2) รองรับ MD5 เดิม เช่น 32 ตัวอักษร hex: ab563249d1fbcbf9993ec80223c35974
+  const looksLikeMd5 = /^[a-f0-9]{32}$/i.test(stored);
+  if(looksLikeMd5){
+    // ใช้ CryptoJS ถ้ามี
+    if(window.CryptoJS?.MD5){
+      const md5Lower = window.CryptoJS.MD5(rawPassword).toString().toLowerCase();
+      if(md5Lower === stored.toLowerCase()) return true;
+    }
+
+    // fallback: ถ้ารหัสที่กรอกมาเป็น MD5 อยู่แล้ว ก็เทียบตรง ๆ
+    if(rawPassword.toLowerCase() === stored.toLowerCase()) return true;
+  }
+
+  // 3) รองรับ bcrypt hash เช่น $2a$ / $2b$ / $2y$
   if(stored.startsWith('$2') && window.dcodeIO?.bcrypt){
     try{
-      return window.dcodeIO.bcrypt.compareSync(password, stored);
+      return window.dcodeIO.bcrypt.compareSync(rawPassword, stored);
     }catch(err){
       console.warn('bcrypt compare failed', err);
       return false;
@@ -4214,12 +4229,9 @@ async function loginWithSupabase(teacherCode, password){
     console.warn('ไม่พบหรือเรียก rpc_teacher_login ไม่สำเร็จ จึงตรวจจากตาราง teachers โดยตรง', err);
   }
 
-  // ตาราง teachers แต่ละเวอร์ชันอาจใช้ชื่อคอลัมน์รหัสผ่านไม่เหมือนกัน
-  // ลอง password_hash ก่อน ถ้าไม่มีคอลัมน์นี้จะลอง password ต่อ
+  // ตาราง teachers จริงของโปรเจกต์นี้ใช้ password_hash เท่านั้น
   const selectVariants = [
-    'id, teacher_code, full_name, password_hash, is_active',
-    'id, teacher_code, full_name, password, is_active',
-    'id, teacher_code, full_name, is_active'
+    'id, teacher_code, full_name, password_hash, is_active'
   ];
 
   let data = null;
@@ -4259,7 +4271,7 @@ async function loginWithSupabase(teacherCode, password){
 
   const hasPasswordColumn = !!String(data.password_hash || data.password || '').trim();
   if(!hasPasswordColumn){
-    throw new Error('ตาราง teachers ไม่มีคอลัมน์ password_hash หรือ password สำหรับตรวจรหัสผ่าน');
+    throw new Error('ตาราง teachers ไม่มีค่า password_hash สำหรับตรวจรหัสผ่าน');
   }
 
   const passwordOk = await verifyTeacherPassword(password, data);

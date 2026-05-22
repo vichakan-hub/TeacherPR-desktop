@@ -1,16 +1,3 @@
-# Teacher-desktop
+# Teacher-desktop v5 MD5 password
 
-เวอร์ชันนี้ตัดการผูกกับ Google Apps Script ออกแล้ว
-
-## แก้ไขหลัก
-- ไม่มี `google.script.run`
-- Login ผ่าน Supabase
-- ลด warning จากปุ่ม optional ที่ไม่มีในหน้านี้
-- ใช้ `index.html` เป็นไฟล์หลักสำหรับ GitHub Pages
-
-## วิธีอัปเดตบน GitHub
-อัปโหลด `index.html` ทับไฟล์เดิมใน repo `Teacher-desktop` แล้ว Commit changes
-
-
-## v4
-- แก้ login ให้รองรับตาราง teachers ที่ใช้ password_hash หรือ password และไม่เรียก teacher_role
+เวอร์ชันนี้ไม่ผูกกับ Google Apps Script และรองรับ password_hash แบบ MD5 เดิม รวมถึง bcrypt และ plain text fallback
