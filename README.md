@@ -1,3 +1,3 @@
-# Teacher-desktop v5 MD5 password
+# Teacher-desktop v6
 
-เวอร์ชันนี้ไม่ผูกกับ Google Apps Script และรองรับ password_hash แบบ MD5 เดิม รวมถึง bcrypt และ plain text fallback
+No Apps Script login. Supports password_hash: MD5, bcrypt, and plain-text fallback.

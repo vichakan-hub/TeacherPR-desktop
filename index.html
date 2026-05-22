@@ -4158,31 +4158,55 @@ function initDefaultFilters(){
     }
 
 async function verifyTeacherPassword(password, teacher){
-  const stored = String(teacher.password_hash || teacher.password || '').trim();
+  const stored = String(teacher.password_hash || '').trim();
   const rawPassword = String(password || '');
+  const trimmedPassword = rawPassword.trim();
+  const teacherCode = String(teacher.teacher_code || '').trim().toUpperCase();
 
   if(!stored) return false;
 
   // 1) fallback สำหรับฐานข้อมูลเก่าที่เก็บรหัสผ่านแบบ plain text
-  if(stored === rawPassword) return true;
+  if(stored === rawPassword || stored === trimmedPassword) return true;
 
   // 2) รองรับ MD5 เดิม เช่น 32 ตัวอักษร hex: ab563249d1fbcbf9993ec80223c35974
   const looksLikeMd5 = /^[a-f0-9]{32}$/i.test(stored);
   if(looksLikeMd5){
-    // ใช้ CryptoJS ถ้ามี
-    if(window.CryptoJS?.MD5){
-      const md5Lower = window.CryptoJS.MD5(rawPassword).toString().toLowerCase();
-      if(md5Lower === stored.toLowerCase()) return true;
-    }
+    const storedLower = stored.toLowerCase();
 
     // fallback: ถ้ารหัสที่กรอกมาเป็น MD5 อยู่แล้ว ก็เทียบตรง ๆ
-    if(rawPassword.toLowerCase() === stored.toLowerCase()) return true;
+    if(rawPassword.toLowerCase() === storedLower || trimmedPassword.toLowerCase() === storedLower) return true;
+
+    if(window.CryptoJS?.MD5){
+      // รองรับหลายสูตรที่เคยเจอในการย้ายข้อมูลเก่า
+      const candidates = [
+        rawPassword,
+        trimmedPassword,
+        trimmedPassword.toLowerCase(),
+        trimmedPassword.toUpperCase(),
+        `${teacherCode}${trimmedPassword}`,
+        `${trimmedPassword}${teacherCode}`,
+        `${teacherCode}:${trimmedPassword}`,
+        `${teacherCode}|${trimmedPassword}`
+      ];
+
+      const uniqueCandidates = [...new Set(candidates.filter(v => v !== null && v !== undefined))];
+      for(const value of uniqueCandidates){
+        const md5Lower = window.CryptoJS.MD5(String(value)).toString().toLowerCase();
+        if(md5Lower === storedLower) return true;
+      }
+
+      console.warn('[login] MD5 ไม่ตรงกับรหัสผ่านที่กรอก', {
+        teacherCode,
+        storedPrefix: storedLower.slice(0, 8),
+        typedMd5Prefix: window.CryptoJS.MD5(trimmedPassword).toString().toLowerCase().slice(0, 8)
+      });
+    }
   }
 
   // 3) รองรับ bcrypt hash เช่น $2a$ / $2b$ / $2y$
   if(stored.startsWith('$2') && window.dcodeIO?.bcrypt){
     try{
-      return window.dcodeIO.bcrypt.compareSync(rawPassword, stored);
+      return window.dcodeIO.bcrypt.compareSync(trimmedPassword || rawPassword, stored);
     }catch(err){
       console.warn('bcrypt compare failed', err);
       return false;
@@ -4275,7 +4299,7 @@ async function loginWithSupabase(teacherCode, password){
   }
 
   const passwordOk = await verifyTeacherPassword(password, data);
-  if(!passwordOk) throw new Error('รหัสผ่านไม่ถูกต้อง');
+  if(!passwordOk) throw new Error('รหัสผ่านไม่ถูกต้อง ถ้าย้ายข้อมูลจากระบบเก่า ให้ตั้ง password_hash เป็น md5(รหัสผ่านจริง) เช่น md5('123456')');
 
   return buildTeacherUser(data);
 }
