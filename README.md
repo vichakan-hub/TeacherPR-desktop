@@ -10,3 +10,7 @@
 
 ## วิธีอัปเดตบน GitHub
 อัปโหลด `index.html` ทับไฟล์เดิมใน repo `Teacher-desktop` แล้ว Commit changes
+
+
+## v4
+- แก้ login ให้รองรับตาราง teachers ที่ใช้ password_hash หรือ password และไม่เรียก teacher_role

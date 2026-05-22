@@ -4194,7 +4194,7 @@ function buildTeacherUser(row){
 }
 
 async function loginWithSupabase(teacherCode, password){
-  // ถ้ามี RPC ฝั่ง Supabase สำหรับ login ให้ใช้ก่อน เพื่อไม่ต้องดึง password_hash มาที่ browser
+  // ถ้ามี RPC ฝั่ง Supabase สำหรับ login ให้ใช้ก่อน เพื่อไม่ต้องดึงรหัสผ่านมาที่ browser
   try{
     const { data, error } = await supabaseClient.rpc('rpc_teacher_login', {
       p_teacher_code: teacherCode,
@@ -4214,15 +4214,53 @@ async function loginWithSupabase(teacherCode, password){
     console.warn('ไม่พบหรือเรียก rpc_teacher_login ไม่สำเร็จ จึงตรวจจากตาราง teachers โดยตรง', err);
   }
 
-  const { data, error } = await supabaseClient
-    .from('teachers')
-    .select('id, teacher_code, full_name, password_hash, is_active')
-    .eq('teacher_code', teacherCode)
-    .maybeSingle();
+  // ตาราง teachers แต่ละเวอร์ชันอาจใช้ชื่อคอลัมน์รหัสผ่านไม่เหมือนกัน
+  // ลอง password_hash ก่อน ถ้าไม่มีคอลัมน์นี้จะลอง password ต่อ
+  const selectVariants = [
+    'id, teacher_code, full_name, password_hash, is_active',
+    'id, teacher_code, full_name, password, is_active',
+    'id, teacher_code, full_name, is_active'
+  ];
 
-  if(error) throw error;
+  let data = null;
+  let lastError = null;
+
+  for(const columns of selectVariants){
+    const result = await supabaseClient
+      .from('teachers')
+      .select(columns)
+      .eq('teacher_code', teacherCode)
+      .maybeSingle();
+
+    if(!result.error){
+      data = result.data;
+      lastError = null;
+      break;
+    }
+
+    lastError = result.error;
+
+    // ถ้าเป็น error คอลัมน์ไม่มีอยู่ ให้ลองชุดคอลัมน์ถัดไป
+    const message = String(result.error?.message || '').toLowerCase();
+    if(
+      result.error?.code === '42703' ||
+      message.includes('does not exist') ||
+      message.includes('column')
+    ){
+      continue;
+    }
+
+    throw result.error;
+  }
+
+  if(lastError && !data) throw lastError;
   if(!data) throw new Error('ไม่พบรหัสครูนี้ในระบบ');
   if(data.is_active === false) throw new Error('บัญชีครูนี้ถูกปิดใช้งาน');
+
+  const hasPasswordColumn = !!String(data.password_hash || data.password || '').trim();
+  if(!hasPasswordColumn){
+    throw new Error('ตาราง teachers ไม่มีคอลัมน์ password_hash หรือ password สำหรับตรวจรหัสผ่าน');
+  }
 
   const passwordOk = await verifyTeacherPassword(password, data);
   if(!passwordOk) throw new Error('รหัสผ่านไม่ถูกต้อง');
