@@ -4178,16 +4178,18 @@ async function verifyTeacherPassword(password, teacher){
 }
 
 function buildTeacherUser(row){
+  const teacherCode = normalizeTeacherCode(row.teacher_code);
   const fullName = safeText(
     row.full_name || [row.first_name, row.last_name].filter(Boolean).join(' '),
-    row.teacher_code || ''
+    teacherCode || ''
   );
 
   return {
     id: row.id,
-    teacher_code: normalizeTeacherCode(row.teacher_code),
+    teacher_code: teacherCode,
     full_name: fullName,
-    teacher_role: row.teacher_role || row.role || 'teacher'
+    // ฐานข้อมูลจริงไม่มีคอลัมน์ teacher_role แล้ว จึงกำหนดสิทธิ์จากรหัสครูแทน
+    teacher_role: teacherCode.startsWith('G') ? 'admin' : 'teacher'
   };
 }
 
@@ -4214,7 +4216,7 @@ async function loginWithSupabase(teacherCode, password){
 
   const { data, error } = await supabaseClient
     .from('teachers')
-    .select('id, teacher_code, full_name, first_name, last_name, teacher_role, role, password_hash, password, is_active')
+    .select('id, teacher_code, full_name, password_hash, is_active')
     .eq('teacher_code', teacherCode)
     .maybeSingle();
 
