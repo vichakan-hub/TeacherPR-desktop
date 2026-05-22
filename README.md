@@ -1,12 +1,12 @@
 # Teacher-desktop
 
-ระบบ Teacher Desktop สำหรับรายงานผลการเรียน / ส่งผลสอบแก้ตัว / นักเรียนในที่ปรึกษา / จองคาบว่าง
+เวอร์ชันนี้ตัดการผูกกับ Google Apps Script ออกแล้ว
 
-## วิธีอัปโหลดขึ้น GitHub
+## แก้ไขหลัก
+- ไม่มี `google.script.run`
+- Login ผ่าน Supabase
+- ลด warning จากปุ่ม optional ที่ไม่มีในหน้านี้
+- ใช้ `index.html` เป็นไฟล์หลักสำหรับ GitHub Pages
 
-1. สร้าง Repository ใหม่ชื่อ `Teacher-desktop`
-2. เข้า Repository แล้วกด `Add file` > `Upload files`
-3. ลากไฟล์ `index.html` ไปวาง
-4. กด `Commit changes`
-
-> หมายเหตุ: ไฟล์นี้ยังมีบางส่วนที่เรียก Google Apps Script (`google.script.run`) จึงเหมาะสำหรับเก็บโค้ดขึ้น GitHub ก่อน จากนั้นค่อยปรับให้รันแบบเว็บปกติผ่าน Supabase/Cloudflare Pages ต่อไป
+## วิธีอัปเดตบน GitHub
+อัปโหลด `index.html` ทับไฟล์เดิมใน repo `Teacher-desktop` แล้ว Commit changes

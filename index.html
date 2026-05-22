@@ -6780,7 +6780,9 @@ function bindFirstExisting(ids, eventName, handler){
       return id;
     }
   }
-  console.warn(`[bindFirstExisting] ไม่พบ element จาก ids: ${ids.join(', ')}`);
+
+  // บางปุ่มเป็นของหน้า Admin/Teacher Management ซึ่งไม่มีใน Teacher-desktop เวอร์ชันนี้
+  // จึงไม่ต้องแจ้ง warning ให้รก Console
   return '';
 }
 
