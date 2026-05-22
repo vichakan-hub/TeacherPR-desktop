@@ -7,6 +7,7 @@
   <title>Teacher - นำเข้าผลการเรียน</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3860,77 +3861,125 @@ function setActivePage(page){
       return month >= 5 && month <= 10 ? 1 : 2;
     }
 
-    function runGas(functionName, ...args) {
-  return new Promise((resolve, reject) => {
-    google.script.run
-      .withSuccessHandler(resolve)
-      .withFailureHandler(reject)[functionName](...args);
+function buildDefaultTeacherSettings(){
+  const year = getCurrentAcademicYear();
+  const term = getCurrentTerm();
+  const yearOptions = [year + 1, year, year - 1].filter((v, i, arr) => arr.indexOf(v) === i);
+
+  return {
+    import: {
+      academic_year: year,
+      term,
+      lock: false,
+      year_options: yearOptions,
+      term_options: [1, 2]
+    },
+    retest: {
+      academic_year: year,
+      term,
+      lock: false,
+      year_options: yearOptions,
+      term_options: [1, 2]
+    },
+    free_period: {
+      academic_year: year,
+      term,
+      lock: false,
+      year_options: yearOptions,
+      term_options: [1, 2]
+    }
+  };
+}
+
+function normalizeSettingObject(raw, fallback){
+  if(!raw) return fallback;
+
+  let value = raw;
+  if(typeof raw === 'string'){
+    try{
+      value = JSON.parse(raw);
+    }catch(e){
+      return fallback;
+    }
+  }
+
+  if(!value || typeof value !== 'object') return fallback;
+
+  return {
+    academic_year: safeNum(value.academic_year) || fallback.academic_year,
+    term: safeNum(value.term) || fallback.term,
+    lock: !!value.lock,
+    year_options: Array.isArray(value.year_options) && value.year_options.length
+      ? value.year_options.map(v => safeNum(v) || v)
+      : fallback.year_options,
+    term_options: Array.isArray(value.term_options) && value.term_options.length
+      ? value.term_options.map(v => safeNum(v) || v)
+      : fallback.term_options
+  };
+}
+
+async function tryLoadSettingsFromTable(tableName){
+  const { data, error } = await supabaseClient
+    .from(tableName)
+    .select('*')
+    .in('key', ['teacher_import_settings', 'teacher_retest_settings', 'teacher_free_period_settings']);
+
+  if(error) throw error;
+
+  const map = {};
+  (data || []).forEach(row => {
+    const key = row.key || row.setting_key || row.name;
+    const value = row.value ?? row.setting_value ?? row.json_value ?? row.config;
+    if(key) map[key] = value;
   });
+
+  return map;
 }
 
 async function loadImportSettingsFromSheet() {
-  try {
-    const res = await runGas('getTeacherImportSettings');
+  const defaults = buildDefaultTeacherSettings();
+  let settings = { ...defaults };
 
-    if (!res || !res.ok) {
-      throw new Error('ไม่พบค่าตั้งค่าจาก Google Sheet');
+  // GitHub/Cloudflare version: ไม่ใช้ Google Apps Script แล้ว
+  // ถ้ามีตาราง app_settings หรือ system_settings ใน Supabase จะอ่านค่าจากตารางนั้น
+  // ถ้าไม่มี จะใช้ค่า default จากวันที่ปัจจุบันแทน
+  for(const tableName of ['app_settings', 'system_settings']){
+    try{
+      const map = await tryLoadSettingsFromTable(tableName);
+
+      settings.import = normalizeSettingObject(
+        map.teacher_import_settings,
+        settings.import
+      );
+
+      settings.retest = normalizeSettingObject(
+        map.teacher_retest_settings,
+        settings.retest
+      );
+
+      settings.free_period = normalizeSettingObject(
+        map.teacher_free_period_settings,
+        settings.free_period
+      );
+
+      break;
+    }catch(err){
+      console.warn(`ไม่พบ/อ่านตาราง ${tableName} ไม่สำเร็จ จึงใช้ค่า default`, err);
     }
-
-    if (!res.import) {
-      throw new Error('ไม่พบค่าตั้งค่าการนำเข้าผลการเรียน');
-    }
-
-    state.importSettings = res.import;
-    applyImportSettingsToDropdowns(res.import);
-
-    if (res.retest) {
-      state.retestSettings = res.retest;
-      applyRetestSettingsToDropdowns(res.retest);
-    }
-
-    if (res.free_period) {
-  state.freePeriodSettings = res.free_period;
-  applyFreePeriodSettingsToDropdowns(res.free_period);
-}
-
-    return res;
-  } catch (err) {
-    console.error('loadImportSettingsFromSheet ERROR', err);
-
-    const fallbackImport = {
-      academic_year: getCurrentAcademicYear(),
-      term: getCurrentTerm(),
-      lock: false,
-      year_options: [getCurrentAcademicYear()],
-      term_options: [1, 2]
-    };
-
-    const fallbackRetest = {
-      academic_year: getCurrentAcademicYear(),
-      term: getCurrentTerm(),
-      lock: false,
-      year_options: [getCurrentAcademicYear()],
-      term_options: [1, 2]
-    };
-
-    state.importSettings = fallbackImport;
-    state.retestSettings = fallbackRetest;
-
-    applyImportSettingsToDropdowns(fallbackImport);
-    applyRetestSettingsToDropdowns(fallbackRetest);
-
-    showToast(
-      'โหลดค่าปี/เทอมจาก Google Sheet ไม่สำเร็จ',
-      'ระบบใช้ค่าจากวันที่ปัจจุบันแทนชั่วคราว',
-      'warn'
-    );
-
-    return {
-      ok: false,
-      import: fallbackImport,
-      retest: fallbackRetest
-    };
   }
+
+  state.importSettings = settings.import;
+  state.retestSettings = settings.retest;
+  state.freePeriodSettings = settings.free_period;
+
+  applyImportSettingsToDropdowns(settings.import);
+  applyRetestSettingsToDropdowns(settings.retest);
+  applyFreePeriodSettingsToDropdowns(settings.free_period);
+
+  return {
+    ok: true,
+    ...settings
+  };
 }
 
 function applyFreePeriodSettingsToDropdowns(settings) {
@@ -4107,55 +4156,125 @@ function initDefaultFilters(){
       }
     }
 
-    async function login(){
-      setStatus('loginStatus','กำลังตรวจสอบสิทธิ์...','info');
+async function verifyTeacherPassword(password, teacher){
+  const stored = String(teacher.password_hash || teacher.password || '').trim();
 
-      const teacherCode = normalizeTeacherCode(el('loginTeacherCode').value);
-      const password = el('loginPassword').value || '';
+  if(!stored) return false;
 
-      if(!teacherCode){
-        setStatus('loginStatus','กรุณากรอกรหัสครู','error');
-        return;
-      }
-      if(!teacherCode.startsWith('T')){
-        setStatus('loginStatus','หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น','error');
-        return;
-      }
-      if(!password){
-        setStatus('loginStatus','กรุณากรอกรหัสผ่าน','error');
-        return;
-      }
+  // fallback สำหรับฐานข้อมูลเก่าที่เก็บรหัสผ่านแบบ plain text
+  if(stored === password) return true;
 
-      google.script.run
-        .withSuccessHandler(async (res) => {
-          if(!res || !res.ok || !res.user){
-            setStatus('loginStatus','เข้าสู่ระบบไม่สำเร็จ','error');
-            return;
-          }
-
-          state.currentUser = res.user;
-          saveSession();
-
-          el('loginView').classList.add('hidden');
-          el('appView').classList.remove('hidden');
-          setActivePage('home');
-
-          el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
-          el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
-
-await loadImportSettingsFromSheet();
-await loadImportTeachingList();
-await loadAdviserRooms();
-
-          showToast('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${state.currentUser.full_name}`, 'success');
-        })
-        .withFailureHandler((err) => {
-          const msg = (err && err.message) || 'เข้าสู่ระบบไม่สำเร็จ';
-          setStatus('loginStatus', msg, 'error');
-          showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
-        })
-        .loginSystem(teacherCode, password);
+  // รองรับ bcrypt hash เช่น $2a$ / $2b$ / $2y$
+  if(stored.startsWith('$2') && window.dcodeIO?.bcrypt){
+    try{
+      return window.dcodeIO.bcrypt.compareSync(password, stored);
+    }catch(err){
+      console.warn('bcrypt compare failed', err);
+      return false;
     }
+  }
+
+  return false;
+}
+
+function buildTeacherUser(row){
+  const fullName = safeText(
+    row.full_name || [row.first_name, row.last_name].filter(Boolean).join(' '),
+    row.teacher_code || ''
+  );
+
+  return {
+    id: row.id,
+    teacher_code: normalizeTeacherCode(row.teacher_code),
+    full_name: fullName,
+    teacher_role: row.teacher_role || row.role || 'teacher'
+  };
+}
+
+async function loginWithSupabase(teacherCode, password){
+  // ถ้ามี RPC ฝั่ง Supabase สำหรับ login ให้ใช้ก่อน เพื่อไม่ต้องดึง password_hash มาที่ browser
+  try{
+    const { data, error } = await supabaseClient.rpc('rpc_teacher_login', {
+      p_teacher_code: teacherCode,
+      p_password: password
+    });
+
+    if(!error && data){
+      const payload = Array.isArray(data) ? data[0] : data;
+      const ok = payload?.ok !== false;
+      const user = payload?.user || payload;
+
+      if(ok && user?.teacher_code){
+        return buildTeacherUser(user);
+      }
+    }
+  }catch(err){
+    console.warn('ไม่พบหรือเรียก rpc_teacher_login ไม่สำเร็จ จึงตรวจจากตาราง teachers โดยตรง', err);
+  }
+
+  const { data, error } = await supabaseClient
+    .from('teachers')
+    .select('id, teacher_code, full_name, first_name, last_name, teacher_role, role, password_hash, password, is_active')
+    .eq('teacher_code', teacherCode)
+    .maybeSingle();
+
+  if(error) throw error;
+  if(!data) throw new Error('ไม่พบรหัสครูนี้ในระบบ');
+  if(data.is_active === false) throw new Error('บัญชีครูนี้ถูกปิดใช้งาน');
+
+  const passwordOk = await verifyTeacherPassword(password, data);
+  if(!passwordOk) throw new Error('รหัสผ่านไม่ถูกต้อง');
+
+  return buildTeacherUser(data);
+}
+
+async function login(){
+  setStatus('loginStatus','กำลังตรวจสอบสิทธิ์...','info');
+
+  const teacherCode = normalizeTeacherCode(el('loginTeacherCode').value);
+  const password = el('loginPassword').value || '';
+
+  if(!teacherCode){
+    setStatus('loginStatus','กรุณากรอกรหัสครู','error');
+    return;
+  }
+  if(!teacherCode.startsWith('T')){
+    setStatus('loginStatus','หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น','error');
+    return;
+  }
+  if(!password){
+    setStatus('loginStatus','กรุณากรอกรหัสผ่าน','error');
+    return;
+  }
+
+  try{
+    const user = await loginWithSupabase(teacherCode, password);
+
+    if(!user || !user.teacher_code){
+      throw new Error('เข้าสู่ระบบไม่สำเร็จ');
+    }
+
+    state.currentUser = user;
+    saveSession();
+
+    el('loginView').classList.add('hidden');
+    el('appView').classList.remove('hidden');
+    setActivePage('home');
+
+    el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+    el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
+
+    await loadImportSettingsFromSheet();
+    await loadImportTeachingList();
+    await loadAdviserRooms();
+
+    showToast('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${state.currentUser.full_name}`, 'success');
+  }catch(err){
+    const msg = err?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+    setStatus('loginStatus', msg, 'error');
+    showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
+  }
+}
 
     function logout(){
       state.currentUser = null;
@@ -6938,6 +7057,254 @@ function fpGetReservationFilters(includeClassRoom){
   return base;
 }
 
+const FP_SLOT_TABLE_CANDIDATES = ['free_period_slots', 'emptysec', 'free_slots'];
+const FP_RESERVATION_TABLE_CANDIDATES = ['free_period_reservations', 'free_period_reservation'];
+let fpResolvedSlotTable = null;
+let fpResolvedReservationTable = null;
+
+function normalizeFpClassLevel(value){
+  const s = safeText(value, '');
+  if(!s) return '';
+  if(s.startsWith('ม.')) return s;
+  if(/^\d+$/.test(s)) return `ม.${s}`;
+  return s;
+}
+
+function fpNormalizeSlot(row){
+  const classLevel = normalizeFpClassLevel(row.class_level || row.level || row.grade_level);
+  const room = safeText(row.room || row.class_room_no || row.room_no, '');
+  const classRoom = safeText(row.class_room || row.classroom, classLevel && room ? `${classLevel}/${room}` : '');
+
+  return {
+    ...row,
+    id: row.id || row.slot_id || row.emptysec_id,
+    slot_code: safeText(row.slot_code || row.emptysec_code || row.code, row.id || '-'),
+    academic_year: row.academic_year,
+    term: row.term,
+    class_level: classLevel,
+    room,
+    class_room: classRoom,
+    day_of_week: safeText(row.day_of_week || row.day_name || row.day || row.weekday, ''),
+    period_no: row.period_no ?? row.period ?? row.period_number ?? '',
+    note: safeText(row.note || row.remark || row.description, 'คาบว่าง')
+  };
+}
+
+function fpNormalizeReservation(row, slotMap = new Map()){
+  const slot = slotMap.get(String(row.slot_id || row.free_period_slot_id || row.emptysec_id || '')) || row.slot || row.free_period_slots || {};
+  const normalizedSlot = fpNormalizeSlot({ ...slot, ...row });
+
+  return {
+    ...row,
+    id: row.id || row.reservation_id,
+    slot_id: row.slot_id || row.free_period_slot_id || row.emptysec_id || normalizedSlot.id,
+    reserve_date: row.reserve_date || row.reservation_date || row.date,
+    reserve_date_th: row.reserve_date_th || fpFormatThaiDate(row.reserve_date || row.reservation_date || row.date),
+    slot_code: safeText(row.slot_code, normalizedSlot.slot_code),
+    academic_year: row.academic_year || normalizedSlot.academic_year,
+    term: row.term || normalizedSlot.term,
+    class_level: normalizeFpClassLevel(row.class_level || normalizedSlot.class_level),
+    room: safeText(row.room, normalizedSlot.room),
+    class_room: safeText(row.class_room, normalizedSlot.class_room),
+    day_of_week: safeText(row.day_of_week, normalizedSlot.day_of_week),
+    period_no: row.period_no ?? normalizedSlot.period_no,
+    teacher_code: safeText(row.teacher_code || row.reserved_by_teacher_code, ''),
+    teacher_full_name: safeText(row.teacher_full_name || row.reserved_by_teacher_name || row.teacher_name, ''),
+    status: safeText(row.status, 'reserved'),
+    created_at: row.created_at || row.inserted_at || row.updated_at || null
+  };
+}
+
+function fpApplyBaseSlotFilters(query, filters){
+  if(filters.academic_year) query = query.eq('academic_year', safeNum(filters.academic_year) || filters.academic_year);
+  if(filters.term) query = query.eq('term', safeNum(filters.term) || filters.term);
+  if(filters.class_level) query = query.eq('class_level', filters.class_level);
+  if(filters.room) query = query.eq('room', filters.room);
+  return query;
+}
+
+async function fpFetchFreeSlots(filters){
+  const tableNames = fpResolvedSlotTable
+    ? [fpResolvedSlotTable, ...FP_SLOT_TABLE_CANDIDATES.filter(t => t !== fpResolvedSlotTable)]
+    : FP_SLOT_TABLE_CANDIDATES;
+
+  let lastError = null;
+
+  for(const tableName of tableNames){
+    try{
+      let query = supabaseClient.from(tableName).select('*');
+      query = fpApplyBaseSlotFilters(query, filters)
+        .order('day_of_week', { ascending:true })
+        .order('period_no', { ascending:true });
+
+      const { data, error } = await query;
+      if(error) throw error;
+
+      fpResolvedSlotTable = tableName;
+      return (data || []).map(fpNormalizeSlot);
+    }catch(err){
+      lastError = err;
+      console.warn(`โหลดคาบว่างจาก ${tableName} ไม่สำเร็จ`, err);
+    }
+  }
+
+  throw lastError || new Error('ไม่พบตารางคาบว่างใน Supabase');
+}
+
+async function fpFetchSlotsByIds(slotIds){
+  const ids = [...new Set((slotIds || []).filter(Boolean).map(String))];
+  const map = new Map();
+  if(!ids.length) return map;
+
+  const tableNames = fpResolvedSlotTable
+    ? [fpResolvedSlotTable, ...FP_SLOT_TABLE_CANDIDATES.filter(t => t !== fpResolvedSlotTable)]
+    : FP_SLOT_TABLE_CANDIDATES;
+
+  for(const tableName of tableNames){
+    try{
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .select('*')
+        .in('id', ids);
+
+      if(error) throw error;
+      fpResolvedSlotTable = tableName;
+
+      (data || []).map(fpNormalizeSlot).forEach(slot => {
+        map.set(String(slot.id), slot);
+      });
+
+      return map;
+    }catch(err){
+      console.warn(`โหลดข้อมูล slot จาก ${tableName} ไม่สำเร็จ`, err);
+    }
+  }
+
+  return map;
+}
+
+function fpApplyReservationFilters(query, filters){
+  if(filters.academic_year) query = query.eq('academic_year', safeNum(filters.academic_year) || filters.academic_year);
+  if(filters.term) query = query.eq('term', safeNum(filters.term) || filters.term);
+  if(filters.class_level) query = query.eq('class_level', filters.class_level);
+  if(filters.room) query = query.eq('room', filters.room);
+  if(filters.class_room) query = query.eq('class_room', filters.class_room);
+  if(filters.teacher_code) query = query.eq('teacher_code', filters.teacher_code);
+  if(filters.reserve_date) query = query.eq('reserve_date', filters.reserve_date);
+  if(filters.slot_id) query = query.eq('slot_id', filters.slot_id);
+  return query;
+}
+
+async function fpFetchReservations(filters = {}){
+  const tableNames = fpResolvedReservationTable
+    ? [fpResolvedReservationTable, ...FP_RESERVATION_TABLE_CANDIDATES.filter(t => t !== fpResolvedReservationTable)]
+    : FP_RESERVATION_TABLE_CANDIDATES;
+
+  let lastError = null;
+
+  for(const tableName of tableNames){
+    try{
+      let query = supabaseClient
+        .from(tableName)
+        .select('*')
+        .eq('status', 'reserved')
+        .order('reserve_date', { ascending:true })
+        .order('created_at', { ascending:false });
+
+      query = fpApplyReservationFilters(query, filters);
+
+      const { data, error } = await query;
+      if(error) throw error;
+
+      fpResolvedReservationTable = tableName;
+
+      const slotIds = (data || []).map(row => row.slot_id || row.free_period_slot_id || row.emptysec_id).filter(Boolean);
+      const slotMap = await fpFetchSlotsByIds(slotIds);
+
+      return (data || []).map(row => fpNormalizeReservation(row, slotMap));
+    }catch(err){
+      lastError = err;
+      console.warn(`โหลดรายการจองจาก ${tableName} ไม่สำเร็จ`, err);
+    }
+  }
+
+  throw lastError || new Error('ไม่พบตารางรายการจองคาบว่างใน Supabase');
+}
+
+async function fpFindReservedByDateAndSlot(reserveDate, slotId){
+  const rows = await fpFetchReservations({ reserve_date: reserveDate, slot_id: slotId });
+  return rows.find(row => String(row.slot_id) === String(slotId)) || null;
+}
+
+async function fpCreateReservation(slot, reserveDate){
+  const tableNames = fpResolvedReservationTable
+    ? [fpResolvedReservationTable, ...FP_RESERVATION_TABLE_CANDIDATES.filter(t => t !== fpResolvedReservationTable)]
+    : FP_RESERVATION_TABLE_CANDIDATES;
+
+  const payload = {
+    slot_id: slot.id,
+    reserve_date: reserveDate,
+    teacher_code: state.currentUser.teacher_code,
+    teacher_full_name: state.currentUser.full_name,
+    academic_year: slot.academic_year,
+    term: slot.term,
+    class_level: slot.class_level,
+    room: slot.room,
+    class_room: slot.class_room,
+    slot_code: slot.slot_code,
+    day_of_week: slot.day_of_week,
+    period_no: slot.period_no,
+    status: 'reserved'
+  };
+
+  let lastError = null;
+
+  for(const tableName of tableNames){
+    try{
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .insert(payload)
+        .select('*')
+        .single();
+
+      if(error) throw error;
+      fpResolvedReservationTable = tableName;
+      return fpNormalizeReservation(data, new Map([[String(slot.id), slot]]));
+    }catch(err){
+      lastError = err;
+      console.warn(`บันทึกการจองลง ${tableName} ไม่สำเร็จ`, err);
+    }
+  }
+
+  throw lastError || new Error('บันทึกการจองไม่สำเร็จ');
+}
+
+async function fpUpdateReservationCancelled(reservationId){
+  if(!fpResolvedReservationTable){
+    await fpFetchReservations({ teacher_code: state.currentUser.teacher_code });
+  }
+
+  const tableName = fpResolvedReservationTable || FP_RESERVATION_TABLE_CANDIDATES[0];
+
+  let result = await supabaseClient
+    .from(tableName)
+    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+    .eq('id', reservationId)
+    .eq('teacher_code', state.currentUser.teacher_code)
+    .eq('status', 'reserved');
+
+  if(result.error){
+    result = await supabaseClient
+      .from(tableName)
+      .update({ status: 'cancelled' })
+      .eq('id', reservationId)
+      .eq('teacher_code', state.currentUser.teacher_code)
+      .eq('status', 'reserved');
+  }
+
+  if(result.error) throw result.error;
+}
+
 async function fpLoadSlots(){
   try{
     if(!state.currentUser){
@@ -6957,13 +7324,7 @@ async function fpLoadSlots(){
     fpSetSubPage('search');
     setStatus('fpStatus', 'กำลังโหลดคาบว่าง...', 'info');
 
-    const res = await runGas('listFreeSlots', fpGetFilters());
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดคาบว่างไม่สำเร็จ');
-    }
-
-    state.freePeriodSlots = res.data || [];
+    state.freePeriodSlots = await fpFetchFreeSlots(fpGetFilters());
     fpRenderSlots(state.freePeriodSlots);
     fpUpdateSummary();
 
@@ -7236,17 +7597,7 @@ async function fpConfirmReserve(){
     el('fpConfirmReserveBtn').disabled = true;
     setStatus('fpReserveStatus', 'กำลังตรวจสอบการจอง...', 'info');
 
-    const mapRes = await runGas('getReservationMapByDate', {
-      reserve_date: reserveDate,
-      academic_year: slot.academic_year,
-      term: slot.term,
-      class_level: slot.class_level,
-      room: slot.room,
-      class_room: slot.class_room
-    });
-
-    const map = mapRes?.data || {};
-    const existing = map[String(slot.id)];
+    const existing = await fpFindReservedByDateAndSlot(reserveDate, slot.id);
 
     if(existing){
       const name = existing.teacher_full_name || 'ครูท่านอื่น';
@@ -7257,16 +7608,7 @@ async function fpConfirmReserve(){
 
     setStatus('fpReserveStatus', 'กำลังบันทึกการจอง...', 'info');
 
-    const res = await runGas('reserveSlot', {
-      slot_id: slot.id,
-      reserve_date: reserveDate,
-      teacher_code: state.currentUser.teacher_code,
-      teacher_full_name: state.currentUser.full_name
-    });
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'จองไม่สำเร็จ');
-    }
+    await fpCreateReservation(slot, reserveDate);
 
     closeOverlay('fpReserveOverlay');
 
@@ -7294,17 +7636,10 @@ async function fpLoadMyReservations(){
   try{
     if(!state.currentUser) return;
 
-    const res = await runGas(
-      'listMyReservations',
-      state.currentUser.teacher_code,
-      fpGetReservationFilters(false)
-    );
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดรายการจองของฉันไม่สำเร็จ');
-    }
-
-    state.freePeriodMyReservations = res.data || [];
+    state.freePeriodMyReservations = await fpFetchReservations({
+      ...fpGetReservationFilters(false),
+      teacher_code: state.currentUser.teacher_code
+    });
     fpRenderReservationTable('fpMineTbody', state.freePeriodMyReservations, true);
     fpUpdateSummary();
 
@@ -7330,13 +7665,7 @@ async function fpLoadAllReservations(showStatus = true){
   try{
     const filters = fpGetReservationFilters(true);
 
-    const res = await runGas('listAllActiveReservations', filters);
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดการจองทั้งหมดไม่สำเร็จ');
-    }
-
-  state.freePeriodAllReservations = res.data || [];
+    state.freePeriodAllReservations = await fpFetchReservations(filters);
 fpRenderAllReservationsFiltered();
 
     if(showStatus && state.freePeriodSubPage === 'all'){
@@ -7421,14 +7750,7 @@ async function fpCancelReservation(reservationId){
     const ok = confirm('ต้องการยกเลิกรายการจองนี้หรือไม่');
     if(!ok) return;
 
-    const res = await runGas('cancelReservation', {
-      reservation_id: reservationId,
-      teacher_code: state.currentUser.teacher_code
-    });
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'ยกเลิกไม่สำเร็จ');
-    }
+    await fpUpdateReservationCancelled(reservationId);
 
     showToast('ยกเลิกรายการจองแล้ว', 'ระบบยกเลิกรายการจองเรียบร้อย', 'success');
 
