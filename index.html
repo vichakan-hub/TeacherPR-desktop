@@ -4140,22 +4140,36 @@ function initDefaultFilters(){
       sessionStorage.setItem('teacherPageUser', JSON.stringify(state.currentUser));
     }
 
-    function restoreSession(){
-      try{
-        const raw = sessionStorage.getItem('teacherPageUser');
-        if(!raw) return false;
-        state.currentUser = JSON.parse(raw);
-        if(!String(state.currentUser.teacher_code || '').startsWith('T')) return false;
+function restoreSession(){
+  try{
+    const raw = sessionStorage.getItem('teacherPageUser');
+    if(!raw) return false;
 
-        el('loginView').classList.add('hidden');
-        el('appView').classList.remove('hidden');
-        el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
-        el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
-        return true;
-      }catch(e){
-        return false;
-      }
+    state.currentUser = JSON.parse(raw);
+
+    if(!isTeacherDesktopAllowed(state.currentUser.teacher_code)){
+      sessionStorage.removeItem('teacherPageUser');
+      return false;
     }
+
+    el('loginView').classList.add('hidden');
+    el('appView').classList.remove('hidden');
+
+    if(el('currentUserBox')){
+      el('currentUserBox').innerHTML =
+        `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+    }
+
+    if(el('homeUserName')){
+      el('homeUserName').textContent =
+        `คุณครู ${state.currentUser.full_name}`;
+    }
+
+    return true;
+  }catch(e){
+    return false;
+  }
+}
 
 async function verifyTeacherPassword(password, teacher){
   const stored = String(teacher.password_hash || '').trim();
@@ -4304,53 +4318,115 @@ async function loginWithSupabase(teacherCode, password){
   return buildTeacherUser(data);
 }
 
+
+
 async function login(){
   setStatus('loginStatus','กำลังตรวจสอบสิทธิ์...','info');
 
-  const teacherCode = normalizeTeacherCode(el('loginTeacherCode').value);
-  const password = el('loginPassword').value || '';
-
-  if(!teacherCode){
-    setStatus('loginStatus','กรุณากรอกรหัสครู','error');
-    return;
-  }
-  if(!teacherCode.startsWith('T')){
-    setStatus('loginStatus','หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น','error');
-    return;
-  }
-  if(!password){
-    setStatus('loginStatus','กรุณากรอกรหัสผ่าน','error');
-    return;
-  }
-
   try{
-    const user = await loginWithSupabase(teacherCode, password);
-
-    if(!user || !user.teacher_code){
-      throw new Error('เข้าสู่ระบบไม่สำเร็จ');
-    }
+    const user = await loginWithTeacherRpc(
+      el('loginTeacherCode').value,
+      el('loginPassword').value
+    );
 
     state.currentUser = user;
     saveSession();
 
     el('loginView').classList.add('hidden');
     el('appView').classList.remove('hidden');
-    setActivePage('home');
 
-    el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
-    el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
+    if(el('currentUserBox')){
+      el('currentUserBox').innerHTML =
+        `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+    }
+
+    if(el('homeUserName')){
+      el('homeUserName').textContent =
+        `คุณครู ${state.currentUser.full_name}`;
+    }
+
+    setActivePage('home');
 
     await loadImportSettingsFromSheet();
     await loadImportTeachingList();
     await loadAdviserRooms();
 
-    showToast('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${state.currentUser.full_name}`, 'success');
+    showToast(
+      'เข้าสู่ระบบสำเร็จ',
+      `ยินดีต้อนรับ ${state.currentUser.full_name}`,
+      'success'
+    );
+
   }catch(err){
-    const msg = err?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+    console.error('login ERROR', err);
+    const msg = err.message || 'เข้าสู่ระบบไม่สำเร็จ';
     setStatus('loginStatus', msg, 'error');
     showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
   }
 }
+
+  function normalizeTeacherCode(raw){
+  const s = String(raw || '').trim().toUpperCase();
+  if(!s) return '';
+  if(s.startsWith('T') || s.startsWith('G')) return s;
+  if(/^\d+$/.test(s)) return `T${s}`;
+  return s;
+}
+
+function isTeacherDesktopAllowed(code){
+  const c = String(code || '').trim().toUpperCase();
+  return c.startsWith('T');
+}
+
+async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
+  const teacherCode = normalizeTeacherCode(teacherCodeRaw);
+  const password = String(passwordRaw || '').trim();
+
+  if(!teacherCode){
+    throw new Error('กรุณากรอกรหัสครู');
+  }
+
+  // Desktop ไม่เอา G
+  if(!isTeacherDesktopAllowed(teacherCode)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  if(!password){
+    throw new Error('กรุณากรอกรหัสผ่าน');
+  }
+
+  const { data, error } = await supabaseClient.rpc('login_teacher', {
+    p_teacher_code: teacherCode,
+    p_password: password
+  });
+
+  if(error) throw error;
+
+  if(!data || data.ok !== true || !data.user){
+    throw new Error(data?.message || 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
+
+  const user = data.user;
+  const code = String(user.teacher_code || '').toUpperCase();
+
+  // กันอีกชั้นหลัง RPC ส่ง user กลับมา
+  if(!isTeacherDesktopAllowed(code)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  return {
+    id: user.id || '',
+    teacher_code: user.teacher_code || '',
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
+    full_name: user.full_name || [user.first_name || '', user.last_name || ''].join(' ').trim() || user.teacher_code,
+    role_prefix: code.charAt(0),
+    teacher_role: 'teacher',
+    is_active: user.is_active !== false
+  };
+}
+
+
 
     function logout(){
       state.currentUser = null;
