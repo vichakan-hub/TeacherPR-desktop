@@ -7,8 +7,6 @@
   <title>Teacher - นำเข้าผลการเรียน</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3612,6 +3610,82 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_bvvfwIdiPxyN2hYXVogVHQ_QxXE0I1_';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    /*******************************************************
+ * Shared Teacher Login Helper
+ * ใช้ร่วมกันทั้ง Teacher-desktop และ Teacher-mobile
+ *******************************************************/
+
+function normalizeTeacherCode(raw){
+  const s = String(raw || '').trim().toUpperCase();
+
+  if(!s) return '';
+
+  // ถ้าพิมพ์ T323 หรือ G001 มา ให้คืนค่าตามนั้น
+  if(s.startsWith('T') || s.startsWith('G')) return s;
+
+  // ถ้าพิมพ์เลขล้วน เช่น 323 ให้แปลงเป็น T323
+  if(/^\d+$/.test(s)) return `T${s}`;
+
+  return s;
+}
+
+function isTeacherPageAllowed(code){
+  const c = String(code || '').trim().toUpperCase();
+
+  // Teacher Desktop / Mobile รับเฉพาะครูรหัส T
+  return c.startsWith('T');
+}
+
+async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
+  const teacherCode = normalizeTeacherCode(teacherCodeRaw);
+  const password = String(passwordRaw || '').trim();
+
+  if(!teacherCode){
+    throw new Error('กรุณากรอกรหัสครู');
+  }
+
+  if(!isTeacherPageAllowed(teacherCode)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  if(!password){
+    throw new Error('กรุณากรอกรหัสผ่าน');
+  }
+
+  const { data, error } = await supabaseClient.rpc('login_teacher', {
+    p_teacher_code: teacherCode,
+    p_password: password
+  });
+
+  if(error) throw error;
+
+  if(!data || data.ok !== true || !data.user){
+    throw new Error(data?.message || 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
+
+  const user = data.user || {};
+  const code = String(user.teacher_code || '').toUpperCase();
+
+  // กันอีกชั้นหลัง RPC ส่งข้อมูลกลับมา
+  if(!isTeacherPageAllowed(code)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  return {
+    id: user.id || '',
+    teacher_code: user.teacher_code || '',
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
+    full_name:
+      user.full_name ||
+      [user.first_name || '', user.last_name || ''].join(' ').trim() ||
+      user.teacher_code,
+    role_prefix: code.charAt(0),
+    teacher_role: 'teacher',
+    is_active: user.is_active !== false
+  };
+}
+
     const el = (id) => document.getElementById(id);
 
 const state = {
@@ -4147,7 +4221,7 @@ function restoreSession(){
 
     state.currentUser = JSON.parse(raw);
 
-    if(!isTeacherDesktopAllowed(state.currentUser.teacher_code)){
+    if(!isTeacherPageAllowed(state.currentUser.teacher_code)){
       sessionStorage.removeItem('teacherPageUser');
       return false;
     }
@@ -4167,158 +4241,10 @@ function restoreSession(){
 
     return true;
   }catch(e){
+    sessionStorage.removeItem('teacherPageUser');
     return false;
   }
 }
-
-async function verifyTeacherPassword(password, teacher){
-  const stored = String(teacher.password_hash || '').trim();
-  const rawPassword = String(password || '');
-  const trimmedPassword = rawPassword.trim();
-  const teacherCode = String(teacher.teacher_code || '').trim().toUpperCase();
-
-  if(!stored) return false;
-
-  // 1) fallback สำหรับฐานข้อมูลเก่าที่เก็บรหัสผ่านแบบ plain text
-  if(stored === rawPassword || stored === trimmedPassword) return true;
-
-  // 2) รองรับ MD5 เดิม เช่น 32 ตัวอักษร hex: ab563249d1fbcbf9993ec80223c35974
-  const looksLikeMd5 = /^[a-f0-9]{32}$/i.test(stored);
-  if(looksLikeMd5){
-    const storedLower = stored.toLowerCase();
-
-    // fallback: ถ้ารหัสที่กรอกมาเป็น MD5 อยู่แล้ว ก็เทียบตรง ๆ
-    if(rawPassword.toLowerCase() === storedLower || trimmedPassword.toLowerCase() === storedLower) return true;
-
-    if(window.CryptoJS?.MD5){
-      // รองรับหลายสูตรที่เคยเจอในการย้ายข้อมูลเก่า
-      const candidates = [
-        rawPassword,
-        trimmedPassword,
-        trimmedPassword.toLowerCase(),
-        trimmedPassword.toUpperCase(),
-        `${teacherCode}${trimmedPassword}`,
-        `${trimmedPassword}${teacherCode}`,
-        `${teacherCode}:${trimmedPassword}`,
-        `${teacherCode}|${trimmedPassword}`
-      ];
-
-      const uniqueCandidates = [...new Set(candidates.filter(v => v !== null && v !== undefined))];
-      for(const value of uniqueCandidates){
-        const md5Lower = window.CryptoJS.MD5(String(value)).toString().toLowerCase();
-        if(md5Lower === storedLower) return true;
-      }
-
-      console.warn('[login] MD5 ไม่ตรงกับรหัสผ่านที่กรอก', {
-        teacherCode,
-        storedPrefix: storedLower.slice(0, 8),
-        typedMd5Prefix: window.CryptoJS.MD5(trimmedPassword).toString().toLowerCase().slice(0, 8)
-      });
-    }
-  }
-
-  // 3) รองรับ bcrypt hash เช่น $2a$ / $2b$ / $2y$
-  if(stored.startsWith('$2') && window.dcodeIO?.bcrypt){
-    try{
-      return window.dcodeIO.bcrypt.compareSync(trimmedPassword || rawPassword, stored);
-    }catch(err){
-      console.warn('bcrypt compare failed', err);
-      return false;
-    }
-  }
-
-  return false;
-}
-
-function buildTeacherUser(row){
-  const teacherCode = normalizeTeacherCode(row.teacher_code);
-  const fullName = safeText(
-    row.full_name || [row.first_name, row.last_name].filter(Boolean).join(' '),
-    teacherCode || ''
-  );
-
-  return {
-    id: row.id,
-    teacher_code: teacherCode,
-    full_name: fullName,
-    // ฐานข้อมูลจริงไม่มีคอลัมน์ teacher_role แล้ว จึงกำหนดสิทธิ์จากรหัสครูแทน
-    teacher_role: teacherCode.startsWith('G') ? 'admin' : 'teacher'
-  };
-}
-
-async function loginWithSupabase(teacherCode, password){
-  // ถ้ามี RPC ฝั่ง Supabase สำหรับ login ให้ใช้ก่อน เพื่อไม่ต้องดึงรหัสผ่านมาที่ browser
-  try{
-    const { data, error } = await supabaseClient.rpc('rpc_teacher_login', {
-      p_teacher_code: teacherCode,
-      p_password: password
-    });
-
-    if(!error && data){
-      const payload = Array.isArray(data) ? data[0] : data;
-      const ok = payload?.ok !== false;
-      const user = payload?.user || payload;
-
-      if(ok && user?.teacher_code){
-        return buildTeacherUser(user);
-      }
-    }
-  }catch(err){
-    console.warn('ไม่พบหรือเรียก rpc_teacher_login ไม่สำเร็จ จึงตรวจจากตาราง teachers โดยตรง', err);
-  }
-
-  // ตาราง teachers จริงของโปรเจกต์นี้ใช้ password_hash เท่านั้น
-  const selectVariants = [
-    'id, teacher_code, full_name, password_hash, is_active'
-  ];
-
-  let data = null;
-  let lastError = null;
-
-  for(const columns of selectVariants){
-    const result = await supabaseClient
-      .from('teachers')
-      .select(columns)
-      .eq('teacher_code', teacherCode)
-      .maybeSingle();
-
-    if(!result.error){
-      data = result.data;
-      lastError = null;
-      break;
-    }
-
-    lastError = result.error;
-
-    // ถ้าเป็น error คอลัมน์ไม่มีอยู่ ให้ลองชุดคอลัมน์ถัดไป
-    const message = String(result.error?.message || '').toLowerCase();
-    if(
-      result.error?.code === '42703' ||
-      message.includes('does not exist') ||
-      message.includes('column')
-    ){
-      continue;
-    }
-
-    throw result.error;
-  }
-
-  if(lastError && !data) throw lastError;
-  if(!data) throw new Error('ไม่พบรหัสครูนี้ในระบบ');
-  if(data.is_active === false) throw new Error('บัญชีครูนี้ถูกปิดใช้งาน');
-
-  const hasPasswordColumn = !!String(data.password_hash || data.password || '').trim();
-  if(!hasPasswordColumn){
-    throw new Error('ตาราง teachers ไม่มีค่า password_hash สำหรับตรวจรหัสผ่าน');
-  }
-
-  const passwordOk = await verifyTeacherPassword(password, data);
-  if(!passwordOk) throw new Error('รหัสผ่านไม่ถูกต้อง ถ้าย้ายข้อมูลจากระบบเก่า ให้ตั้ง password_hash เป็น md5(รหัสผ่านจริง) เช่น md5('123456')');
-
-  return buildTeacherUser(data);
-}
-
-
 
 async function login(){
   setStatus('loginStatus','กำลังตรวจสอบสิทธิ์...','info');
@@ -4359,73 +4285,12 @@ async function login(){
 
   }catch(err){
     console.error('login ERROR', err);
+
     const msg = err.message || 'เข้าสู่ระบบไม่สำเร็จ';
     setStatus('loginStatus', msg, 'error');
     showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
   }
 }
-
-  function normalizeTeacherCode(raw){
-  const s = String(raw || '').trim().toUpperCase();
-  if(!s) return '';
-  if(s.startsWith('T') || s.startsWith('G')) return s;
-  if(/^\d+$/.test(s)) return `T${s}`;
-  return s;
-}
-
-function isTeacherDesktopAllowed(code){
-  const c = String(code || '').trim().toUpperCase();
-  return c.startsWith('T');
-}
-
-async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
-  const teacherCode = normalizeTeacherCode(teacherCodeRaw);
-  const password = String(passwordRaw || '').trim();
-
-  if(!teacherCode){
-    throw new Error('กรุณากรอกรหัสครู');
-  }
-
-  // Desktop ไม่เอา G
-  if(!isTeacherDesktopAllowed(teacherCode)){
-    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
-  }
-
-  if(!password){
-    throw new Error('กรุณากรอกรหัสผ่าน');
-  }
-
-  const { data, error } = await supabaseClient.rpc('login_teacher', {
-    p_teacher_code: teacherCode,
-    p_password: password
-  });
-
-  if(error) throw error;
-
-  if(!data || data.ok !== true || !data.user){
-    throw new Error(data?.message || 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-  }
-
-  const user = data.user;
-  const code = String(user.teacher_code || '').toUpperCase();
-
-  // กันอีกชั้นหลัง RPC ส่ง user กลับมา
-  if(!isTeacherDesktopAllowed(code)){
-    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
-  }
-
-  return {
-    id: user.id || '',
-    teacher_code: user.teacher_code || '',
-    first_name: user.first_name || '',
-    last_name: user.last_name || '',
-    full_name: user.full_name || [user.first_name || '', user.last_name || ''].join(' ').trim() || user.teacher_code,
-    role_prefix: code.charAt(0),
-    teacher_role: 'teacher',
-    is_active: user.is_active !== false
-  };
-}
-
 
 
     function logout(){
