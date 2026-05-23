@@ -7040,9 +7040,18 @@ function fpTodayISO(){
 
 function fpFormatThaiDate(iso){
   if(!iso) return '-';
-  const [y, m, d] = String(iso).split('-');
-  if(!y || !m || !d) return iso;
-  return `${d}/${m}/${Number(y) + 543}`;
+
+  const d = new Date(`${iso}T00:00:00`);
+
+  if(Number.isNaN(d.getTime())){
+    return String(iso);
+  }
+
+  return d.toLocaleDateString('th-TH', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
 }
 
 function fpGetThaiDayNameFromISO(iso){
