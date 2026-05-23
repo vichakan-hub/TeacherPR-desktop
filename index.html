@@ -7833,11 +7833,36 @@ function fpBuildReservationPrintHtml(rows){
     th{background:#eef4fb;font-weight:800;text-align:center;}
     .text-center{text-align:center;}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;}
-    .signature{margin-top:28px;display:flex;justify-content:flex-start;}
-    .signature-box{width:360px;text-align:center;font-weight:700;}
-    .sign-line{display:flex;align-items:flex-end;justify-content:center;gap:8px;}
-    .dots{display:inline-block;min-width:230px;border-bottom:1px dotted #111827;height:18px;}
-    .name{margin-top:6px;}
+.signature{
+  margin-top:46px;
+  display:flex;
+  justify-content:flex-end;
+  padding-right:18px;
+}
+
+.signature-box{
+  width:380px;
+  text-align:center;
+  font-weight:700;
+}
+
+.sign-line{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:8px;
+}
+
+.dots{
+  display:inline-block;
+  min-width:240px;
+  border-bottom:1px dotted #111827;
+  height:18px;
+}
+
+.name{
+  margin-top:8px;
+}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.no-print{display:none!important;}}
   </style>
 </head>
