@@ -7750,16 +7750,26 @@ function fpToggleMinePrintSelection(reservationId, checked){
 }
 
 function fpToggleMineSelectAllPrint(checked){
-  state.freePeriodSelectedMineReservationIds = state.freePeriodSelectedMineReservationIds || new Set();
+  state.freePeriodSelectedMineReservationIds =
+    state.freePeriodSelectedMineReservationIds || new Set();
+
   state.freePeriodSelectedMineReservationIds.clear();
 
   if(checked){
     (state.freePeriodMyReservations || []).forEach(row => {
-      if(row?.id) state.freePeriodSelectedMineReservationIds.add(String(row.id));
+      const id = String(row?.id || '');
+      if(id){
+        state.freePeriodSelectedMineReservationIds.add(id);
+      }
     });
   }
 
-  fpRenderReservationTable('fpMineTbody', state.freePeriodMyReservations || [], true);
+  // อัปเดต checkbox รายแถวทันที โดยไม่ต้องรอ render ใหม่
+  document.querySelectorAll('#fpMineTbody [data-fp-mine-print-check]').forEach(input => {
+    input.checked = !!checked;
+  });
+
+  fpUpdateMinePrintSelectionUI();
 }
 
 function fpGetSelectedMineReservations(){
@@ -8654,6 +8664,21 @@ bindIfExists('fpReserveDate', 'change', () => {
   }catch(err){
     setStatus('fpReserveStatus', err.message || 'วันที่ไม่ถูกต้อง', 'error');
   }
+});
+
+    /* ===== PRINT SELECTED FREE PERIOD RESERVATIONS : รายการจองของฉัน ===== */
+
+bindIfExists('fpSelectAllMinePrint', 'change', (e) => {
+  fpToggleMineSelectAllPrint(e.target.checked);
+});
+
+bindIfExists('fpLoadMinePrintBtn', 'click', async () => {
+  fpSetSubPage('mine');
+  await fpLoadMyReservations();
+});
+
+bindIfExists('fpPrintMineSelectedBtn', 'click', () => {
+  fpPrintSelectedMineReservations();
 });
 
   /* ===== TEACHER MANAGEMENT BUTTONS : จัดการครู / ตาราง teachers ===== */
