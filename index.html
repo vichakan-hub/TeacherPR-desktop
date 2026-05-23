@@ -3612,6 +3612,73 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_bvvfwIdiPxyN2hYXVogVHQ_QxXE0I1_';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/*******************************************************
+ * Shared Teacher Login Helper
+ * Teacher-desktop รับเฉพาะครูรหัส T
+ *******************************************************/
+function normalizeTeacherCode(raw){
+  const s = String(raw || '').trim().toUpperCase();
+  if(!s) return '';
+  if(s.startsWith('T') || s.startsWith('G')) return s;
+  if(/^\d+$/.test(s)) return `T${s}`;
+  return s;
+}
+
+function isTeacherPageAllowed(code){
+  const c = String(code || '').trim().toUpperCase();
+  return c.startsWith('T');
+}
+
+async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
+  const teacherCode = normalizeTeacherCode(teacherCodeRaw);
+  const password = String(passwordRaw || '').trim();
+
+  if(!teacherCode){
+    throw new Error('กรุณากรอกรหัสครู');
+  }
+
+  if(!isTeacherPageAllowed(teacherCode)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  if(!password){
+    throw new Error('กรุณากรอกรหัสผ่าน');
+  }
+
+  const { data, error } = await supabaseClient.rpc('login_teacher', {
+    p_teacher_code: teacherCode,
+    p_password: password
+  });
+
+  if(error) throw error;
+
+  if(!data || data.ok !== true || !data.user){
+    throw new Error(data?.message || 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
+
+  const user = data.user || {};
+  const code = String(user.teacher_code || '').toUpperCase();
+
+  if(!isTeacherPageAllowed(code)){
+    throw new Error('หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น');
+  }
+
+  return {
+    id: user.id || '',
+    teacher_code: user.teacher_code || '',
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
+    full_name:
+      user.full_name ||
+      [user.first_name || '', user.last_name || ''].join(' ').trim() ||
+      user.teacher_code,
+    role_prefix: code.charAt(0),
+    teacher_role: 'teacher',
+    is_active: user.is_active !== false
+  };
+}
+
+
     const el = (id) => document.getElementById(id);
 
 const state = {
@@ -4201,15 +4268,29 @@ function getSettingTerm(settingName, fallback = null){
       try{
         const raw = sessionStorage.getItem('teacherPageUser');
         if(!raw) return false;
+
         state.currentUser = JSON.parse(raw);
-        if(!String(state.currentUser.teacher_code || '').startsWith('T')) return false;
+
+        if(!isTeacherPageAllowed(state.currentUser.teacher_code)){
+          sessionStorage.removeItem('teacherPageUser');
+          return false;
+        }
 
         el('loginView').classList.add('hidden');
         el('appView').classList.remove('hidden');
-        el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
-        el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
+
+        if(el('currentUserBox')){
+          el('currentUserBox').innerHTML =
+            `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+        }
+
+        if(el('homeUserName')){
+          el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
+        }
+
         return true;
       }catch(e){
+        sessionStorage.removeItem('teacherPageUser');
         return false;
       }
     }
@@ -4217,51 +4298,44 @@ function getSettingTerm(settingName, fallback = null){
     async function login(){
       setStatus('loginStatus','กำลังตรวจสอบสิทธิ์...','info');
 
-      const teacherCode = normalizeTeacherCode(el('loginTeacherCode').value);
-      const password = el('loginPassword').value || '';
+      try{
+        const user = await loginWithTeacherRpc(
+          el('loginTeacherCode').value,
+          el('loginPassword').value
+        );
 
-      if(!teacherCode){
-        setStatus('loginStatus','กรุณากรอกรหัสครู','error');
-        return;
-      }
-      if(!teacherCode.startsWith('T')){
-        setStatus('loginStatus','หน้านี้อนุญาตเฉพาะครูรหัส T เท่านั้น','error');
-        return;
-      }
-      if(!password){
-        setStatus('loginStatus','กรุณากรอกรหัสผ่าน','error');
-        return;
-      }
+        state.currentUser = user;
+        saveSession();
 
-      google.script.run
-        .withSuccessHandler(async (res) => {
-          if(!res || !res.ok || !res.user){
-            setStatus('loginStatus','เข้าสู่ระบบไม่สำเร็จ','error');
-            return;
-          }
+        el('loginView').classList.add('hidden');
+        el('appView').classList.remove('hidden');
 
-          state.currentUser = res.user;
-          saveSession();
+        if(el('currentUserBox')){
+          el('currentUserBox').innerHTML =
+            `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+        }
 
-          el('loginView').classList.add('hidden');
-          el('appView').classList.remove('hidden');
-          setActivePage('home');
-
-          el('currentUserBox').innerHTML = `${escapeHtml(state.currentUser.teacher_code)} ${escapeHtml(state.currentUser.full_name)}`;
+        if(el('homeUserName')){
           el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
+        }
 
-await loadImportSettingsFromSheet();
-await loadImportTeachingList();
-await loadAdviserRooms();
+        setActivePage('home');
 
-          showToast('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${state.currentUser.full_name}`, 'success');
-        })
-        .withFailureHandler((err) => {
-          const msg = (err && err.message) || 'เข้าสู่ระบบไม่สำเร็จ';
-          setStatus('loginStatus', msg, 'error');
-          showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
-        })
-        .loginSystem(teacherCode, password);
+        await loadImportSettingsFromSheet();
+        await loadImportTeachingList();
+        await loadAdviserRooms();
+
+        showToast(
+          'เข้าสู่ระบบสำเร็จ',
+          `ยินดีต้อนรับ ${state.currentUser.full_name}`,
+          'success'
+        );
+      }catch(err){
+        console.error('login ERROR', err);
+        const msg = err.message || 'เข้าสู่ระบบไม่สำเร็จ';
+        setStatus('loginStatus', msg, 'error');
+        showToast('เข้าสู่ระบบไม่สำเร็จ', msg, 'error');
+      }
     }
 
     function logout(){
@@ -7064,13 +7138,23 @@ async function fpLoadSlots(){
     fpSetSubPage('search');
     setStatus('fpStatus', 'กำลังโหลดคาบว่าง...', 'info');
 
-    const res = await runGas('listFreeSlots', fpGetFilters());
+    let query = supabaseClient
+      .from('emptysec')
+      .select('id, academic_year, term, slot_code, class_level, room, class_room, day_of_week, period_no, note, is_active')
+      .eq('academic_year', Number(selected.academic_year))
+      .eq('term', Number(selected.term))
+      .eq('class_level', selected.class_level)
+      .eq('room', selected.room)
+      .eq('is_active', true)
+      .order('class_level', { ascending:true })
+      .order('room', { ascending:true })
+      .order('day_of_week', { ascending:true })
+      .order('period_no', { ascending:true });
 
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดคาบว่างไม่สำเร็จ');
-    }
+    const { data, error } = await query;
+    if(error) throw error;
 
-    state.freePeriodSlots = res.data || [];
+    state.freePeriodSlots = data || [];
     fpRenderSlots(state.freePeriodSlots);
     fpUpdateSummary();
 
@@ -7090,6 +7174,7 @@ async function fpLoadSlots(){
     showToast('โหลดคาบว่างไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
   }
 }
+
 
 function fpRenderSlots(rows){
   if(state.freePeriodViewMode === 'list'){
@@ -7333,6 +7418,88 @@ function fpValidateReserveDate(slot, reserveDate){
   return true;
 }
 
+
+function fpNormalizeDayOfWeek(value){
+  const s = safeText(value, '');
+  if(!s) return '';
+  return s.startsWith('วัน') ? s : `วัน${s}`;
+}
+
+function fpBuildReservationQuery(filters = {}){
+  let query = supabaseClient
+    .from('free_period_reservations')
+    .select('id, slot_id, slot_code, teacher_id, teacher_code, teacher_full_name, academic_year, term, class_level, room, class_room, day_of_week, period_no, reserve_date, status, created_at, cancelled_at, cancelled_by_teacher_code')
+    .eq('status', 'reserved')
+    .order('reserve_date', { ascending:false })
+    .order('class_level', { ascending:true })
+    .order('room', { ascending:true })
+    .order('period_no', { ascending:true });
+
+  if(filters.academic_year) query = query.eq('academic_year', Number(filters.academic_year));
+  if(filters.term) query = query.eq('term', Number(filters.term));
+  if(filters.reserve_date) query = query.eq('reserve_date', filters.reserve_date);
+  if(filters.teacher_code) query = query.eq('teacher_code', normalizeTeacherCode(filters.teacher_code));
+  if(filters.class_level) query = query.eq('class_level', filters.class_level);
+  if(filters.room) query = query.eq('room', String(filters.room));
+  if(filters.class_room) query = query.eq('class_room', filters.class_room);
+
+  return query;
+}
+
+function fpFormatReservationForClient(row){
+  if(!row) return row;
+
+  return {
+    ...row,
+    reserve_date_th: row.reserve_date_th || fpFormatThaiDate(row.reserve_date)
+  };
+}
+
+async function fpGetReservationMapByDate(filters){
+  const { data, error } = await fpBuildReservationQuery(filters);
+  if(error) throw error;
+
+  const map = {};
+  (data || []).forEach(row => {
+    map[String(row.slot_id)] = fpFormatReservationForClient(row);
+  });
+
+  return map;
+}
+
+async function fpInsertReservation(slot, reserveDate){
+  const payload = {
+    slot_id: slot.id,
+    slot_code: slot.slot_code,
+
+    teacher_id: state.currentUser?.id || null,
+    teacher_code: state.currentUser?.teacher_code || '',
+    teacher_full_name: state.currentUser?.full_name || '',
+
+    academic_year: Number(slot.academic_year),
+    term: Number(slot.term),
+
+    class_level: slot.class_level,
+    room: String(slot.room),
+    class_room: slot.class_room,
+
+    day_of_week: fpNormalizeDayOfWeek(slot.day_of_week),
+    period_no: Number(slot.period_no),
+
+    reserve_date: reserveDate,
+    status: 'reserved'
+  };
+
+  const { data, error } = await supabaseClient
+    .from('free_period_reservations')
+    .insert(payload)
+    .select()
+    .single();
+
+  if(error) throw error;
+  return fpFormatReservationForClient(data);
+}
+
 async function fpConfirmReserve(){
   try{
     const slot = state.freePeriodSelectedSlot;
@@ -7343,7 +7510,7 @@ async function fpConfirmReserve(){
     el('fpConfirmReserveBtn').disabled = true;
     setStatus('fpReserveStatus', 'กำลังตรวจสอบการจอง...', 'info');
 
-    const mapRes = await runGas('getReservationMapByDate', {
+    const map = await fpGetReservationMapByDate({
       reserve_date: reserveDate,
       academic_year: slot.academic_year,
       term: slot.term,
@@ -7352,7 +7519,6 @@ async function fpConfirmReserve(){
       class_room: slot.class_room
     });
 
-    const map = mapRes?.data || {};
     const existing = map[String(slot.id)];
 
     if(existing){
@@ -7364,16 +7530,7 @@ async function fpConfirmReserve(){
 
     setStatus('fpReserveStatus', 'กำลังบันทึกการจอง...', 'info');
 
-    const res = await runGas('reserveSlot', {
-      slot_id: slot.id,
-      reserve_date: reserveDate,
-      teacher_code: state.currentUser.teacher_code,
-      teacher_full_name: state.currentUser.full_name
-    });
-
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'จองไม่สำเร็จ');
-    }
+    await fpInsertReservation(slot, reserveDate);
 
     closeOverlay('fpReserveOverlay');
 
@@ -7388,8 +7545,14 @@ async function fpConfirmReserve(){
     fpUpdateSummary();
   }catch(err){
     console.error('fpConfirmReserve ERROR', err);
-    setStatus('fpReserveStatus', err.message || 'จองไม่สำเร็จ', 'error');
-    showToast('จองไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+
+    const msg = String(err.message || 'จองไม่สำเร็จ');
+    const friendly = msg.includes('duplicate key') || msg.includes('unique')
+      ? 'คาบนี้ถูกจองแล้วในวันที่เลือก'
+      : msg;
+
+    setStatus('fpReserveStatus', friendly, 'error');
+    showToast('จองไม่สำเร็จ', friendly, 'error');
   }finally{
     if(el('fpConfirmReserveBtn')){
       el('fpConfirmReserveBtn').disabled = false;
@@ -7397,21 +7560,20 @@ async function fpConfirmReserve(){
   }
 }
 
+
 async function fpLoadMyReservations(){
   try{
     if(!state.currentUser) return;
 
-    const res = await runGas(
-      'listMyReservations',
-      state.currentUser.teacher_code,
-      fpGetReservationFilters(false)
-    );
+    const filters = {
+      ...fpGetReservationFilters(false),
+      teacher_code: state.currentUser.teacher_code
+    };
 
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดรายการจองของฉันไม่สำเร็จ');
-    }
+    const { data, error } = await fpBuildReservationQuery(filters);
+    if(error) throw error;
 
-    state.freePeriodMyReservations = res.data || [];
+    state.freePeriodMyReservations = (data || []).map(fpFormatReservationForClient);
     fpRenderReservationTable('fpMineTbody', state.freePeriodMyReservations, true);
     fpUpdateSummary();
 
@@ -7433,18 +7595,16 @@ async function fpLoadMyReservations(){
   }
 }
 
+
 async function fpLoadAllReservations(showStatus = true){
   try{
     const filters = fpGetReservationFilters(true);
 
-    const res = await runGas('listAllActiveReservations', filters);
+    const { data, error } = await fpBuildReservationQuery(filters);
+    if(error) throw error;
 
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'โหลดการจองทั้งหมดไม่สำเร็จ');
-    }
-
-  state.freePeriodAllReservations = res.data || [];
-fpRenderAllReservationsFiltered();
+    state.freePeriodAllReservations = (data || []).map(fpFormatReservationForClient);
+    fpRenderAllReservationsFiltered();
 
     if(showStatus && state.freePeriodSubPage === 'all'){
       setStatus(
@@ -7457,11 +7617,12 @@ fpRenderAllReservationsFiltered();
     }
   }catch(err){
     console.error('fpLoadAllReservations ERROR', err);
-state.freePeriodAllReservations = [];
-fpRenderAllReservationsFiltered();
+    state.freePeriodAllReservations = [];
+    fpRenderAllReservationsFiltered();
     showToast('โหลดการจองทั้งหมดไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
   }
 }
+
 
 function fpRenderReservationTable(tbodyId, rows, allowCancel){
   const tbody = el(tbodyId);
@@ -7528,14 +7689,37 @@ async function fpCancelReservation(reservationId){
     const ok = confirm('ต้องการยกเลิกรายการจองนี้หรือไม่');
     if(!ok) return;
 
-    const res = await runGas('cancelReservation', {
-      reservation_id: reservationId,
-      teacher_code: state.currentUser.teacher_code
-    });
+    const { data: rows, error: readError } = await supabaseClient
+      .from('free_period_reservations')
+      .select('id, teacher_code, status')
+      .eq('id', reservationId)
+      .limit(1);
 
-    if(!res || !res.ok){
-      throw new Error(res?.message || 'ยกเลิกไม่สำเร็จ');
+    if(readError) throw readError;
+
+    const current = rows?.[0];
+    if(!current){
+      throw new Error('ไม่พบรายการจองนี้');
     }
+
+    if(String(current.status || '') !== 'reserved'){
+      throw new Error('รายการนี้ไม่ได้อยู่ในสถานะจองแล้ว');
+    }
+
+    if(String(current.teacher_code || '').toUpperCase() !== String(state.currentUser?.teacher_code || '').toUpperCase()){
+      throw new Error('ยกเลิกได้เฉพาะรายการที่คุณครูเป็นผู้จองเท่านั้น');
+    }
+
+    const { error } = await supabaseClient
+      .from('free_period_reservations')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancelled_by_teacher_code: state.currentUser.teacher_code
+      })
+      .eq('id', reservationId);
+
+    if(error) throw error;
 
     showToast('ยกเลิกรายการจองแล้ว', 'ระบบยกเลิกรายการจองเรียบร้อย', 'success');
 
@@ -7547,6 +7731,7 @@ async function fpCancelReservation(reservationId){
     showToast('ยกเลิกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
   }
 }
+
 
 function fpRefreshCurrentSubPage(){
   if(state.freePeriodSubPage === 'search'){
