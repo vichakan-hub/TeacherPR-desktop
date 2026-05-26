@@ -4390,7 +4390,7 @@ function setActivePage(page){
   updateAppTopbarTitle(page);
 
   if(isFreePeriod){
-    el('sidebarFreePeriodGroup')?.classList.add('open');
+    
     fpInitDefaultValues();
     fpLoadMyReservations();
   }
@@ -9111,9 +9111,21 @@ function bindEvents(){
     await loadRetestRows();
   });
 
-  bindIfExists('menuFreePeriodBtn', 'click', () => {
-    openFreePeriodFromSidebar('search');
-  });
+bindIfExists('menuFreePeriodBtn', 'click', () => {
+  const group = el('sidebarFreePeriodGroup');
+  const isOpen = group?.classList.contains('open');
+  const isOnFreePeriod = !el('pageFreePeriod')?.classList.contains('hidden');
+
+  if(isOnFreePeriod && isOpen){
+    group.classList.remove('open');
+    setSidebarActiveMain('freeperiod');
+    updateAppTopbarTitle('freeperiod');
+    closeMobileSidebar();
+    return;
+  }
+
+  openFreePeriodFromSidebar(state.freePeriodSubPage || 'search');
+});
 
   bindIfExists('sideFpSearchBtn', 'click', () => {
     openFreePeriodFromSidebar('search');
