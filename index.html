@@ -3107,6 +3107,87 @@
   }
 }
 
+/* =========================================================
+   FIX: ตารางสอนจองคาบว่าง card ล้นขวาใน Sidebar Layout
+   ========================================================= */
+
+/* ให้กล่องตารางไม่ดันหน้าออกขวา */
+#fpSlotScheduleWrap{
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+}
+
+/* ลด min-width ของตารางเล็กน้อยให้พอดีกับ layout sidebar */
+#fpSlotScheduleWrap .fp-schedule-table{
+  width:100%;
+  min-width:1040px;
+  table-layout:fixed;
+}
+
+/* ลด padding ช่องตาราง เพื่อให้ card มีพื้นที่หายใจ */
+#fpSlotScheduleWrap .fp-schedule-table th,
+#fpSlotScheduleWrap .fp-schedule-table td{
+  padding:8px;
+  overflow:visible;
+}
+
+/* ช่องหัววันซ้าย */
+#fpSlotScheduleWrap .fp-day-head{
+  width:118px;
+}
+
+/* หัวคาบ */
+#fpSlotScheduleWrap .fp-period-head{
+  width:auto;
+}
+
+/* บังคับ card ให้ไม่เกินความกว้างของ cell */
+#fpSlotScheduleWrap .fp-slot-card,
+#fpSlotScheduleWrap .fp-lunch-card{
+  width:100% !important;
+  max-width:106px !important;
+  min-width:0 !important;
+  margin:0 auto !important;
+  box-sizing:border-box;
+}
+
+/* ปุ่มใน card ไม่ให้ดัน card กว้าง */
+#fpSlotScheduleWrap .fp-slot-card button{
+  max-width:100%;
+  padding:0 10px !important;
+  white-space:nowrap;
+}
+
+/* รหัสคาบ / ข้อความใน card ไม่ให้ดันกล่อง */
+#fpSlotScheduleWrap .fp-slot-card-title,
+#fpSlotScheduleWrap .fp-slot-card-sub,
+#fpSlotScheduleWrap .fp-lunch-title,
+#fpSlotScheduleWrap .fp-lunch-sub{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* เมื่อ sidebar ย่อแล้ว พื้นที่เยอะขึ้น ให้ card กลับมาดูกว้างขึ้นนิด */
+.app-shell.sidebar-collapsed #fpSlotScheduleWrap .fp-slot-card,
+.app-shell.sidebar-collapsed #fpSlotScheduleWrap .fp-lunch-card{
+  max-width:112px !important;
+}
+
+/* จอเล็กมาก ให้ตารางเลื่อนแนวนอนได้ แต่ card ไม่ล้น cell */
+@media (max-width:900px){
+  #fpSlotScheduleWrap .fp-schedule-table{
+    min-width:980px;
+  }
+
+  #fpSlotScheduleWrap .fp-slot-card,
+  #fpSlotScheduleWrap .fp-lunch-card{
+    max-width:100px !important;
+  }
+}
+
 </style>
 </head>
 <body>
