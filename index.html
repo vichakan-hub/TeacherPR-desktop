@@ -2688,6 +2688,425 @@
   body{background:#fff!important;}
 }
 
+
+
+/* =========================================================
+   SIDEBAR LAYOUT : เมนูด้านข้างยืด/หดได้ + Mobile Drawer
+   ========================================================= */
+:root{
+  --sidebar-width:292px;
+  --sidebar-mini:82px;
+}
+
+#appView{
+  min-height:100vh;
+}
+
+.app-shell{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:var(--sidebar-width) 1fr;
+  transition:.22s ease;
+}
+
+.app-shell.sidebar-collapsed{
+  grid-template-columns:var(--sidebar-mini) 1fr;
+}
+
+.app-sidebar{
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:16px 14px;
+  background:rgba(255,255,255,.78);
+  border-right:1px solid rgba(255,255,255,.65);
+  box-shadow:0 14px 35px rgba(18,38,63,.10);
+  backdrop-filter:blur(16px);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  overflow:hidden;
+  z-index:80;
+}
+
+.sidebar-brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 10px;
+  min-height:64px;
+}
+
+.sidebar-logo{
+  width:46px;
+  height:46px;
+  border-radius:17px;
+  background:linear-gradient(135deg,#2563eb,#38bdf8);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:900;
+  flex:0 0 auto;
+}
+
+.sidebar-brand-text{
+  min-width:0;
+  transition:.16s ease;
+}
+
+.sidebar-brand-title{
+  font-size:17px;
+  font-weight:900;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sidebar-brand-sub{
+  margin-top:3px;
+  font-size:12px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sidebar-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#f8fbff;
+}
+
+.sidebar-user-icon{
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  background:#dbeafe;
+  color:#2563eb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-size:22px;
+}
+
+.sidebar-user-text{
+  min-width:0;
+  transition:.16s ease;
+}
+
+.sidebar-user-name{
+  font-weight:900;
+  font-size:14px;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sidebar-user-code{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sidebar-nav{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1;
+  overflow:auto;
+  padding-right:2px;
+}
+
+.sidebar-link,
+.sidebar-parent,
+.sidebar-sublink{
+  width:100%;
+  min-height:48px;
+  border:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-radius:16px;
+  color:#41536c;
+  background:transparent;
+  padding:0 13px;
+  text-align:left;
+  font-size:15px;
+  font-weight:800;
+  transition:.16s ease;
+  position:relative;
+}
+
+.sidebar-link:hover,
+.sidebar-parent:hover,
+.sidebar-sublink:hover{
+  background:#eef4ff;
+  color:#1d4ed8;
+}
+
+.sidebar-link.active,
+.sidebar-parent.active,
+.sidebar-sublink.active{
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
+  box-shadow:0 10px 22px rgba(37,99,235,.20);
+}
+
+.sidebar-icon{
+  width:28px;
+  text-align:center;
+  font-size:20px;
+  flex:0 0 auto;
+}
+
+.sidebar-label{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sidebar-caret{
+  margin-left:auto;
+  transition:.18s ease;
+}
+
+.sidebar-group.open .sidebar-caret{
+  transform:rotate(180deg);
+}
+
+.sidebar-submenu{
+  display:grid;
+  gap:6px;
+  margin:6px 0 8px 40px;
+  padding-left:10px;
+  border-left:2px solid #d8e4ef;
+}
+
+.sidebar-group:not(.open) .sidebar-submenu{
+  display:none;
+}
+
+.sidebar-sublink{
+  min-height:42px;
+  border-radius:14px;
+  padding:0 12px;
+  font-size:13px;
+  font-weight:800;
+}
+
+.sidebar-subicon{
+  width:22px;
+  text-align:center;
+  font-size:16px;
+  flex:0 0 auto;
+}
+
+.sidebar-footer{
+  display:grid;
+  gap:8px;
+  padding-top:8px;
+  border-top:1px solid var(--line);
+}
+
+.sidebar-logout{
+  min-height:46px;
+  border:1px solid #ffd2cf;
+  background:#fff0ef;
+  color:var(--danger);
+  border-radius:16px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.app-main{
+  min-width:0;
+  padding:18px;
+}
+
+.app-topbar{
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px 16px;
+  margin-bottom:18px;
+  border-radius:24px;
+}
+
+.app-topbar-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.sidebar-toggle-btn{
+  width:46px;
+  height:46px;
+  border:0;
+  border-radius:16px;
+  background:#eef4ff;
+  color:#1d4ed8;
+  font-size:21px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  flex:0 0 auto;
+}
+
+.app-title-wrap{
+  min-width:0;
+}
+
+.app-title{
+  font-size:22px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.app-subtitle{
+  font-size:13px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.app-topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.app-content-wrap{
+  max-width:none;
+  padding:0;
+}
+
+.sidebar-backdrop{
+  display:none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-text,
+.app-shell.sidebar-collapsed .sidebar-user-text,
+.app-shell.sidebar-collapsed .sidebar-label,
+.app-shell.sidebar-collapsed .sidebar-caret,
+.app-shell.sidebar-collapsed .sidebar-logout-label{
+  opacity:0;
+  width:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand,
+.app-shell.sidebar-collapsed .sidebar-user,
+.app-shell.sidebar-collapsed .sidebar-link,
+.app-shell.sidebar-collapsed .sidebar-parent{
+  justify-content:center;
+  padding-left:0;
+  padding-right:0;
+}
+
+.app-shell.sidebar-collapsed .sidebar-submenu{
+  display:none!important;
+}
+
+/* ซ่อนเมนูย่อยเดิมในหน้า เพราะย้ายไปอยู่ sidebar แล้ว */
+#pageFreePeriod > section:first-child .fp-submenu{
+  display:none!important;
+}
+
+#pageFreePeriod > section:first-child{
+  margin-bottom:14px!important;
+}
+
+@media (max-width:900px){
+  .app-shell{
+    display:block;
+  }
+
+  .app-sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:min(310px, calc(100vw - 46px));
+    transform:translateX(-105%);
+    transition:.22s ease;
+  }
+
+  .app-shell.mobile-sidebar-open .app-sidebar{
+    transform:translateX(0);
+  }
+
+  .sidebar-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.42);
+    z-index:70;
+  }
+
+  .app-shell.mobile-sidebar-open .sidebar-backdrop{
+    display:block;
+  }
+
+  .app-main{
+    padding:14px;
+  }
+
+  .app-topbar{
+    border-radius:22px;
+    margin-bottom:14px;
+  }
+
+  .app-title{
+    font-size:18px;
+  }
+
+  .app-subtitle{
+    font-size:12px;
+  }
+
+  .app-topbar-actions{
+    display:none;
+  }
+}
+
+@media (max-width:520px){
+  .app-main{
+    padding:12px;
+  }
+
+  .app-topbar{
+    padding:10px 12px;
+  }
+
+  .sidebar-toggle-btn{
+    width:42px;
+    height:42px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2764,46 +3183,100 @@
   </div>
 
   <div id="appView" class="hidden">
-    <div class="wrap">
-      <section class="hero">
-        <div class="hero-top">
-          <div>
-            <div class="badge-school">🏫 โรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”</div>
-            <h1>นำเข้าผลการเรียน</h1>
-            <p>ตรวจสอบก่อนบันทึกทุกครั้ง</p>
-          </div>
-          <div class="hero-side">
-            <div class="hero-side-title">ฝ่ายบริการ</div>
-            <div class="hero-side-main">งานทะเบียน–วัดผล</div>
+  <div id="appShell" class="app-shell">
+
+    <aside id="appSidebar" class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">ทม</div>
+        <div class="sidebar-brand-text">
+          <div class="sidebar-brand-title">TeacherPR</div>
+          <div class="sidebar-brand-sub">ระบบครูผู้สอน</div>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="sidebar-user-icon">👨‍🏫</div>
+        <div class="sidebar-user-text">
+          <div id="sidebarUserName" class="sidebar-user-name">ครูผู้สอน</div>
+          <div id="sidebarUserCode" class="sidebar-user-code">Teacher</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button id="menuHomeBtn" class="sidebar-link active" type="button" data-side-page="home">
+          <span class="sidebar-icon">🏠</span>
+          <span class="sidebar-label">หน้าแรก</span>
+        </button>
+
+        <button id="menuRetestBtn" class="sidebar-link" type="button" data-side-page="retest">
+          <span class="sidebar-icon">📝</span>
+          <span class="sidebar-label">ส่งผลสอบแก้ตัว</span>
+        </button>
+
+        <button id="menuImportBtn" class="sidebar-link" type="button" data-side-page="import">
+          <span class="sidebar-icon">📥</span>
+          <span class="sidebar-label">รายงานผลการเรียน</span>
+        </button>
+
+        <button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
+          <span class="sidebar-icon">👩‍🏫</span>
+          <span class="sidebar-label">นักเรียนในที่ปรึกษา</span>
+        </button>
+
+        <div id="sidebarFreePeriodGroup" class="sidebar-group">
+          <button id="menuFreePeriodBtn" class="sidebar-parent" type="button" data-side-page="freeperiod">
+            <span class="sidebar-icon">🗓️</span>
+            <span class="sidebar-label">จองคาบว่าง</span>
+            <span class="sidebar-caret">▾</span>
+          </button>
+
+          <div class="sidebar-submenu">
+            <button id="sideFpSearchBtn" class="sidebar-sublink" type="button" data-fp-side-page="search">
+              <span class="sidebar-subicon">🔎</span>
+              <span class="sidebar-label">ค้นหาและจองคาบว่าง</span>
+            </button>
+
+            <button id="sideFpMineBtn" class="sidebar-sublink" type="button" data-fp-side-page="mine">
+              <span class="sidebar-subicon">👤</span>
+              <span class="sidebar-label">รายการจองของฉัน</span>
+            </button>
+
+            <button id="sideFpAllBtn" class="sidebar-sublink" type="button" data-fp-side-page="all">
+              <span class="sidebar-subicon">🏫</span>
+              <span class="sidebar-label">การจองทั้งหมดของโรงเรียน</span>
+            </button>
           </div>
         </div>
-      </section>
+      </nav>
 
-      <section class="top-user card">
-        <div class="teacher-box">
-          <div class="teacher-icon">👨‍🏫</div>
-          <div class="teacher-text">
-            <b>ครูผู้สอน</b>
-            <span>Teacher</span>
+      <div class="sidebar-footer">
+        <button id="sidebarLogoutBtn" class="sidebar-logout" type="button">
+          <span>🚪</span>
+          <span class="sidebar-logout-label">ออกจากระบบ</span>
+        </button>
+      </div>
+    </aside>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <main class="app-main">
+      <header class="app-topbar card">
+        <div class="app-topbar-left">
+          <button id="sidebarToggleBtn" class="sidebar-toggle-btn" type="button" title="เปิด/ย่อเมนู">☰</button>
+
+          <div class="app-title-wrap">
+            <div id="appPageTitle" class="app-title">หน้าแรก</div>
+            <div id="appPageSubtitle" class="app-subtitle">โรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”</div>
           </div>
         </div>
 
-        <div class="user-actions">
+        <div class="app-topbar-actions">
           <div id="currentUserBox" class="user-pill">-</div>
           <button id="logoutBtn" class="btn-danger">ออกจากระบบ</button>
         </div>
-      </section>
+      </header>
 
-      <section class="menu-card card">
-  <div class="actions" style="margin:0;">
-    <button id="menuHomeBtn" class="menu-btn btn-primary">🏠 หน้าแรก</button>
-    <button id="menuRetestBtn" class="menu-btn btn-secondary">📝 ส่งผลสอบแก้ตัว</button>
-    <button id="menuImportBtn" class="menu-btn btn-secondary">📥 รายงานผลการเรียน</button>
-    <button id="menuAdviserBtn" class="menu-btn btn-secondary">👩‍🏫 ดูเกรดนักเรียนในที่ปรึกษา</button>
-    <button id="menuFreePeriodBtn" class="menu-btn btn-secondary">🗓️ จองคาบว่าง</button>
-  </div>
-</section>
-
+      <div class="wrap app-content-wrap">
       <section id="pageHome" class="page-grid">
         <div class="home-card-left card">
           <div class="welcome-wrap">
@@ -3556,8 +4029,10 @@
     </div>
   </div>
 </div>
-    </div>
+      </div>
+    </main>
   </div>
+</div>
 
   <!-- FREE PERIOD RESERVE OVERLAY -->
 <div id="fpReserveOverlay" class="overlay">
@@ -3917,20 +4392,153 @@ function setActivePage(page){
   el('pageRetest').classList.toggle('hidden', !isRetest);
   el('pageFreePeriod')?.classList.toggle('hidden', !isFreePeriod);
 
-  el('menuHomeBtn').className = isHome ? 'menu-btn btn-primary' : 'menu-btn btn-secondary';
-  el('menuImportBtn').className = isImport ? 'menu-btn btn-primary' : 'menu-btn btn-secondary';
-  el('menuAdviserBtn').className = isAdviser ? 'menu-btn btn-primary' : 'menu-btn btn-secondary';
-  el('menuRetestBtn').className = isRetest ? 'menu-btn btn-primary' : 'menu-btn btn-secondary';
-
-  if(el('menuFreePeriodBtn')){
-    el('menuFreePeriodBtn').className = isFreePeriod ? 'menu-btn btn-primary' : 'menu-btn btn-secondary';
-  }
+  setSidebarActiveMain(page);
+  updateAppTopbarTitle(page);
 
   if(isFreePeriod){
+    el('sidebarFreePeriodGroup')?.classList.add('open');
     fpInitDefaultValues();
     fpLoadMyReservations();
   }
+
+  closeMobileSidebar();
 }
+
+function isMobileSidebarMode(){
+  return window.matchMedia('(max-width:900px)').matches;
+}
+
+function closeMobileSidebar(){
+  if(isMobileSidebarMode()){
+    el('appShell')?.classList.remove('mobile-sidebar-open');
+  }
+}
+
+function toggleSidebar(){
+  const shell = el('appShell');
+  if(!shell) return;
+
+  if(isMobileSidebarMode()){
+    shell.classList.toggle('mobile-sidebar-open');
+  }else{
+    shell.classList.toggle('sidebar-collapsed');
+
+    if(shell.classList.contains('sidebar-collapsed')){
+      el('sidebarFreePeriodGroup')?.classList.remove('open');
+    }
+  }
+}
+
+function setSidebarActiveMain(page){
+  document
+    .querySelectorAll('.sidebar-link,.sidebar-parent,.sidebar-sublink')
+    .forEach(btn => btn.classList.remove('active'));
+
+  if(page === 'freeperiod'){
+    el('menuFreePeriodBtn')?.classList.add('active');
+    return;
+  }
+
+  const map = {
+    home: 'menuHomeBtn',
+    retest: 'menuRetestBtn',
+    import: 'menuImportBtn',
+    adviser: 'menuAdviserBtn'
+  };
+
+  const targetId = map[page];
+  if(targetId){
+    el(targetId)?.classList.add('active');
+  }
+}
+
+function setSidebarActiveFpSubPage(page){
+  document
+    .querySelectorAll('.sidebar-sublink')
+    .forEach(btn => btn.classList.remove('active'));
+
+  const map = {
+    search: 'sideFpSearchBtn',
+    mine: 'sideFpMineBtn',
+    all: 'sideFpAllBtn'
+  };
+
+  const targetId = map[page || 'search'];
+  if(targetId){
+    el(targetId)?.classList.add('active');
+  }
+
+  el('menuFreePeriodBtn')?.classList.add('active');
+}
+
+function updateAppTopbarTitle(page){
+  const titleMap = {
+    home: ['หน้าแรก', 'ภาพรวมระบบครูผู้สอน'],
+    retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
+    import: ['รายงานผลการเรียน', 'นำเข้าไฟล์ Excel และตรวจสอบก่อนบันทึก'],
+    adviser: ['นักเรียนในที่ปรึกษา', 'ดูผลการเรียนรายคนของนักเรียนในห้องที่ปรึกษา'],
+    freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
+  };
+
+  const item = titleMap[page] || titleMap.home;
+
+  if(el('appPageTitle')){
+    el('appPageTitle').textContent = item[0];
+  }
+
+  if(el('appPageSubtitle')){
+    el('appPageSubtitle').textContent = item[1];
+  }
+}
+
+function updateAppTopbarFreePeriodSubTitle(subPage){
+  const subMap = {
+    search: 'ค้นหาและจองคาบว่าง',
+    mine: 'รายการจองคาบว่างของฉัน',
+    all: 'การจองทั้งหมดของโรงเรียน'
+  };
+
+  const subText = subMap[subPage || 'search'] || subMap.search;
+
+  if(el('appPageTitle')){
+    el('appPageTitle').textContent = `จองคาบว่าง / ${subText}`;
+  }
+
+  if(el('appPageSubtitle')){
+    el('appPageSubtitle').textContent = 'เลือกเมนูย่อยจากด้านซ้ายเพื่อจัดการคาบว่าง';
+  }
+}
+
+function openFreePeriodFromSidebar(subPage = 'search'){
+  const shell = el('appShell');
+
+  if(shell?.classList.contains('sidebar-collapsed')){
+    shell.classList.remove('sidebar-collapsed');
+  }
+
+  el('sidebarFreePeriodGroup')?.classList.add('open');
+
+  setActivePage('freeperiod');
+  fpSetSubPage(subPage);
+  setSidebarActiveFpSubPage(subPage);
+  updateAppTopbarFreePeriodSubTitle(subPage);
+  closeMobileSidebar();
+}
+
+function updateSidebarUserInfo(){
+  const user = state.currentUser || {};
+  const fullName = safeText(user.full_name, 'ครูผู้สอน');
+  const teacherCode = safeText(user.teacher_code, 'Teacher');
+
+  if(el('sidebarUserName')){
+    el('sidebarUserName').textContent = fullName;
+  }
+
+  if(el('sidebarUserCode')){
+    el('sidebarUserCode').textContent = teacherCode;
+  }
+}
+
 
 
 
@@ -4348,6 +4956,8 @@ function getSettingTerm(settingName, fallback = null){
           el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
         }
 
+        updateSidebarUserInfo();
+
         return true;
       }catch(e){
         sessionStorage.removeItem('teacherPageUser');
@@ -4378,6 +4988,8 @@ function getSettingTerm(settingName, fallback = null){
         if(el('homeUserName')){
           el('homeUserName').textContent = `คุณครู ${state.currentUser.full_name}`;
         }
+
+        updateSidebarUserInfo();
 
         setActivePage('home');
 
@@ -4430,6 +5042,17 @@ state.currentStudentSummary = null;
       resetStudentDetail();
       resetRetestPage();
       fpResetPage();
+
+      el('appShell')?.classList.remove('sidebar-collapsed');
+      el('appShell')?.classList.remove('mobile-sidebar-open');
+
+      if(el('sidebarUserName')){
+        el('sidebarUserName').textContent = 'ครูผู้สอน';
+      }
+
+      if(el('sidebarUserCode')){
+        el('sidebarUserCode').textContent = 'Teacher';
+      }
     }
 
     function togglePassword(){
@@ -7126,6 +7749,9 @@ function fpSetSubPage(page){
   const isMine = state.freePeriodSubPage === 'mine';
   const isAll = state.freePeriodSubPage === 'all';
 
+  setSidebarActiveFpSubPage(state.freePeriodSubPage);
+  updateAppTopbarFreePeriodSubTitle(state.freePeriodSubPage);
+
   el('fpSearchOnlyControls')?.classList.toggle('hidden', !isSearch);
 
   el('fpPanelSearch')?.classList.toggle('hidden', !isSearch);
@@ -8469,6 +9095,9 @@ function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
   bindIfExists('loginBtn', 'click', login);
   bindIfExists('logoutBtn', 'click', logout);
+  bindIfExists('sidebarLogoutBtn', 'click', logout);
+  bindIfExists('sidebarToggleBtn', 'click', toggleSidebar);
+  bindIfExists('sidebarBackdrop', 'click', closeMobileSidebar);
 
   bindIfExists('menuHomeBtn', 'click', () => setActivePage('home'));
   bindIfExists('menuImportBtn', 'click', () => setActivePage('import'));
@@ -8478,19 +9107,31 @@ function bindEvents(){
     await loadAdviserRooms();
   });
 
-bindIfExists('menuRetestBtn', 'click', async () => {
-  setActivePage('retest');
+  bindIfExists('menuRetestBtn', 'click', async () => {
+    setActivePage('retest');
 
-  if (!state.retestSettings) {
-    await loadImportSettingsFromSheet();
-  }
+    if (!state.retestSettings) {
+      await loadImportSettingsFromSheet();
+    }
 
-  await loadRetestRows();
-});
+    await loadRetestRows();
+  });
 
-bindIfExists('menuFreePeriodBtn', 'click', () => {
-  setActivePage('freeperiod');
-});
+  bindIfExists('menuFreePeriodBtn', 'click', () => {
+    openFreePeriodFromSidebar('search');
+  });
+
+  bindIfExists('sideFpSearchBtn', 'click', () => {
+    openFreePeriodFromSidebar('search');
+  });
+
+  bindIfExists('sideFpMineBtn', 'click', () => {
+    openFreePeriodFromSidebar('mine');
+  });
+
+  bindIfExists('sideFpAllBtn', 'click', () => {
+    openFreePeriodFromSidebar('all');
+  });
 
   bindIfExists('filterAllBtn', 'click', () => setPreviewFilter('all'));
   bindIfExists('filterErrorBtn', 'click', () => setPreviewFilter('error'));
@@ -8609,10 +9250,6 @@ bindIfExists('adviserRoomSelect', 'change', () => {
     );
   });
 
-bindIfExists('menuFreePeriodBtn', 'click', () => {
-  setActivePage('freeperiod');
-  fpSetSubPage('search');
-});
 
 bindIfExists('fpTabSearchBtn', 'click', () => {
   fpSetSubPage('search');
@@ -8636,10 +9273,10 @@ bindIfExists('fpViewListBtn', 'click', () => {
 
 bindIfExists('fpLoadSlotsBtn', 'click', fpLoadSlots);
 bindIfExists('fpLoadMineBtn', 'click', () => {
-  fpSetSubPage('mine');
+  openFreePeriodFromSidebar('mine');
 });
 bindIfExists('fpLoadAllBtn', 'click', () => {
-  fpSetSubPage('all');
+  openFreePeriodFromSidebar('all');
 });
 
 bindIfExists('fpYear', 'change', () => {
