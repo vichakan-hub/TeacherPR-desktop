@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Teacher - นำเข้าผลการเรียน</title>
+  <title>TeacherPR - ระบบงานวิชาการสำหรับครู</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -3115,9 +3115,9 @@
       <section class="hero">
         <div class="hero-top">
           <div>
-            <div class="badge-school">🏫 โรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”</div>
-            <h1>นำเข้าผลการเรียน</h1>
-            <p>สำหรับครูผู้สอนรหัส T เท่านั้น</p>
+            <div class="badge-school">🏫 โรงเรียนท่าใหม่“พูลสวัสดิ์ราษฎร์นุกูล”</div>
+            <h1>TeacherPR</h1>
+            <p>ระบบงานวิชาการสำหรับครู</p>
           </div>
           <div class="hero-side">
             <div class="hero-side-title">ฝ่ายวิชาการ</div>
@@ -3156,18 +3156,15 @@
           <button id="loginBtn" class="login-btn">↪ เข้าสู่ระบบ</button>
           <div id="loginStatus" class="status info"></div>
 
-          <div class="login-note">
-            ℹ️ หน้านี้อนุญาตเฉพาะครูรหัส <strong>T</strong><br>
-            ℹ️ ใช้สำหรับนำเข้าผลการเรียนและบันทึกเข้า Supabase โดยตรง
-          </div>
+
         </section>
 
         <section class="info-card">
           <div class="info-head">
             <div class="info-icon">📄</div>
             <div>
-              <div class="info-kicker">FORMAT</div>
-              <h2 class="info-title">รูปแบบไฟล์ที่รองรับ</h2>
+              <div class="info-kicker">Information</div>
+              <h2 class="info-title">ประชาสัมพันธ์</h2>
             </div>
           </div>
 
@@ -4475,8 +4472,8 @@ function updateAppTopbarTitle(page){
   const titleMap = {
     home: ['หน้าแรก', 'ภาพรวมระบบครูผู้สอน'],
     retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
-    import: ['รายงานผลการเรียน', 'นำเข้าไฟล์ Excel และตรวจสอบก่อนบันทึก'],
-    adviser: ['ติดตามผลการเรียน', 'ดูผลการเรียนรายคนของนักเรียนในห้องที่ปรึกษา'],
+    import: ['รายงานผลการเรียน', 'นำเข้าไฟล์ Excel ผลการเรียนและตรวจสอบก่อนบันทึก'],
+    adviser: ['ติดตามผลการเรียน', 'ติดตามผลการเรียนของนักเรียนในที่ปรึกษา'],
     freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
   };
 
