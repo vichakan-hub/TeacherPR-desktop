@@ -3617,10 +3617,7 @@
 <!-- PAGE FREE PERIOD : จองคาบว่าง -->
 <div id="pageFreePeriod" class="hidden">
   <section class="card" style="margin-bottom:18px;">
-    <h2>จองคาบว่าง</h2>
-    <div class="sub">
-      ค้นหาคาบว่างของห้องเรียน เลือกวันที่จริง จองคาบ และตรวจสอบรายการจองของโรงเรียน
-    </div>
+
 
     <div class="fp-submenu">
       <button id="fpTabSearchBtn" class="fp-submenu-btn active" type="button">
@@ -4498,7 +4495,7 @@ function updateAppTopbarFreePeriodSubTitle(subPage){
   const subText = subMap[subPage || 'search'] || subMap.search;
 
   if(el('appPageTitle')){
-    el('appPageTitle').textContent = `จองคาบว่าง / ${subText}`;
+    el('appPageTitle').textContent = `จองคาบว่าง`;
   }
 
   if(el('appPageSubtitle')){
