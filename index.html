@@ -3291,10 +3291,25 @@
           <span class="sidebar-label">ส่งผลสอบแก้ตัว</span>
         </button>
 
-        <button id="menuImportBtn" class="sidebar-link" type="button" data-side-page="import">
-          <span class="sidebar-icon">📥</span>
-          <span class="sidebar-label">รายงานผลปลายภาค</span>
-        </button>
+<div id="sidebarGradeReportGroup" class="sidebar-group">
+  <button id="menuGradeReportBtn" class="sidebar-parent" type="button" data-side-page="gradereport">
+    <span class="sidebar-icon">📊</span>
+    <span class="sidebar-label">รายงานผลการเรียน</span>
+    <span class="sidebar-caret">▾</span>
+  </button>
+
+  <div class="sidebar-submenu">
+    <button id="sideMidtermReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="midtermReport">
+      <span class="sidebar-subicon">🕒</span>
+      <span class="sidebar-label">รายงานผลกลางภาค</span>
+    </button>
+
+    <button id="sideFinalReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="import">
+      <span class="sidebar-subicon">📥</span>
+      <span class="sidebar-label">รายงานผลปลายภาค</span>
+    </button>
+  </div>
+</div>
 
         <button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
           <span class="sidebar-icon">👩‍🏫</span>
@@ -3383,6 +3398,31 @@
           </div>
         </div>
       </section>
+
+        <div id="pageMidtermReport" class="hidden">
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>รายงานผลกลางภาค</h2>
+        <div class="sub" style="margin-bottom:0;">
+          เตรียมไว้สำหรับระบบรายงานผลกลางภาค
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div style="font-weight:800;color:#2563eb;font-size:18px;margin-bottom:8px;">
+        🕒 ระบบรายงานผลกลางภาค
+      </div>
+      <div>
+        หน้านี้เตรียมไว้ก่อน สำหรับเพิ่มระบบรายงานผลกลางภาคในอนาคต
+      </div>
+      <div style="margin-top:8px;color:#6b7a90;">
+        ตอนนี้ยังไม่เปิดใช้งานการนำเข้า/บันทึกข้อมูลกลางภาค
+      </div>
+    </div>
+  </section>
+</div>
 
       <div id="pageImport" class="hidden">
         <section class="card" style="margin-bottom:18px;">
@@ -4442,12 +4482,14 @@ freePeriodSelectedMineReservationIds: new Set()
 
 function setActivePage(page){
   const isHome = page === 'home';
+  const isMidtermReport = page === 'midtermReport';
   const isImport = page === 'import';
   const isAdviser = page === 'adviser';
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
 
   el('pageHome').classList.toggle('hidden', !isHome);
+  el('pageMidtermReport')?.classList.toggle('hidden', !isMidtermReport);
   el('pageImport').classList.toggle('hidden', !isImport);
   el('pageAdviser').classList.toggle('hidden', !isAdviser);
   el('pageRetest').classList.toggle('hidden', !isRetest);
@@ -4484,9 +4526,10 @@ function toggleSidebar(){
   }else{
     shell.classList.toggle('sidebar-collapsed');
 
-    if(shell.classList.contains('sidebar-collapsed')){
-      el('sidebarFreePeriodGroup')?.classList.remove('open');
-    }
+if(shell.classList.contains('sidebar-collapsed')){
+  el('sidebarFreePeriodGroup')?.classList.remove('open');
+  el('sidebarGradeReportGroup')?.classList.remove('open');
+}
   }
 }
 
@@ -4500,10 +4543,15 @@ function setSidebarActiveMain(page){
     return;
   }
 
+  if(page === 'midtermReport' || page === 'import'){
+    el('menuGradeReportBtn')?.classList.add('active');
+    setSidebarActiveGradeSubPage(page);
+    return;
+  }
+
   const map = {
     home: 'menuHomeBtn',
     retest: 'menuRetestBtn',
-    import: 'menuImportBtn',
     adviser: 'menuAdviserBtn'
   };
 
@@ -4511,6 +4559,23 @@ function setSidebarActiveMain(page){
   if(targetId){
     el(targetId)?.classList.add('active');
   }
+}
+  function setSidebarActiveGradeSubPage(page){
+  document
+    .querySelectorAll('#sidebarGradeReportGroup .sidebar-sublink')
+    .forEach(btn => btn.classList.remove('active'));
+
+  const map = {
+    midtermReport: 'sideMidtermReportBtn',
+    import: 'sideFinalReportBtn'
+  };
+
+  const targetId = map[page || 'import'];
+  if(targetId){
+    el(targetId)?.classList.add('active');
+  }
+
+  el('menuGradeReportBtn')?.classList.add('active');
 }
 
 function setSidebarActiveFpSubPage(page){
@@ -4533,13 +4598,14 @@ function setSidebarActiveFpSubPage(page){
 }
 
 function updateAppTopbarTitle(page){
-  const titleMap = {
-    home: ['หน้าแรก', 'ระบบงานวิชาการสำหรับครู'],
-    retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
-    import: ['รายงานผลปลายภาค', 'นำเข้าไฟล์ Excel ผลการเรียนและตรวจสอบก่อนบันทึก'],
-    adviser: ['ติดตามผลการเรียน', 'ติดตามผลการเรียนของนักเรียนในที่ปรึกษา'],
-    freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
-  };
+const titleMap = {
+  home: ['หน้าแรก', 'ระบบงานวิชาการสำหรับครู'],
+  retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
+  midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
+  import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
+  adviser: ['ติดตามผลการเรียน', 'ติดตามผลการเรียนของนักเรียนในที่ปรึกษา'],
+  freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
+};
 
   const item = titleMap[page] || titleMap.home;
 
@@ -4568,6 +4634,21 @@ function updateAppTopbarFreePeriodSubTitle(subPage){
   if(el('appPageSubtitle')){
     el('appPageSubtitle').textContent = 'เลือกเมนูย่อยจากด้านซ้ายเพื่อจัดการคาบว่าง';
   }
+}
+
+    function openGradeReportFromSidebar(page = 'import'){
+  const shell = el('appShell');
+
+  if(shell?.classList.contains('sidebar-collapsed')){
+    shell.classList.remove('sidebar-collapsed');
+  }
+
+  el('sidebarGradeReportGroup')?.classList.add('open');
+
+  setActivePage(page);
+  setSidebarActiveGradeSubPage(page);
+  updateAppTopbarTitle(page);
+  closeMobileSidebar();
 }
 
 function openFreePeriodFromSidebar(subPage = 'search'){
@@ -9161,7 +9242,41 @@ function bindEvents(){
   bindIfExists('sidebarBackdrop', 'click', closeMobileSidebar);
 
   bindIfExists('menuHomeBtn', 'click', () => setActivePage('home'));
-  bindIfExists('menuImportBtn', 'click', () => setActivePage('import'));
+bindIfExists('menuGradeReportBtn', 'click', () => {
+  const shell = el('appShell');
+  const group = el('sidebarGradeReportGroup');
+  const isOpen = group?.classList.contains('open');
+  const isOnGradePage =
+    !el('pageImport')?.classList.contains('hidden') ||
+    !el('pageMidtermReport')?.classList.contains('hidden');
+
+  if(shell?.classList.contains('sidebar-collapsed')){
+    shell.classList.remove('sidebar-collapsed');
+  }
+
+  if(isOnGradePage && isOpen){
+    group.classList.remove('open');
+    el('menuGradeReportBtn')?.classList.add('active');
+    updateAppTopbarTitle(
+      !el('pageMidtermReport')?.classList.contains('hidden')
+        ? 'midtermReport'
+        : 'import'
+    );
+    closeMobileSidebar();
+    return;
+  }
+
+  group?.classList.add('open');
+  openGradeReportFromSidebar('import');
+});
+
+bindIfExists('sideMidtermReportBtn', 'click', () => {
+  openGradeReportFromSidebar('midtermReport');
+});
+
+bindIfExists('sideFinalReportBtn', 'click', () => {
+  openGradeReportFromSidebar('import');
+});
 
   bindIfExists('menuAdviserBtn', 'click', async () => {
     setActivePage('adviser');
