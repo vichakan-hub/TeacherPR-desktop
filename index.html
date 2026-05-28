@@ -903,6 +903,12 @@
   color:#d92d20;
   border-color:#ffd2cf;
 }
+    .student-risk-term-badge.repeat-risk{
+  background:#7f1d1d;
+  color:#ffffff;
+  border-color:#450a0a;
+  box-shadow:0 0 0 3px rgba(127,29,29,.14);
+}
 
 .student-risk-term-badge.no-grade{
   background:#eef3f8;
@@ -5359,6 +5365,23 @@ function buildStudentRiskTermText(student){
   const riskGrades = getOrderedRiskGrades(student.risk_grades || []);
   const hasAnyGrade = !!student.has_grade_result;
 
+  const repeatRiskCount = Number(student.repeat_risk_count || 0);
+  const totalSubjectCount = Number(student.total_subject_count || 0);
+  const isRepeatRisk =
+    totalSubjectCount > 0 &&
+    repeatRiskCount / totalSubjectCount >= 0.5;
+
+  if(isRepeatRisk && repeatRiskCount > 0){
+    return `
+      <div class="student-risk-term-wrap">
+        <span class="student-risk-term-badge repeat-risk">
+          เสี่ยงซ้ำชั้น : ติด ${escapeHtml(riskGrades.join(' '))}
+          ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
+        </span>
+      </div>
+    `;
+  }
+
   if(riskGrades.length){
     return `
       <div class="student-risk-term-wrap">
@@ -7084,6 +7107,46 @@ function resetRetestPage(){
     .sort((a, b) => order.indexOf(a) - order.indexOf(b));
 }
 
+    function getOrderedRiskGrades(grades){
+  const order = ['0', 'ร', 'มส', 'มผ'];
+  const unique = [...new Set((grades || []).map(normalizeGradeValue).filter(Boolean))];
+
+  return unique
+    .filter(g => order.includes(g))
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+
+function isRepeatRiskGrade(grade){
+  const g = normalizeGradeValue(grade);
+  return ['0', 'ร', 'มส'].includes(g);
+}
+
+function buildRepeatRiskSnapshotFromTermPlans(flag, termPlans){
+  let totalSubjectCount = 0;
+  let repeatRiskCount = 0;
+
+  (termPlans || []).forEach(plan => {
+    const termFlag = flag?.term_flags?.[plan.key];
+
+    // นับเฉพาะเทอมที่มีผลการเรียนแล้ว
+    if(!termFlag?.has_grade_result) return;
+
+    totalSubjectCount += Number(termFlag.total_subject_count || termFlag.grade_count || 0);
+    repeatRiskCount += Number(termFlag.repeat_risk_count || 0);
+  });
+
+  const ratio = totalSubjectCount > 0
+    ? repeatRiskCount / totalSubjectCount
+    : 0;
+
+  return {
+    total_subject_count: totalSubjectCount,
+    repeat_risk_count: repeatRiskCount,
+    repeat_risk_ratio: ratio,
+    is_repeat_risk: totalSubjectCount > 0 && ratio >= 0.5
+  };
+}
+    
 async function fetchStudentGradeFlags(studentIds, academicYear, term){
   const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
 
@@ -7130,20 +7193,30 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
           has_risk_grade: false,
           grade_count: 0,
           risk_grades: [],
+          repeat_risk_count: 0,
+          total_subject_count: 0,
+          repeat_risk_ratio: 0,
+          is_repeat_risk: false,
           term_flags: {}
         });
       }
 
       const item = map.get(sid);
+
       item.has_grade_result = true;
       item.grade_count += 1;
+      item.total_subject_count += 1;
 
       if(!item.term_flags[termKey]){
         item.term_flags[termKey] = {
           has_grade_result: false,
           has_risk_grade: false,
           grade_count: 0,
-          risk_grades: []
+          risk_grades: [],
+          repeat_risk_count: 0,
+          total_subject_count: 0,
+          repeat_risk_ratio: 0,
+          is_repeat_risk: false
         };
       }
 
@@ -7151,7 +7224,9 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
 
       termFlag.has_grade_result = true;
       termFlag.grade_count += 1;
+      termFlag.total_subject_count += 1;
 
+      // ป้าย "เสี่ยง : ติด ..." นับ 0, ร, มส, มผ
       if(isRiskGrade(effectiveGrade)){
         item.has_risk_grade = true;
         termFlag.has_risk_grade = true;
@@ -7164,16 +7239,38 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
           termFlag.risk_grades.push(effectiveGrade);
         }
       }
+
+      // ป้าย "เสี่ยงซ้ำชั้น" นับเฉพาะ 0, ร, มส ไม่รวม มผ
+      if(isRepeatRiskGrade(effectiveGrade)){
+        item.repeat_risk_count += 1;
+        termFlag.repeat_risk_count += 1;
+      }
     });
   }
 
   map.forEach(item => {
     item.risk_grades = getOrderedRiskGrades(item.risk_grades);
 
+    item.repeat_risk_ratio = item.total_subject_count > 0
+      ? item.repeat_risk_count / item.total_subject_count
+      : 0;
+
+    item.is_repeat_risk =
+      item.total_subject_count > 0 &&
+      item.repeat_risk_ratio >= 0.5;
+
     Object.keys(item.term_flags || {}).forEach(termKey => {
-      item.term_flags[termKey].risk_grades = getOrderedRiskGrades(
-        item.term_flags[termKey].risk_grades
-      );
+      const termFlag = item.term_flags[termKey];
+
+      termFlag.risk_grades = getOrderedRiskGrades(termFlag.risk_grades);
+
+      termFlag.repeat_risk_ratio = termFlag.total_subject_count > 0
+        ? termFlag.repeat_risk_count / termFlag.total_subject_count
+        : 0;
+
+      termFlag.is_repeat_risk =
+        termFlag.total_subject_count > 0 &&
+        termFlag.repeat_risk_ratio >= 0.5;
     });
   });
 
@@ -7273,12 +7370,21 @@ const riskGrades = getOrderedRiskGrades(
   termPlans.flatMap(plan => flag.term_flags?.[plan.key]?.risk_grades || [])
 );
 
+const repeatSnapshot = buildRepeatRiskSnapshotFromTermPlans(flag, termPlans);
+
 return {
   ...student,
   computed_class_level: targetClass,
   ...flag,
   term_plans: termPlans,
   risk_grades: riskGrades,
+
+  // คำนวณสะสมเฉพาะเทอมที่มีผลการเรียนแล้ว
+  repeat_risk_count: repeatSnapshot.repeat_risk_count,
+  total_subject_count: repeatSnapshot.total_subject_count,
+  repeat_risk_ratio: repeatSnapshot.repeat_risk_ratio,
+  is_repeat_risk: repeatSnapshot.is_repeat_risk,
+
   has_risk_grade: riskGrades.length > 0
 };
 }).sort((a,b) => {
