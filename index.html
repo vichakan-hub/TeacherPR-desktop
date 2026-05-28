@@ -5356,13 +5356,15 @@ function renderAdviserStudentsThead(){
 }
 
 function buildStudentRiskTermText(student){
-  const riskTerms = student.risk_terms || [];
+  const riskGrades = getOrderedRiskGrades(student.risk_grades || []);
   const hasAnyGrade = !!student.has_grade_result;
 
-  if(riskTerms.length){
+  if(riskGrades.length){
     return `
       <div class="student-risk-term-wrap">
-        <span class="student-risk-term-badge risk">เสี่ยง: ${escapeHtml(riskTerms.join(', '))}</span>
+        <span class="student-risk-term-badge risk">
+          เสี่ยง : ติด ${escapeHtml(riskGrades.join(' '))}
+        </span>
       </div>
     `;
   }
@@ -7073,6 +7075,15 @@ function resetRetestPage(){
   return rows;
 }
 
+    function getOrderedRiskGrades(grades){
+  const order = ['0', 'ร', 'มส', 'มผ'];
+  const unique = [...new Set((grades || []).map(normalizeGradeValue).filter(Boolean))];
+
+  return unique
+    .filter(g => order.includes(g))
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+
 async function fetchStudentGradeFlags(studentIds, academicYear, term){
   const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
 
@@ -7118,6 +7129,7 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
           has_grade_result: false,
           has_risk_grade: false,
           grade_count: 0,
+          risk_grades: [],
           term_flags: {}
         });
       }
@@ -7130,19 +7142,40 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
         item.term_flags[termKey] = {
           has_grade_result: false,
           has_risk_grade: false,
-          grade_count: 0
+          grade_count: 0,
+          risk_grades: []
         };
       }
 
-      item.term_flags[termKey].has_grade_result = true;
-      item.term_flags[termKey].grade_count += 1;
+      const termFlag = item.term_flags[termKey];
+
+      termFlag.has_grade_result = true;
+      termFlag.grade_count += 1;
 
       if(isRiskGrade(effectiveGrade)){
         item.has_risk_grade = true;
-        item.term_flags[termKey].has_risk_grade = true;
+        termFlag.has_risk_grade = true;
+
+        if(!item.risk_grades.includes(effectiveGrade)){
+          item.risk_grades.push(effectiveGrade);
+        }
+
+        if(!termFlag.risk_grades.includes(effectiveGrade)){
+          termFlag.risk_grades.push(effectiveGrade);
+        }
       }
     });
   }
+
+  map.forEach(item => {
+    item.risk_grades = getOrderedRiskGrades(item.risk_grades);
+
+    Object.keys(item.term_flags || {}).forEach(termKey => {
+      item.term_flags[termKey].risk_grades = getOrderedRiskGrades(
+        item.term_flags[termKey].risk_grades
+      );
+    });
+  });
 
   return map;
 }
@@ -7236,18 +7269,18 @@ state.adviserStudents = students.map(student => {
 
 const termPlans = getTermPlansForStudent(student, selectedRoom);
 
-  const riskTerms = termPlans
-    .filter(plan => flag.term_flags?.[plan.key]?.has_risk_grade)
-    .map(plan => plan.label);
+const riskGrades = getOrderedRiskGrades(
+  termPlans.flatMap(plan => flag.term_flags?.[plan.key]?.risk_grades || [])
+);
 
-  return {
-    ...student,
-    computed_class_level: targetClass,
-    ...flag,
-    term_plans: termPlans,
-    risk_terms: riskTerms,
-    has_risk_grade: riskTerms.length > 0
-  };
+return {
+  ...student,
+  computed_class_level: targetClass,
+  ...flag,
+  term_plans: termPlans,
+  risk_grades: riskGrades,
+  has_risk_grade: riskGrades.length > 0
+};
 }).sort((a,b) => {
       const byNo = compareStudentNo(a.current_no, b.current_no);
       if(byNo !== 0) return byNo;
