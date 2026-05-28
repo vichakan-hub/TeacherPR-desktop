@@ -5375,7 +5375,7 @@ function buildStudentRiskTermText(student){
     return `
       <div class="student-risk-term-wrap">
         <span class="student-risk-term-badge repeat-risk">
-          เสี่ยงซ้ำชั้น : ติด ${escapeHtml(riskGrades.join(' '))}
+          เสี่ยงซ้ำชั้น : ติด 
           ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
         </span>
       </div>
@@ -5386,7 +5386,7 @@ function buildStudentRiskTermText(student){
     return `
       <div class="student-risk-term-wrap">
         <span class="student-risk-term-badge risk">
-          เสี่ยง : ติด ${escapeHtml(riskGrades.join(' '))}
+          เสี่ยง
         </span>
       </div>
     `;
