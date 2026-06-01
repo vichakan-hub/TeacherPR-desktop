@@ -8539,19 +8539,7 @@ function updateStudentRiskKpi(baseRows){
   }
 }
 
-function getFilteredStudentRiskRows(rows){
-  const classFilter = safeText(el('studentRiskClassFilter')?.value, '');
-  const termFilter = safeText(el('studentRiskTermFilter')?.value, '');
 
-  state.currentStudentRiskClassFilter = classFilter;
-  state.currentStudentRiskTermFilter = termFilter;
-
-  return (rows || []).filter(row => {
-    if(classFilter && safeText(row.class_level, '') !== classFilter) return false;
-    if(termFilter && String(row.term) !== String(termFilter)) return false;
-    return true;
-  });
-}
 
 function renderStudentRiskFilteredList(){
   const baseRows = getStudentRiskBaseFilteredRows(state.currentStudentRiskRows || []);
@@ -10786,6 +10774,22 @@ if(restoreSession()){
   setStatus('loginStatus','กรุณาเข้าสู่ระบบก่อนใช้งาน','info');
 }
     }
+
+    document.addEventListener('click', (event) => {
+  const btn = event.target.closest('[data-risk-status-filter]');
+  if(!btn) return;
+
+  setStudentRiskStatusFilter(btn.dataset.riskStatusFilter || '');
+});
+
+document.addEventListener('change', (event) => {
+  if(
+    event.target?.id === 'studentRiskClassFilter' ||
+    event.target?.id === 'studentRiskTermFilter'
+  ){
+    renderStudentRiskFilteredList();
+  }
+});
 
     document.addEventListener('DOMContentLoaded', init);
   </script>
