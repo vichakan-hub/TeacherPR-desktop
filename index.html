@@ -3666,6 +3666,58 @@
   }
 }
 
+    /* ===== ปรับ KPI วิชาที่ต้องติดตามให้อ่านง่ายขึ้น ===== */
+.risk-tracking-summary{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.risk-tracking-card{
+  min-height:96px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  gap:8px;
+  border-radius:20px;
+  padding:18px 22px;
+}
+
+.risk-tracking-label{
+  font-size:14px;
+  font-weight:900;
+  line-height:1.2;
+}
+
+.risk-tracking-value{
+  font-size:36px;
+  font-weight:900;
+  line-height:1;
+  margin-top:0;
+}
+
+.risk-tracking-card.active{
+  outline:3px solid rgba(37,99,235,.22);
+  box-shadow:0 12px 28px rgba(37,99,235,.16);
+  transform:translateY(-1px);
+}
+
+.risk-tracking-card.total.active{
+  border-color:#93c5fd;
+}
+
+.risk-tracking-card.danger.active{
+  outline-color:rgba(217,45,32,.18);
+  border-color:#fca5a5;
+}
+
+.risk-tracking-card.success.active{
+  outline-color:rgba(15,157,88,.18);
+  border-color:#86efac;
+}
+
 </style>
 </head>
 <body>
