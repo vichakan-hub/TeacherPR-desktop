@@ -3510,6 +3510,94 @@
   }
 }
 
+    /* ===== Beautiful tooltip for adviser risk badge ===== */
+.student-risk-term-badge[data-risk-tooltip]{
+  position:relative;
+  cursor:help;
+  overflow:visible;
+}
+
+.student-risk-term-badge[data-risk-tooltip]::after{
+  content:attr(data-risk-tooltip);
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 10px);
+  transform:translateX(-50%) translateY(4px);
+  z-index:9999;
+
+  min-width:132px;
+  max-width:220px;
+  padding:9px 12px;
+  border-radius:14px;
+
+  background:#17263c;
+  color:#ffffff;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+  text-align:center;
+  white-space:nowrap;
+
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  box-shadow:0 12px 26px rgba(15,23,42,.24);
+  transition:.16s ease;
+}
+
+.student-risk-term-badge[data-risk-tooltip]::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 3px);
+  transform:translateX(-50%) translateY(4px);
+  z-index:10000;
+
+  border-width:7px 7px 0 7px;
+  border-style:solid;
+  border-color:#17263c transparent transparent transparent;
+
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:.16s ease;
+}
+
+.student-risk-term-badge[data-risk-tooltip]:hover::after,
+.student-risk-term-badge[data-risk-tooltip]:hover::before{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* สี tooltip แยกตามระดับ */
+.student-risk-term-badge.risk[data-risk-tooltip]::after{
+  background:#b42318;
+}
+
+.student-risk-term-badge.risk[data-risk-tooltip]::before{
+  border-color:#b42318 transparent transparent transparent;
+}
+
+.student-risk-term-badge.repeat-risk[data-risk-tooltip]::after{
+  background:#7f1d1d;
+}
+
+.student-risk-term-badge.repeat-risk[data-risk-tooltip]::before{
+  border-color:#7f1d1d transparent transparent transparent;
+}
+    .student-table,
+.student-table tbody,
+.student-table tr,
+.student-table td{
+  overflow:visible;
+}
+
+#pageAdviser .table-wrap{
+  overflow-x:auto;
+  overflow-y:visible;
+}
+
 </style>
 </head>
 <body>
@@ -5789,7 +5877,7 @@ function buildStudentRiskTermText(student){
       <div class="student-risk-term-wrap">
         <span
           class="student-risk-term-badge repeat-risk"
-          title="${escapeHtml(tooltipText)}"
+          data-risk-tooltip="${escapeHtml(tooltipText)}"
         >
           เสี่ยงซ้ำชั้น
         </span>
@@ -5802,7 +5890,7 @@ function buildStudentRiskTermText(student){
       <div class="student-risk-term-wrap">
         <span
           class="student-risk-term-badge risk"
-          title="${escapeHtml(tooltipText)}"
+          data-risk-tooltip="${escapeHtml(tooltipText)}"
         >
           เสี่ยง
         </span>
