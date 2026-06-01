@@ -8586,7 +8586,7 @@ function renderStudentRiskFilteredList(){
             · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
           </div>
 
-          <div class="risk-subject-meta">
+          <div class="risk-teacher-meta">
             ครูผู้สอน:
             ${escapeHtml(safeText(row.teacher_name, '-'))}
             ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
