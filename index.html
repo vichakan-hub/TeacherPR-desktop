@@ -5362,7 +5362,6 @@ function renderAdviserStudentsThead(){
 }
 
 function buildStudentRiskTermText(student){
-  const riskGrades = getOrderedRiskGrades(student.risk_grades || []);
   const hasAnyGrade = !!student.has_grade_result;
 
   const repeatRiskCount = Number(student.repeat_risk_count || 0);
@@ -5375,18 +5374,17 @@ function buildStudentRiskTermText(student){
     return `
       <div class="student-risk-term-wrap">
         <span class="student-risk-term-badge repeat-risk">
-          เสี่ยงซ้ำชั้น : ติด 
-          ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
+          เสี่ยงซ้ำชั้น : ติด ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
         </span>
       </div>
     `;
   }
 
-  if(riskGrades.length){
+  if(repeatRiskCount > 0 && totalSubjectCount > 0){
     return `
       <div class="student-risk-term-wrap">
         <span class="student-risk-term-badge risk">
-          เสี่ยง
+          เสี่ยง : ติด ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
         </span>
       </div>
     `;
