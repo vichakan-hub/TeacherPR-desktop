@@ -3197,6 +3197,55 @@
     max-width:100px !important;
   }
 }
+    /* ===== Student detail tabs ===== */
+.student-detail-tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:16px 0 14px;
+  padding:8px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+.student-detail-tab-btn{
+  height:42px;
+  border-radius:14px;
+  padding:0 18px;
+  font-weight:900;
+  background:#ecf2f8;
+  color:#41536c;
+  border:1px solid #d6e2ee;
+}
+
+.student-detail-tab-btn.active{
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 8px 18px rgba(37,99,235,.18);
+}
+
+.student-detail-tab-panel.hidden{
+  display:none!important;
+}
+
+.student-detail-tab-panel{
+  display:grid;
+  gap:16px;
+}
+
+.student-detail-panel-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+@media (max-width:900px){
+  .student-detail-panel-grid{
+    grid-template-columns:1fr;
+  }
+}
 
 </style>
 </head>
@@ -4008,133 +4057,183 @@
     </div>
 
     <div class="student-detail-body">
-      <div class="student-meta-grid">
-        <div class="student-meta-card">
-          <div class="student-meta-label">เลขประจำตัวนักเรียน</div>
-          <div id="detailStudentCode" class="student-meta-value">-</div>
-        </div>
+<div class="student-meta-grid">
+  <div class="student-meta-card">
+    <div class="student-meta-label">เลขประจำตัวนักเรียน</div>
+    <div id="detailStudentCode" class="student-meta-value">-</div>
+  </div>
 
-        <div class="student-meta-card">
-          <div class="student-meta-label">ชื่อ - สกุล</div>
-          <div id="detailStudentName" class="student-meta-value">-</div>
-        </div>
+  <div class="student-meta-card">
+    <div class="student-meta-label">ชื่อ - สกุล</div>
+    <div id="detailStudentName" class="student-meta-value">-</div>
+  </div>
 
-        <div class="student-meta-card">
-          <div class="student-meta-label">ชั้น / ห้อง</div>
-          <div id="detailStudentClass" class="student-meta-value">-</div>
-        </div>
+  <div class="student-meta-card">
+    <div class="student-meta-label">ชั้น / ห้อง</div>
+    <div id="detailStudentClass" class="student-meta-value">-</div>
+  </div>
 
-        <div class="student-meta-card">
-          <div class="student-meta-label">เลขที่</div>
-          <div id="detailStudentRoomNo" class="student-meta-value">-</div>
-        </div>
+  <div class="student-meta-card">
+    <div class="student-meta-label">เลขที่</div>
+    <div id="detailStudentRoomNo" class="student-meta-value">-</div>
+  </div>
 
-        <div class="student-meta-card">
-          <div class="student-meta-label">ภาคเรียน / ปีการศึกษา</div>
-          <div id="detailStudentYearTerm" class="student-meta-value">-</div>
-        </div>
+  <div class="student-meta-card">
+    <div class="student-meta-label">ภาคเรียน / ปีการศึกษา</div>
+    <div id="detailStudentYearTerm" class="student-meta-value">-</div>
+  </div>
+</div>
+
+<div class="student-detail-tabs">
+  <button id="studentDetailTabGradesBtn" class="student-detail-tab-btn active" type="button">
+    รายวิชาและผลการเรียน
+  </button>
+  <button id="studentDetailTabRiskBtn" class="student-detail-tab-btn" type="button">
+    วิชาที่ต้องติดตาม
+  </button>
+</div>
+
+<div id="studentDetailTabGradesPanel" class="student-detail-tab-panel">
+  <div class="student-panel">
+    <div class="student-panel-head">
+      <h3>รายวิชาและผลการเรียน</h3>
+    </div>
+
+    <div class="student-panel-body">
+      <div class="table-wrap">
+        <table class="grade-report-table">
+          <thead>
+            <tr class="group">
+              <th rowspan="2">รหัสวิชา</th>
+              <th rowspan="2">รายวิชา</th>
+              <th rowspan="2">ประเภท</th>
+              <th rowspan="2">หน่วยกิต</th>
+              <th colspan="4">ผลการเรียน</th>
+              <th rowspan="2">เกรด</th>
+              <th rowspan="2">แก้ตัว</th>
+              <th rowspan="2">ครูผู้สอน</th>
+            </tr>
+            <tr>
+              <th>หน่วยการเรียน</th>
+              <th>กลางภาค</th>
+              <th>ปลายภาค</th>
+              <th>รวม</th>
+            </tr>
+          </thead>
+          <tbody id="studentGradeTableBody">
+            <tr>
+              <td colspan="11" class="empty-state">ยังไม่มีข้อมูล</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="student-panel">
+    <div class="student-panel-head">
+      <h3>สรุปผลการประเมิน</h3>
+    </div>
+
+    <div class="student-panel-body">
+      <div class="table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr class="group">
+              <th rowspan="2">สรุปผลการประเมิน</th>
+              <th colspan="2">ผลการเรียน</th>
+            </tr>
+            <tr>
+              <th>ที่เรียน</th>
+              <th>ที่ได้</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาพื้นฐาน</td>
+              <td id="detailBasicLearned" class="value-cell">0.0</td>
+              <td id="detailBasicEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาเพิ่มเติม</td>
+              <td id="detailAdditionalLearned" class="value-cell">0.0</td>
+              <td id="detailAdditionalEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">รวมจำนวนหน่วยกิต/น้ำหนัก</td>
+              <td id="detailTotalLearned" class="value-cell">0.0</td>
+              <td id="detailTotalEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">ระดับผลการเรียนเฉลี่ย (GPA)</td>
+              <td id="detailGpa" class="value-cell" colspan="2">0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="studentDetailTabRiskPanel" class="student-detail-tab-panel hidden">
+  <div class="student-detail-panel-grid">
+    <div class="student-panel">
+      <div class="student-panel-head">
+        <h3>สรุปผลการประเมินตลอดหลักสูตร</h3>
       </div>
 
-      <!-- บนสุด 1 คอลัมน์เต็ม -->
-      <div class="student-detail-top-panels">
-        <div class="student-panel">
-          <div class="student-panel-head">
-            <h3>รายวิชาและผลการเรียน</h3>
-            
-          </div>
-
-          <div class="student-panel-body">
-            <div class="table-wrap">
-              <table class="grade-report-table">
-                <thead>
-                  <tr class="group">
-                    <th rowspan="2">รหัสวิชา</th>
-                    <th rowspan="2">รายวิชา</th>
-                    <th rowspan="2">ประเภท</th>
-                    <th rowspan="2">หน่วยกิต</th>
-                    <th colspan="4">ผลการเรียน</th>
-                    <th rowspan="2">เกรด</th>
-                    <th rowspan="2">แก้ตัว</th>
-                    <th rowspan="2">ครูผู้สอน</th>
-                  </tr>
-                  <tr>
-                    <th>หน่วยการเรียน</th>
-                    <th>กลางภาค</th>
-                    <th>ปลายภาค</th>
-                    <th>รวม</th>
-                  </tr>
-                </thead>
-                <tbody id="studentGradeTableBody">
-                  <tr>
-                    <td colspan="11" class="empty-state">ยังไม่มีข้อมูล</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <div class="student-panel-body">
+        <div class="table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr class="group">
+                <th rowspan="2">สรุปผลการประเมินตลอดหลักสูตร</th>
+                <th colspan="2">ผลการเรียน</th>
+              </tr>
+              <tr>
+                <th>ที่เรียน</th>
+                <th>ที่ได้</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาพื้นฐาน</td>
+                <td id="detailCourseBasicLearned" class="value-cell">0.0</td>
+                <td id="detailCourseBasicEarned" class="value-cell">0.0</td>
+              </tr>
+              <tr>
+                <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาเพิ่มเติม</td>
+                <td id="detailCourseAdditionalLearned" class="value-cell">0.0</td>
+                <td id="detailCourseAdditionalEarned" class="value-cell">0.0</td>
+              </tr>
+              <tr>
+                <td class="label-cell">รวมจำนวนหน่วยกิต/น้ำหนัก</td>
+                <td id="detailCourseTotalLearned" class="value-cell">0.0</td>
+                <td id="detailCourseTotalEarned" class="value-cell">0.0</td>
+              </tr>
+              <tr>
+                <td class="label-cell">ระดับผลการเรียนเฉลี่ยรวม</td>
+                <td id="detailCourseGpa" class="value-cell" colspan="2">0.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <!-- ล่าง 2 คอลัมน์ -->
-      <div class="student-detail-bottom-panels">
-        <div class="student-panel">
-          <div class="student-panel-head">
-            <h3>สรุปผลการประเมิน</h3>
-           
-          </div>
+    <div class="student-panel">
+      <div class="student-panel-head">
+        <h3>วิชาที่ต้องติดตาม</h3>
+      </div>
 
-          <div class="student-panel-body">
-            <div class="table-wrap">
-              <table class="summary-table">
-                <thead>
-                  <tr class="group">
-                    <th rowspan="2">สรุปผลการประเมิน</th>
-                    <th colspan="2">ผลการเรียน</th>
-                  </tr>
-                  <tr>
-                    <th>ที่เรียน</th>
-                    <th>ที่ได้</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาพื้นฐาน</td>
-                    <td id="detailBasicLearned" class="value-cell">0.0</td>
-                    <td id="detailBasicEarned" class="value-cell">0.0</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาเพิ่มเติม</td>
-                    <td id="detailAdditionalLearned" class="value-cell">0.0</td>
-                    <td id="detailAdditionalEarned" class="value-cell">0.0</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">รวมจำนวนหน่วยกิต/น้ำหนัก</td>
-                    <td id="detailTotalLearned" class="value-cell">0.0</td>
-                    <td id="detailTotalEarned" class="value-cell">0.0</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">ระดับผลการเรียนเฉลี่ย (GPA)</td>
-                    <td id="detailGpa" class="value-cell" colspan="2">0.00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="student-panel">
-          <div class="student-panel-head">
-            <h3>วิชาที่ต้องติดตาม</h3>
-            
-          </div>
-
-          <div class="student-panel-body">
-            <div id="studentRiskList" class="risk-list">
-              <div class="empty-state">ยังไม่มีรายการ</div>
-            </div>
-          </div>
+      <div class="student-panel-body">
+        <div id="studentRiskList" class="risk-list">
+          <div class="empty-state">ยังไม่มีรายการ</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
       <div class="actions" style="justify-content:flex-end;margin-top:18px;">
         <button id="closeStudentDetailBtnBottom" class="btn-secondary" type="button">ปิดหน้าต่าง</button>
@@ -4732,6 +4831,16 @@ function updateSidebarUserInfo(){
     function closeStudentDetailOverlay(){
       closeOverlay('studentDetailOverlay');
     }
+
+    function setStudentDetailTab(tabName = 'grades'){
+  const isGrades = tabName === 'grades';
+
+  el('studentDetailTabGradesBtn')?.classList.toggle('active', isGrades);
+  el('studentDetailTabRiskBtn')?.classList.toggle('active', !isGrades);
+
+  el('studentDetailTabGradesPanel')?.classList.toggle('hidden', !isGrades);
+  el('studentDetailTabRiskPanel')?.classList.toggle('hidden', isGrades);
+}
 
 
 /*******************************************************
@@ -6115,6 +6224,19 @@ function resetRetestPage(){
       el('detailTotalLearned').textContent = '0.0';
       el('detailTotalEarned').textContent = '0.0';
       el('detailGpa').textContent = '0.00';
+      [
+  ['detailCourseBasicLearned', '0.0'],
+  ['detailCourseBasicEarned', '0.0'],
+  ['detailCourseAdditionalLearned', '0.0'],
+  ['detailCourseAdditionalEarned', '0.0'],
+  ['detailCourseTotalLearned', '0.0'],
+  ['detailCourseTotalEarned', '0.0'],
+  ['detailCourseGpa', '0.00']
+].forEach(([id, value]) => {
+  if(el(id)) el(id).textContent = value;
+});
+
+setStudentDetailTab('grades');
 
       el('studentGradeTableBody').innerHTML = `
         <tr>
@@ -7678,6 +7800,62 @@ const renderClassTermButtons = (classLevel) => {
       }).join('');
     }
 
+    function buildStudentCourseSummary(rows){
+  const summary = {
+    basicLearned: 0,
+    basicEarned: 0,
+    additionalLearned: 0,
+    additionalEarned: 0,
+    totalLearned: 0,
+    totalEarned: 0,
+    gpa: 0
+  };
+
+  let totalGradePoint = 0;
+  let totalCreditForGpa = 0;
+
+  (rows || []).forEach(row => {
+    const subjectType = safeText(row.subject_type, '');
+    const credit = safeNum(row.credit) || 0;
+    const effectiveGrade = getEffectiveGrade(row);
+
+    if(!credit) return;
+
+    const isCreditSubject =
+      subjectType === 'พื้นฐาน' ||
+      subjectType === 'เพิ่มเติม';
+
+    if(!isCreditSubject) return;
+
+    const earned = isPassingGrade(effectiveGrade) ? credit : 0;
+
+    if(subjectType === 'พื้นฐาน'){
+      summary.basicLearned += credit;
+      summary.basicEarned += earned;
+    }
+
+    if(subjectType === 'เพิ่มเติม'){
+      summary.additionalLearned += credit;
+      summary.additionalEarned += earned;
+    }
+
+    summary.totalLearned += credit;
+    summary.totalEarned += earned;
+
+    const numericGrade = getNumericGradeForGpa(effectiveGrade);
+    if(numericGrade !== null){
+      totalGradePoint += numericGrade * credit;
+      totalCreditForGpa += credit;
+    }
+  });
+
+  summary.gpa = totalCreditForGpa > 0
+    ? totalGradePoint / totalCreditForGpa
+    : 0;
+
+  return summary;
+}
+
     function renderStudentSummary(summary){
       el('detailBasicLearned').textContent = formatDecimal(summary.basicLearned, 1);
       el('detailBasicEarned').textContent = formatDecimal(summary.basicEarned, 1);
@@ -7687,6 +7865,19 @@ const renderClassTermButtons = (classLevel) => {
       el('detailTotalEarned').textContent = formatDecimal(summary.totalEarned, 1);
       el('detailGpa').textContent = formatDecimalFloor(summary.gpa, 2);
     }
+
+    function renderStudentCourseSummary(summary){
+  el('detailCourseBasicLearned').textContent = formatDecimal(summary.basicLearned, 1);
+  el('detailCourseBasicEarned').textContent = formatDecimal(summary.basicEarned, 1);
+
+  el('detailCourseAdditionalLearned').textContent = formatDecimal(summary.additionalLearned, 1);
+  el('detailCourseAdditionalEarned').textContent = formatDecimal(summary.additionalEarned, 1);
+
+  el('detailCourseTotalLearned').textContent = formatDecimal(summary.totalLearned, 1);
+  el('detailCourseTotalEarned').textContent = formatDecimal(summary.totalEarned, 1);
+
+  el('detailCourseGpa').textContent = formatDecimalFloor(summary.gpa, 2);
+}
 
     function renderStudentRiskList(rows){
       const wrap = el('studentRiskList');
@@ -7778,8 +7969,12 @@ const targetTerm = termContext
 
 let rows = await fetchStudentGrades(student.id, targetYear, targetTerm);
 
-        state.currentStudentGrades = rows;
-        state.currentStudentSummary = buildStudentSummary(rows);
+// ดึงผลการเรียนทั้งหมดของนักเรียน เพื่อคำนวณตลอดหลักสูตร
+const courseRows = await fetchStudentGrades(student.id, null, null);
+
+state.currentStudentGrades = rows;
+state.currentStudentSummary = buildStudentSummary(rows);
+state.currentStudentCourseSummary = buildStudentCourseSummary(courseRows);
 
         populateStudentDetailHeader(student, rows, {
   ...selectedRoom,
@@ -7788,9 +7983,16 @@ let rows = await fetchStudentGrades(student.id, targetYear, targetTerm);
   class_level: termContext?.class_level || selectedRoom?.class_level,
   label: termContext?.label || ''
 });
-        renderStudentGradeTable(rows);
-        renderStudentSummary(state.currentStudentSummary);
-        renderStudentRiskList(rows);
+renderStudentGradeTable(rows);
+renderStudentSummary(state.currentStudentSummary);
+
+// วิชาที่ต้องติดตามให้ดูจากทุกเทอมที่มีผลการเรียนแล้ว
+renderStudentRiskList(courseRows);
+
+// สรุปผลการประเมินตลอดหลักสูตร
+renderStudentCourseSummary(state.currentStudentCourseSummary);
+
+setStudentDetailTab('grades');
       }catch(err){
         console.error('openStudentDetail ERROR', err);
         resetStudentDetail();
@@ -9786,6 +9988,13 @@ bindIfExists('fpPrintMineSelectedBtn', 'click', () => {
       await handleTeacherImportFileFallback(e);
     }
   );
+  bindIfExists('studentDetailTabGradesBtn', 'click', () => {
+  setStudentDetailTab('grades');
+});
+
+bindIfExists('studentDetailTabRiskBtn', 'click', () => {
+  setStudentDetailTab('risk');
+});
 }
 
     function init(){
