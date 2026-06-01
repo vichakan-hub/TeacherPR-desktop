@@ -3402,6 +3402,106 @@
     grid-template-columns:1fr;
   }
 }
+    /* ===== Risk subject list: 4 columns layout ===== */
+.risk-subject-card{
+  display:grid;
+  grid-template-columns:minmax(360px, 1fr) 130px 150px 130px;
+  gap:14px;
+  align-items:center;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  padding:16px 18px;
+  background:linear-gradient(180deg,#ffffff,#f9fbff);
+}
+
+.risk-subject-card.pending{
+  border-color:#ffd2cf;
+  background:linear-gradient(180deg,#fff,#fff7f7);
+}
+
+.risk-subject-card.done{
+  border-color:#bfe6cb;
+  background:linear-gradient(180deg,#fff,#f3fff7);
+}
+
+.risk-subject-info{
+  min-width:0;
+}
+
+.risk-subject-code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:900;
+  color:#1d4ed8;
+  margin-bottom:4px;
+}
+
+.risk-subject-name{
+  font-size:16px;
+  font-weight:900;
+  color:#17324d;
+  line-height:1.45;
+}
+
+.risk-subject-meta{
+  margin-top:6px;
+  color:#6b7a90;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.risk-subject-col{
+  display:grid;
+  justify-items:center;
+  gap:8px;
+}
+
+.risk-subject-col-label{
+  font-size:12px;
+  color:#6b7a90;
+  font-weight:900;
+}
+
+.risk-subject-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  border:1px solid transparent;
+}
+
+.risk-subject-status.pending{
+  background:#fff0ef;
+  color:#d92d20;
+  border-color:#ffd2cf;
+}
+
+.risk-subject-status.done{
+  background:#e9f8ef;
+  color:#0f9d58;
+  border-color:#bfe6cb;
+}
+
+@media (max-width:980px){
+  .risk-subject-card{
+    grid-template-columns:1fr 110px 120px 110px;
+  }
+}
+
+@media (max-width:720px){
+  .risk-subject-card{
+    grid-template-columns:1fr;
+    align-items:start;
+  }
+
+  .risk-subject-col{
+    justify-items:start;
+  }
+}
 
 </style>
 </head>
@@ -8145,24 +8245,8 @@ function getFilteredStudentRiskRows(rows){
   });
 }
 
-function renderStudentRiskList(rows){
-  const riskRows = (rows || [])
-    .filter(isRiskTrackingRow)
-    .sort((a, b) => {
-      const yearCompare = Number(a.academic_year || 0) - Number(b.academic_year || 0);
-      if(yearCompare !== 0) return yearCompare;
-
-      const termCompare = Number(a.term || 0) - Number(b.term || 0);
-      if(termCompare !== 0) return termCompare;
-
-      return compareStudentGradeRows(a, b);
-    });
-
-  state.currentStudentRiskRows = riskRows;
-
-  buildStudentRiskFilterOptions(riskRows);
-
-  const filteredRows = getFilteredStudentRiskRows(riskRows);
+    function renderStudentRiskFilteredList(){
+  const filteredRows = getFilteredStudentRiskRows(state.currentStudentRiskRows || []);
 
   const pendingCount = filteredRows.filter(isRiskTrackingPending).length;
   const doneCount = filteredRows.filter(isRiskTrackingDone).length;
@@ -8191,61 +8275,78 @@ function renderStudentRiskList(rows){
     const originalGrade = normalizeGradeValue(row.grade_code);
     const retestGrade = normalizeGradeValue(row.retest_grade_code);
     const isDone = isRiskTrackingDone(row);
-    const isPending = isRiskTrackingPending(row);
 
     const statusClass = isDone ? 'done' : 'pending';
     const statusText = isDone ? 'แก้แล้ว' : 'ยังไม่ได้แก้';
 
     return `
       <div class="risk-subject-card ${statusClass}">
-        <div class="risk-subject-top">
-          <div>
-            <div class="risk-subject-code">
-              ${escapeHtml(safeText(row.subject_code, '-'))}
-            </div>
-
-            <div class="risk-subject-name">
-              ${escapeHtml(safeText(row.subject_name, '-'))}
-            </div>
-
-            <div class="risk-subject-meta">
-              ${escapeHtml(safeText(row.class_level, '-'))}
-              เทอม ${escapeHtml(String(row.term || '-'))}
-              ปีการศึกษา ${escapeHtml(String(row.academic_year || '-'))}
-              · ${escapeHtml(safeText(row.subject_type, '-'))}
-              · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
-            </div>
-
-            <div class="risk-subject-meta">
-              ครูผู้สอน:
-              ${escapeHtml(safeText(row.teacher_name, '-'))}
-              ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
-            </div>
+        <div class="risk-subject-info">
+          <div class="risk-subject-code">
+            ${escapeHtml(safeText(row.subject_code, '-'))}
           </div>
 
+          <div class="risk-subject-name">
+            ${escapeHtml(safeText(row.subject_name, '-'))}
+          </div>
+
+          <div class="risk-subject-meta">
+            ${escapeHtml(safeText(row.class_level, '-'))}
+            เทอม ${escapeHtml(String(row.term || '-'))}
+            ปีการศึกษา ${escapeHtml(String(row.academic_year || '-'))}
+            · ${escapeHtml(safeText(row.subject_type, '-'))}
+            · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
+          </div>
+
+          <div class="risk-subject-meta">
+            ครูผู้สอน:
+            ${escapeHtml(safeText(row.teacher_name, '-'))}
+            ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
+          </div>
+        </div>
+
+        <div class="risk-subject-col">
+          <div class="risk-subject-col-label">เกรดที่ติด</div>
+          ${renderStudentGradePill(originalGrade)}
+        </div>
+
+        <div class="risk-subject-col">
+          <div class="risk-subject-col-label">เกรดที่แก้แล้ว</div>
+          ${
+            retestGrade
+              ? renderStudentGradePill(retestGrade)
+              : `<span class="student-grade-pill neutral">-</span>`
+          }
+        </div>
+
+        <div class="risk-subject-col">
+          <div class="risk-subject-col-label">สถานะ</div>
           <span class="risk-subject-status ${statusClass}">
             ${escapeHtml(statusText)}
           </span>
         </div>
-
-        <div class="risk-grade-grid">
-          <div class="risk-grade-box">
-            <div class="risk-grade-label">เกรดที่ติด</div>
-            ${renderStudentGradePill(originalGrade)}
-          </div>
-
-          <div class="risk-grade-box">
-            <div class="risk-grade-label">เกรดที่แก้แล้ว</div>
-            ${
-              retestGrade
-                ? renderStudentGradePill(retestGrade)
-                : `<span class="student-grade-pill neutral">-</span>`
-            }
-          </div>
-        </div>
       </div>
     `;
   }).join('');
+}
+
+function renderStudentRiskList(rows){
+  const riskRows = (rows || [])
+    .filter(isRiskTrackingRow)
+    .sort((a, b) => {
+      const yearCompare = Number(a.academic_year || 0) - Number(b.academic_year || 0);
+      if(yearCompare !== 0) return yearCompare;
+
+      const termCompare = Number(a.term || 0) - Number(b.term || 0);
+      if(termCompare !== 0) return termCompare;
+
+      return compareStudentGradeRows(a, b);
+    });
+
+  state.currentStudentRiskRows = riskRows;
+
+  buildStudentRiskFilterOptions(riskRows);
+  renderStudentRiskFilteredList();
 }
 
 function populateStudentDetailHeader(student, gradeRows, selectedRoom){
@@ -10330,11 +10431,11 @@ bindIfExists('studentDetailTabRiskBtn', 'click', () => {
   setStudentDetailTab('risk');
 });
 bindIfExists('studentRiskClassFilter', 'change', () => {
-  renderStudentRiskList(state.currentStudentRiskRows || []);
+  renderStudentRiskFilteredList();
 });
 
 bindIfExists('studentRiskTermFilter', 'change', () => {
-  renderStudentRiskList(state.currentStudentRiskRows || []);
+  renderStudentRiskFilteredList();
 });
   
 }
