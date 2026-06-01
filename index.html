@@ -3598,6 +3598,74 @@
   overflow-y:visible;
 }
 
+.risk-tracking-summary{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.risk-tracking-card{
+  width:100%;
+  text-align:left;
+  border-radius:18px;
+  padding:16px 18px;
+  border:1px solid transparent;
+  background:#f8fbff;
+  color:#17324d;
+  cursor:pointer;
+  font-family:inherit;
+  transition:.16s ease;
+}
+
+.risk-tracking-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(15,23,42,.08);
+}
+
+.risk-tracking-card.total{
+  background:#eef4ff;
+  border-color:#cfe0ff;
+  color:#1d4ed8;
+}
+
+.risk-tracking-card.danger{
+  background:#fff0ef;
+  border-color:#ffd2cf;
+  color:#7f1d1d;
+}
+
+.risk-tracking-card.success{
+  background:#e9f8ef;
+  border-color:#bfe6cb;
+  color:#0f5132;
+}
+
+.risk-tracking-card.active{
+  outline:3px solid rgba(37,99,235,.18);
+  box-shadow:0 10px 24px rgba(37,99,235,.16);
+  transform:translateY(-1px);
+}
+
+.risk-tracking-label{
+  font-size:13px;
+  font-weight:900;
+  opacity:.9;
+}
+
+.risk-tracking-value{
+  font-size:30px;
+  font-weight:900;
+  margin-top:6px;
+  line-height:1;
+}
+
+@media (max-width:720px){
+  .risk-tracking-summary{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4579,17 +4647,34 @@
     </div>
 
     <div class="student-panel-body">
-      <div class="risk-tracking-summary">
-        <div class="risk-tracking-card danger">
-          <div class="risk-tracking-label">ยังไม่ได้แก้</div>
-          <div id="studentRiskPendingCount" class="risk-tracking-value">0</div>
-        </div>
+<div class="risk-tracking-summary">
+  <button
+    id="studentRiskTotalFilterBtn"
+    class="risk-tracking-card total active"
+    type="button"
+    data-risk-status-filter="">
+    <div class="risk-tracking-label">เกรดที่ติดทั้งหมด</div>
+    <div id="studentRiskTotalCount" class="risk-tracking-value">0</div>
+  </button>
 
-        <div class="risk-tracking-card success">
-          <div class="risk-tracking-label">แก้แล้ว</div>
-          <div id="studentRiskDoneCount" class="risk-tracking-value">0</div>
-        </div>
-      </div>
+  <button
+    id="studentRiskPendingFilterBtn"
+    class="risk-tracking-card danger"
+    type="button"
+    data-risk-status-filter="pending">
+    <div class="risk-tracking-label">ยังไม่แก้</div>
+    <div id="studentRiskPendingCount" class="risk-tracking-value">0</div>
+  </button>
+
+  <button
+    id="studentRiskDoneFilterBtn"
+    class="risk-tracking-card success"
+    type="button"
+    data-risk-status-filter="done">
+    <div class="risk-tracking-label">แก้แล้ว</div>
+    <div id="studentRiskDoneCount" class="risk-tracking-value">0</div>
+  </button>
+</div>
 
       <div class="risk-filter-bar">
         <div class="field" style="margin-bottom:0;">
@@ -4832,9 +4917,10 @@ const state = {
   currentStudentGrades: [],
   currentStudentSummary: null,
 
-  currentStudentRiskRows: [],
+currentStudentRiskRows: [],
 currentStudentRiskClassFilter: '',
 currentStudentRiskTermFilter: '',
+currentStudentRiskStatusFilter: '',
 
 freePeriodSettings: null,
 freePeriodSlots: [],
@@ -6644,6 +6730,21 @@ if(el('studentRiskClassFilter')){
 if(el('studentRiskTermFilter')){
   el('studentRiskTermFilter').value = '';
 }
+
+      state.currentStudentRiskRows = [];
+state.currentStudentRiskClassFilter = '';
+state.currentStudentRiskTermFilter = '';
+state.currentStudentRiskStatusFilter = '';
+
+if(el('studentRiskTotalCount')) el('studentRiskTotalCount').textContent = '0';
+if(el('studentRiskPendingCount')) el('studentRiskPendingCount').textContent = '0';
+if(el('studentRiskDoneCount')) el('studentRiskDoneCount').textContent = '0';
+
+document
+  .querySelectorAll('[data-risk-status-filter]')
+  .forEach(btn => {
+    btn.classList.toggle('active', safeText(btn.dataset.riskStatusFilter, '') === '');
+  });
     }
 
     function updateAdviserStatusSummary(rows){
@@ -8326,6 +8427,66 @@ function buildStudentRiskFilterOptions(rows){
   termSelect.value = state.currentStudentRiskTermFilter || '';
 }
 
+function setStudentRiskStatusFilter(status = ''){
+  state.currentStudentRiskStatusFilter = safeText(status, '');
+
+  document
+    .querySelectorAll('[data-risk-status-filter]')
+    .forEach(btn => {
+      const value = safeText(btn.dataset.riskStatusFilter, '');
+      btn.classList.toggle('active', value === state.currentStudentRiskStatusFilter);
+    });
+
+  renderStudentRiskFilteredList();
+}
+
+function getStudentRiskBaseFilteredRows(rows){
+  const classFilter = safeText(el('studentRiskClassFilter')?.value, '');
+  const termFilter = safeText(el('studentRiskTermFilter')?.value, '');
+
+  state.currentStudentRiskClassFilter = classFilter;
+  state.currentStudentRiskTermFilter = termFilter;
+
+  return (rows || []).filter(row => {
+    if(classFilter && safeText(row.class_level, '') !== classFilter) return false;
+    if(termFilter && String(row.term) !== String(termFilter)) return false;
+    return true;
+  });
+}
+
+function getFilteredStudentRiskRows(rows){
+  const statusFilter = safeText(state.currentStudentRiskStatusFilter, '');
+  const baseRows = getStudentRiskBaseFilteredRows(rows);
+
+  if(statusFilter === 'pending'){
+    return baseRows.filter(isRiskTrackingPending);
+  }
+
+  if(statusFilter === 'done'){
+    return baseRows.filter(isRiskTrackingDone);
+  }
+
+  return baseRows;
+}
+
+function updateStudentRiskKpi(baseRows){
+  const totalCount = baseRows.length;
+  const pendingCount = baseRows.filter(isRiskTrackingPending).length;
+  const doneCount = baseRows.filter(isRiskTrackingDone).length;
+
+  if(el('studentRiskTotalCount')){
+    el('studentRiskTotalCount').textContent = String(totalCount);
+  }
+
+  if(el('studentRiskPendingCount')){
+    el('studentRiskPendingCount').textContent = String(pendingCount);
+  }
+
+  if(el('studentRiskDoneCount')){
+    el('studentRiskDoneCount').textContent = String(doneCount);
+  }
+}
+
 function getFilteredStudentRiskRows(rows){
   const classFilter = safeText(el('studentRiskClassFilter')?.value, '');
   const termFilter = safeText(el('studentRiskTermFilter')?.value, '');
@@ -8340,19 +8501,11 @@ function getFilteredStudentRiskRows(rows){
   });
 }
 
-    function renderStudentRiskFilteredList(){
+function renderStudentRiskFilteredList(){
+  const baseRows = getStudentRiskBaseFilteredRows(state.currentStudentRiskRows || []);
   const filteredRows = getFilteredStudentRiskRows(state.currentStudentRiskRows || []);
 
-  const pendingCount = filteredRows.filter(isRiskTrackingPending).length;
-  const doneCount = filteredRows.filter(isRiskTrackingDone).length;
-
-  if(el('studentRiskPendingCount')){
-    el('studentRiskPendingCount').textContent = String(pendingCount);
-  }
-
-  if(el('studentRiskDoneCount')){
-    el('studentRiskDoneCount').textContent = String(doneCount);
-  }
+  updateStudentRiskKpi(baseRows);
 
   const list = el('studentRiskList');
   if(!list) return;
@@ -8393,7 +8546,7 @@ function getFilteredStudentRiskRows(rows){
             · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
           </div>
 
-          <div class="risk-teacher-meta">
+          <div class="risk-subject-meta">
             ครูผู้สอน:
             ${escapeHtml(safeText(row.teacher_name, '-'))}
             ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
@@ -8440,8 +8593,21 @@ function renderStudentRiskList(rows){
 
   state.currentStudentRiskRows = riskRows;
 
+  state.currentStudentRiskClassFilter = '';
+  state.currentStudentRiskTermFilter = '';
+  state.currentStudentRiskStatusFilter = '';
+
   buildStudentRiskFilterOptions(riskRows);
-  renderStudentRiskFilteredList();
+
+  if(el('studentRiskClassFilter')){
+    el('studentRiskClassFilter').value = '';
+  }
+
+  if(el('studentRiskTermFilter')){
+    el('studentRiskTermFilter').value = '';
+  }
+
+  setStudentRiskStatusFilter('');
 }
 
 function populateStudentDetailHeader(student, gradeRows, selectedRoom){
@@ -10531,6 +10697,20 @@ bindIfExists('studentRiskClassFilter', 'change', () => {
 
 bindIfExists('studentRiskTermFilter', 'change', () => {
   renderStudentRiskFilteredList();
+});
+
+  bindIfExists('studentRiskClassFilter', 'change', () => {
+  renderStudentRiskFilteredList();
+});
+
+bindIfExists('studentRiskTermFilter', 'change', () => {
+  renderStudentRiskFilteredList();
+});
+
+document.querySelectorAll('[data-risk-status-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setStudentRiskStatusFilter(btn.dataset.riskStatusFilter || '');
+  });
 });
   
 }
