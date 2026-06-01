@@ -5370,11 +5370,18 @@ function buildStudentRiskTermText(student){
     totalSubjectCount > 0 &&
     repeatRiskCount / totalSubjectCount >= 0.5;
 
+  const tooltipText = totalSubjectCount > 0
+    ? `ติด ${repeatRiskCount}/${totalSubjectCount} วิชา`
+    : '';
+
   if(isRepeatRisk && repeatRiskCount > 0){
     return `
       <div class="student-risk-term-wrap">
-        <span class="student-risk-term-badge repeat-risk">
-          เสี่ยงซ้ำชั้น : ติด ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
+        <span
+          class="student-risk-term-badge repeat-risk"
+          title="${escapeHtml(tooltipText)}"
+        >
+          เสี่ยงซ้ำชั้น
         </span>
       </div>
     `;
@@ -5383,8 +5390,11 @@ function buildStudentRiskTermText(student){
   if(repeatRiskCount > 0 && totalSubjectCount > 0){
     return `
       <div class="student-risk-term-wrap">
-        <span class="student-risk-term-badge risk">
-          เสี่ยง : ติด ${escapeHtml(String(repeatRiskCount))}/${escapeHtml(String(totalSubjectCount))} วิชา
+        <span
+          class="student-risk-term-badge risk"
+          title="${escapeHtml(tooltipText)}"
+        >
+          เสี่ยง
         </span>
       </div>
     `;
