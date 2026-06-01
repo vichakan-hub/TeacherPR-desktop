@@ -3448,6 +3448,13 @@
   font-size:13px;
   line-height:1.6;
 }
+    .risk-teacher-meta{
+  margin-top:6px;
+  color:#17324d;
+  font-weight:800;
+  font-size:16px;
+  line-height:1.45;
+}
 
 .risk-subject-col{
   display:grid;
@@ -8298,7 +8305,7 @@ function getFilteredStudentRiskRows(rows){
             · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
           </div>
 
-          <div class="risk-subject-meta">
+          <div class="risk-teacher-meta">
             ครูผู้สอน:
             ${escapeHtml(safeText(row.teacher_name, '-'))}
             ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
