@@ -3247,6 +3247,162 @@
   }
 }
 
+    /* ===== Student risk tracking tab ===== */
+.risk-tracking-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.risk-tracking-card{
+  border-radius:18px;
+  padding:16px 18px;
+  border:1px solid transparent;
+  background:#f8fbff;
+}
+
+.risk-tracking-card.danger{
+  background:#fff0ef;
+  border-color:#ffd2cf;
+  color:#7f1d1d;
+}
+
+.risk-tracking-card.success{
+  background:#e9f8ef;
+  border-color:#bfe6cb;
+  color:#0f5132;
+}
+
+.risk-tracking-label{
+  font-size:13px;
+  font-weight:800;
+  opacity:.85;
+}
+
+.risk-tracking-value{
+  font-size:30px;
+  font-weight:900;
+  margin-top:6px;
+  line-height:1;
+}
+
+.risk-filter-bar{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:14px;
+  padding:14px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+.risk-subject-list{
+  display:grid;
+  gap:12px;
+}
+
+.risk-subject-card{
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  padding:16px;
+  background:linear-gradient(180deg,#ffffff,#f9fbff);
+}
+
+.risk-subject-card.pending{
+  border-color:#ffd2cf;
+  background:linear-gradient(180deg,#fff,#fff7f7);
+}
+
+.risk-subject-card.done{
+  border-color:#bfe6cb;
+  background:linear-gradient(180deg,#fff,#f3fff7);
+}
+
+.risk-subject-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.risk-subject-code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:900;
+  color:#1d4ed8;
+  margin-bottom:4px;
+}
+
+.risk-subject-name{
+  font-size:16px;
+  font-weight:900;
+  color:#17324d;
+  line-height:1.45;
+}
+
+.risk-subject-meta{
+  margin-top:6px;
+  color:#6b7a90;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.risk-subject-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  border:1px solid transparent;
+}
+
+.risk-subject-status.pending{
+  background:#fff0ef;
+  color:#d92d20;
+  border-color:#ffd2cf;
+}
+
+.risk-subject-status.done{
+  background:#e9f8ef;
+  color:#0f9d58;
+  border-color:#bfe6cb;
+}
+
+.risk-grade-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
+.risk-grade-box{
+  border:1px solid #e5eef7;
+  border-radius:16px;
+  padding:12px;
+  background:#fff;
+}
+
+.risk-grade-label{
+  font-size:12px;
+  color:#6b7a90;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+@media (max-width:720px){
+  .risk-tracking-summary,
+  .risk-filter-bar,
+  .risk-grade-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4228,7 +4384,37 @@
     </div>
 
     <div class="student-panel-body">
-      <div id="studentRiskList" class="risk-list">
+      <div class="risk-tracking-summary">
+        <div class="risk-tracking-card danger">
+          <div class="risk-tracking-label">ยังไม่ได้แก้</div>
+          <div id="studentRiskPendingCount" class="risk-tracking-value">0</div>
+        </div>
+
+        <div class="risk-tracking-card success">
+          <div class="risk-tracking-label">แก้แล้ว</div>
+          <div id="studentRiskDoneCount" class="risk-tracking-value">0</div>
+        </div>
+      </div>
+
+      <div class="risk-filter-bar">
+        <div class="field" style="margin-bottom:0;">
+          <span class="label-in-form">กรองชั้น</span>
+          <select id="studentRiskClassFilter" class="std">
+            <option value="">ทั้งหมด</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <span class="label-in-form">กรองเทอม</span>
+          <select id="studentRiskTermFilter" class="std">
+            <option value="">ทั้งหมด</option>
+            <option value="1">เทอม 1</option>
+            <option value="2">เทอม 2</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="studentRiskList" class="risk-subject-list">
         <div class="empty-state">ยังไม่มีรายการ</div>
       </div>
     </div>
@@ -4450,6 +4636,10 @@ const state = {
   currentStudentProfile: null,
   currentStudentGrades: [],
   currentStudentSummary: null,
+
+  currentStudentRiskRows: [],
+currentStudentRiskClassFilter: '',
+currentStudentRiskTermFilter: '',
 
 freePeriodSettings: null,
 freePeriodSlots: [],
@@ -6245,6 +6435,20 @@ setStudentDetailTab('grades');
       `;
 
       el('studentRiskList').innerHTML = `<div class="empty-state">ยังไม่มีรายการ</div>`;
+      state.currentStudentRiskRows = [];
+state.currentStudentRiskClassFilter = '';
+state.currentStudentRiskTermFilter = '';
+
+if(el('studentRiskPendingCount')) el('studentRiskPendingCount').textContent = '0';
+if(el('studentRiskDoneCount')) el('studentRiskDoneCount').textContent = '0';
+
+if(el('studentRiskClassFilter')){
+  el('studentRiskClassFilter').innerHTML = `<option value="">ทั้งหมด</option>`;
+}
+
+if(el('studentRiskTermFilter')){
+  el('studentRiskTermFilter').value = '';
+}
     }
 
     function updateAdviserStatusSummary(rows){
@@ -7879,40 +8083,170 @@ const renderClassTermButtons = (classLevel) => {
   el('detailCourseGpa').textContent = formatDecimalFloor(summary.gpa, 2);
 }
 
-    function renderStudentRiskList(rows){
-      const wrap = el('studentRiskList');
-      const riskRows = rows.filter(row => {
-        const originalGrade = normalizeGradeValue(row.grade_code);
-        const effectiveGrade = getEffectiveGrade(row);
-        return isRiskGrade(originalGrade) || isRiskGrade(effectiveGrade) || !!normalizeGradeValue(row.retest_grade_code);
-      });
+    function isRiskTrackingOriginalGrade(grade){
+  return isRiskGrade(grade);
+}
 
-      if(!riskRows.length){
-        wrap.innerHTML = `<div class="empty-state">ไม่พบวิชาที่ต้องติดตาม</div>`;
-        return;
-      }
+function isRiskTrackingDone(row){
+  const originalGrade = normalizeGradeValue(row.grade_code);
+  const retestGrade = normalizeGradeValue(row.retest_grade_code);
 
-      wrap.innerHTML = riskRows.map(row => {
-        const originalGrade = normalizeGradeValue(row.grade_code);
-        const retestGrade = normalizeGradeValue(row.retest_grade_code);
-        const hasRetest = !!retestGrade;
+  return isRiskTrackingOriginalGrade(originalGrade) &&
+    !!retestGrade &&
+    isPassingGrade(retestGrade);
+}
 
-        const statusClass = hasRetest ? 'done' : 'pending';
-        const statusText = hasRetest ? 'มีผลแก้ตัวแล้ว' : 'ต้องติดตาม';
+function isRiskTrackingPending(row){
+  const originalGrade = normalizeGradeValue(row.grade_code);
+  const effectiveGrade = getEffectiveGrade(row);
 
-        return `
-          <div class="risk-item">
-            <h4 class="risk-item-title">${escapeHtml(safeText(row.subject_name, '-'))}</h4>
-            <p class="risk-item-sub">
-              รหัสวิชา ${escapeHtml(safeText(row.subject_code, '-'))}
-              • เกรดเดิม ${escapeHtml(originalGrade || '-')}
-              ${hasRetest ? `• แก้ตัว ${escapeHtml(retestGrade)}` : ''}
-            </p>
-            <div class="risk-status ${statusClass}">${escapeHtml(statusText)}</div>
+  return isRiskTrackingOriginalGrade(originalGrade) &&
+    isRiskGrade(effectiveGrade);
+}
+
+function isRiskTrackingRow(row){
+  return isRiskTrackingOriginalGrade(row.grade_code);
+}
+
+function buildStudentRiskFilterOptions(rows){
+  const classSelect = el('studentRiskClassFilter');
+  const termSelect = el('studentRiskTermFilter');
+
+  if(!classSelect || !termSelect) return;
+
+  const classLevels = [...new Set(
+    (rows || [])
+      .map(row => safeText(row.class_level, ''))
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'th', { numeric:true }));
+
+  classSelect.innerHTML = `
+    <option value="">ทั้งหมด</option>
+    ${classLevels.map(c => `
+      <option value="${escapeHtml(c)}">${escapeHtml(c)}</option>
+    `).join('')}
+  `;
+
+  classSelect.value = state.currentStudentRiskClassFilter || '';
+  termSelect.value = state.currentStudentRiskTermFilter || '';
+}
+
+function getFilteredStudentRiskRows(rows){
+  const classFilter = safeText(el('studentRiskClassFilter')?.value, '');
+  const termFilter = safeText(el('studentRiskTermFilter')?.value, '');
+
+  state.currentStudentRiskClassFilter = classFilter;
+  state.currentStudentRiskTermFilter = termFilter;
+
+  return (rows || []).filter(row => {
+    if(classFilter && safeText(row.class_level, '') !== classFilter) return false;
+    if(termFilter && String(row.term) !== String(termFilter)) return false;
+    return true;
+  });
+}
+
+function renderStudentRiskList(rows){
+  const riskRows = (rows || [])
+    .filter(isRiskTrackingRow)
+    .sort((a, b) => {
+      const yearCompare = Number(a.academic_year || 0) - Number(b.academic_year || 0);
+      if(yearCompare !== 0) return yearCompare;
+
+      const termCompare = Number(a.term || 0) - Number(b.term || 0);
+      if(termCompare !== 0) return termCompare;
+
+      return compareStudentGradeRows(a, b);
+    });
+
+  state.currentStudentRiskRows = riskRows;
+
+  buildStudentRiskFilterOptions(riskRows);
+
+  const filteredRows = getFilteredStudentRiskRows(riskRows);
+
+  const pendingCount = filteredRows.filter(isRiskTrackingPending).length;
+  const doneCount = filteredRows.filter(isRiskTrackingDone).length;
+
+  if(el('studentRiskPendingCount')){
+    el('studentRiskPendingCount').textContent = String(pendingCount);
+  }
+
+  if(el('studentRiskDoneCount')){
+    el('studentRiskDoneCount').textContent = String(doneCount);
+  }
+
+  const list = el('studentRiskList');
+  if(!list) return;
+
+  if(!filteredRows.length){
+    list.innerHTML = `
+      <div class="empty-state">
+        ไม่พบวิชาที่ต้องติดตามตามตัวกรองที่เลือก
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filteredRows.map(row => {
+    const originalGrade = normalizeGradeValue(row.grade_code);
+    const retestGrade = normalizeGradeValue(row.retest_grade_code);
+    const isDone = isRiskTrackingDone(row);
+    const isPending = isRiskTrackingPending(row);
+
+    const statusClass = isDone ? 'done' : 'pending';
+    const statusText = isDone ? 'แก้แล้ว' : 'ยังไม่ได้แก้';
+
+    return `
+      <div class="risk-subject-card ${statusClass}">
+        <div class="risk-subject-top">
+          <div>
+            <div class="risk-subject-code">
+              ${escapeHtml(safeText(row.subject_code, '-'))}
+            </div>
+
+            <div class="risk-subject-name">
+              ${escapeHtml(safeText(row.subject_name, '-'))}
+            </div>
+
+            <div class="risk-subject-meta">
+              ${escapeHtml(safeText(row.class_level, '-'))}
+              เทอม ${escapeHtml(String(row.term || '-'))}
+              ปีการศึกษา ${escapeHtml(String(row.academic_year || '-'))}
+              · ${escapeHtml(safeText(row.subject_type, '-'))}
+              · ${escapeHtml(formatDecimal(row.credit || 0, 1))} หน่วยกิต
+            </div>
+
+            <div class="risk-subject-meta">
+              ครูผู้สอน:
+              ${escapeHtml(safeText(row.teacher_name, '-'))}
+              ${row.teacher_code ? `(${escapeHtml(row.teacher_code)})` : ''}
+            </div>
           </div>
-        `;
-      }).join('');
-    }
+
+          <span class="risk-subject-status ${statusClass}">
+            ${escapeHtml(statusText)}
+          </span>
+        </div>
+
+        <div class="risk-grade-grid">
+          <div class="risk-grade-box">
+            <div class="risk-grade-label">เกรดที่ติด</div>
+            ${renderStudentGradePill(originalGrade)}
+          </div>
+
+          <div class="risk-grade-box">
+            <div class="risk-grade-label">เกรดที่แก้แล้ว</div>
+            ${
+              retestGrade
+                ? renderStudentGradePill(retestGrade)
+                : `<span class="student-grade-pill neutral">-</span>`
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 function populateStudentDetailHeader(student, gradeRows, selectedRoom){
   const firstRow = gradeRows[0] || null;
@@ -9995,6 +10329,14 @@ bindIfExists('fpPrintMineSelectedBtn', 'click', () => {
 bindIfExists('studentDetailTabRiskBtn', 'click', () => {
   setStudentDetailTab('risk');
 });
+bindIfExists('studentRiskClassFilter', 'change', () => {
+  renderStudentRiskList(state.currentStudentRiskRows || []);
+});
+
+bindIfExists('studentRiskTermFilter', 'change', () => {
+  renderStudentRiskList(state.currentStudentRiskRows || []);
+});
+  
 }
 
     function init(){
