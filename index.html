@@ -12017,8 +12017,14 @@ function buildGradeStatsReportHtml(payload){
   const academicHead = getSignerByKey(signers, 'academic_head');
   const director = getSignerByKey(signers, 'director');
 
-  const teacherNames = getTeacherNamesFromExtras(extras);
-  const teacherNameText = getSingleLineTeacherNames(teacherNames);
+const teacherNames = getTeacherNamesFromExtras(extras);
+const teacherNameText = getSingleLineTeacherNames(teacherNames);
+
+const signatureTeacherNames = Array.isArray(extras?.subject_teachers)
+  ? extras.subject_teachers
+      .map(t => safeText(t.signature_name || t.teacher_name, ''))
+      .filter(Boolean)
+  : [];
 
   const subjectName = safeText(extras.subject_name || summary.subject_name, '-');
   const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
@@ -12032,11 +12038,11 @@ function buildGradeStatsReportHtml(payload){
   const roomAverageLabels = roomAverages.map(r => r.room_label || '-');
   const roomAverageDataset = roomAverages.map(r => Number(r.average || 0));
 
-  const teacherSlots = [
-    teacherNames[0] || '',
-    teacherNames[1] || '',
-    teacherNames[2] || ''
-  ];
+const teacherSlots = [
+  signatureTeacherNames[0] || '',
+  signatureTeacherNames[1] || '',
+  signatureTeacherNames[2] || ''
+];
 
   const topStudents = Array.isArray(extras.top_score_students)
     ? extras.top_score_students
