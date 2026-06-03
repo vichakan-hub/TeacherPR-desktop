@@ -11908,6 +11908,15 @@ function getReportClassLabel(extras, rows){
   return first || '-';
 }
 
+    function formatReportTeacherCell(teacherText){
+  return String(teacherText || '')
+    .split(',')
+    .map(name => safeText(name, ''))
+    .filter(Boolean)
+    .map(name => escapeHtml(name))
+    .join('<br>');
+}
+
 function buildReportRoomRowsHtml(rows){
   const keys = getReportGradeKeys();
 
@@ -11933,7 +11942,7 @@ function buildReportRoomRowsHtml(rows){
         <td>${formatReportNumber(row.fx || 0, 2)}</td>
         <td>${formatReportNumber(row.average || 0, 2)}</td>
         <td>${formatReportNumber(row.sd || 0, 2)}</td>
-        <td class="teacher-cell">${escapeHtml(row.teacher_name || '')}</td>
+        <td class="teacher-cell">${formatReportTeacherCell(row.teacher_name || '')}</td>
       </tr>
     `;
   }).join('');
@@ -12063,31 +12072,48 @@ const teacherSlots = [
       </tr>
     `;
 
-  function buildTeacherSignature(name){
-    return `
-      <div class="sig-item">
-        <div class="sig-row">
-          <span>ลงชื่อ</span>
-          <span class="sig-line"></span>
-        </div>
-        <div class="sig-name">${name ? `(${escapeHtml(name)})` : '&nbsp;'}</div>
-        <div class="sig-position">ครูประจำวิชา</div>
-      </div>
-    `;
+function buildTeacherSignature(name){
+  const cleanName = safeText(name, '');
+
+  if(!cleanName){
+    return `<div class="sig-item sig-empty"></div>`;
   }
 
-  function buildOfficialSignature(positionTitle, personName){
-    return `
-      <div class="sig-item">
-        <div class="sig-row">
-          <span>ลงชื่อ</span>
-          <span class="sig-line"></span>
-        </div>
-        <div class="sig-name">${personName ? `(${escapeHtml(personName)})` : '&nbsp;'}</div>
-        <div class="sig-position">${escapeHtml(positionTitle || '')}</div>
+  return `
+    <div class="sig-item">
+      <div class="sig-row">
+        <span>ลงชื่อ</span>
+        <span class="sig-line"></span>
       </div>
-    `;
+      <div class="sig-name">(${escapeHtml(cleanName)})</div>
+      <div class="sig-position">ครูประจำวิชา</div>
+    </div>
+  `;
+}
+
+function buildOfficialSignature(positionTitle, personName){
+  const cleanName = safeText(personName, '');
+  const cleanTitle = safeText(positionTitle, '');
+
+  if(!cleanName && !cleanTitle){
+    return `<div class="sig-item sig-empty"></div>`;
   }
+
+  if(!cleanName){
+    return `<div class="sig-item sig-empty"></div>`;
+  }
+
+  return `
+    <div class="sig-item">
+      <div class="sig-row">
+        <span>ลงชื่อ</span>
+        <span class="sig-line"></span>
+      </div>
+      <div class="sig-name">(${escapeHtml(cleanName)})</div>
+      <div class="sig-position">${escapeHtml(cleanTitle)}</div>
+    </div>
+  `;
+}
 
   return `
 <!DOCTYPE html>
@@ -12269,13 +12295,13 @@ const teacherSlots = [
       color:#ff0000;
     }
 
-    .summary-table .teacher-cell{
-      color:#0f172a;
-      font-size:12px;
-      line-height:1.08;
-      word-break:break-word;
-      font-weight:600;
-    }
+.summary-table .teacher-cell{
+  color:#0f172a;
+  font-size:5.8px;
+  line-height:1.18;
+  word-break:break-word;
+  font-weight:600;
+}
 
     .summary-table .total-row td{
       background:#ffffff !important;
@@ -12400,6 +12426,9 @@ const teacherSlots = [
       font-size:14px;
       line-height:1.25;
     }
+    .sig-empty{
+  visibility:hidden;
+}
 
     .sig-row{
       display:grid;
