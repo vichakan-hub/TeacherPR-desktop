@@ -3896,6 +3896,132 @@
   color:#e11d48;
 }
 
+    /* =====================================================
+   FIX Grade Stats: ไม่ให้ล้น + ไม่ให้มี scrollbar แนวนอน
+   ===================================================== */
+
+/* กันทั้งหน้าไม่ให้ดันออกขวา */
+.app-main,
+.app-content-wrap,
+#pageGradeStats{
+  min-width:0;
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+/* กราฟ 2 ช่องต้องย่อได้ ไม่ดันหน้า */
+.grade-stats-chart-grid{
+  grid-template-columns:minmax(0, 1.35fr) minmax(0, .8fr);
+  gap:16px;
+  max-width:100%;
+  overflow:hidden;
+}
+
+.grade-stats-chart-card{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+
+.grade-stats-chart-box{
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+}
+
+/* กล่องตารางไม่ให้มี scrollbar แนวนอน */
+#pageGradeStats .table-wrap{
+  overflow-x:hidden;
+  max-width:100%;
+}
+
+/* ตารางสรุปรายห้องให้บีบพอดีพื้นที่ */
+.grade-stats-table{
+  width:100%;
+  min-width:0 !important;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+/* ลด padding/font เพื่อให้ 18 คอลัมน์อยู่ในหน้าเดียว */
+.grade-stats-table th,
+.grade-stats-table td{
+  padding:10px 6px !important;
+  font-size:13px !important;
+  white-space:normal;
+  word-break:break-word;
+}
+
+/* กำหนดความกว้างคอลัมน์ให้พอดี */
+.grade-stats-table th:nth-child(1),
+.grade-stats-table td:nth-child(1){
+  width:82px;
+}
+
+.grade-stats-table th:nth-child(2),
+.grade-stats-table td:nth-child(2){
+  width:70px;
+}
+
+/* คอลัมน์เกรด */
+.grade-stats-table th:nth-child(n+3):nth-child(-n+14),
+.grade-stats-table td:nth-child(n+3):nth-child(-n+14){
+  width:44px;
+}
+
+/* ∑fx */
+.grade-stats-table th:nth-child(15),
+.grade-stats-table td:nth-child(15){
+  width:78px;
+}
+
+/* X̄ */
+.grade-stats-table th:nth-child(16),
+.grade-stats-table td:nth-child(16){
+  width:78px;
+}
+
+/* S.D. */
+.grade-stats-table th:nth-child(17),
+.grade-stats-table td:nth-child(17){
+  width:70px;
+}
+
+/* ครูผู้สอน */
+.grade-stats-table th:nth-child(18),
+.grade-stats-table td:nth-child(18){
+  width:150px;
+}
+
+/* ป้ายค่าเฉลี่ยให้เล็กลงนิด */
+.grade-stats-average-pill{
+  min-width:54px;
+  height:30px;
+  padding:0 9px;
+  font-size:13px;
+}
+
+/* ตาราง Top Students ยังอนุญาตให้เลื่อนได้ถ้ากว้างมาก */
+.grade-stats-top-table{
+  min-width:980px;
+}
+
+/* ถ้าหน้าจอไม่กว้าง ให้กราฟเรียงลงมา */
+@media (max-width:1100px){
+  .grade-stats-chart-grid{
+    grid-template-columns:1fr;
+  }
+
+  #pageGradeStats .table-wrap{
+    overflow-x:auto;
+  }
+
+  .grade-stats-table{
+    min-width:980px !important;
+  }
+}
+
 </style>
 </head>
 <body>
