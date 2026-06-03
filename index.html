@@ -3808,6 +3808,94 @@
   }
 }
 
+    /* ===== Grade Stats Summary Table แบบ Dashboard เดิม ===== */
+.grade-stats-table{
+  min-width:1320px;
+  border-collapse:separate;
+  border-spacing:0;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.grade-stats-table th{
+  background:#f8fbff;
+  color:#334155;
+  font-weight:900;
+  text-align:center;
+  border-right:1px solid #e5edf7;
+  border-bottom:1px solid #d8e4ef;
+  padding:13px 10px;
+  white-space:nowrap;
+}
+
+.grade-stats-table td{
+  color:#ff0000;
+  text-align:center;
+  border-right:1px solid #e5edf7;
+  border-bottom:1px solid #d8e4ef;
+  padding:14px 10px;
+  vertical-align:middle;
+  background:#fff;
+}
+
+.grade-stats-table tbody tr:nth-child(even) td{
+  background:#fffaf0;
+}
+
+.grade-stats-table td:first-child,
+.grade-stats-table th:first-child{
+  text-align:left;
+}
+
+.grade-stats-table .grade-stats-room-main{
+  color:#ff0000;
+  font-weight:900;
+}
+
+.grade-stats-teacher-cell{
+  color:#0f172a !important;
+  text-align:center !important;
+  font-weight:500;
+}
+
+.grade-stats-empty-mark{
+  color:#ff5a5a;
+}
+
+.grade-stats-average-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:60px;
+  height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  font-weight:900;
+  border:1px solid #fed7aa;
+  background:#fff7ed;
+  color:#b45309;
+}
+
+.grade-stats-average-pill.low{
+  border-color:#fecaca;
+  background:#fff1f2;
+  color:#e11d48;
+}
+
+.grade-stats-total-row td{
+  background:#fff !important;
+  border-top:2px solid #17324d;
+  font-weight:900;
+  color:#ff0000;
+}
+
+.grade-stats-total-row .grade-stats-average-pill{
+  background:#fff1f2;
+  border-color:#fecaca;
+  color:#e11d48;
+}
+
 </style>
 </head>
 <body>
@@ -4381,29 +4469,31 @@
 
     <div class="table-wrap">
       <table class="grade-stats-table">
-        <thead>
-          <tr>
-            <th style="width:110px;">ห้อง</th>
-            <th style="width:120px;" class="text-center">จำนวน</th>
-            <th class="text-center">4</th>
-            <th class="text-center">3.5</th>
-            <th class="text-center">3</th>
-            <th class="text-center">2.5</th>
-            <th class="text-center">2</th>
-            <th class="text-center">1.5</th>
-            <th class="text-center">1</th>
-            <th class="text-center">0</th>
-            <th class="text-center">ร</th>
-            <th class="text-center">มส</th>
-            <th class="text-center">มผ</th>
-            <th class="text-center">ค่าเฉลี่ย</th>
-            <th class="text-center">S.D.</th>
-            <th>ครูผู้สอน</th>
-          </tr>
-        </thead>
+<thead>
+  <tr>
+    <th style="width:120px;">กลุ่มข้อมูล</th>
+    <th style="width:90px;" class="text-center">จำนวน</th>
+    <th class="text-center">4</th>
+    <th class="text-center">3.5</th>
+    <th class="text-center">3</th>
+    <th class="text-center">2.5</th>
+    <th class="text-center">2</th>
+    <th class="text-center">1.5</th>
+    <th class="text-center">1</th>
+    <th class="text-center">0</th>
+    <th class="text-center">ร</th>
+    <th class="text-center">มส</th>
+    <th class="text-center">ผ</th>
+    <th class="text-center">มผ</th>
+    <th style="width:100px;" class="text-center">∑fx</th>
+    <th style="width:90px;" class="text-center">X̄</th>
+    <th style="width:90px;" class="text-center">S.D.</th>
+    <th style="width:220px;" class="text-center">ครูผู้สอน</th>
+  </tr>
+</thead>
         <tbody id="gradeStatsRoomTbody">
           <tr>
-            <td colspan="16" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
+            <td colspan="18" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
           </tr>
         </tbody>
       </table>
@@ -11311,44 +11401,90 @@ function renderTeacherGradeStatsDashboard(data){
 function renderTeacherGradeStatsRoomRows(rows){
   const tbody = el('gradeStatsRoomTbody');
 
+  const gradeKeys = ['4','3.5','3','2.5','2','1.5','1','0','ร','มส','ผ','มผ'];
+
+  function fmtCell(value){
+    const n = Number(value || 0);
+    return n > 0
+      ? n.toLocaleString('th-TH')
+      : '<span class="grade-stats-empty-mark">-</span>';
+  }
+
+  function fmtFx(value){
+    const n = Number(value || 0);
+    return n > 0 ? n.toFixed(2) : '-';
+  }
+
+  function renderAveragePill(value){
+    const n = Number(value || 0);
+    const cls = n < 3 ? 'low' : '';
+    return `<span class="grade-stats-average-pill ${cls}">${formatTeacherStatsNumber(n)}</span>`;
+  }
+
+  function normalizeGrades(grades){
+    return Object.assign(
+      Object.fromEntries(gradeKeys.map(k => [k, 0])),
+      grades || {}
+    );
+  }
+
   if(!rows.length){
     tbody.innerHTML = `
       <tr>
-        <td colspan="16" class="empty-state">ไม่พบข้อมูลรายห้อง</td>
+        <td colspan="18" class="empty-state">ไม่พบข้อมูลรายห้อง</td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = rows.map(row => {
-    const grades = Object.assign(
-      Object.fromEntries(TEACHER_GRADE_STAT_KEYS.map(k => [k, 0])),
-      row.grades || {}
-    );
+  const summary = state.gradeStatsData?.summary || {};
+  const totalGrades = getTeacherStatsGradeTotals(summary);
+
+  const totalResults = Number(summary.total_results || 0);
+  const totalFx = Number(summary.total_fx || rows.reduce((sum, r) => sum + Number(r.fx || 0), 0));
+  const totalAverage = Number(summary.average || 0);
+  const totalSd = Number(summary.sd || 0);
+
+  const bodyRows = rows.map(row => {
+    const grades = normalizeGrades(row.grades);
 
     return `
       <tr>
         <td>
           <div class="grade-stats-room-main">${escapeHtml(row.room_label || '-')}</div>
         </td>
-        <td class="text-center">${Number(row.total_results || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['4'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['3.5'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['3'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['2.5'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['2'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['1.5'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['1'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['0'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['ร'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['มส'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center">${Number(grades['มผ'] || 0).toLocaleString('th-TH')}</td>
-        <td class="text-center"><strong>${formatTeacherStatsNumber(row.average || 0)}</strong></td>
-        <td class="text-center">${formatTeacherStatsNumber(row.sd || 0)}</td>
-        <td>${escapeHtml(row.teacher_name || '')}</td>
+
+        <td>${fmtCell(row.total_results)}</td>
+
+        ${gradeKeys.map(k => `
+          <td>${fmtCell(grades[k])}</td>
+        `).join('')}
+
+        <td>${fmtFx(row.fx)}</td>
+        <td>${renderAveragePill(row.average || 0)}</td>
+        <td>${formatTeacherStatsNumber(row.sd || 0)}</td>
+        <td class="grade-stats-teacher-cell">${escapeHtml(row.teacher_name || '')}</td>
       </tr>
     `;
   }).join('');
+
+  const totalRow = `
+    <tr class="grade-stats-total-row">
+      <td>รวม</td>
+      <td>${fmtCell(totalResults)}</td>
+
+      ${gradeKeys.map(k => `
+        <td>${fmtCell(totalGrades[k])}</td>
+      `).join('')}
+
+      <td>${fmtFx(totalFx)}</td>
+      <td>${renderAveragePill(totalAverage)}</td>
+      <td>${formatTeacherStatsNumber(totalSd)}</td>
+      <td class="grade-stats-teacher-cell"></td>
+    </tr>
+  `;
+
+  tbody.innerHTML = bodyRows + totalRow;
 }
 
 function renderTeacherGradeStatsTopStudents(rows){
