@@ -4260,6 +4260,24 @@
   display:none !important;
 }
 
+    .grade-stats-action-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.grade-stats-action-buttons button{
+  width:100%;
+  height:42px;
+  padding:0 10px;
+}
+
+@media (max-width:720px){
+  .grade-stats-action-buttons{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4763,9 +4781,15 @@
 
       <div class="field">
         <span class="label-in-form">&nbsp;</span>
-        <button id="loadGradeStatsBtn" class="btn-primary" type="button" style="width:100%;">
-          แสดงสถิติ
-        </button>
+<div class="grade-stats-action-buttons">
+  <button id="loadGradeStatsBtn" class="btn-primary" type="button">
+    แสดงสถิติ
+  </button>
+
+  <button id="exportGradeStatsPdfBtn" class="btn-secondary" type="button" disabled>
+    Export PDF
+  </button>
+</div>
       </div>
     </div>
 
@@ -11503,6 +11527,11 @@ document.querySelectorAll('[data-risk-status-filter]').forEach(btn => {
     setStudentRiskStatusFilter(btn.dataset.riskStatusFilter || '');
   });
 });
+  el('exportGradeStatsPdfBtn')?.addEventListener('click', exportTeacherGradeStatsPdf);
+
+el('gradeStatsSubject')?.addEventListener('change', () => {
+  setGradeStatsExportButtonEnabled(false);
+});
   
 }
 
@@ -11684,6 +11713,8 @@ function renderTeacherGradeStatsSubjectOptions(){
   `;
 }
 
+    
+
 async function loadTeacherGradeStats(){
   try{
     if(!state.currentUser?.id){
@@ -11773,6 +11804,7 @@ function resetTeacherGradeStatsDashboard(){
   state.gradeStatsPercentChart.destroy();
   state.gradeStatsPercentChart = null;
 }
+  setGradeStatsExportButtonEnabled(false);
 }
 
 function renderTeacherGradeStatsDashboard(data){
@@ -11793,8 +11825,810 @@ function renderTeacherGradeStatsDashboard(data){
   renderTeacherGradeStatsRoomRows(rows);
   renderTeacherGradeStatsTopStudents(topStudents);
   renderTeacherGradeStatsCharts(rows, gradeTotals);
+  setGradeStatsExportButtonEnabled(!!getSelectedGradeStatsSubjectCode());
+}
+    
+function getSelectedGradeStatsSubjectCode(){
+  return safeText(el('gradeStatsSubject')?.value, '');
 }
 
+function setGradeStatsExportButtonEnabled(enabled){
+  const btn = el('exportGradeStatsPdfBtn');
+  if(btn){
+    btn.disabled = !enabled;
+  }
+}
+
+function formatReportNumber(value, digits = 2){
+  const n = Number(value || 0);
+  return n.toLocaleString('th-TH', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+}
+
+function formatReportInt(value){
+  return Number(value || 0).toLocaleString('th-TH');
+}
+
+function getReportGradeKeys(){
+  return ['4','3.5','3','2.5','2','1.5','1','0','ร','มส','ผ','มผ'];
+}
+
+function getReportGradeTotals(summary){
+  const keys = getReportGradeKeys();
+  return Object.assign(
+    Object.fromEntries(keys.map(k => [k, 0])),
+    summary?.grade_totals || {}
+  );
+}
+
+function getReportGradePercentages(summary){
+  const keys = getReportGradeKeys();
+  const totals = getReportGradeTotals(summary);
+  const totalResults = Number(summary?.total_results || 0);
+
+  return Object.fromEntries(keys.map(k => {
+    const count = Number(totals[k] || 0);
+    const pct = totalResults ? (count / totalResults) * 100 : 0;
+    return [k, pct];
+  }));
+}
+
+function getSignerByKey(signers, key){
+  return (signers || []).find(s => safeText(s.position_key, '') === key) || {
+    position_key: key,
+    position_title: '',
+    person_name: ''
+  };
+}
+
+function getTeacherNamesFromExtras(extras){
+  const teachers = Array.isArray(extras?.subject_teachers)
+    ? extras.subject_teachers
+    : [];
+
+  return teachers
+    .map(t => safeText(t.teacher_name, ''))
+    .filter(Boolean);
+}
+
+function getSingleLineTeacherNames(names){
+  const arr = Array.isArray(names) ? names.filter(Boolean) : [];
+  return arr.length ? arr.join(', ') : '-';
+}
+
+function getReportClassLabel(extras, rows){
+  const c = safeText(extras?.class_level, '');
+  if(c) return c;
+
+  const first = Array.isArray(rows) && rows.length ? safeText(rows[0].room_label, '') : '';
+  if(first.includes('/')) return first.split('/')[0];
+
+  return first || '-';
+}
+
+function buildReportRoomRowsHtml(rows){
+  const keys = getReportGradeKeys();
+
+  if(!rows.length){
+    return `
+      <tr>
+        <td colspan="18" class="empty-cell">ไม่พบข้อมูล</td>
+      </tr>
+    `;
+  }
+
+  return rows.map(row => {
+    const grades = Object.assign(
+      Object.fromEntries(keys.map(k => [k, 0])),
+      row.grades || {}
+    );
+
+    return `
+      <tr>
+        <td class="room-cell">${escapeHtml(row.room_label || '-')}</td>
+        <td>${formatReportInt(row.total_results)}</td>
+        ${keys.map(k => `<td>${Number(grades[k] || 0) ? formatReportInt(grades[k]) : '-'}</td>`).join('')}
+        <td>${formatReportNumber(row.fx || 0, 2)}</td>
+        <td>${formatReportNumber(row.average || 0, 2)}</td>
+        <td>${formatReportNumber(row.sd || 0, 2)}</td>
+        <td class="teacher-cell">${escapeHtml(row.teacher_name || '')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function buildReportTotalRowHtml(summary){
+  const keys = getReportGradeKeys();
+  const totals = getReportGradeTotals(summary);
+
+  return `
+    <tr class="total-row">
+      <td>รวม</td>
+      <td>${formatReportInt(summary.total_results || 0)}</td>
+      ${keys.map(k => `<td>${Number(totals[k] || 0) ? formatReportInt(totals[k]) : '-'}</td>`).join('')}
+      <td>${formatReportNumber(summary.total_fx || 0, 2)}</td>
+      <td>${formatReportNumber(summary.average || 0, 2)}</td>
+      <td>${formatReportNumber(summary.sd || 0, 2)}</td>
+      <td></td>
+    </tr>
+  `;
+}
+
+function buildReportPercentRowHtml(summary){
+  const keys = getReportGradeKeys();
+  const percentages = getReportGradePercentages(summary);
+
+  return `
+    <tr class="percent-row">
+      <td>ร้อยละ</td>
+      <td>100</td>
+      ${keys.map(k => `<td>${formatReportNumber(percentages[k] || 0, 2)}</td>`).join('')}
+      <td colspan="4"></td>
+    </tr>
+  `;
+}
+
+function buildReportTopStudentsHtml(topStudents){
+  const rows = Array.isArray(topStudents) ? topStudents : [];
+
+  if(!rows.length){
+    return `
+      <tr>
+        <td colspan="4" class="empty-cell">ไม่พบข้อมูลคะแนนสูงสุด</td>
+      </tr>
+    `;
+  }
+
+  return rows.map(st => `
+    <tr>
+      <td>${escapeHtml(st.student_code || '-')}</td>
+      <td class="student-name-cell">${escapeHtml(st.student_name || '-')}</td>
+      <td>${escapeHtml(st.class_level || '-')}/${escapeHtml(st.room || '-')}</td>
+      <td>${escapeHtml(st.total_score ?? '-')}</td>
+    </tr>
+  `).join('');
+}
+
+function buildSignatureHtml(label, name){
+  return `
+    <div class="signature-box">
+      <div class="signature-line">ลงชื่อ ....................................................</div>
+      <div class="signature-position">${escapeHtml(label || '')}</div>
+      <div class="signature-name">${name ? `(${escapeHtml(name)})` : '&nbsp;'}</div>
+    </div>
+  `;
+}
+
+function buildGradeStatsReportHtml(payload){
+  const {
+    data,
+    extras,
+    rows,
+    summary,
+    gradeTotals,
+    gradePercents,
+    roomAverages
+  } = payload;
+
+  const signers = Array.isArray(extras.report_signers) ? extras.report_signers : [];
+  const learningAreaHead = getSignerByKey(signers, 'learning_area_head');
+  const measurementHead = getSignerByKey(signers, 'measurement_head');
+  const academicHead = getSignerByKey(signers, 'academic_head');
+  const director = getSignerByKey(signers, 'director');
+
+  const teacherNames = getTeacherNamesFromExtras(extras);
+  const teacherNameText = getSingleLineTeacherNames(teacherNames);
+
+  const subjectName = safeText(extras.subject_name || summary.subject_name, '-');
+  const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
+  const classLabel = getReportClassLabel(extras, rows);
+
+  const gradeLabels = getReportGradeKeys();
+  const gradePercentDataset = gradeLabels.map(k => Number(gradePercents[k] || 0));
+  const roomAverageLabels = roomAverages.map(r => r.room_label || '-');
+  const roomAverageDataset = roomAverages.map(r => Number(r.average || 0));
+
+  return `
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>รายงานผลการเรียน ${escapeHtml(subjectCode)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    @page{
+      size:A4 portrait;
+      margin:6mm 5mm;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html, body{
+      margin:0;
+      padding:0;
+      background:#fff;
+      color:#111827;
+      font-family:'Sarabun','TH Sarabun New',sans-serif;
+    }
+
+    body{
+      width:210mm;
+      min-height:297mm;
+    }
+
+    .report-page{
+      width:200mm;
+      height:285mm;
+      margin:0 auto;
+      overflow:hidden;
+      padding:0;
+    }
+
+    .report-title{
+      text-align:center;
+      font-size:12.5px;
+      font-weight:800;
+      line-height:1.25;
+      margin:0 0 2px;
+    }
+
+    .report-subtitle{
+      text-align:center;
+      font-size:10.2px;
+      font-weight:700;
+      line-height:1.25;
+      margin:0;
+    }
+
+    .report-meta{
+      display:grid;
+      grid-template-columns:1.4fr .8fr .8fr;
+      gap:4px;
+      margin:4px 0 4px;
+      font-size:8.8px;
+      line-height:1.2;
+      font-weight:700;
+    }
+
+    .meta-box{
+      border:1px solid #111827;
+      padding:2px 4px;
+      min-height:16px;
+    }
+
+    .summary-table{
+      width:100%;
+      table-layout:fixed;
+      border-collapse:collapse;
+      font-size:7.1px;
+      line-height:1.05;
+    }
+
+    .summary-table th,
+    .summary-table td{
+      border:1px solid #111827;
+      padding:1.5px 1.5px;
+      text-align:center;
+      vertical-align:middle;
+      height:14px;
+    }
+
+    .summary-table th{
+      background:#f3f4f6;
+      font-weight:800;
+    }
+
+    .summary-table .room-cell{
+      text-align:left;
+      font-weight:700;
+      padding-left:3px;
+    }
+
+    .summary-table .teacher-cell{
+      font-size:6.4px;
+      line-height:1.05;
+      word-break:break-word;
+    }
+
+    .total-row td{
+      font-weight:800;
+      background:#f9fafb;
+    }
+
+    .percent-row td{
+      font-weight:700;
+      background:#fff;
+    }
+
+    .empty-cell{
+      text-align:center;
+      color:#6b7280;
+    }
+
+    .chart-section{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:5px;
+      margin-top:5px;
+    }
+
+    .chart-box{
+      border:1px solid #111827;
+      padding:3px;
+      height:52mm;
+    }
+
+    .chart-title{
+      text-align:center;
+      font-size:8.4px;
+      font-weight:800;
+      margin-bottom:1px;
+      line-height:1.1;
+    }
+
+    .chart-canvas-wrap{
+      height:45mm;
+      position:relative;
+    }
+
+    .bottom-section{
+      display:grid;
+      grid-template-columns:1fr 1.1fr;
+      gap:5px;
+      margin-top:5px;
+      align-items:start;
+    }
+
+    .top-student-box,
+    .signature-section{
+      border:1px solid #111827;
+      padding:3px;
+      min-height:48mm;
+    }
+
+    .section-title{
+      font-size:8.6px;
+      font-weight:800;
+      margin:0 0 2px;
+      text-align:center;
+      line-height:1.15;
+    }
+
+    .top-student-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:7.2px;
+      line-height:1.1;
+    }
+
+    .top-student-table th,
+    .top-student-table td{
+      border:1px solid #111827;
+      padding:1.5px 2px;
+      text-align:center;
+      vertical-align:middle;
+    }
+
+    .top-student-table th{
+      background:#f3f4f6;
+      font-weight:800;
+    }
+
+    .top-student-table .student-name-cell{
+      text-align:left;
+      word-break:break-word;
+    }
+
+    .signature-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:5px 8px;
+      margin-top:3px;
+    }
+
+    .signature-box{
+      min-height:18mm;
+      text-align:center;
+      font-size:7.6px;
+      line-height:1.25;
+      padding-top:3px;
+    }
+
+    .signature-line{
+      white-space:nowrap;
+    }
+
+    .signature-position{
+      margin-top:1px;
+      font-weight:700;
+    }
+
+    .signature-name{
+      margin-top:1px;
+    }
+
+    .director-signature{
+      grid-column:1 / span 2;
+      width:55%;
+      margin:0 auto;
+    }
+
+    .approval-text{
+      text-align:center;
+      font-size:8px;
+      font-weight:800;
+      margin-top:1px;
+    }
+
+    .print-actions{
+      position:fixed;
+      right:14px;
+      top:14px;
+      display:flex;
+      gap:8px;
+      z-index:9999;
+    }
+
+    .print-actions button{
+      font-family:'Sarabun',sans-serif;
+      border:0;
+      border-radius:10px;
+      height:34px;
+      padding:0 14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .print-btn{
+      background:#2563eb;
+      color:#fff;
+    }
+
+    .close-btn{
+      background:#eef2f7;
+      color:#111827;
+    }
+
+    @media print{
+      .print-actions{
+        display:none !important;
+      }
+
+      body{
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="print-actions">
+    <button class="print-btn" onclick="window.print()">พิมพ์ / Save as PDF</button>
+    <button class="close-btn" onclick="window.close()">ปิด</button>
+  </div>
+
+  <main class="report-page">
+    <h1 class="report-title">
+      แบบรายงานผลการเรียนการสอนโรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
+    </h1>
+    <p class="report-subtitle">
+      ปีการศึกษา ${escapeHtml(data.academic_year || '-')} ภาคเรียนที่ ${escapeHtml(data.term || '-')}
+    </p>
+    <p class="report-subtitle">
+      สรุปผลการเรียนรายวิชา ${escapeHtml(subjectName)} รหัสวิชา ${escapeHtml(subjectCode)}
+      ชั้น ${escapeHtml(classLabel)}
+    </p>
+
+    <div class="report-meta">
+      <div class="meta-box">ครูผู้สอน: ${escapeHtml(teacherNameText)}</div>
+      <div class="meta-box">จำนวนผลการเรียน: ${formatReportInt(summary.total_results || 0)}</div>
+      <div class="meta-box">ค่าเฉลี่ย: ${formatReportNumber(summary.average || 0, 2)}</div>
+    </div>
+
+    <table class="summary-table">
+      <colgroup>
+        <col style="width:9%;">
+        <col style="width:5%;">
+        <col style="width:3.8%;">
+        <col style="width:4.2%;">
+        <col style="width:3.8%;">
+        <col style="width:4.2%;">
+        <col style="width:3.8%;">
+        <col style="width:4.2%;">
+        <col style="width:3.8%;">
+        <col style="width:3.8%;">
+        <col style="width:3.8%;">
+        <col style="width:4.2%;">
+        <col style="width:3.8%;">
+        <col style="width:4.2%;">
+        <col style="width:6%;">
+        <col style="width:5.2%;">
+        <col style="width:5.2%;">
+        <col style="width:20%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>ชั้น/ห้อง</th>
+          <th>จำนวน</th>
+          <th>4</th>
+          <th>3.5</th>
+          <th>3</th>
+          <th>2.5</th>
+          <th>2</th>
+          <th>1.5</th>
+          <th>1</th>
+          <th>0</th>
+          <th>ร</th>
+          <th>มส</th>
+          <th>ผ</th>
+          <th>มผ</th>
+          <th>∑fx</th>
+          <th>X̄</th>
+          <th>S.D.</th>
+          <th>ครูผู้สอน</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${buildReportRoomRowsHtml(rows)}
+        ${buildReportTotalRowHtml(summary)}
+        ${buildReportPercentRowHtml(summary)}
+      </tbody>
+    </table>
+
+    <section class="chart-section">
+      <div class="chart-box">
+        <div class="chart-title">แผนภูมิแสดงการกระจายผลการเรียน</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="reportGradeDistChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">แผนภูมิแสดงค่าเฉลี่ยรายห้อง</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="reportRoomAverageChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="bottom-section">
+      <div class="top-student-box">
+        <div class="section-title">รายชื่อนักเรียนที่ทำคะแนนได้สูงสุด</div>
+        <table class="top-student-table">
+          <colgroup>
+            <col style="width:25%;">
+            <col style="width:42%;">
+            <col style="width:18%;">
+            <col style="width:15%;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>เลขประจำตัว</th>
+              <th>ชื่อ - สกุล</th>
+              <th>ชั้น/ห้อง</th>
+              <th>คะแนน</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildReportTopStudentsHtml(extras.top_score_students)}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="signature-section">
+        <div class="section-title">ลงชื่อรับรองรายงาน</div>
+        <div class="signature-grid">
+          ${teacherNames.length
+            ? teacherNames.slice(0, 3).map(name => buildSignatureHtml('อาจารย์ประจำวิชา', name)).join('')
+            : buildSignatureHtml('อาจารย์ประจำวิชา', '')
+          }
+
+          ${buildSignatureHtml(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', learningAreaHead.person_name)}
+          ${buildSignatureHtml(measurementHead.position_title || 'หัวหน้างานวัดผล', measurementHead.person_name)}
+          ${buildSignatureHtml(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', academicHead.person_name)}
+
+          <div class="director-signature">
+            <div class="approval-text">อนุมัติ</div>
+            ${buildSignatureHtml(director.position_title || 'ผู้อำนวยการโรงเรียน', director.person_name)}
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const gradeLabels = ${JSON.stringify(gradeLabels)};
+    const gradePercentDataset = ${JSON.stringify(gradePercentDataset)};
+    const roomAverageLabels = ${JSON.stringify(roomAverageLabels)};
+    const roomAverageDataset = ${JSON.stringify(roomAverageDataset)};
+
+    function drawReportCharts(){
+      const commonFont = {
+        family: 'Sarabun',
+        size: 8,
+        weight: '700'
+      };
+
+      new Chart(document.getElementById('reportGradeDistChart'), {
+        type: 'bar',
+        data: {
+          labels: gradeLabels,
+          datasets: [{
+            label: 'ร้อยละ',
+            data: gradePercentDataset,
+            borderRadius: 3,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                font: commonFont,
+                callback: value => value + '%'
+              }
+            },
+            x: {
+              ticks: { font: commonFont },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      new Chart(document.getElementById('reportRoomAverageChart'), {
+        type: 'bar',
+        data: {
+          labels: roomAverageLabels,
+          datasets: [{
+            label: 'ค่าเฉลี่ย',
+            data: roomAverageDataset,
+            borderRadius: 3,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 4,
+              ticks: {
+                stepSize: 1,
+                font: commonFont
+              }
+            },
+            x: {
+              ticks: {
+                font: commonFont,
+                maxRotation: 0,
+                minRotation: 0
+              },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    window.addEventListener('load', () => {
+      drawReportCharts();
+      setTimeout(() => {
+        window.focus();
+      }, 500);
+    });
+  </script>
+</body>
+</html>
+  `;
+}
+
+async function exportTeacherGradeStatsPdf(){
+  try{
+    if(!state.currentUser?.id){
+      throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
+    }
+
+    if(!state.gradeStatsData?.summary){
+      throw new Error('กรุณากดแสดงสถิติก่อน Export PDF');
+    }
+
+    const subjectCode = getSelectedGradeStatsSubjectCode();
+
+    if(!subjectCode){
+      throw new Error('กรุณาเลือกรายวิชา 1 รายวิชาก่อน Export PDF');
+    }
+
+    const academicYear = safeNum(el('gradeStatsYear')?.value);
+    const term = safeNum(el('gradeStatsTerm')?.value);
+
+    if(!academicYear || !term){
+      throw new Error('กรุณาเลือกปีการศึกษาและภาคเรียน');
+    }
+
+    setStatus('gradeStatsStatus', 'กำลังเตรียมรายงาน PDF...', 'info');
+
+    const { data: extras, error } = await supabaseClient.rpc(
+      'get_teacher_grade_stat_report_extras',
+      {
+        p_teacher_id: state.currentUser.id,
+        p_academic_year: academicYear,
+        p_term: term,
+        p_subject_code: subjectCode
+      }
+    );
+
+    if(error) throw error;
+
+    if(!extras || extras.ok === false){
+      throw new Error(extras?.message || 'โหลดข้อมูลรายงานไม่สำเร็จ');
+    }
+
+    const data = state.gradeStatsData;
+    const summary = data.summary || {};
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+
+    if(!rows.length){
+      throw new Error('ไม่พบข้อมูลรายห้องสำหรับ Export PDF');
+    }
+
+    const gradeTotals = getReportGradeTotals(summary);
+    const gradePercents = getReportGradePercentages(summary);
+    const roomAverages = rows.map(r => ({
+      room_label: r.room_label || '-',
+      average: Number(r.average || 0)
+    }));
+
+    const reportHtml = buildGradeStatsReportHtml({
+      data,
+      extras,
+      rows,
+      summary,
+      gradeTotals,
+      gradePercents,
+      roomAverages
+    });
+
+    const reportWindow = window.open('', '_blank');
+
+    if(!reportWindow){
+      throw new Error('เบราว์เซอร์บล็อก popup กรุณาอนุญาต popup สำหรับหน้านี้');
+    }
+
+    reportWindow.document.open();
+    reportWindow.document.write(reportHtml);
+    reportWindow.document.close();
+
+    setStatus('gradeStatsStatus', 'เปิดหน้ารายงานแล้ว กดพิมพ์ / Save as PDF ได้เลย', 'success');
+  }catch(err){
+    console.error('exportTeacherGradeStatsPdf ERROR', err);
+    setStatus('gradeStatsStatus', err.message || 'Export PDF ไม่สำเร็จ', 'error');
+    showToast('Export PDF ไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+  }
+}
 function renderTeacherGradeStatsRoomRows(rows){
   const tbody = el('gradeStatsRoomTbody');
 
