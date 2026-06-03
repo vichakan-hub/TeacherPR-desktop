@@ -10811,17 +10811,7 @@ bindIfExists('adviserRoomSelect', 'change', () => {
   });
 
 
-bindIfExists('fpTabSearchBtn', 'click', () => {
-  fpSetSubPage('search');
-});
 
-bindIfExists('fpTabMineBtn', 'click', () => {
-  fpSetSubPage('mine');
-});
-
-bindIfExists('fpTabAllBtn', 'click', () => {
-  fpSetSubPage('all');
-});
 
 bindIfExists('fpViewScheduleBtn', 'click', () => {
   fpSetViewMode('schedule');
@@ -10835,9 +10825,7 @@ bindIfExists('fpLoadSlotsBtn', 'click', fpLoadSlots);
 bindIfExists('fpLoadMineBtn', 'click', () => {
   openFreePeriodFromSidebar('mine');
 });
-bindIfExists('fpLoadAllBtn', 'click', () => {
-  openFreePeriodFromSidebar('all');
-});
+
 
 bindIfExists('fpYear', 'change', () => {
   state.freePeriodSlots = [];
