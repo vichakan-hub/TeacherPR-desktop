@@ -4022,6 +4022,164 @@
   }
 }
 
+    /* ===== Grade Stats : layout กราฟ ===== */
+.grade-stats-chart-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:14px;
+  align-items:stretch;
+}
+
+.grade-stats-chart-card{
+  background:#fff;
+  border:1px solid #d9e6f2;
+  border-radius:22px;
+  padding:16px;
+  min-width:0;
+  overflow:hidden;
+}
+
+.grade-stats-chart-card h3{
+  margin:0;
+  font-size:18px;
+  line-height:1.3;
+  color:#17324d;
+}
+
+.grade-stats-chart-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.grade-stats-chart-sub{
+  margin-top:4px;
+  color:#64748b;
+  font-size:13px;
+  font-weight:600;
+}
+
+.grade-stats-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:84px;
+  height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  background:#fff8eb;
+  border:1px solid #f8d28a;
+  color:#b7791f;
+  font-weight:800;
+  font-size:13px;
+}
+
+.grade-stats-chart-box{
+  position:relative;
+  height:250px;
+  min-width:0;
+}
+
+.doughnut-box{
+  height:290px;
+}
+
+/* ===== Grade Stats : ตารางให้ชิดขึ้น ===== */
+.grade-stats-table{
+  width:100%;
+  min-width:0 !important;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.grade-stats-table th,
+.grade-stats-table td{
+  padding:8px 5px !important;
+  font-size:12px !important;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.grade-stats-table th{
+  text-align:center;
+  font-weight:900;
+}
+
+.grade-stats-table td{
+  text-align:center;
+}
+
+.grade-stats-table td:first-child,
+.grade-stats-table th:first-child{
+  text-align:left;
+}
+
+.grade-stats-table th:nth-child(1),
+.grade-stats-table td:nth-child(1){ width:80px; }
+
+.grade-stats-table th:nth-child(2),
+.grade-stats-table td:nth-child(2){ width:60px; }
+
+.grade-stats-table th:nth-child(n+3):nth-child(-n+14),
+.grade-stats-table td:nth-child(n+3):nth-child(-n+14){ width:40px; }
+
+.grade-stats-table th:nth-child(15),
+.grade-stats-table td:nth-child(15){ width:66px; }
+
+.grade-stats-table th:nth-child(16),
+.grade-stats-table td:nth-child(16){ width:60px; }
+
+.grade-stats-table th:nth-child(17),
+.grade-stats-table td:nth-child(17){ width:60px; }
+
+.grade-stats-table th:nth-child(18),
+.grade-stats-table td:nth-child(18){
+  width:150px;
+  white-space:normal;
+  word-break:break-word;
+  line-height:1.2;
+}
+
+.grade-stats-average-pill{
+  min-width:52px;
+  height:28px;
+  padding:0 8px;
+  font-size:12px;
+}
+
+/* กันล้น */
+#pageGradeStats .table-wrap{
+  overflow-x:hidden;
+  max-width:100%;
+}
+
+/* จอแคบค่อยลดเหลือ 2 คอลัมน์ */
+@media (max-width: 1280px){
+  .grade-stats-chart-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* จอเล็กค่อยเรียง 1 คอลัมน์ */
+@media (max-width: 900px){
+  .grade-stats-chart-grid{
+    grid-template-columns:1fr;
+  }
+
+  #pageGradeStats .table-wrap{
+    overflow-x:auto;
+  }
+
+  .grade-stats-table{
+    min-width:980px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4566,21 +4724,34 @@
       </div>
     </div>
 
-    <div class="grade-stats-chart-grid">
-      <div class="grade-stats-chart-card">
-        <h3>การกระจายผลการเรียน</h3>
-        <div class="grade-stats-chart-box">
-          <canvas id="teacherGradeDistChart"></canvas>
-        </div>
-      </div>
-
-      <div class="grade-stats-chart-card">
-        <h3>ค่าเฉลี่ยรายห้อง</h3>
-        <div class="grade-stats-chart-box">
-          <canvas id="teacherRoomAverageChart"></canvas>
-        </div>
-      </div>
+<div class="grade-stats-chart-grid">
+  <div class="grade-stats-chart-card">
+    <h3>การกระจายผลการเรียน</h3>
+    <div class="grade-stats-chart-box">
+      <canvas id="teacherGradeDistChart"></canvas>
     </div>
+  </div>
+
+  <div class="grade-stats-chart-card">
+    <h3>ค่าเฉลี่ยรายห้อง</h3>
+    <div class="grade-stats-chart-box">
+      <canvas id="teacherRoomAverageChart"></canvas>
+    </div>
+  </div>
+
+  <div class="grade-stats-chart-card">
+    <div class="grade-stats-chart-head">
+      <div>
+        <h3>สัดส่วนเกรด</h3>
+        <div class="grade-stats-chart-sub">คิดเป็นร้อยละจากรายการผลการเรียนทั้งหมด</div>
+      </div>
+      <span class="grade-stats-chip">Percent</span>
+    </div>
+    <div class="grade-stats-chart-box doughnut-box">
+      <canvas id="teacherGradePercentChart"></canvas>
+    </div>
+  </div>
+</div>
   </section>
 
   <section class="card" style="margin-bottom:18px;">
@@ -5476,6 +5647,7 @@ gradeStatsOptions: {
 gradeStatsData: null,
 gradeStatsDistChart: null,
 gradeStatsRoomChart: null,
+gradeStatsPercentChart: null,
 };
 
     function setStatus(id, text, type='info'){
@@ -11502,6 +11674,11 @@ function resetTeacherGradeStatsDashboard(){
     state.gradeStatsRoomChart.destroy();
     state.gradeStatsRoomChart = null;
   }
+
+  if(state.gradeStatsPercentChart){
+  state.gradeStatsPercentChart.destroy();
+  state.gradeStatsPercentChart = null;
+}
 }
 
 function renderTeacherGradeStatsDashboard(data){
@@ -11650,6 +11827,20 @@ function renderTeacherGradeStatsTopStudents(rows){
 function renderTeacherGradeStatsCharts(rows, gradeTotals){
   const gradeLabels = TEACHER_GRADE_STAT_KEYS;
   const gradeValues = gradeLabels.map(k => Number(gradeTotals[k] || 0));
+  const chartColors = [
+    '#2f64dc', // 4
+    '#5f97e4', // 3.5
+    '#42ace3', // 3
+    '#22c55e', // 2.5
+    '#f5a300', // 2
+    '#f97316', // 1.5
+    '#ef4444', // 1
+    '#a855f7', // 0
+    '#7c3aed', // ร
+    '#14b8a6', // มส
+    '#64748b', // ผ
+    '#ec4899'  // มผ
+  ];
 
   if(state.gradeStatsDistChart){
     state.gradeStatsDistChart.destroy();
@@ -11659,6 +11850,11 @@ function renderTeacherGradeStatsCharts(rows, gradeTotals){
     state.gradeStatsRoomChart.destroy();
   }
 
+  if(state.gradeStatsPercentChart){
+    state.gradeStatsPercentChart.destroy();
+  }
+
+  // 1) การกระจายผลการเรียน
   state.gradeStatsDistChart = new Chart(el('teacherGradeDistChart'), {
     type: 'bar',
     data: {
@@ -11666,7 +11862,7 @@ function renderTeacherGradeStatsCharts(rows, gradeTotals){
       datasets: [{
         label: 'จำนวนผลการเรียน',
         data: gradeValues,
-        backgroundColor: teacherStatsChartColors(gradeLabels.length),
+        backgroundColor: chartColors,
         borderRadius: 10,
         borderSkipped: false
       }]
@@ -11684,6 +11880,7 @@ function renderTeacherGradeStatsCharts(rows, gradeTotals){
     }
   });
 
+  // 2) ค่าเฉลี่ยรายห้อง
   state.gradeStatsRoomChart = new Chart(el('teacherRoomAverageChart'), {
     type: 'bar',
     data: {
@@ -11691,7 +11888,7 @@ function renderTeacherGradeStatsCharts(rows, gradeTotals){
       datasets: [{
         label: 'ค่าเฉลี่ย',
         data: rows.map(r => Number(r.average || 0)),
-        backgroundColor: rows.map(r => Number(r.average || 0) < 3 ? '#f59e0b' : '#2563eb'),
+        backgroundColor: rows.map(r => Number(r.average || 0) < 3 ? '#f5a300' : '#2f64dc'),
         borderRadius: 10,
         borderSkipped: false
       }]
@@ -11707,6 +11904,89 @@ function renderTeacherGradeStatsCharts(rows, gradeTotals){
         x: { grid: { display: false } }
       }
     }
+  });
+
+  // 3) สัดส่วนเกรด
+  const totalCount = gradeValues.reduce((sum, n) => sum + Number(n || 0), 0);
+  const filteredLabels = [];
+  const filteredValues = [];
+  const filteredColors = [];
+
+  gradeLabels.forEach((label, i) => {
+    const value = Number(gradeValues[i] || 0);
+    if(value > 0){
+      filteredLabels.push(label);
+      filteredValues.push(value);
+      filteredColors.push(chartColors[i]);
+    }
+  });
+
+  state.gradeStatsPercentChart = new Chart(el('teacherGradePercentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: filteredLabels,
+      datasets: [{
+        data: filteredValues,
+        backgroundColor: filteredColors,
+        borderColor: '#ffffff',
+        borderWidth: 4,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 10,
+            padding: 14,
+            font: {
+              size: 13,
+              weight: '700'
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context){
+              const value = Number(context.raw || 0);
+              const percent = totalCount ? ((value / totalCount) * 100) : 0;
+              return `${context.label}: ${value.toLocaleString('th-TH')} รายการ (${percent.toFixed(2)}%)`;
+            }
+          }
+        }
+      }
+    },
+    plugins: [{
+      id: 'centerText',
+      afterDraw(chart){
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        if(!meta?.data?.length) return;
+
+        const x = meta.data[0].x;
+        const y = meta.data[0].y;
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 14px Sarabun';
+        ctx.fillText('รวม', x, y - 14);
+
+        ctx.fillStyle = '#17324d';
+        ctx.font = '900 24px Sarabun';
+        ctx.fillText(totalCount.toLocaleString('th-TH'), x, y + 10);
+
+        ctx.restore();
+      }
+    }]
   });
 }
     el('menuGradeStatsBtn')?.addEventListener('click', async () => {
