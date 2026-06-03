@@ -12007,7 +12007,6 @@ function buildGradeStatsReportHtml(payload){
     extras,
     rows,
     summary,
-    gradeTotals,
     gradePercents,
     roomAverages
   } = payload;
@@ -12026,9 +12025,63 @@ function buildGradeStatsReportHtml(payload){
   const classLabel = getReportClassLabel(extras, rows);
 
   const gradeLabels = getReportGradeKeys();
+  const gradeTotals = getReportGradeTotals(summary);
+  const gradeCountDataset = gradeLabels.map(k => Number(gradeTotals[k] || 0));
   const gradePercentDataset = gradeLabels.map(k => Number(gradePercents[k] || 0));
+
   const roomAverageLabels = roomAverages.map(r => r.room_label || '-');
   const roomAverageDataset = roomAverages.map(r => Number(r.average || 0));
+
+  const teacherSlots = [
+    teacherNames[0] || '',
+    teacherNames[1] || '',
+    teacherNames[2] || ''
+  ];
+
+  const topStudents = Array.isArray(extras.top_score_students)
+    ? extras.top_score_students
+    : [];
+
+  const topStudentsRowsHtml = topStudents.length
+    ? topStudents.map(st => `
+      <tr>
+        <td>${escapeHtml(st.student_code || '-')}</td>
+        <td class="student-name-cell">${escapeHtml(st.student_name || '-')}</td>
+        <td>${escapeHtml(st.class_level || '-')}/${escapeHtml(st.room || '-')}</td>
+        <td>${escapeHtml(st.total_score ?? '-')}</td>
+      </tr>
+    `).join('')
+    : `
+      <tr>
+        <td colspan="4" class="empty-cell">ไม่พบข้อมูลคะแนนสูงสุด</td>
+      </tr>
+    `;
+
+  function buildTeacherSignature(name){
+    return `
+      <div class="sig-item">
+        <div class="sig-row">
+          <span>ลงชื่อ</span>
+          <span class="sig-line"></span>
+        </div>
+        <div class="sig-name">${name ? `(${escapeHtml(name)})` : '&nbsp;'}</div>
+        <div class="sig-position">อาจารย์ประจำวิชา</div>
+      </div>
+    `;
+  }
+
+  function buildOfficialSignature(positionTitle, personName){
+    return `
+      <div class="sig-item">
+        <div class="sig-row">
+          <span>ลงชื่อ</span>
+          <span class="sig-line"></span>
+        </div>
+        <div class="sig-name">${personName ? `(${escapeHtml(personName)})` : '&nbsp;'}</div>
+        <div class="sig-position">${escapeHtml(positionTitle || '')}</div>
+      </div>
+    `;
+  }
 
   return `
 <!DOCTYPE html>
@@ -12037,7 +12090,7 @@ function buildGradeStatsReportHtml(payload){
   <meta charset="utf-8">
   <title>รายงานผลการเรียน ${escapeHtml(subjectCode)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>
 
   <style>
     @page{
@@ -12049,222 +12102,36 @@ function buildGradeStatsReportHtml(payload){
       box-sizing:border-box;
     }
 
-    html, body{
+    html,
+    body{
       margin:0;
       padding:0;
-      background:#fff;
-      color:#111827;
+      background:#ffffff;
+      color:#163254;
       font-family:'Sarabun','TH Sarabun New',sans-serif;
     }
 
     body{
       width:210mm;
       min-height:297mm;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
     }
 
-    .report-page{
-      width:200mm;
-      height:285mm;
-      margin:0 auto;
-      overflow:hidden;
-      padding:0;
-    }
-
-    .report-title{
-      text-align:center;
-      font-size:12.5px;
-      font-weight:800;
-      line-height:1.25;
-      margin:0 0 2px;
-    }
-
-    .report-subtitle{
-      text-align:center;
-      font-size:10.2px;
-      font-weight:700;
-      line-height:1.25;
-      margin:0;
-    }
-
-    .report-meta{
-      display:grid;
-      grid-template-columns:1.4fr .8fr .8fr;
-      gap:4px;
-      margin:4px 0 4px;
-      font-size:8.8px;
-      line-height:1.2;
-      font-weight:700;
-    }
-
-    .meta-box{
-      border:1px solid #111827;
-      padding:2px 4px;
-      min-height:16px;
-    }
-
-    .summary-table{
-      width:100%;
-      table-layout:fixed;
-      border-collapse:collapse;
-      font-size:7.1px;
-      line-height:1.05;
-    }
-
-    .summary-table th,
-    .summary-table td{
-      border:1px solid #111827;
-      padding:1.5px 1.5px;
-      text-align:center;
-      vertical-align:middle;
-      height:14px;
-    }
-
-    .summary-table th{
-      background:#f3f4f6;
-      font-weight:800;
-    }
-
-    .summary-table .room-cell{
-      text-align:left;
-      font-weight:700;
-      padding-left:3px;
-    }
-
-    .summary-table .teacher-cell{
-      font-size:6.4px;
-      line-height:1.05;
-      word-break:break-word;
-    }
-
-    .total-row td{
-      font-weight:800;
-      background:#f9fafb;
-    }
-
-    .percent-row td{
-      font-weight:700;
-      background:#fff;
-    }
-
-    .empty-cell{
-      text-align:center;
-      color:#6b7280;
-    }
-
-    .chart-section{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:5px;
-      margin-top:5px;
-    }
-
-    .chart-box{
-      border:1px solid #111827;
-      padding:3px;
-      height:52mm;
-    }
-
-    .chart-title{
-      text-align:center;
-      font-size:8.4px;
-      font-weight:800;
-      margin-bottom:1px;
-      line-height:1.1;
-    }
-
-    .chart-canvas-wrap{
-      height:45mm;
-      position:relative;
-    }
-
-    .bottom-section{
-      display:grid;
-      grid-template-columns:1fr 1.1fr;
-      gap:5px;
-      margin-top:5px;
-      align-items:start;
-    }
-
-    .top-student-box,
-    .signature-section{
-      border:1px solid #111827;
-      padding:3px;
-      min-height:48mm;
-    }
-
-    .section-title{
-      font-size:8.6px;
-      font-weight:800;
-      margin:0 0 2px;
-      text-align:center;
-      line-height:1.15;
-    }
-
-    .top-student-table{
-      width:100%;
-      border-collapse:collapse;
-      table-layout:fixed;
-      font-size:7.2px;
-      line-height:1.1;
-    }
-
-    .top-student-table th,
-    .top-student-table td{
-      border:1px solid #111827;
-      padding:1.5px 2px;
-      text-align:center;
-      vertical-align:middle;
-    }
-
-    .top-student-table th{
-      background:#f3f4f6;
-      font-weight:800;
-    }
-
-    .top-student-table .student-name-cell{
-      text-align:left;
-      word-break:break-word;
-    }
-
-    .signature-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:5px 8px;
-      margin-top:3px;
-    }
-
-    .signature-box{
-      min-height:18mm;
-      text-align:center;
-      font-size:7.6px;
-      line-height:1.25;
-      padding-top:3px;
-    }
-
-    .signature-line{
-      white-space:nowrap;
-    }
-
-    .signature-position{
-      margin-top:1px;
-      font-weight:700;
-    }
-
-    .signature-name{
-      margin-top:1px;
-    }
-
-    .director-signature{
-      grid-column:1 / span 2;
-      width:55%;
-      margin:0 auto;
-    }
-
-    .approval-text{
-      text-align:center;
-      font-size:8px;
-      font-weight:800;
-      margin-top:1px;
+    :root{
+      --primary:#2563eb;
+      --primary-2:#3b82f6;
+      --primary-soft:#60a5fa;
+      --sky:#38bdf8;
+      --green:#22c55e;
+      --orange:#f59e0b;
+      --deep:#163254;
+      --muted:#5b6b85;
+      --line:#cfe0ff;
+      --line-dark:#9ebce9;
+      --soft:#f8fbff;
+      --soft-blue:#eef5ff;
+      --danger:#ef4444;
     }
 
     .print-actions{
@@ -12284,11 +12151,12 @@ function buildGradeStatsReportHtml(payload){
       padding:0 14px;
       font-weight:800;
       cursor:pointer;
+      box-shadow:0 8px 18px rgba(15,23,42,.16);
     }
 
     .print-btn{
-      background:#2563eb;
-      color:#fff;
+      background:linear-gradient(135deg,#2563eb,#60a5fa);
+      color:#ffffff;
     }
 
     .close-btn{
@@ -12296,14 +12164,301 @@ function buildGradeStatsReportHtml(payload){
       color:#111827;
     }
 
+    .report-page{
+      width:200mm;
+      height:285mm;
+      margin:0 auto;
+      overflow:hidden;
+      padding:0;
+      background:#ffffff;
+    }
+
+    .report-header{
+      text-align:center;
+      margin-bottom:3.5mm;
+      line-height:1.22;
+    }
+
+    .report-title{
+      margin:0;
+      font-size:12.4px;
+      font-weight:800;
+      color:#102a43;
+    }
+
+    .report-subtitle{
+      margin:1px 0 0;
+      font-size:9.2px;
+      font-weight:700;
+      color:#304761;
+    }
+
+    .report-subtitle strong{
+      color:#102a43;
+      font-weight:800;
+    }
+
+    .report-meta{
+      display:grid;
+      grid-template-columns:1.4fr .55fr .55fr;
+      gap:3px;
+      margin-bottom:3px;
+      font-size:7.4px;
+      line-height:1.22;
+      font-weight:700;
+    }
+
+    .meta-box{
+      border:1px solid var(--line-dark);
+      border-radius:5px;
+      background:linear-gradient(135deg,#eef5ff,#ffffff);
+      padding:2px 4px;
+      min-height:13px;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+
+    .summary-table{
+      width:100%;
+      table-layout:fixed;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid var(--line-dark);
+      border-radius:7px;
+      overflow:hidden;
+      font-size:6.65px;
+      line-height:1.05;
+      margin-bottom:3.5mm;
+    }
+
+    .summary-table th,
+    .summary-table td{
+      border-right:1px solid #d9e8ff;
+      border-bottom:1px solid #d9e8ff;
+      padding:1.35px 1.2px;
+      text-align:center;
+      vertical-align:middle;
+      height:11px;
+      color:#ff0000;
+      background:#ffffff;
+      font-weight:600;
+    }
+
+    .summary-table th{
+      background:#f8fbff;
+      color:#17324d;
+      font-weight:800;
+    }
+
+    .summary-table tr:nth-child(even) td{
+      background:#fffaf0;
+    }
+
+    .summary-table .room-cell,
+    .summary-table td:first-child{
+      text-align:left;
+      padding-left:3px;
+      font-weight:800;
+      color:#ff0000;
+    }
+
+    .summary-table .teacher-cell{
+      color:#0f172a;
+      font-size:5.9px;
+      line-height:1.08;
+      word-break:break-word;
+      font-weight:600;
+    }
+
+    .summary-table .total-row td{
+      background:#ffffff !important;
+      border-top:1.4px solid #17324d;
+      font-weight:800;
+      color:#ff0000;
+    }
+
+    .summary-table .percent-row td{
+      background:#ffffff !important;
+      color:#17324d;
+      font-size:6px;
+      font-weight:700;
+    }
+
+    .chart-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:4mm;
+      margin-bottom:3.5mm;
+    }
+
+    .chart-card{
+      border:1px solid var(--line-dark);
+      border-radius:8px;
+      background:#ffffff;
+      overflow:hidden;
+      height:47mm;
+    }
+
+    .chart-title{
+      background:linear-gradient(90deg,#2563eb,#60a5fa);
+      color:#ffffff;
+      text-align:center;
+      font-size:7.8px;
+      font-weight:800;
+      line-height:1.15;
+      padding:2.4px 4px;
+    }
+
+    .chart-wrap{
+      height:41mm;
+      padding:2.5mm 3mm 2mm;
+      position:relative;
+    }
+
+    .top-student-card{
+      border:1px solid var(--line-dark);
+      border-radius:8px;
+      background:#ffffff;
+      overflow:hidden;
+      margin-bottom:3.5mm;
+    }
+
+    .section-title{
+      background:linear-gradient(90deg,#2563eb,#60a5fa);
+      color:#ffffff;
+      text-align:center;
+      font-size:7.8px;
+      font-weight:800;
+      line-height:1.15;
+      padding:2.5px 4px;
+    }
+
+    .top-student-body{
+      padding:2mm;
+    }
+
+    .top-student-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:7px;
+      line-height:1.15;
+    }
+
+    .top-student-table th,
+    .top-student-table td{
+      border:1px solid #bfd5f5;
+      padding:2px 3px;
+      text-align:center;
+      vertical-align:middle;
+      height:14px;
+    }
+
+    .top-student-table th{
+      background:#eef5ff;
+      color:#17324d;
+      font-weight:800;
+    }
+
+    .top-student-table .student-name-cell{
+      text-align:left;
+      word-break:break-word;
+    }
+
+    .empty-cell{
+      color:#64748b;
+      text-align:center !important;
+    }
+
+    .signature-card{
+      border:1px solid var(--line-dark);
+      border-radius:8px;
+      background:#ffffff;
+      padding:4mm 8mm 3mm;
+      min-height:75mm;
+    }
+
+    .signature-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      column-gap:28mm;
+      row-gap:6.5mm;
+      align-items:start;
+    }
+
+    .sig-item{
+      text-align:center;
+      min-height:14mm;
+      color:#111827;
+      font-size:8.4px;
+      line-height:1.25;
+    }
+
+    .sig-row{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:4px;
+      align-items:end;
+      margin-bottom:2px;
+    }
+
+    .sig-line{
+      display:block;
+      height:12px;
+      border-bottom:1px dotted #475569;
+    }
+
+    .sig-name{
+      min-height:12px;
+      font-size:8.4px;
+      color:#111827;
+    }
+
+    .sig-position{
+      font-size:8.2px;
+      font-weight:700;
+      color:#111827;
+      margin-top:1px;
+    }
+
+    .approval-box{
+      margin-top:5.5mm;
+      text-align:center;
+    }
+
+    .approval-text{
+      font-size:8.5px;
+      font-weight:800;
+      margin-bottom:1.5mm;
+      color:#111827;
+    }
+
+    .director-box{
+      width:44%;
+      margin:0 auto;
+    }
+
+    canvas{
+      width:100% !important;
+      height:100% !important;
+    }
+
     @media print{
       .print-actions{
         display:none !important;
       }
 
+      html,
       body{
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
+        width:210mm;
+        height:297mm;
+        overflow:hidden;
+      }
+
+      .report-page{
+        page-break-after:avoid;
+        page-break-inside:avoid;
       }
     }
   </style>
@@ -12316,43 +12471,47 @@ function buildGradeStatsReportHtml(payload){
   </div>
 
   <main class="report-page">
-    <h1 class="report-title">
-      แบบรายงานผลการเรียนการสอนโรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
-    </h1>
-    <p class="report-subtitle">
-      ปีการศึกษา ${escapeHtml(data.academic_year || '-')} ภาคเรียนที่ ${escapeHtml(data.term || '-')}
-    </p>
-    <p class="report-subtitle">
-      สรุปผลการเรียนรายวิชา ${escapeHtml(subjectName)} รหัสวิชา ${escapeHtml(subjectCode)}
-      ชั้น ${escapeHtml(classLabel)}
-    </p>
+    <header class="report-header">
+      <h1 class="report-title">
+        แบบรายงานผลการเรียนการสอนโรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
+      </h1>
+      <p class="report-subtitle">
+        ปีการศึกษา <strong>${escapeHtml(data.academic_year || '-')}</strong>
+        ภาคเรียนที่ <strong>${escapeHtml(data.term || '-')}</strong>
+      </p>
+      <p class="report-subtitle">
+        สรุปผลการเรียนรายวิชา <strong>${escapeHtml(subjectName)}</strong>
+        รหัสวิชา <strong>${escapeHtml(subjectCode)}</strong>
+        ชั้น <strong>${escapeHtml(classLabel)}</strong>
+      </p>
+    </header>
 
     <div class="report-meta">
       <div class="meta-box">ครูผู้สอน: ${escapeHtml(teacherNameText)}</div>
-      <div class="meta-box">จำนวนผลการเรียน: ${formatReportInt(summary.total_results || 0)}</div>
       <div class="meta-box">ค่าเฉลี่ย: ${formatReportNumber(summary.average || 0, 2)}</div>
+      <div class="meta-box">S.D.: ${formatReportNumber(summary.sd || 0, 2)}</div>
     </div>
 
     <table class="summary-table">
       <colgroup>
-        <col style="width:9%;">
-        <col style="width:5%;">
-        <col style="width:3.8%;">
-        <col style="width:4.2%;">
-        <col style="width:3.8%;">
-        <col style="width:4.2%;">
-        <col style="width:3.8%;">
-        <col style="width:4.2%;">
-        <col style="width:3.8%;">
-        <col style="width:3.8%;">
-        <col style="width:3.8%;">
-        <col style="width:4.2%;">
-        <col style="width:3.8%;">
-        <col style="width:4.2%;">
-        <col style="width:6%;">
-        <col style="width:5.2%;">
-        <col style="width:5.2%;">
-        <col style="width:20%;">
+        <col style="width:8%;">
+        <col style="width:4.8%;">
+        <col style="width:3.5%;">
+        <col style="width:3.9%;">
+        <col style="width:3.5%;">
+        <col style="width:3.9%;">
+        <col style="width:3.5%;">
+        <col style="width:3.9%;">
+        <col style="width:3.5%;">
+        <col style="width:3.5%;">
+        <col style="width:3.5%;">
+        <col style="width:3.9%;">
+        <col style="width:3.5%;">
+        <col style="width:3.9%;">
+        <col style="width:5.6%;">
+        <col style="width:4.7%;">
+        <col style="width:4.7%;">
+        <col style="width:21.2%;">
       </colgroup>
       <thead>
         <tr>
@@ -12383,30 +12542,30 @@ function buildGradeStatsReportHtml(payload){
       </tbody>
     </table>
 
-    <section class="chart-section">
-      <div class="chart-box">
+    <section class="chart-grid">
+      <div class="chart-card">
         <div class="chart-title">แผนภูมิแสดงการกระจายผลการเรียน</div>
-        <div class="chart-canvas-wrap">
+        <div class="chart-wrap">
           <canvas id="reportGradeDistChart"></canvas>
         </div>
       </div>
 
-      <div class="chart-box">
+      <div class="chart-card">
         <div class="chart-title">แผนภูมิแสดงค่าเฉลี่ยรายห้อง</div>
-        <div class="chart-canvas-wrap">
+        <div class="chart-wrap">
           <canvas id="reportRoomAverageChart"></canvas>
         </div>
       </div>
     </section>
 
-    <section class="bottom-section">
-      <div class="top-student-box">
-        <div class="section-title">รายชื่อนักเรียนที่ทำคะแนนได้สูงสุด</div>
+    <section class="top-student-card">
+      <div class="section-title">รายชื่อนักเรียนที่ทำคะแนนได้สูงสุด</div>
+      <div class="top-student-body">
         <table class="top-student-table">
           <colgroup>
-            <col style="width:25%;">
-            <col style="width:42%;">
             <col style="width:18%;">
+            <col style="width:50%;">
+            <col style="width:17%;">
             <col style="width:15%;">
           </colgroup>
           <thead>
@@ -12418,27 +12577,28 @@ function buildGradeStatsReportHtml(payload){
             </tr>
           </thead>
           <tbody>
-            ${buildReportTopStudentsHtml(extras.top_score_students)}
+            ${topStudentsRowsHtml}
           </tbody>
         </table>
       </div>
+    </section>
 
-      <div class="signature-section">
-        <div class="section-title">ลงชื่อรับรองรายงาน</div>
-        <div class="signature-grid">
-          ${teacherNames.length
-            ? teacherNames.slice(0, 3).map(name => buildSignatureHtml('อาจารย์ประจำวิชา', name)).join('')
-            : buildSignatureHtml('อาจารย์ประจำวิชา', '')
-          }
+    <section class="signature-card">
+      <div class="signature-grid">
+        ${buildTeacherSignature(teacherSlots[0])}
+        ${buildOfficialSignature(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', learningAreaHead.person_name)}
 
-          ${buildSignatureHtml(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', learningAreaHead.person_name)}
-          ${buildSignatureHtml(measurementHead.position_title || 'หัวหน้างานวัดผล', measurementHead.person_name)}
-          ${buildSignatureHtml(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', academicHead.person_name)}
+        ${buildTeacherSignature(teacherSlots[1])}
+        ${buildOfficialSignature(measurementHead.position_title || 'หัวหน้างานวัดผล', measurementHead.person_name)}
 
-          <div class="director-signature">
-            <div class="approval-text">อนุมัติ</div>
-            ${buildSignatureHtml(director.position_title || 'ผู้อำนวยการโรงเรียน', director.person_name)}
-          </div>
+        ${buildTeacherSignature(teacherSlots[2])}
+        ${buildOfficialSignature(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', academicHead.person_name)}
+      </div>
+
+      <div class="approval-box">
+        <div class="approval-text">อนุมัติ</div>
+        <div class="director-box">
+          ${buildOfficialSignature(director.position_title || 'ผู้อำนวยการโรงเรียน', director.person_name)}
         </div>
       </div>
     </section>
@@ -12446,6 +12606,7 @@ function buildGradeStatsReportHtml(payload){
 
   <script>
     const gradeLabels = ${JSON.stringify(gradeLabels)};
+    const gradeCountDataset = ${JSON.stringify(gradeCountDataset)};
     const gradePercentDataset = ${JSON.stringify(gradePercentDataset)};
     const roomAverageLabels = ${JSON.stringify(roomAverageLabels)};
     const roomAverageDataset = ${JSON.stringify(roomAverageDataset)};
@@ -12457,14 +12618,32 @@ function buildGradeStatsReportHtml(payload){
         weight: '700'
       };
 
+      const chartColors = [
+        '#2563eb',
+        '#60a5fa',
+        '#38bdf8',
+        '#22c55e',
+        '#f59e0b',
+        '#f97316',
+        '#ef4444',
+        '#a855f7',
+        '#7c3aed',
+        '#14b8a6',
+        '#64748b',
+        '#ec4899'
+      ];
+
       new Chart(document.getElementById('reportGradeDistChart'), {
         type: 'bar',
         data: {
           labels: gradeLabels,
           datasets: [{
-            label: 'ร้อยละ',
-            data: gradePercentDataset,
-            borderRadius: 3,
+            label: 'จำนวน',
+            data: gradeCountDataset,
+            backgroundColor: chartColors,
+            borderColor: chartColors,
+            borderWidth: 1,
+            borderRadius: 5,
             borderSkipped: false
           }]
         },
@@ -12479,14 +12658,18 @@ function buildGradeStatsReportHtml(payload){
           scales: {
             y: {
               beginAtZero: true,
-              max: 100,
               ticks: {
-                font: commonFont,
-                callback: value => value + '%'
+                precision: 0,
+                font: commonFont
+              },
+              grid: {
+                color: '#e5e7eb'
               }
             },
             x: {
-              ticks: { font: commonFont },
+              ticks: {
+                font: commonFont
+              },
               grid: { display: false }
             }
           }
@@ -12500,7 +12683,10 @@ function buildGradeStatsReportHtml(payload){
           datasets: [{
             label: 'ค่าเฉลี่ย',
             data: roomAverageDataset,
-            borderRadius: 3,
+            backgroundColor: '#60a5fa',
+            borderColor: '#2563eb',
+            borderWidth: 1,
+            borderRadius: 5,
             borderSkipped: false
           }]
         },
@@ -12519,6 +12705,9 @@ function buildGradeStatsReportHtml(payload){
               ticks: {
                 stepSize: 1,
                 font: commonFont
+              },
+              grid: {
+                color: '#e5e7eb'
               }
             },
             x: {
