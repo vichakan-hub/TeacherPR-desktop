@@ -4141,6 +4141,125 @@
   }
 }
 
+    /* =====================================================
+   FINAL FIX : Sidebar compact + hide scrollbar
+   ===================================================== */
+
+/* sidebar โดยรวมให้กระชับขึ้น */
+.app-sidebar{
+  padding:14px 12px !important;
+  gap:10px !important;
+}
+
+/* ซ่อน scrollbar แต่ยังเลื่อนได้ในจอเตี้ย */
+.sidebar-nav{
+  gap:4px !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  padding-right:0 !important;
+  scrollbar-width:none !important;
+}
+
+.sidebar-nav::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+}
+
+/* brand ด้านบนให้เตี้ยลงนิด */
+.sidebar-brand{
+  min-height:56px !important;
+  padding:8px 8px !important;
+}
+
+.sidebar-logo{
+  width:42px !important;
+  height:42px !important;
+  border-radius:15px !important;
+  font-size:20px !important;
+}
+
+.sidebar-brand-title{
+  font-size:18px !important;
+}
+
+.sidebar-brand-sub{
+  font-size:13px !important;
+}
+
+/* กล่องชื่อครูให้เตี้ยลง */
+.sidebar-user{
+  padding:9px 10px !important;
+  border-radius:18px !important;
+}
+
+.sidebar-user-icon{
+  width:38px !important;
+  height:38px !important;
+  border-radius:14px !important;
+  font-size:20px !important;
+}
+
+.sidebar-user-name{
+  font-size:13px !important;
+}
+
+.sidebar-user-code{
+  font-size:11px !important;
+}
+
+/* เมนูหลักให้แคบลง */
+.sidebar-link,
+.sidebar-parent{
+  min-height:43px !important;
+  border-radius:14px !important;
+  padding:0 11px !important;
+  gap:10px !important;
+  font-size:14px !important;
+}
+
+/* icon ในเมนูให้เล็กลงนิด */
+.sidebar-icon{
+  width:25px !important;
+  font-size:18px !important;
+}
+
+/* เมนูย่อยให้เตี้ยและชิดขึ้น */
+.sidebar-submenu{
+  gap:4px !important;
+  margin:4px 0 6px 34px !important;
+  padding-left:8px !important;
+}
+
+.sidebar-sublink{
+  min-height:36px !important;
+  border-radius:12px !important;
+  padding:0 10px !important;
+  gap:8px !important;
+  font-size:12.5px !important;
+}
+
+.sidebar-subicon{
+  width:20px !important;
+  font-size:15px !important;
+}
+
+/* ปุ่มออกจากระบบให้เตี้ยลง */
+.sidebar-footer{
+  gap:6px !important;
+  padding-top:6px !important;
+}
+
+.sidebar-logout{
+  min-height:42px !important;
+  border-radius:14px !important;
+  font-size:14px !important;
+}
+
+/* ตอน sidebar ย่อ ไม่ต้องให้ submenu โผล่ */
+.app-shell.sidebar-collapsed .sidebar-submenu{
+  display:none !important;
+}
+
 </style>
 </head>
 <body>
@@ -5741,6 +5860,11 @@ gradeStatsPercentChart: null,
       });
     }
 
+    function closeAllSidebarGroups(){
+  el('sidebarFreePeriodGroup')?.classList.remove('open');
+  el('sidebarGradeReportGroup')?.classList.remove('open');
+}
+
 function setActivePage(page){
   const isHome = page === 'home';
   const isMidtermReport = page === 'midtermReport';
@@ -5749,6 +5873,10 @@ function setActivePage(page){
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
   const isGradeStats = page === 'gradestats';
+
+  if(!isFreePeriod && !isMidtermReport && !isImport){
+    closeAllSidebarGroups();
+  }
 
   el('pageHome').classList.toggle('hidden', !isHome);
   el('pageMidtermReport')?.classList.toggle('hidden', !isMidtermReport);
@@ -5762,7 +5890,6 @@ function setActivePage(page){
   updateAppTopbarTitle(page);
 
   if(isFreePeriod){
-    
     fpInitDefaultValues();
     fpLoadMyReservations();
   }
@@ -5901,13 +6028,14 @@ function updateAppTopbarFreePeriodSubTitle(subPage){
   }
 }
 
-    function openGradeReportFromSidebar(page = 'import'){
+function openGradeReportFromSidebar(page = 'import'){
   const shell = el('appShell');
 
   if(shell?.classList.contains('sidebar-collapsed')){
     shell.classList.remove('sidebar-collapsed');
   }
 
+  closeAllSidebarGroups();
   el('sidebarGradeReportGroup')?.classList.add('open');
 
   setActivePage(page);
@@ -5923,6 +6051,7 @@ function openFreePeriodFromSidebar(subPage = 'search'){
     shell.classList.remove('sidebar-collapsed');
   }
 
+  closeAllSidebarGroups();
   el('sidebarFreePeriodGroup')?.classList.add('open');
 
   setActivePage('freeperiod');
