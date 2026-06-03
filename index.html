@@ -7,6 +7,7 @@
   <title>TeacherPR - ระบบงานวิชาการสำหรับครู</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3718,6 +3719,95 @@
   border-color:#86efac;
 }
 
+    /* ===== Grade Stats Page ===== */
+.grade-stats-summary{
+  margin-top:14px;
+}
+
+.grade-stats-chart-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.grade-stats-chart-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:18px;
+  min-height:340px;
+}
+
+.grade-stats-chart-card h3{
+  margin:0 0 12px;
+  font-size:20px;
+  color:#17324d;
+}
+
+.grade-stats-chart-box{
+  height:260px;
+  position:relative;
+}
+
+.grade-stats-table,
+.grade-stats-top-table{
+  width:100%;
+  min-width:1180px;
+  border-collapse:collapse;
+}
+
+.grade-stats-table th,
+.grade-stats-table td,
+.grade-stats-top-table th,
+.grade-stats-top-table td{
+  padding:13px 12px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+  vertical-align:middle;
+}
+
+.grade-stats-table th,
+.grade-stats-top-table th{
+  background:#f8fbff;
+  color:#41536c;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+.grade-stats-room-main{
+  font-weight:900;
+  color:#d92d20;
+}
+
+.grade-stats-subject-cell{
+  line-height:1.45;
+}
+
+.grade-stats-subject-code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:900;
+  color:#1d4ed8;
+}
+
+.grade-stats-subject-name{
+  color:#41536c;
+  margin-top:3px;
+}
+
+.grade-stats-score{
+  font-family:'Sarabun',sans-serif;
+  font-size:18px;
+  font-weight:900;
+  color:#17324d;
+}
+
+@media (max-width:900px){
+  .grade-stats-chart-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3825,6 +3915,11 @@
           <span class="sidebar-icon">👩‍🏫</span>
           <span class="sidebar-label">ติดตามผลการเรียน</span>
         </button>
+
+       <button id="menuGradeStatsBtn" class="sidebar-link" type="button" data-side-page="gradestats">
+        <span class="sidebar-icon">📈</span>
+        <span class="sidebar-label">สถิติผลการเรียน</span>
+      </button>
 
 <div id="sidebarGradeReportGroup" class="sidebar-group">
   <button id="menuGradeReportBtn" class="sidebar-parent" type="button" data-side-page="gradereport">
@@ -4177,6 +4272,178 @@
           </div>
         </section>
       </div>
+
+        <!-- PAGE GRADE STATS : สถิติผลการเรียน -->
+<div id="pageGradeStats" class="hidden">
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>สถิติผลการเรียน</h2>
+        <div class="sub" style="margin-bottom:0;">
+          แสดงสถิติผลการเรียนเฉพาะรายวิชาที่ครูมีสิทธิ์ดู โดยรวมข้อมูลของครูทุกคนในรหัสวิชาเดียวกัน
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar-4">
+      <div class="field">
+        <span class="label-in-form">ปีการศึกษา</span>
+        <select id="gradeStatsYear" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ภาคเรียน</span>
+        <select id="gradeStatsTerm" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">รายวิชา</span>
+        <select id="gradeStatsSubject" class="std">
+          <option value="">ทุกวิชาที่ฉันสอน</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">&nbsp;</span>
+        <button id="loadGradeStatsBtn" class="btn-primary" type="button" style="width:100%;">
+          แสดงสถิติ
+        </button>
+      </div>
+    </div>
+
+    <div id="gradeStatsStatus" class="status info">
+      กรุณาเลือกปีการศึกษา ภาคเรียน และรายวิชา แล้วกดแสดงสถิติ
+    </div>
+
+    <div class="retest-summary grade-stats-summary">
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">จำนวนผลการเรียน</div>
+        <div id="gradeStatsTotalResults" class="retest-summary-value">0</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">นักเรียนไม่ซ้ำ</div>
+        <div id="gradeStatsUniqueStudents" class="retest-summary-value">0</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">ค่าเฉลี่ย</div>
+        <div id="gradeStatsAverage" class="retest-summary-value">0.00</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">กลุ่มเสี่ยง 0/ร/มส/มผ</div>
+        <div id="gradeStatsRiskCount" class="retest-summary-value">0</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2 id="gradeStatsSubjectTitle">ยังไม่ได้ประมวลผล</h2>
+        <div id="gradeStatsSubjectMeta" class="sub" style="margin-bottom:0;">
+          -
+        </div>
+      </div>
+    </div>
+
+    <div class="grade-stats-chart-grid">
+      <div class="grade-stats-chart-card">
+        <h3>การกระจายผลการเรียน</h3>
+        <div class="grade-stats-chart-box">
+          <canvas id="teacherGradeDistChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grade-stats-chart-card">
+        <h3>ค่าเฉลี่ยรายห้อง</h3>
+        <div class="grade-stats-chart-box">
+          <canvas id="teacherRoomAverageChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>ตารางสรุปรายห้อง</h2>
+        <div class="sub" style="margin-bottom:0;">
+          แสดงจำนวนผลการเรียนและค่าเฉลี่ยของแต่ละห้อง
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="grade-stats-table">
+        <thead>
+          <tr>
+            <th style="width:110px;">ห้อง</th>
+            <th style="width:120px;" class="text-center">จำนวน</th>
+            <th class="text-center">4</th>
+            <th class="text-center">3.5</th>
+            <th class="text-center">3</th>
+            <th class="text-center">2.5</th>
+            <th class="text-center">2</th>
+            <th class="text-center">1.5</th>
+            <th class="text-center">1</th>
+            <th class="text-center">0</th>
+            <th class="text-center">ร</th>
+            <th class="text-center">มส</th>
+            <th class="text-center">มผ</th>
+            <th class="text-center">ค่าเฉลี่ย</th>
+            <th class="text-center">S.D.</th>
+            <th>ครูผู้สอน</th>
+          </tr>
+        </thead>
+        <tbody id="gradeStatsRoomTbody">
+          <tr>
+            <td colspan="16" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="preview-topbar">
+      <div>
+        <h2>นักเรียนที่ทำคะแนนได้สูงสุด</h2>
+        <div class="sub" style="margin-bottom:0;">
+          เรียงจากคะแนนรวมมากไปน้อย
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="grade-stats-top-table">
+        <thead>
+          <tr>
+            <th style="width:70px;" class="text-center">ลำดับ</th>
+            <th style="width:130px;" class="text-center">รหัสนักเรียน</th>
+            <th>ชื่อ - สกุล</th>
+            <th style="width:120px;" class="text-center">ชั้น/ห้อง</th>
+            <th style="width:90px;" class="text-center">เลขที่</th>
+            <th style="width:120px;" class="text-center">คะแนนรวม</th>
+            <th style="width:100px;" class="text-center">เกรด</th>
+            <th>รายวิชา</th>
+            <th>ครูผู้สอน</th>
+          </tr>
+        </thead>
+        <tbody id="gradeStatsTopTbody">
+          <tr>
+            <td colspan="9" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
 <!-- PAGE RETEST : ส่งผลสอบแก้ตัว -->
 <div id="pageRetest" class="hidden">
@@ -4984,6 +5251,15 @@ freePeriodSelectedReserveDate: '',
 freePeriodSubPage: 'search',
 freePeriodViewMode: 'schedule',
 freePeriodSelectedMineReservationIds: new Set()
+
+gradeStatsOptions: {
+  years: [],
+  terms: [],
+  subjects: []
+},
+gradeStatsData: null,
+gradeStatsDistChart: null,
+gradeStatsRoomChart: null,
 };
 
     function setStatus(id, text, type='info'){
@@ -5121,6 +5397,7 @@ function setActivePage(page){
   const isAdviser = page === 'adviser';
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
+  const isGradeStats = page === 'gradestats';
 
   el('pageHome').classList.toggle('hidden', !isHome);
   el('pageMidtermReport')?.classList.toggle('hidden', !isMidtermReport);
@@ -5128,6 +5405,7 @@ function setActivePage(page){
   el('pageAdviser').classList.toggle('hidden', !isAdviser);
   el('pageRetest').classList.toggle('hidden', !isRetest);
   el('pageFreePeriod')?.classList.toggle('hidden', !isFreePeriod);
+  el('pageGradeStats')?.classList.toggle('hidden', !isGradeStats);
 
   setSidebarActiveMain(page);
   updateAppTopbarTitle(page);
@@ -5183,11 +5461,12 @@ function setSidebarActiveMain(page){
     return;
   }
 
-  const map = {
-    home: 'menuHomeBtn',
-    retest: 'menuRetestBtn',
-    adviser: 'menuAdviserBtn'
-  };
+const map = {
+  home: 'menuHomeBtn',
+  retest: 'menuRetestBtn',
+  adviser: 'menuAdviserBtn',
+  gradestats: 'menuGradeStatsBtn'
+};
 
   const targetId = map[page];
   if(targetId){
@@ -5235,6 +5514,7 @@ function updateAppTopbarTitle(page){
 const titleMap = {
   home: ['หน้าแรก', 'ระบบงานวิชาการสำหรับครู'],
   retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
+  gradestats: ['สถิติผลการเรียน', 'ดู Dashboard ผลการเรียนเฉพาะรายวิชาที่ครูมีสิทธิ์ดู'],
   midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
   import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
   adviser: ['ติดตามผลการเรียน', 'ติดตามผลการเรียนของนักเรียนในที่ปรึกษา'],
@@ -5782,6 +6062,7 @@ function getSettingTerm(settingName, fallback = null){
         await loadImportSettingsFromSheet();
         await loadImportTeachingList();
         await loadAdviserRooms();
+        await loadTeacherGradeStatOptions();
 
         showToast(
           'เข้าสู่ระบบสำเร็จ',
@@ -10792,6 +11073,409 @@ document.addEventListener('change', (event) => {
 });
 
     document.addEventListener('DOMContentLoaded', init);
+    const TEACHER_GRADE_STAT_KEYS = ['4','3.5','3','2.5','2','1.5','1','0','ร','มส','ผ','มผ'];
+
+function formatTeacherStatsNumber(value, digit = 2){
+  return Number(value || 0).toLocaleString('th-TH', {
+    minimumFractionDigits: digit,
+    maximumFractionDigits: digit
+  });
+}
+
+function getTeacherStatsGradeTotals(summary){
+  return Object.assign(
+    Object.fromEntries(TEACHER_GRADE_STAT_KEYS.map(k => [k, 0])),
+    summary?.grade_totals || {}
+  );
+}
+
+function teacherStatsChartColors(count){
+  const palette = [
+    '#2563eb','#60a5fa','#38bdf8','#22c55e',
+    '#f59e0b','#f97316','#ef4444','#a855f7',
+    '#64748b','#14b8a6','#84cc16','#ec4899'
+  ];
+
+  return Array.from({length: count}, (_, i) => palette[i % palette.length]);
+}
+
+async function loadTeacherGradeStatOptions(){
+  try{
+    if(!state.currentUser?.id){
+      throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
+    }
+
+    setStatus('gradeStatsStatus', 'กำลังโหลดตัวเลือกสถิติผลการเรียน...', 'info');
+
+    const { data, error } = await supabaseClient.rpc(
+      'get_teacher_grade_stat_options',
+      {
+        p_teacher_id: state.currentUser.id
+      }
+    );
+
+    if(error) throw error;
+
+    if(!data || data.ok === false){
+      throw new Error(data?.message || 'โหลดตัวเลือกไม่สำเร็จ');
+    }
+
+    state.gradeStatsOptions = {
+      years: Array.isArray(data.years) ? data.years : [],
+      terms: Array.isArray(data.terms) ? data.terms : [],
+      subjects: Array.isArray(data.subjects) ? data.subjects : []
+    };
+
+    renderTeacherGradeStatsYearTermOptions();
+    renderTeacherGradeStatsSubjectOptions();
+
+    setStatus(
+      'gradeStatsStatus',
+      'โหลดตัวเลือกเรียบร้อยแล้ว เลือกเงื่อนไขแล้วกดแสดงสถิติ',
+      'success'
+    );
+  }catch(err){
+    console.error('loadTeacherGradeStatOptions ERROR', err);
+    setStatus('gradeStatsStatus', err.message || 'โหลดตัวเลือกไม่สำเร็จ', 'error');
+  }
+}
+
+function renderTeacherGradeStatsYearTermOptions(){
+  const years = state.gradeStatsOptions.years || [];
+  const terms = state.gradeStatsOptions.terms || [];
+
+  const yearSelect = el('gradeStatsYear');
+  const termSelect = el('gradeStatsTerm');
+
+  const defaultYear =
+    state.importSettings?.academic_year ||
+    state.retestSettings?.academic_year ||
+    years[0] ||
+    '';
+
+  const defaultTerm =
+    state.importSettings?.term ||
+    state.retestSettings?.term ||
+    terms[0] ||
+    '';
+
+  yearSelect.innerHTML = years.length
+    ? years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('')
+    : `<option value="">ไม่พบปีการศึกษา</option>`;
+
+  termSelect.innerHTML = terms.length
+    ? terms.map(t => `<option value="${escapeHtml(t)}">เทอม ${escapeHtml(t)}</option>`).join('')
+    : `<option value="">ไม่พบภาคเรียน</option>`;
+
+  if(defaultYear && years.map(String).includes(String(defaultYear))){
+    yearSelect.value = String(defaultYear);
+  }
+
+  if(defaultTerm && terms.map(String).includes(String(defaultTerm))){
+    termSelect.value = String(defaultTerm);
+  }
+}
+
+function getFilteredTeacherGradeStatsSubjects(){
+  const year = safeNum(el('gradeStatsYear')?.value);
+  const term = safeNum(el('gradeStatsTerm')?.value);
+
+  return (state.gradeStatsOptions.subjects || []).filter(s => {
+    const sy = safeNum(s.academic_year);
+    const st = safeNum(s.term);
+
+    if(year && sy !== year) return false;
+    if(term && st !== term) return false;
+
+    return true;
+  });
+}
+
+function renderTeacherGradeStatsSubjectOptions(){
+  const subjects = getFilteredTeacherGradeStatsSubjects();
+  const select = el('gradeStatsSubject');
+
+  if(!select) return;
+
+  select.innerHTML = `
+    <option value="">ทุกวิชาที่ฉันสอน</option>
+    ${subjects.map(s => {
+      const code = safeText(s.subject_code, '');
+      const name = safeText(s.subject_name, '-');
+      const roomCount = Number(s.room_count || 0);
+      const resultCount = Number(s.result_count || 0);
+
+      return `
+        <option value="${escapeHtml(code)}">
+          ${escapeHtml(code)} · ${escapeHtml(name)} (${roomCount} ห้อง / ${resultCount} รายการ)
+        </option>
+      `;
+    }).join('')}
+  `;
+}
+
+async function loadTeacherGradeStats(){
+  try{
+    if(!state.currentUser?.id){
+      throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
+    }
+
+    const academicYear = safeNum(el('gradeStatsYear')?.value);
+    const term = safeNum(el('gradeStatsTerm')?.value);
+    const subjectCode = safeText(el('gradeStatsSubject')?.value, '');
+
+    if(!academicYear){
+      throw new Error('กรุณาเลือกปีการศึกษา');
+    }
+
+    if(!term){
+      throw new Error('กรุณาเลือกภาคเรียน');
+    }
+
+    const subjectCodes = subjectCode ? [subjectCode] : [];
+
+    setStatus('gradeStatsStatus', 'กำลังประมวลผลสถิติผลการเรียน...', 'info');
+
+    const { data, error } = await supabaseClient.rpc(
+      'get_teacher_grade_stat_summary',
+      {
+        p_teacher_id: state.currentUser.id,
+        p_academic_year: academicYear,
+        p_term: term,
+        p_subject_codes: subjectCodes,
+        p_top_limit: 20
+      }
+    );
+
+    if(error) throw error;
+
+    if(!data || data.ok === false){
+      throw new Error(data?.message || 'ประมวลผลไม่สำเร็จ');
+    }
+
+    state.gradeStatsData = data;
+    renderTeacherGradeStatsDashboard(data);
+
+    setStatus(
+      'gradeStatsStatus',
+      `ประมวลผลสำเร็จ พบข้อมูล ${Number(data.summary?.total_results || 0).toLocaleString('th-TH')} รายการ`,
+      'success'
+    );
+  }catch(err){
+    console.error('loadTeacherGradeStats ERROR', err);
+    resetTeacherGradeStatsDashboard();
+    setStatus('gradeStatsStatus', err.message || 'ประมวลผลไม่สำเร็จ', 'error');
+  }
+}
+
+function resetTeacherGradeStatsDashboard(){
+  el('gradeStatsTotalResults').textContent = '0';
+  el('gradeStatsUniqueStudents').textContent = '0';
+  el('gradeStatsAverage').textContent = '0.00';
+  el('gradeStatsRiskCount').textContent = '0';
+
+  el('gradeStatsSubjectTitle').textContent = 'ยังไม่ได้ประมวลผล';
+  el('gradeStatsSubjectMeta').textContent = '-';
+
+  el('gradeStatsRoomTbody').innerHTML = `
+    <tr>
+      <td colspan="16" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
+    </tr>
+  `;
+
+  el('gradeStatsTopTbody').innerHTML = `
+    <tr>
+      <td colspan="9" class="empty-state">ยังไม่ได้ประมวลผลข้อมูล</td>
+    </tr>
+  `;
+
+  if(state.gradeStatsDistChart){
+    state.gradeStatsDistChart.destroy();
+    state.gradeStatsDistChart = null;
+  }
+
+  if(state.gradeStatsRoomChart){
+    state.gradeStatsRoomChart.destroy();
+    state.gradeStatsRoomChart = null;
+  }
+}
+
+function renderTeacherGradeStatsDashboard(data){
+  const summary = data.summary || {};
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+  const topStudents = Array.isArray(data.top_students) ? data.top_students : [];
+  const gradeTotals = getTeacherStatsGradeTotals(summary);
+
+  el('gradeStatsTotalResults').textContent = Number(summary.total_results || 0).toLocaleString('th-TH');
+  el('gradeStatsUniqueStudents').textContent = Number(summary.unique_students || 0).toLocaleString('th-TH');
+  el('gradeStatsAverage').textContent = formatTeacherStatsNumber(summary.average || 0);
+  el('gradeStatsRiskCount').textContent = Number(summary.risk_count || 0).toLocaleString('th-TH');
+
+  el('gradeStatsSubjectTitle').textContent = summary.subject_name || 'ทุกวิชาที่ฉันสอน';
+  el('gradeStatsSubjectMeta').textContent =
+    `ปีการศึกษา ${data.academic_year || '-'} · เทอม ${data.term || '-'} · รายวิชา ${Array.isArray(data.selected_subject_codes) ? data.selected_subject_codes.join(', ') : '-'}`;
+
+  renderTeacherGradeStatsRoomRows(rows);
+  renderTeacherGradeStatsTopStudents(topStudents);
+  renderTeacherGradeStatsCharts(rows, gradeTotals);
+}
+
+function renderTeacherGradeStatsRoomRows(rows){
+  const tbody = el('gradeStatsRoomTbody');
+
+  if(!rows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="16" class="empty-state">ไม่พบข้อมูลรายห้อง</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => {
+    const grades = Object.assign(
+      Object.fromEntries(TEACHER_GRADE_STAT_KEYS.map(k => [k, 0])),
+      row.grades || {}
+    );
+
+    return `
+      <tr>
+        <td>
+          <div class="grade-stats-room-main">${escapeHtml(row.room_label || '-')}</div>
+        </td>
+        <td class="text-center">${Number(row.total_results || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['4'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['3.5'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['3'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['2.5'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['2'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['1.5'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['1'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['0'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['ร'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['มส'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center">${Number(grades['มผ'] || 0).toLocaleString('th-TH')}</td>
+        <td class="text-center"><strong>${formatTeacherStatsNumber(row.average || 0)}</strong></td>
+        <td class="text-center">${formatTeacherStatsNumber(row.sd || 0)}</td>
+        <td>${escapeHtml(row.teacher_name || '')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderTeacherGradeStatsTopStudents(rows){
+  const tbody = el('gradeStatsTopTbody');
+
+  if(!rows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="empty-state">ไม่พบข้อมูลคะแนนรวม</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td class="text-center">${escapeHtml(row.rank_no || '-')}</td>
+      <td class="text-center mono">${escapeHtml(row.student_code || '-')}</td>
+      <td>${escapeHtml(row.student_name || '-')}</td>
+      <td class="text-center">${escapeHtml(row.class_level || '-')}/${escapeHtml(row.room || '-')}</td>
+      <td class="text-center">${escapeHtml(row.student_no ?? '-')}</td>
+      <td class="text-center">
+        <span class="grade-stats-score">${escapeHtml(row.total_score ?? '-')}</span>
+      </td>
+      <td class="text-center">${renderStudentGradePill(row.grade_code)}</td>
+      <td>
+        <div class="grade-stats-subject-cell">
+          <div class="grade-stats-subject-code">${escapeHtml(row.subject_code || '-')}</div>
+          <div class="grade-stats-subject-name">${escapeHtml(row.subject_name || '-')}</div>
+        </div>
+      </td>
+      <td>${escapeHtml(row.teacher_name || '')}</td>
+    </tr>
+  `).join('');
+}
+
+function renderTeacherGradeStatsCharts(rows, gradeTotals){
+  const gradeLabels = TEACHER_GRADE_STAT_KEYS;
+  const gradeValues = gradeLabels.map(k => Number(gradeTotals[k] || 0));
+
+  if(state.gradeStatsDistChart){
+    state.gradeStatsDistChart.destroy();
+  }
+
+  if(state.gradeStatsRoomChart){
+    state.gradeStatsRoomChart.destroy();
+  }
+
+  state.gradeStatsDistChart = new Chart(el('teacherGradeDistChart'), {
+    type: 'bar',
+    data: {
+      labels: gradeLabels,
+      datasets: [{
+        label: 'จำนวนผลการเรียน',
+        data: gradeValues,
+        backgroundColor: teacherStatsChartColors(gradeLabels.length),
+        borderRadius: 10,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  state.gradeStatsRoomChart = new Chart(el('teacherRoomAverageChart'), {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.room_label || '-'),
+      datasets: [{
+        label: 'ค่าเฉลี่ย',
+        data: rows.map(r => Number(r.average || 0)),
+        backgroundColor: rows.map(r => Number(r.average || 0) < 3 ? '#f59e0b' : '#2563eb'),
+        borderRadius: 10,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true, max: 4, ticks: { stepSize: 0.5 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+    el('menuGradeStatsBtn')?.addEventListener('click', async () => {
+  setActivePage('gradestats');
+
+  if(!state.gradeStatsOptions?.subjects?.length){
+    await loadTeacherGradeStatOptions();
+  }
+});
+
+el('gradeStatsYear')?.addEventListener('change', () => {
+  renderTeacherGradeStatsSubjectOptions();
+});
+
+el('gradeStatsTerm')?.addEventListener('change', () => {
+  renderTeacherGradeStatsSubjectOptions();
+});
+
+el('loadGradeStatsBtn')?.addEventListener('click', loadTeacherGradeStats);
   </script>
 </body>
 </html>
