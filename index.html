@@ -12035,9 +12035,7 @@ const signatureTeacherNames = Array.isArray(extras?.subject_teachers)
       .filter(Boolean)
   : [];
 
-  const subjectName = safeText(extras.subject_name || summary.subject_name, '-');
-  const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
-  const classLabel = getReportClassLabel(extras, rows);
+
 
   const subjectName = safeText(extras.subject_name || summary.subject_name, '-');
   const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
