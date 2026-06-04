@@ -12039,6 +12039,12 @@ const signatureTeacherNames = Array.isArray(extras?.subject_teachers)
   const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
   const classLabel = getReportClassLabel(extras, rows);
 
+  const subjectName = safeText(extras.subject_name || summary.subject_name, '-');
+  const subjectCode = safeText(extras.subject_code || getSelectedGradeStatsSubjectCode(), '-');
+  const classLabel = getReportClassLabel(extras, rows);
+
+  const reportLogoUrl = new URL(SCHOOL_LOGO_URL, window.location.href).href;
+
   const gradeLabels = getReportGradeKeys();
   const gradeTotals = getReportGradeTotals(summary);
   const gradeCountDataset = gradeLabels.map(k => Number(gradeTotals[k] || 0));
@@ -12205,11 +12211,23 @@ function buildOfficialSignature(positionTitle, personName){
       background:#ffffff;
     }
 
-    .report-header{
-      text-align:center;
-      margin-bottom:3.5mm;
-      line-height:1.22;
-    }
+.report-header{
+  position:relative;
+  text-align:center;
+  margin-bottom:3.5mm;
+  line-height:1.22;
+  min-height:18mm;
+  padding:1mm 20mm 0;
+}
+
+.report-logo{
+  position:absolute;
+  left:0;
+  top:0;
+  width:17mm;
+  height:17mm;
+  object-fit:contain;
+}
 
     .report-title{
       margin:0;
@@ -12506,10 +12524,16 @@ function buildOfficialSignature(positionTitle, personName){
   </div>
 
   <main class="report-page">
-    <header class="report-header">
-      <h1 class="report-title">
-        แบบรายงานผลการเรียนการสอนโรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
-      </h1>
+<header class="report-header">
+  <img
+    class="report-logo"
+    src="${escapeHtml(reportLogoUrl)}"
+    alt="ตราโรงเรียน"
+  >
+
+  <h1 class="report-title">
+    แบบรายงานผลการเรียนการสอนโรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
+  </h1>
       <p class="report-subtitle">
         ปีการศึกษา <strong>${escapeHtml(data.academic_year || '-')}</strong>
         ภาคเรียนที่ <strong>${escapeHtml(data.term || '-')}</strong>
