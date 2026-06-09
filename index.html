@@ -4278,6 +4278,58 @@
   }
 }
 
+    /* ===== Sidebar section label: ครูผู้สอน / ครูที่ปรึกษา / งานทั่วไป ===== */
+.sidebar-section-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:30px;
+  padding:12px 12px 4px;
+  color:#64748b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  user-select:none;
+}
+
+.sidebar-section-label::after{
+  content:'';
+  height:1px;
+  flex:1;
+  background:#d8e4ef;
+  margin-left:4px;
+}
+
+.sidebar-section-dot{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#2563eb;
+  box-shadow:0 0 0 4px rgba(37,99,235,.10);
+  flex:0 0 auto;
+}
+
+.sidebar-section-dot.adviser{
+  background:#0f9d58;
+  box-shadow:0 0 0 4px rgba(15,157,88,.10);
+}
+
+.sidebar-section-dot.general{
+  background:#b26a00;
+  box-shadow:0 0 0 4px rgba(178,106,0,.12);
+}
+
+/* ตอน sidebar ย่อ ให้ซ่อน label กลุ่มเมนู */
+.app-shell.sidebar-collapsed .sidebar-section-label{
+  opacity:0;
+  height:0;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+
 </style>
 </head>
 <body>
@@ -4370,76 +4422,87 @@
         </div>
       </div>
 
-      <nav class="sidebar-nav">
-        <button id="menuHomeBtn" class="sidebar-link active" type="button" data-side-page="home">
-          <span class="sidebar-icon">🏠</span>
-          <span class="sidebar-label">หน้าแรก</span>
-        </button>
-
-        <button id="menuRetestBtn" class="sidebar-link" type="button" data-side-page="retest">
-          <span class="sidebar-icon">📝</span>
-          <span class="sidebar-label">ส่งผลสอบแก้ตัว</span>
-        </button>
-
-        <button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
-          <span class="sidebar-icon">👩‍🏫</span>
-          <span class="sidebar-label">ติดตามผลการเรียน</span>
-        </button>
-
-
-
-<div id="sidebarGradeReportGroup" class="sidebar-group">
-  <button id="menuGradeReportBtn" class="sidebar-parent" type="button" data-side-page="gradereport">
-    <span class="sidebar-icon">📊</span>
-    <span class="sidebar-label">รายงานผลการเรียน</span>
-    <span class="sidebar-caret">▾</span>
+<nav class="sidebar-nav">
+  <button id="menuHomeBtn" class="sidebar-link active" type="button" data-side-page="home">
+    <span class="sidebar-icon">🏠</span>
+    <span class="sidebar-label">หน้าแรก</span>
   </button>
 
-  <div class="sidebar-submenu">
-    <button id="sideMidtermReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="midtermReport">
-      <span class="sidebar-subicon">🕒</span>
-      <span class="sidebar-label">รายงานผลกลางภาค</span>
-    </button>
-
-    <button id="sideFinalReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="import">
-      <span class="sidebar-subicon">📥</span>
-      <span class="sidebar-label">รายงานผลปลายภาค</span>
-    </button>
+  <div class="sidebar-section-label">
+    <span class="sidebar-section-dot"></span>
+    <span>ครูผู้สอน</span>
   </div>
-</div>
 
-      <button id="menuGradeStatsBtn" class="sidebar-link" type="button" data-side-page="gradestats">
-        <span class="sidebar-icon">📈</span>
-        <span class="sidebar-label">สถิติผลการเรียน</span>
+  <div id="sidebarGradeReportGroup" class="sidebar-group">
+    <button id="menuGradeReportBtn" class="sidebar-parent" type="button" data-side-page="gradereport">
+      <span class="sidebar-icon">📊</span>
+      <span class="sidebar-label">รายงานผลการเรียน</span>
+      <span class="sidebar-caret">▾</span>
+    </button>
+
+    <div class="sidebar-submenu">
+      <button id="sideMidtermReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="midtermReport">
+        <span class="sidebar-subicon">🕒</span>
+        <span class="sidebar-label">รายงานผลกลางภาค</span>
       </button>
 
+      <button id="sideFinalReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="import">
+        <span class="sidebar-subicon">📥</span>
+        <span class="sidebar-label">รายงานผลปลายภาค</span>
+      </button>
+    </div>
+  </div>
 
+  <button id="menuGradeStatsBtn" class="sidebar-link" type="button" data-side-page="gradestats">
+    <span class="sidebar-icon">📈</span>
+    <span class="sidebar-label">สถิติผลการเรียน</span>
+  </button>
 
-        <div id="sidebarFreePeriodGroup" class="sidebar-group">
-          <button id="menuFreePeriodBtn" class="sidebar-parent" type="button" data-side-page="freeperiod">
-            <span class="sidebar-icon">🗓️</span>
-            <span class="sidebar-label">จองคาบว่าง</span>
-            <span class="sidebar-caret">▾</span>
-          </button>
+  <button id="menuRetestBtn" class="sidebar-link" type="button" data-side-page="retest">
+    <span class="sidebar-icon">📝</span>
+    <span class="sidebar-label">ส่งผลสอบแก้ตัว</span>
+  </button>
 
-          <div class="sidebar-submenu">
-            <button id="sideFpSearchBtn" class="sidebar-sublink" type="button" data-fp-side-page="search">
-              <span class="sidebar-subicon">🔎</span>
-              <span class="sidebar-label">จองคาบ</span>
-            </button>
+  <div class="sidebar-section-label">
+    <span class="sidebar-section-dot adviser"></span>
+    <span>ครูที่ปรึกษา</span>
+  </div>
 
-            <button id="sideFpMineBtn" class="sidebar-sublink" type="button" data-fp-side-page="mine">
-              <span class="sidebar-subicon">👤</span>
-              <span class="sidebar-label">การจองของฉัน</span>
-            </button>
+  <button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
+    <span class="sidebar-icon">👩‍🏫</span>
+    <span class="sidebar-label">ติดตามผลการเรียน</span>
+  </button>
 
-            <button id="sideFpAllBtn" class="sidebar-sublink" type="button" data-fp-side-page="all">
-              <span class="sidebar-subicon">🏫</span>
-              <span class="sidebar-label">การจองทั้งหมด</span>
-            </button>
-          </div>
-        </div>
-      </nav>
+  <div class="sidebar-section-label">
+    <span class="sidebar-section-dot general"></span>
+    <span>งานทั่วไป</span>
+  </div>
+
+  <div id="sidebarFreePeriodGroup" class="sidebar-group">
+    <button id="menuFreePeriodBtn" class="sidebar-parent" type="button" data-side-page="freeperiod">
+      <span class="sidebar-icon">🗓️</span>
+      <span class="sidebar-label">จองคาบว่าง</span>
+      <span class="sidebar-caret">▾</span>
+    </button>
+
+    <div class="sidebar-submenu">
+      <button id="sideFpSearchBtn" class="sidebar-sublink" type="button" data-fp-side-page="search">
+        <span class="sidebar-subicon">🔎</span>
+        <span class="sidebar-label">จองคาบ</span>
+      </button>
+
+      <button id="sideFpMineBtn" class="sidebar-sublink" type="button" data-fp-side-page="mine">
+        <span class="sidebar-subicon">👤</span>
+        <span class="sidebar-label">การจองของฉัน</span>
+      </button>
+
+      <button id="sideFpAllBtn" class="sidebar-sublink" type="button" data-fp-side-page="all">
+        <span class="sidebar-subicon">🏫</span>
+        <span class="sidebar-label">การจองทั้งหมด</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
       <div class="sidebar-footer">
         <button id="sidebarLogoutBtn" class="sidebar-logout" type="button">
