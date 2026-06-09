@@ -4278,7 +4278,8 @@
   }
 }
 
-    /* ===== Sidebar section label: ครูผู้สอน / ครูที่ปรึกษา / งานทั่วไป ===== */
+
+/* ===== Sidebar section label: ครูผู้สอน / ครูที่ปรึกษา / งานทั่วไป ===== */
 .sidebar-section-label{
   display:flex;
   align-items:center;
@@ -4292,7 +4293,6 @@
   white-space:nowrap;
   user-select:none;
 }
-
 .sidebar-section-label::after{
   content:'';
   height:1px;
@@ -4300,7 +4300,6 @@
   background:#d8e4ef;
   margin-left:4px;
 }
-
 .sidebar-section-dot{
   width:9px;
   height:9px;
@@ -4309,18 +4308,14 @@
   box-shadow:0 0 0 4px rgba(37,99,235,.10);
   flex:0 0 auto;
 }
-
 .sidebar-section-dot.adviser{
   background:#0f9d58;
   box-shadow:0 0 0 4px rgba(15,157,88,.10);
 }
-
 .sidebar-section-dot.general{
   background:#b26a00;
   box-shadow:0 0 0 4px rgba(178,106,0,.12);
 }
-
-/* ตอน sidebar ย่อ ให้ซ่อน label กลุ่มเมนู */
 .app-shell.sidebar-collapsed .sidebar-section-label{
   opacity:0;
   height:0;
@@ -4328,6 +4323,118 @@
   padding:0;
   overflow:hidden;
   pointer-events:none;
+}
+
+/* ===== Teacher student profile page ===== */
+.teacher-student-toolbar{
+  display:grid;
+  grid-template-columns:1.35fr 1fr 1.25fr 170px;
+  gap:10px 12px;
+  margin-bottom:14px;
+}
+.teacher-student-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:14px;
+}
+.teacher-student-table{
+  width:100%;
+  min-width:760px;
+  border-collapse:collapse;
+}
+.teacher-student-table th,
+.teacher-student-table td{
+  padding:14px 14px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+  vertical-align:middle;
+}
+.teacher-student-table th{
+  background:#f8fbff;
+  color:#41536c;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+.teacher-student-gpa-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:74px;
+  min-height:34px;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid #fed7aa;
+  background:#fff7ed;
+  color:#b45309;
+  font-family:'Sarabun',sans-serif;
+  font-weight:900;
+}
+.teacher-student-overlay .overlay-card{
+  width:min(1420px,100%);
+  max-height:92vh;
+  overflow:auto;
+  padding:0;
+}
+.teacher-student-term-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:8px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:#f8fbff;
+  margin:16px 0;
+}
+.teacher-student-term-tab{
+  height:42px;
+  border-radius:14px;
+  padding:0 16px;
+  font-weight:900;
+  background:#ecf2f8;
+  color:#41536c;
+  border:1px solid #d6e2ee;
+}
+.teacher-student-term-tab.active{
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 8px 18px rgba(37,99,235,.18);
+}
+.teacher-student-overview-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+.teacher-student-chart-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:18px;
+  min-height:340px;
+}
+.teacher-student-chart-box{
+  position:relative;
+  height:280px;
+}
+.teacher-student-tab-panel.hidden{
+  display:none!important;
+}
+@media (max-width:1100px){
+  .teacher-student-toolbar,
+  .teacher-student-summary,
+  .teacher-student-overview-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+@media (max-width:720px){
+  .teacher-student-toolbar,
+  .teacher-student-summary,
+  .teacher-student-overview-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 </style>
@@ -4422,7 +4529,7 @@
         </div>
       </div>
 
-<nav class="sidebar-nav">
+      <nav class="sidebar-nav">
   <button id="menuHomeBtn" class="sidebar-link active" type="button" data-side-page="home">
     <span class="sidebar-icon">🏠</span>
     <span class="sidebar-label">หน้าแรก</span>
@@ -4456,6 +4563,11 @@
   <button id="menuGradeStatsBtn" class="sidebar-link" type="button" data-side-page="gradestats">
     <span class="sidebar-icon">📈</span>
     <span class="sidebar-label">สถิติผลการเรียน</span>
+  </button>
+
+  <button id="menuTeacherStudentBtn" class="sidebar-link" type="button" data-side-page="teacherstudent">
+    <span class="sidebar-icon">🧑‍🎓</span>
+    <span class="sidebar-label">ข้อมูลนักเรียนรายบุคคล</span>
   </button>
 
   <button id="menuRetestBtn" class="sidebar-link" type="button" data-side-page="retest">
@@ -4808,7 +4920,94 @@
         </section>
       </div>
 
-        <!-- PAGE GRADE STATS : สถิติผลการเรียน -->
+        
+<!-- PAGE TEACHER STUDENT : ข้อมูลนักเรียนรายบุคคล -->
+<div id="pageTeacherStudent" class="hidden">
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>ข้อมูลนักเรียนรายบุคคล</h2>
+        <div class="sub" style="margin-bottom:0;">
+          แสดงรายชื่อนักเรียนในรายวิชาที่ครูผู้สอนรับผิดชอบ และดูผลการเรียนย้อนหลังรายเทอมเพื่อวิเคราะห์ผู้เรียน
+        </div>
+      </div>
+    </div>
+
+    <div class="teacher-student-toolbar">
+      <div class="field">
+        <span class="label-in-form">รายวิชา</span>
+        <select id="teacherStudentSubjectSelect" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ชั้น/ห้อง</span>
+        <select id="teacherStudentRoomSelect" class="std">
+          <option value="">เลือกชั้น/ห้อง</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ค้นหา</span>
+        <input id="teacherStudentKeyword" class="std" type="text" placeholder="เลขประจำตัว / ชื่อ-สกุล">
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">&nbsp;</span>
+        <button id="loadTeacherStudentBtn" class="btn-primary" type="button" style="width:100%;">
+          แสดงรายชื่อ
+        </button>
+      </div>
+    </div>
+
+    <div class="teacher-student-summary">
+      <div class="mini-card">
+        <div class="mini-label">ปี/เทอมปัจจุบัน</div>
+        <div id="teacherStudentCurrentTerm" class="mini-value">-</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">นักเรียนทั้งหมด</div>
+        <div id="teacherStudentTotalCount" class="mini-value">0</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">GPA เฉลี่ยของกลุ่ม</div>
+        <div id="teacherStudentAverageGpa" class="mini-value">0.00</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">มีวิชาเสี่ยง</div>
+        <div id="teacherStudentRiskCount" class="mini-value">0</div>
+      </div>
+    </div>
+
+    <div id="teacherStudentStatus" class="status info">
+      กรุณาเลือกรายวิชาและชั้น/ห้อง แล้วกดแสดงรายชื่อ
+    </div>
+
+    <div class="table-wrap">
+      <table class="teacher-student-table">
+        <thead>
+          <tr>
+            <th style="width:90px;" class="text-center">เลขที่</th>
+            <th>ชื่อ-สกุล</th>
+            <th style="width:190px;" class="text-center">เกรดเฉลี่ยสะสมตลอดหลักสูตร</th>
+            <th style="width:180px;" class="text-center">แสดงผลการเรียน</th>
+          </tr>
+        </thead>
+        <tbody id="teacherStudentTbody">
+          <tr>
+            <td colspan="4" class="empty-state">ยังไม่มีข้อมูลนักเรียน</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- PAGE GRADE STATS : สถิติผลการเรียน -->
 <div id="pageGradeStats" class="hidden">
   <section class="card" style="margin-bottom:18px;">
     <div class="preview-topbar">
@@ -5334,7 +5533,132 @@
 </div>
 
 
-            <!-- STUDENT DETAIL OVERLAY -->
+            
+<!-- TEACHER STUDENT GRADE OVERLAY -->
+<div id="teacherStudentGradeOverlay" class="overlay teacher-student-overlay">
+  <div class="overlay-card">
+    <div class="student-detail-head">
+      <div class="student-detail-top">
+        <div>
+          <h2 id="teacherStudentOverlayTitle" class="student-detail-title">ผลการเรียนของนักเรียน</h2>
+          <p id="teacherStudentOverlaySub" class="student-detail-sub">-</p>
+        </div>
+
+        <div class="actions" style="margin:0;">
+          <button id="closeTeacherStudentOverlayBtnTop" class="btn-secondary" type="button">ปิด</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="student-detail-body">
+      <div class="student-meta-grid">
+        <div class="student-meta-card">
+          <div class="student-meta-label">เลขประจำตัวนักเรียน</div>
+          <div id="teacherStudentDetailCode" class="student-meta-value">-</div>
+        </div>
+
+        <div class="student-meta-card">
+          <div class="student-meta-label">ชื่อ - สกุล</div>
+          <div id="teacherStudentDetailName" class="student-meta-value">-</div>
+        </div>
+
+        <div class="student-meta-card">
+          <div class="student-meta-label">ชั้น / ห้องปัจจุบัน</div>
+          <div id="teacherStudentDetailClass" class="student-meta-value">-</div>
+        </div>
+
+        <div class="student-meta-card">
+          <div class="student-meta-label">เลขที่</div>
+          <div id="teacherStudentDetailNo" class="student-meta-value">-</div>
+        </div>
+
+        <div class="student-meta-card">
+          <div class="student-meta-label">GPA สะสมตลอดหลักสูตร</div>
+          <div id="teacherStudentDetailGpa" class="student-meta-value">0.00</div>
+        </div>
+      </div>
+
+      <div id="teacherStudentTermTabs" class="teacher-student-term-tabs">
+        <button class="teacher-student-term-tab active" type="button" data-teacher-student-tab="overview">ภาพรวม</button>
+      </div>
+
+      <div id="teacherStudentOverviewPanel" class="teacher-student-tab-panel">
+        <div class="teacher-student-overview-grid">
+          <div class="mini-card">
+            <div class="mini-label">GPA สะสม</div>
+            <div id="teacherStudentOvGpa" class="mini-value">0.00</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-label">จำนวนเทอมที่มีผลการเรียน</div>
+            <div id="teacherStudentOvTermCount" class="mini-value">0</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-label">จำนวนวิชาทั้งหมด</div>
+            <div id="teacherStudentOvSubjectCount" class="mini-value">0</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-label">วิชาเสี่ยง 0/ร/มส/มผ</div>
+            <div id="teacherStudentOvRiskCount" class="mini-value">0</div>
+          </div>
+        </div>
+
+        <div class="teacher-student-chart-card">
+          <h3 style="margin:0 0 12px;color:#17324d;">กราฟเปรียบเทียบ GPA รายเทอม</h3>
+          <div class="teacher-student-chart-box">
+            <canvas id="teacherStudentGpaChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="teacherStudentTermPanel" class="teacher-student-tab-panel hidden">
+        <div class="student-panel">
+          <div class="student-panel-head">
+            <h3 id="teacherStudentTermTitle">ผลการเรียนรายเทอม</h3>
+          </div>
+
+          <div class="student-panel-body">
+            <div class="table-wrap">
+              <table class="grade-report-table">
+                <thead>
+                  <tr class="group">
+                    <th rowspan="2">รหัสวิชา</th>
+                    <th rowspan="2">รายวิชา</th>
+                    <th rowspan="2">ประเภท</th>
+                    <th rowspan="2">หน่วยกิต</th>
+                    <th colspan="4">ผลการเรียน</th>
+                    <th rowspan="2">เกรด</th>
+                    <th rowspan="2">แก้ตัว</th>
+                    <th rowspan="2">ครูผู้สอน</th>
+                  </tr>
+                  <tr>
+                    <th>หน่วยการเรียน</th>
+                    <th>กลางภาค</th>
+                    <th>ปลายภาค</th>
+                    <th>รวม</th>
+                  </tr>
+                </thead>
+                <tbody id="teacherStudentGradeTbody">
+                  <tr>
+                    <td colspan="11" class="empty-state">เลือกแท็บรายเทอมเพื่อดูข้อมูล</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="justify-content:flex-end;margin-top:18px;">
+        <button id="closeTeacherStudentOverlayBtnBottom" class="btn-secondary" type="button">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL OVERLAY -->
 <div id="studentDetailOverlay" class="overlay student-detail-overlay">
   <div class="overlay-card">
     <div class="student-detail-head">
@@ -5819,6 +6143,16 @@ gradeStatsData: null,
 gradeStatsDistChart: null,
 gradeStatsRoomChart: null,
 gradeStatsPercentChart: null,
+
+teacherStudentOptions: {
+  subjectGroups: []
+},
+teacherStudentRows: [],
+teacherStudentCurrentStudent: null,
+teacherStudentCurrentGrades: [],
+teacherStudentCurrentSummary: null,
+teacherStudentCurrentTermKey: 'overview',
+teacherStudentGpaChart: null,
 };
 
     function setStatus(id, text, type='info'){
@@ -5962,6 +6296,7 @@ function setActivePage(page){
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
   const isGradeStats = page === 'gradestats';
+  const isTeacherStudent = page === 'teacherstudent';
 
   if(!isFreePeriod && !isMidtermReport && !isImport){
     closeAllSidebarGroups();
@@ -5974,6 +6309,7 @@ function setActivePage(page){
   el('pageRetest').classList.toggle('hidden', !isRetest);
   el('pageFreePeriod')?.classList.toggle('hidden', !isFreePeriod);
   el('pageGradeStats')?.classList.toggle('hidden', !isGradeStats);
+  el('pageTeacherStudent')?.classList.toggle('hidden', !isTeacherStudent);
 
   setSidebarActiveMain(page);
   updateAppTopbarTitle(page);
@@ -5981,6 +6317,10 @@ function setActivePage(page){
   if(isFreePeriod){
     fpInitDefaultValues();
     fpLoadMyReservations();
+  }
+
+  if(isTeacherStudent){
+    teacherStudentUpdateCurrentTermLabel();
   }
 
   closeMobileSidebar();
@@ -6032,7 +6372,8 @@ const map = {
   home: 'menuHomeBtn',
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
-  gradestats: 'menuGradeStatsBtn'
+  gradestats: 'menuGradeStatsBtn',
+  teacherstudent: 'menuTeacherStudentBtn'
 };
 
   const targetId = map[page];
@@ -6082,6 +6423,7 @@ const titleMap = {
   home: ['หน้าแรก', 'ระบบงานวิชาการสำหรับครู'],
   retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
   gradestats: ['สถิติผลการเรียน', 'ดู Dashboard ผลการเรียนเฉพาะรายวิชาที่ครูมีสิทธิ์ดู'],
+  teacherstudent: ['ข้อมูลนักเรียนรายบุคคล', 'ดูผลการเรียนย้อนหลังของนักเรียนในรายวิชาที่ครูสอน'],
   midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
   import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
   adviser: ['ติดตามผลการเรียน', 'ติดตามข้อมูลผลการเรียนของนักเรียนในที่ปรึกษา'],
@@ -6632,6 +6974,7 @@ function getSettingTerm(settingName, fallback = null){
         await loadImportTeachingList();
         await loadAdviserRooms();
         await loadTeacherGradeStatOptions();
+        await loadTeacherStudentOptions();
 
         showToast(
           'เข้าสู่ระบบสำเร็จ',
@@ -6664,6 +7007,17 @@ state.retestEditingId = null;
 state.currentStudentProfile = null;
 state.currentStudentGrades = [];
 state.currentStudentSummary = null;
+
+state.teacherStudentOptions = { subjectGroups: [] };
+state.teacherStudentRows = [];
+state.teacherStudentCurrentStudent = null;
+state.teacherStudentCurrentGrades = [];
+state.teacherStudentCurrentSummary = null;
+state.teacherStudentCurrentTermKey = 'overview';
+if(state.teacherStudentGpaChart){
+  state.teacherStudentGpaChart.destroy();
+  state.teacherStudentGpaChart = null;
+}
 
       sessionStorage.removeItem('teacherPageUser');
       el('appView').classList.add('hidden');
@@ -11270,6 +11624,653 @@ function fpBindScheduleTooltips(){
   });
 }
 
+
+/*******************************************************
+ * Teacher Student Profile : ข้อมูลนักเรียนรายบุคคล
+ *******************************************************/
+function teacherStudentUpdateCurrentTermLabel(){
+  const setting = state.importSettings || buildDefaultOneSetting();
+  const year = safeNum(setting.academic_year) || getCurrentAcademicYear();
+  const term = safeNum(setting.term) || getCurrentTerm();
+
+  if(el('teacherStudentCurrentTerm')){
+    el('teacherStudentCurrentTerm').textContent = `${term}/${year}`;
+  }
+}
+
+function teacherStudentGetCurrentYearTerm(){
+  const setting = state.importSettings || buildDefaultOneSetting();
+  return {
+    academic_year: safeNum(setting.academic_year) || getCurrentAcademicYear(),
+    term: safeNum(setting.term) || getCurrentTerm()
+  };
+}
+
+function teacherStudentGroupOfferings(rows){
+  const map = new Map();
+
+  (rows || []).forEach(row => {
+    const key = [
+      row.subject_id || row.subject_code,
+      row.subject_code,
+      row.subject_name,
+      row.academic_year,
+      row.term,
+      row.class_level
+    ].join('|');
+
+    if(!map.has(key)){
+      map.set(key, {
+        key,
+        subject_id: row.subject_id,
+        subject_code: row.subject_code,
+        subject_name: row.subject_name,
+        subject_type: row.subject_type,
+        academic_year: row.academic_year,
+        term: row.term,
+        class_level: row.class_level,
+        rooms: [],
+        offerings: []
+      });
+    }
+
+    const group = map.get(key);
+    const room = String(row.room || '').trim();
+
+    if(room && !group.rooms.includes(room)){
+      group.rooms.push(room);
+    }
+
+    group.offerings.push({
+      subject_offering_id: row.subject_offering_id,
+      section_code: row.section_code,
+      room,
+      class_level: row.class_level,
+      academic_year: row.academic_year,
+      term: row.term,
+      subject_id: row.subject_id,
+      subject_code: row.subject_code,
+      subject_name: row.subject_name
+    });
+  });
+
+  return Array.from(map.values()).map(group => ({
+    ...group,
+    rooms: group.rooms.sort((a,b) => Number(a) - Number(b))
+  })).sort((a,b) => {
+    const classCompare = safeText(a.class_level,'').localeCompare(safeText(b.class_level,''), 'th', { numeric:true });
+    if(classCompare !== 0) return classCompare;
+
+    const codeCompare = safeText(a.subject_code,'').localeCompare(safeText(b.subject_code,''), 'th', { numeric:true });
+    if(codeCompare !== 0) return codeCompare;
+
+    return safeText(a.subject_name,'').localeCompare(safeText(b.subject_name,''), 'th');
+  });
+}
+
+async function loadTeacherStudentOptions(){
+  try{
+    if(!state.currentUser?.id) return;
+
+    if(!state.importSettings){
+      await loadImportSettingsFromSheet();
+    }
+
+    const { academic_year, term } = teacherStudentGetCurrentYearTerm();
+    teacherStudentUpdateCurrentTermLabel();
+
+    setStatus('teacherStudentStatus', 'กำลังโหลดรายวิชาที่สอน...', 'info');
+
+    const rows = await fetchAllPages(() => {
+      return supabaseClient
+        .from('v_subject_offerings')
+        .select('*')
+        .eq('teacher_id', state.currentUser.id)
+        .eq('academic_year', academic_year)
+        .eq('term', term)
+        .order('class_level', { ascending:true })
+        .order('room', { ascending:true })
+        .order('subject_code', { ascending:true });
+    }, 1000);
+
+    state.teacherStudentOptions.subjectGroups = teacherStudentGroupOfferings(rows || []);
+    renderTeacherStudentSubjectOptions();
+
+    setStatus(
+      'teacherStudentStatus',
+      state.teacherStudentOptions.subjectGroups.length
+        ? 'เลือกรายวิชาและชั้น/ห้อง แล้วกดแสดงรายชื่อ'
+        : `ไม่พบรายวิชาที่สอนในปีการศึกษา ${academic_year} ภาคเรียนที่ ${term}`,
+      state.teacherStudentOptions.subjectGroups.length ? 'info' : 'warn'
+    );
+  }catch(err){
+    console.error('loadTeacherStudentOptions ERROR', err);
+    setStatus('teacherStudentStatus', err.message || 'โหลดรายวิชาไม่สำเร็จ', 'error');
+  }
+}
+
+function renderTeacherStudentSubjectOptions(){
+  const select = el('teacherStudentSubjectSelect');
+  if(!select) return;
+
+  const groups = state.teacherStudentOptions.subjectGroups || [];
+
+  select.innerHTML = `
+    <option value="">เลือกรายวิชา</option>
+    ${groups.map(group => `
+      <option value="${escapeHtml(group.key)}">
+        ${escapeHtml(safeText(group.subject_code, '-'))}
+        ${escapeHtml(safeText(group.subject_name, '-'))}
+        ${escapeHtml(safeText(group.class_level, ''))}
+      </option>
+    `).join('')}
+  `;
+
+  renderTeacherStudentRoomOptions();
+}
+
+function getSelectedTeacherStudentSubjectGroup(){
+  const key = safeText(el('teacherStudentSubjectSelect')?.value, '');
+  return (state.teacherStudentOptions.subjectGroups || []).find(g => g.key === key) || null;
+}
+
+function renderTeacherStudentRoomOptions(){
+  const roomSelect = el('teacherStudentRoomSelect');
+  if(!roomSelect) return;
+
+  const group = getSelectedTeacherStudentSubjectGroup();
+
+  if(!group){
+    roomSelect.innerHTML = `<option value="">เลือกชั้น/ห้อง</option>`;
+    return;
+  }
+
+  roomSelect.innerHTML = `
+    <option value="">เลือกชั้น/ห้อง</option>
+    ${group.rooms.map(room => `
+      <option value="${escapeHtml(room)}">
+        ${escapeHtml(safeText(group.class_level, '-'))}/${escapeHtml(room)}
+      </option>
+    `).join('')}
+  `;
+
+  if(group.rooms.length === 1){
+    roomSelect.value = group.rooms[0];
+  }
+}
+
+function teacherStudentGetEntryFilterByClassLevel(classLevel, academicYear){
+  const c = safeText(classLevel, '');
+  const y = safeNum(academicYear);
+
+  if(!y) return null;
+
+  if(c === 'ม.1') return { entry_academic_year: y, entry_level: 'ม.1' };
+  if(c === 'ม.2') return { entry_academic_year: y - 1, entry_level: 'ม.1' };
+  if(c === 'ม.3') return { entry_academic_year: y - 2, entry_level: 'ม.1' };
+  if(c === 'ม.4') return { entry_academic_year: y, entry_level: 'ม.4' };
+  if(c === 'ม.5') return { entry_academic_year: y - 1, entry_level: 'ม.4' };
+  if(c === 'ม.6') return { entry_academic_year: y - 2, entry_level: 'ม.4' };
+
+  return null;
+}
+
+async function fetchTeacherStudentCumulativeSummaryMap(studentIds){
+  const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
+  const map = new Map();
+
+  if(!ids.length) return map;
+
+  const chunkSize = 80;
+
+  for(let i = 0; i < ids.length; i += chunkSize){
+    const idChunk = ids.slice(i, i + chunkSize);
+
+    const rows = await fetchAllPages(() => {
+      return supabaseClient
+        .from('grade_results')
+        .select(`
+          student_id,
+          grade_code,
+          retest_grade_code,
+          subjects:subjects!fk_grade_results_subject (
+            credit,
+            subject_type
+          )
+        `)
+        .in('student_id', idChunk)
+        .eq('is_active', true);
+    }, 1000);
+
+    idChunk.forEach(id => {
+      if(!map.has(String(id))) map.set(String(id), { rows: [] });
+    });
+
+    (rows || []).forEach(row => {
+      const studentId = String(row.student_id || '');
+      if(!studentId) return;
+
+      if(!map.has(studentId)) map.set(studentId, { rows: [] });
+
+      map.get(studentId).rows.push({
+        grade_code: normalizeGradeValue(row.grade_code),
+        retest_grade_code: normalizeGradeValue(row.retest_grade_code),
+        credit: safeNum(row.subjects?.credit) || 0,
+        subject_type: safeText(row.subjects?.subject_type, '')
+      });
+    });
+  }
+
+  for(const [studentId, item] of map.entries()){
+    const summary = buildStudentCourseSummary(item.rows || []);
+    const riskCount = (item.rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
+
+    map.set(studentId, {
+      ...summary,
+      grade_count: (item.rows || []).length,
+      risk_count: riskCount
+    });
+  }
+
+  return map;
+}
+
+function updateTeacherStudentSummary(rows){
+  const total = rows.length;
+  const gpaRows = rows.filter(row => row.course_gpa !== null && row.course_gpa !== undefined);
+  const avg = gpaRows.length
+    ? gpaRows.reduce((sum, row) => sum + Number(row.course_gpa || 0), 0) / gpaRows.length
+    : 0;
+  const riskCount = rows.filter(row => Number(row.risk_count || 0) > 0).length;
+
+  if(el('teacherStudentTotalCount')) el('teacherStudentTotalCount').textContent = String(total);
+  if(el('teacherStudentAverageGpa')) el('teacherStudentAverageGpa').textContent = formatDecimalFloor(avg, 2);
+  if(el('teacherStudentRiskCount')) el('teacherStudentRiskCount').textContent = String(riskCount);
+}
+
+function renderTeacherStudentRows(rows){
+  const tbody = el('teacherStudentTbody');
+  if(!tbody) return;
+
+  if(!rows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty-state">ไม่พบรายชื่อนักเรียนตามเงื่อนไขที่เลือก</td>
+      </tr>
+    `;
+    updateTeacherStudentSummary([]);
+    return;
+  }
+
+  updateTeacherStudentSummary(rows);
+
+  tbody.innerHTML = rows.map(row => {
+    const gpaText = row.course_gpa !== null && row.course_gpa !== undefined
+      ? formatDecimalFloor(row.course_gpa, 2)
+      : '-';
+
+    return `
+      <tr>
+        <td class="text-center">${escapeHtml(safeText(row.current_no, '-'))}</td>
+        <td>
+          <div class="student-name-block">
+            <div class="student-name-main">${escapeHtml(safeText(row.raw_full_name, '-'))}</div>
+            <div class="student-name-sub">
+              ${escapeHtml(safeText(row.sid, ''))}
+              ${Number(row.risk_count || 0) > 0 ? ` · มีวิชาเสี่ยง ${Number(row.risk_count || 0)} วิชา` : ''}
+            </div>
+          </div>
+        </td>
+        <td class="text-center">
+          <span class="teacher-student-gpa-pill">${escapeHtml(gpaText)}</span>
+        </td>
+        <td class="text-center">
+          <button class="btn-view-grade" type="button" data-teacher-student-id="${escapeHtml(String(row.id))}">
+            แสดงผลการเรียน
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('[data-teacher-student-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const studentId = String(btn.dataset.teacherStudentId || '');
+      const student = state.teacherStudentRows.find(s => String(s.id) === studentId);
+
+      if(student){
+        await openTeacherStudentGradeOverlay(student);
+      }
+    });
+  });
+}
+
+async function loadTeacherStudentRows(){
+  try{
+    const group = getSelectedTeacherStudentSubjectGroup();
+    const room = safeText(el('teacherStudentRoomSelect')?.value, '');
+    const keyword = safeText(el('teacherStudentKeyword')?.value, '').toLowerCase();
+
+    if(!group){
+      renderTeacherStudentRows([]);
+      setStatus('teacherStudentStatus', 'กรุณาเลือกรายวิชา', 'warn');
+      return;
+    }
+
+    if(!room){
+      renderTeacherStudentRows([]);
+      setStatus('teacherStudentStatus', 'กรุณาเลือกชั้น/ห้อง', 'warn');
+      return;
+    }
+
+    setStatus('teacherStudentStatus', 'กำลังโหลดรายชื่อนักเรียน...', 'info');
+
+    const entryFilter = teacherStudentGetEntryFilterByClassLevel(group.class_level, group.academic_year);
+
+    let query = supabaseClient
+      .from('students')
+      .select('id, sid, raw_full_name, current_room, current_no, entry_academic_year, entry_level, is_active')
+      .eq('is_active', true)
+      .eq('current_room', room)
+      .order('current_no', { ascending:true })
+      .order('raw_full_name', { ascending:true });
+
+    if(entryFilter){
+      query = query
+        .eq('entry_academic_year', entryFilter.entry_academic_year)
+        .eq('entry_level', entryFilter.entry_level);
+    }
+
+    const { data, error } = await query;
+    if(error) throw error;
+
+    let students = Array.isArray(data) ? data : [];
+
+    if(keyword){
+      students = students.filter(student => {
+        const sid = safeText(student.sid, '').toLowerCase();
+        const name = safeText(student.raw_full_name, '').toLowerCase();
+        return sid.includes(keyword) || name.includes(keyword);
+      });
+    }
+
+    const summaryMap = await fetchTeacherStudentCumulativeSummaryMap(students.map(s => s.id));
+
+    state.teacherStudentRows = students.map(student => {
+      const summary = summaryMap.get(String(student.id)) || {
+        gpa: null,
+        grade_count: 0,
+        risk_count: 0
+      };
+
+      return {
+        ...student,
+        computed_class_level: group.class_level,
+        current_subject_group: group,
+        current_teaching_room: room,
+        course_gpa: summary.grade_count ? summary.gpa : null,
+        course_summary: summary,
+        risk_count: summary.risk_count || 0
+      };
+    }).sort((a,b) => {
+      const byNo = compareStudentNo(a.current_no, b.current_no);
+      if(byNo !== 0) return byNo;
+      return safeText(a.raw_full_name, '').localeCompare(safeText(b.raw_full_name, ''), 'th');
+    });
+
+    renderTeacherStudentRows(state.teacherStudentRows);
+
+    setStatus(
+      'teacherStudentStatus',
+      `พบรายชื่อนักเรียน ${state.teacherStudentRows.length} คน ใน ${safeText(group.subject_code,'')} ${safeText(group.subject_name,'')} ${safeText(group.class_level,'')}/${room}`,
+      'success'
+    );
+  }catch(err){
+    console.error('loadTeacherStudentRows ERROR', err);
+    setStatus('teacherStudentStatus', err.message || 'โหลดรายชื่อนักเรียนไม่สำเร็จ', 'error');
+    renderTeacherStudentRows([]);
+  }
+}
+
+function teacherStudentBuildTermGroups(rows){
+  const map = new Map();
+
+  (rows || []).forEach(row => {
+    const key = `${row.academic_year}|${row.term}`;
+    if(!map.has(key)){
+      map.set(key, {
+        key,
+        academic_year: row.academic_year,
+        term: row.term,
+        class_level: row.class_level,
+        room: row.room,
+        rows: []
+      });
+    }
+
+    map.get(key).rows.push(row);
+  });
+
+  return Array.from(map.values()).sort((a,b) => {
+    const y = Number(a.academic_year || 0) - Number(b.academic_year || 0);
+    if(y !== 0) return y;
+    return Number(a.term || 0) - Number(b.term || 0);
+  }).map(group => {
+    const summary = buildStudentSummary(group.rows);
+    return {
+      ...group,
+      label: `${safeText(group.class_level, '-') } เทอม ${safeText(group.term, '-')}/${safeText(group.academic_year, '-')}`,
+      summary
+    };
+  });
+}
+
+function teacherStudentRenderGradeRows(rows){
+  const tbody = el('teacherStudentGradeTbody');
+  if(!tbody) return;
+
+  if(!rows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="empty-state">ไม่พบข้อมูลผลการเรียนในเทอมนี้</td>
+      </tr>
+    `;
+    return;
+  }
+
+  const sortedRows = [...rows].sort(compareStudentGradeRows);
+
+  tbody.innerHTML = sortedRows.map(row => `
+    <tr>
+      <td class="text-center mono">${escapeHtml(safeText(row.subject_code, '-'))}</td>
+      <td class="subject-name-cell">${escapeHtml(safeText(row.subject_name, '-'))}</td>
+      <td class="text-center">${renderSubjectTypePill(row.subject_type)}</td>
+      <td class="text-center"><span class="score-badge">${escapeHtml(formatDecimal(row.credit, 1))}</span></td>
+      <td class="text-center"><span class="score-badge">${escapeHtml(formatPlainNumber(row.study_unit_score))}</span></td>
+      <td class="text-center"><span class="score-badge">${escapeHtml(formatPlainNumber(row.midterm_score))}</span></td>
+      <td class="text-center"><span class="score-badge">${escapeHtml(formatPlainNumber(row.final_score))}</span></td>
+      <td class="text-center"><span class="score-badge">${escapeHtml(formatPlainNumber(row.total_score))}</span></td>
+      <td class="text-center">${renderStudentGradePill(row.grade_code)}</td>
+      <td class="text-center">${row.retest_grade_code ? renderStudentGradePill(row.retest_grade_code) : `<span class="student-grade-pill neutral">-</span>`}</td>
+      <td class="teacher-name-cell">
+        <div>${escapeHtml(safeText(row.teacher_name, '-'))}</div>
+        <div class="student-name-sub">${escapeHtml(safeText(row.teacher_code, ''))}</div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function teacherStudentRenderGpaChart(termGroups){
+  const canvas = el('teacherStudentGpaChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+
+  if(state.teacherStudentGpaChart){
+    state.teacherStudentGpaChart.destroy();
+    state.teacherStudentGpaChart = null;
+  }
+
+  const labels = (termGroups || []).map(group => group.label);
+  const data = (termGroups || []).map(group => Number(formatDecimalFloor(group.summary.gpa, 2)));
+
+  state.teacherStudentGpaChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'GPA รายเทอม',
+        data,
+        tension: 0.32,
+        fill: false,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: context => `GPA: ${Number(context.parsed.y || 0).toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 4,
+          ticks: {
+            stepSize: 0.5
+          }
+        }
+      }
+    }
+  });
+}
+
+function teacherStudentSetOverlayTab(tabKey){
+  state.teacherStudentCurrentTermKey = tabKey || 'overview';
+
+  document.querySelectorAll('#teacherStudentTermTabs .teacher-student-term-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.teacherStudentTab === state.teacherStudentCurrentTermKey);
+  });
+
+  const isOverview = state.teacherStudentCurrentTermKey === 'overview';
+
+  el('teacherStudentOverviewPanel')?.classList.toggle('hidden', !isOverview);
+  el('teacherStudentTermPanel')?.classList.toggle('hidden', isOverview);
+
+  if(isOverview){
+    return;
+  }
+
+  const termGroups = teacherStudentBuildTermGroups(state.teacherStudentCurrentGrades || []);
+  const group = termGroups.find(item => item.key === state.teacherStudentCurrentTermKey);
+
+  if(!group){
+    teacherStudentRenderGradeRows([]);
+    return;
+  }
+
+  if(el('teacherStudentTermTitle')){
+    el('teacherStudentTermTitle').textContent = `ผลการเรียน ${group.label}`;
+  }
+
+  teacherStudentRenderGradeRows(group.rows);
+}
+
+function teacherStudentRenderOverlayTabs(termGroups){
+  const wrap = el('teacherStudentTermTabs');
+  if(!wrap) return;
+
+  wrap.innerHTML = `
+    <button class="teacher-student-term-tab active" type="button" data-teacher-student-tab="overview">
+      ภาพรวม
+    </button>
+    ${(termGroups || []).map(group => `
+      <button class="teacher-student-term-tab" type="button" data-teacher-student-tab="${escapeHtml(group.key)}">
+        ${escapeHtml(group.label)}
+      </button>
+    `).join('')}
+  `;
+
+  wrap.querySelectorAll('[data-teacher-student-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      teacherStudentSetOverlayTab(btn.dataset.teacherStudentTab || 'overview');
+    });
+  });
+}
+
+function closeTeacherStudentGradeOverlay(){
+  closeOverlay('teacherStudentGradeOverlay');
+
+  if(state.teacherStudentGpaChart){
+    state.teacherStudentGpaChart.destroy();
+    state.teacherStudentGpaChart = null;
+  }
+}
+
+async function openTeacherStudentGradeOverlay(student){
+  try{
+    state.teacherStudentCurrentStudent = student;
+    state.teacherStudentCurrentGrades = [];
+    state.teacherStudentCurrentSummary = null;
+    state.teacherStudentCurrentTermKey = 'overview';
+
+    openOverlay('teacherStudentGradeOverlay');
+
+    const classRoomText = `${safeText(student.computed_class_level, '-')}/${safeText(student.current_teaching_room || student.current_room, '-')}`;
+
+    el('teacherStudentOverlayTitle').textContent = 'ผลการเรียนของนักเรียน';
+    el('teacherStudentOverlaySub').textContent =
+      `${safeText(student.raw_full_name, '-')} · ${classRoomText}`;
+
+    el('teacherStudentDetailCode').textContent = safeText(student.sid, '-');
+    el('teacherStudentDetailName').textContent = safeText(student.raw_full_name, '-');
+    el('teacherStudentDetailClass').textContent = classRoomText;
+    el('teacherStudentDetailNo').textContent = safeText(student.current_no, '-');
+    el('teacherStudentDetailGpa').textContent =
+      student.course_gpa !== null && student.course_gpa !== undefined
+        ? formatDecimalFloor(student.course_gpa, 2)
+        : '-';
+
+    el('teacherStudentGradeTbody').innerHTML = `
+      <tr>
+        <td colspan="11" class="empty-state">กำลังโหลดข้อมูลผลการเรียน...</td>
+      </tr>
+    `;
+
+    const rows = await fetchStudentGrades(student.id, null, null);
+    state.teacherStudentCurrentGrades = rows || [];
+
+    const courseSummary = buildStudentCourseSummary(rows || []);
+    state.teacherStudentCurrentSummary = courseSummary;
+
+    const termGroups = teacherStudentBuildTermGroups(rows || []);
+    const riskCount = (rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
+
+    el('teacherStudentDetailGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
+    el('teacherStudentOvGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
+    el('teacherStudentOvTermCount').textContent = String(termGroups.length);
+    el('teacherStudentOvSubjectCount').textContent = String((rows || []).length);
+    el('teacherStudentOvRiskCount').textContent = String(riskCount);
+
+    teacherStudentRenderOverlayTabs(termGroups);
+    teacherStudentRenderGpaChart(termGroups);
+    teacherStudentSetOverlayTab('overview');
+  }catch(err){
+    console.error('openTeacherStudentGradeOverlay ERROR', err);
+    showToast('โหลดผลการเรียนไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+    el('teacherStudentGradeTbody').innerHTML = `
+      <tr>
+        <td colspan="11" class="empty-state">โหลดข้อมูลผลการเรียนไม่สำเร็จ</td>
+      </tr>
+    `;
+  }
+}
+
+
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
   bindIfExists('loginBtn', 'click', login);
@@ -11314,6 +12315,17 @@ bindIfExists('sideMidtermReportBtn', 'click', () => {
 bindIfExists('sideFinalReportBtn', 'click', () => {
   openGradeReportFromSidebar('import');
 });
+
+bindIfExists('menuTeacherStudentBtn', 'click', async () => {
+  setActivePage('teacherstudent');
+
+  if(!state.importSettings){
+    await loadImportSettingsFromSheet();
+  }
+
+  await loadTeacherStudentOptions();
+});
+
 
   bindIfExists('menuAdviserBtn', 'click', async () => {
     setActivePage('adviser');
@@ -11444,6 +12456,33 @@ bindIfExists('adviserRoomSelect', 'change', () => {
   });
 
   bindIfExists('loadAdviserStudentsBtn', 'click', loadAdviserStudents);
+
+bindIfExists('teacherStudentSubjectSelect', 'change', () => {
+  renderTeacherStudentRoomOptions();
+  state.teacherStudentRows = [];
+  renderTeacherStudentRows([]);
+  setStatus('teacherStudentStatus', 'เลือกชั้น/ห้อง แล้วกดแสดงรายชื่อ', 'info');
+});
+
+bindIfExists('teacherStudentRoomSelect', 'change', () => {
+  state.teacherStudentRows = [];
+  renderTeacherStudentRows([]);
+  setStatus('teacherStudentStatus', 'กดแสดงรายชื่อเพื่อโหลดนักเรียน', 'info');
+});
+
+bindIfExists('teacherStudentKeyword', 'input', () => {
+  clearTimeout(window.__teacherStudentSearchTimer);
+  window.__teacherStudentSearchTimer = setTimeout(loadTeacherStudentRows, 250);
+});
+
+bindIfExists('loadTeacherStudentBtn', 'click', loadTeacherStudentRows);
+
+bindIfExists('closeTeacherStudentOverlayBtnTop', 'click', closeTeacherStudentGradeOverlay);
+bindIfExists('closeTeacherStudentOverlayBtnBottom', 'click', closeTeacherStudentGradeOverlay);
+bindIfExists('teacherStudentGradeOverlay', 'click', (e) => {
+  if(e.target.id === 'teacherStudentGradeOverlay') closeTeacherStudentGradeOverlay();
+});
+
 
   bindIfExists('loadRetestBtn', 'click', loadRetestRows);
 
@@ -11709,6 +12748,8 @@ if(restoreSession()){
     .then(() => loadImportTeachingList());
 
   loadAdviserRooms();
+  loadTeacherGradeStatOptions();
+  loadTeacherStudentOptions();
 }else{
   setStatus('loginStatus','กรุณาเข้าสู่ระบบก่อนใช้งาน','info');
 }
