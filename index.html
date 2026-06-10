@@ -4365,11 +4365,41 @@
   min-height:34px;
   padding:6px 12px;
   border-radius:999px;
-  border:1px solid #fed7aa;
-  background:#fff7ed;
-  color:#b45309;
   font-family:'Sarabun',sans-serif;
   font-weight:900;
+  border:1px solid #d1d5db;
+  background:#f9fafb;
+  color:#374151;
+}
+
+.teacher-student-gpa-pill.gpa-green-dark{
+  background:#dcfce7;
+  border-color:#86efac;
+  color:#166534;
+}
+
+.teacher-student-gpa-pill.gpa-green-light{
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+  color:#15803d;
+}
+
+.teacher-student-gpa-pill.gpa-yellow{
+  background:#fef9c3;
+  border-color:#fde68a;
+  color:#a16207;
+}
+
+.teacher-student-gpa-pill.gpa-orange{
+  background:#ffedd5;
+  border-color:#fdba74;
+  color:#c2410c;
+}
+
+.teacher-student-gpa-pill.gpa-red{
+  background:#fee2e2;
+  border-color:#fca5a5;
+  color:#b91c1c;
 }
 .teacher-student-overlay .overlay-card{
   width:min(1420px,100%);
@@ -11890,6 +11920,17 @@ function updateTeacherStudentSummary(rows){
   if(el('teacherStudentRiskCount')) el('teacherStudentRiskCount').textContent = String(riskCount);
 }
 
+    function getTeacherStudentGpaClass(gpa){
+  const n = Number(gpa);
+  if(!Number.isFinite(n)) return '';
+
+  if(n >= 3.00) return 'gpa-green-dark';
+  if(n >= 2.50) return 'gpa-green-light';
+  if(n >= 2.00) return 'gpa-yellow';
+  if(n >= 1.50) return 'gpa-orange';
+  return 'gpa-red';
+}
+
 function renderTeacherStudentRows(rows){
   const tbody = el('teacherStudentTbody');
   if(!tbody) return;
@@ -11906,34 +11947,36 @@ function renderTeacherStudentRows(rows){
 
   updateTeacherStudentSummary(rows);
 
-  tbody.innerHTML = rows.map(row => {
-    const gpaText = row.course_gpa !== null && row.course_gpa !== undefined
-      ? formatDecimalFloor(row.course_gpa, 2)
-      : '-';
+tbody.innerHTML = rows.map(row => {
+  const gpaText = row.course_gpa !== null && row.course_gpa !== undefined
+    ? formatDecimalFloor(row.course_gpa, 2)
+    : '-';
 
-    return `
-      <tr>
-        <td class="text-center">${escapeHtml(safeText(row.current_no, '-'))}</td>
-        <td>
-          <div class="student-name-block">
-            <div class="student-name-main">${escapeHtml(safeText(row.raw_full_name, '-'))}</div>
-            <div class="student-name-sub">
-              ${escapeHtml(safeText(row.sid, ''))}
-              ${Number(row.risk_count || 0) > 0 ? ` · มีวิชาเสี่ยง ${Number(row.risk_count || 0)} วิชา` : ''}
-            </div>
+  const gpaClass = getTeacherStudentGpaClass(row.course_gpa);
+
+  return `
+    <tr>
+      <td class="text-center">${escapeHtml(safeText(row.current_no, '-'))}</td>
+      <td>
+        <div class="student-name-block">
+          <div class="student-name-main">${escapeHtml(safeText(row.raw_full_name, '-'))}</div>
+          <div class="student-name-sub">
+            ${escapeHtml(safeText(row.sid, ''))}
+            ${Number(row.risk_count || 0) > 0 ? ` · มีวิชาเสี่ยง ${Number(row.risk_count || 0)} วิชา` : ''}
           </div>
-        </td>
-        <td class="text-center">
-          <span class="teacher-student-gpa-pill">${escapeHtml(gpaText)}</span>
-        </td>
-        <td class="text-center">
-          <button class="btn-view-grade" type="button" data-teacher-student-id="${escapeHtml(String(row.id))}">
-            แสดงผลการเรียน
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+        </div>
+      </td>
+      <td class="text-center">
+        <span class="teacher-student-gpa-pill ${gpaClass}">${escapeHtml(gpaText)}</span>
+      </td>
+      <td class="text-center">
+        <button class="btn-view-grade" type="button" data-teacher-student-id="${escapeHtml(String(row.id))}">
+          แสดงผลการเรียน
+        </button>
+      </td>
+    </tr>
+  `;
+}).join('');
 
   tbody.querySelectorAll('[data-teacher-student-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
