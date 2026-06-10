@@ -4722,10 +4722,15 @@
     <span>ครูที่ปรึกษา</span>
   </div>
 
-  <button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
-    <span class="sidebar-icon">👩‍🏫</span>
-    <span class="sidebar-label">ติดตามผลการเรียน</span>
-  </button>
+<button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
+  <span class="sidebar-icon">👩‍🏫</span>
+  <span class="sidebar-label">นักเรียนในที่ปรึกษา</span>
+</button>
+
+<button id="menuAdviserRetestBtn" class="sidebar-link" type="button" data-side-page="adviserretest">
+  <span class="sidebar-icon">🧾</span>
+  <span class="sidebar-label">ติดตามสอบแก้ตัว</span>
+</button>
 
   <div class="sidebar-section-label">
     <span class="sidebar-section-dot general"></span>
@@ -4977,8 +4982,10 @@
       <!-- PAGE ADVISER : เพิ่มใหม่ แต่ไม่แตะหน้า import เดิม -->
       <div id="pageAdviser" class="hidden">
         <section class="card" style="margin-bottom:18px;">
-          <h2>ติดตามผลการเรียน</h2>
-          <div class="sub">ใช้สำหรับติดตามข้อมูลผลการเรียนและความเสี่ยงของนักเรียนในที่ปรึกษา</div>
+      <h2>นักเรียนในที่ปรึกษา</h2>
+      <div class="sub">
+          แสดงรายชื่อนักเรียนในที่ปรึกษา เกรดเฉลี่ย สถานะความเสี่ยง และเปิดดูภาพรวม/ผลรายเทอมได้ทันที
+      </div>
 
           <div class="adviser-toolbar">
             <div class="field">
@@ -5061,6 +5068,102 @@
           </div>
         </section>
       </div>
+
+        <!-- PAGE ADVISER RETEST : ติดตามสอบแก้ตัว -->
+<div id="pageAdviserRetest" class="hidden">
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>ติดตามสอบแก้ตัว</h2>
+        <div class="sub" style="margin-bottom:0;">
+          แสดงรายวิชาที่นักเรียนในที่ปรึกษาติด 0, ร, มส, มผ และสถานะการแก้ตัว
+        </div>
+      </div>
+    </div>
+
+    <div class="adviser-toolbar">
+      <div class="field">
+        <span class="label-in-form">ปีการศึกษา</span>
+        <select id="adviserRetestYear" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ภาคเรียน</span>
+        <select id="adviserRetestTerm" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ห้องที่ปรึกษา</span>
+        <select id="adviserRetestRoomSelect" class="std">
+          <option value="">โปรดเลือกห้อง</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ค้นหา</span>
+        <input id="adviserRetestKeyword" class="std" type="text" placeholder="เลขประจำตัว / ชื่อ-สกุล / รายวิชา">
+      </div>
+    </div>
+
+    <div class="actions" style="margin-bottom:12px;">
+      <button id="loadAdviserRetestBtn" class="btn-primary" type="button">
+        แสดงรายการ
+      </button>
+    </div>
+
+    <div class="retest-summary">
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">รายการทั้งหมด</div>
+        <div id="adviserRetestTotalCount" class="retest-summary-value">0</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">ยังไม่แก้</div>
+        <div id="adviserRetestPendingCount" class="retest-summary-value">0</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">แก้แล้ว</div>
+        <div id="adviserRetestDoneCount" class="retest-summary-value">0</div>
+      </div>
+
+      <div class="retest-summary-card">
+        <div class="retest-summary-label">นักเรียนที่เกี่ยวข้อง</div>
+        <div id="adviserRetestStudentCount" class="retest-summary-value">0</div>
+      </div>
+    </div>
+
+    <div id="adviserRetestStatus" class="status info">
+      กรุณาเลือกห้องที่ปรึกษาแล้วกดแสดงรายการ
+    </div>
+
+    <div class="table-wrap">
+      <table class="retest-table">
+        <thead>
+          <tr>
+            <th style="width:80px;" class="text-center">เลขที่</th>
+            <th style="width:180px;">ชื่อ-สกุล</th>
+            <th>รายวิชา</th>
+            <th style="width:110px;" class="text-center">ชั้น/เทอม</th>
+            <th style="width:110px;" class="text-center">เกรดเดิม</th>
+            <th style="width:130px;" class="text-center">ผลแก้ตัว</th>
+            <th style="width:130px;" class="text-center">สถานะ</th>
+            <th style="width:180px;">ครูผู้สอน</th>
+          </tr>
+        </thead>
+        <tbody id="adviserRetestTbody">
+          <tr>
+            <td colspan="8" class="empty-state">ยังไม่มีข้อมูลติดตามสอบแก้ตัว</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
         
 <!-- PAGE TEACHER STUDENT : ข้อมูลนักเรียนรายบุคคล -->
@@ -6482,6 +6585,7 @@ function setActivePage(page){
   const isFreePeriod = page === 'freeperiod';
   const isGradeStats = page === 'gradestats';
   const isTeacherStudent = page === 'teacherstudent';
+  const isAdviserRetest = page === 'adviserretest';
 
   if(!isFreePeriod && !isMidtermReport && !isImport){
     closeAllSidebarGroups();
@@ -6491,6 +6595,7 @@ function setActivePage(page){
   el('pageMidtermReport')?.classList.toggle('hidden', !isMidtermReport);
   el('pageImport').classList.toggle('hidden', !isImport);
   el('pageAdviser').classList.toggle('hidden', !isAdviser);
+  el('pageAdviserRetest')?.classList.toggle('hidden', !isAdviserRetest);
   el('pageRetest').classList.toggle('hidden', !isRetest);
   el('pageFreePeriod')?.classList.toggle('hidden', !isFreePeriod);
   el('pageGradeStats')?.classList.toggle('hidden', !isGradeStats);
@@ -6557,6 +6662,7 @@ const map = {
   home: 'menuHomeBtn',
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
+  adviserretest: 'menuAdviserRetestBtn',
   gradestats: 'menuGradeStatsBtn',
   teacherstudent: 'menuTeacherStudentBtn'
 };
@@ -6611,7 +6717,8 @@ const titleMap = {
   teacherstudent: ['ข้อมูลนักเรียนที่สอน', 'ดูผลการเรียนย้อนหลังของนักเรียนในรายวิชาที่ครูสอน'],
   midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
   import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
-  adviser: ['ติดตามผลการเรียน', 'ติดตามข้อมูลผลการเรียนของนักเรียนในที่ปรึกษา'],
+  adviser: ['นักเรียนในที่ปรึกษา', 'ดูข้อมูล ผลการเรียน และภาพรวมเชิงวิเคราะห์ของนักเรียนในที่ปรึกษา'],
+  adviserretest: ['ติดตามสอบแก้ตัว', 'ติดตามนักเรียนในที่ปรึกษาที่ติด 0, ร, มส, มผ และสถานะการแก้ตัว'],
   freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
 };
 
@@ -7011,6 +7118,17 @@ function applyTeacherSettingsToPage(settings){
     allowAllTermText: ''
   });
 
+  applySettingToYearTermControls({
+  setting: settings.adviser,
+  yearId: 'adviserRetestYear',
+  termId: 'adviserRetestTerm',
+  statusId: 'adviserRetestStatus',
+  lockedMessage: s =>
+    `ล็อคข้อมูลติดตามสอบแก้ตัว ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+  allowAllYearText: '',
+  allowAllTermText: ''
+});
+
   // จองคาบว่าง Desktop ใช้ fpYear/fpTerm
   applySettingToYearTermControls({
     setting: settings.free_period,
@@ -7380,10 +7498,12 @@ function renderAdviserStudentsThead(){
 
   thead.innerHTML = `
     <tr>
-      <th rowspan="2" style="width:90px;" class="text-center">เลขที่</th>
+      <th rowspan="2" style="width:80px;" class="text-center">เลขที่</th>
       <th rowspan="2">ชื่อ-สกุล</th>
+      <th rowspan="2" style="width:150px;" class="text-center">เกรดเฉลี่ย</th>
       <th rowspan="2" style="width:260px;" class="text-center">สถานะความเสี่ยง</th>
-      <th colspan="3" class="text-center">ดูผลการเรียน</th>
+      <th rowspan="2" style="width:140px;" class="text-center">ภาพรวม</th>
+      <th colspan="${columns.length}" class="text-center">ผลรายเทอม</th>
     </tr>
     <tr>
       ${columns.map(classLevel => `
@@ -9455,6 +9575,69 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
   return map;
 }
 
+    async function fetchAdviserStudentGpaMap(studentIds){
+  const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
+  const map = new Map();
+
+  if(!ids.length) return map;
+
+  const chunkSize = 80;
+
+  for(let i = 0; i < ids.length; i += chunkSize){
+    const idChunk = ids.slice(i, i + chunkSize);
+
+    const rows = await fetchAllPages(() => {
+      return supabaseClient
+        .from('grade_results')
+        .select(`
+          student_id,
+          grade_code,
+          retest_grade_code,
+          is_active,
+          subjects:subjects!fk_grade_results_subject (
+            credit,
+            subject_type
+          )
+        `)
+        .in('student_id', idChunk)
+        .eq('is_active', true);
+    });
+
+    rows.forEach(row => {
+      const sid = String(row.student_id || '');
+      if(!sid) return;
+
+      const effectiveGrade = normalizeGradeValue(row.retest_grade_code || row.grade_code);
+      const numericGrade = getNumericGradeForGpa(effectiveGrade);
+
+      if(numericGrade === null) return;
+
+      const credit = safeNum(row.subjects?.credit) ?? 0;
+      if(credit <= 0) return;
+
+      if(!map.has(sid)){
+        map.set(sid, {
+          totalPoint: 0,
+          totalCredit: 0,
+          gpa: null
+        });
+      }
+
+      const item = map.get(sid);
+      item.totalPoint += numericGrade * credit;
+      item.totalCredit += credit;
+    });
+  }
+
+  map.forEach(item => {
+    item.gpa = item.totalCredit > 0
+      ? item.totalPoint / item.totalCredit
+      : null;
+  });
+
+  return map;
+}
+
 async function loadAdviserStudents(){
   try{
     const selectedKey = safeText(el('adviserRoomSelect').value, '');
@@ -9531,8 +9714,9 @@ async function loadAdviserStudents(){
       });
     }
 
-    const studentIds = students.map(s => s.id).filter(Boolean);
-    const gradeFlagsMap = await fetchStudentGradeFlags(studentIds, null, null);
+const studentIds = students.map(s => s.id).filter(Boolean);
+const gradeFlagsMap = await fetchStudentGradeFlags(studentIds, null, null);
+const gpaMap = await fetchAdviserStudentGpaMap(studentIds);
 
 state.adviserStudents = students.map(student => {
   const flag = gradeFlagsMap.get(String(student.id)) || {
@@ -9550,10 +9734,13 @@ const riskGrades = getOrderedRiskGrades(
 
 const repeatSnapshot = buildRepeatRiskSnapshotFromTermPlans(flag, termPlans);
 
+const gpaItem = gpaMap.get(String(student.id)) || null;
+
 return {
   ...student,
   computed_class_level: targetClass,
   ...flag,
+  course_gpa: gpaItem?.gpa ?? null,
   term_plans: termPlans,
   risk_grades: riskGrades,
 
@@ -9588,16 +9775,26 @@ return {
   }
 }
 
+    async function openStudentOverviewFromAdviser(student){
+  await openStudentDetail(student, {
+    mode: 'overview'
+  });
+}
+
 function renderAdviserStudents(rows){
   const tbody = el('adviserStudentsTbody');
   const classColumns = getAdviserClassColumns();
 
   renderAdviserStudentsThead();
 
+  if(!tbody) return;
+
   if(!rows.length){
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-state">ยังไม่มีข้อมูลนักเรียนในที่ปรึกษา</td>
+        <td colspan="${5 + classColumns.length}" class="empty-state">
+          ยังไม่มีข้อมูลนักเรียนในที่ปรึกษา
+        </td>
       </tr>
     `;
     return;
@@ -9607,52 +9804,65 @@ function renderAdviserStudents(rows){
     const statusHtml = buildStudentRiskTermText(student);
     const termPlans = student.term_plans || student.junior_term_plans || [];
 
-const renderClassTermButtons = (classLevel) => {
-  const classPlans = termPlans
-    .filter(plan => plan.class_level === classLevel)
-    .filter(plan => {
-      const termFlag = student.term_flags?.[plan.key] || {};
-      return !!termFlag.has_grade_result;
-    });
+    const gpaText = student.course_gpa !== null && student.course_gpa !== undefined
+      ? formatDecimalFloor(student.course_gpa, 2)
+      : '-';
 
-  if(!classPlans.length){
-    return ``;
-  }
+    const gpaClass = getTeacherStudentGpaClass(student.course_gpa);
 
-  return `
-    <div class="term-grade-buttons compact">
-      ${classPlans.map(plan => {
-        const termFlag = student.term_flags?.[plan.key] || {};
-        let btnClass = '';
+    const renderClassTermButtons = (classLevel) => {
+      const classPlans = termPlans
+        .filter(plan => plan.class_level === classLevel)
+        .filter(plan => {
+          const termFlag = student.term_flags?.[plan.key] || {};
+          return !!termFlag.has_grade_result;
+        });
 
-        if(termFlag.has_risk_grade){
-          btnClass = 'has-risk';
-        }else if(termFlag.has_grade_result){
-          btnClass = 'has-grade';
-        }
+      if(!classPlans.length){
+        return `<span class="student-risk-term-badge no-grade">ยังไม่มีผล</span>`;
+      }
 
-        return `
-          <button
-            class="btn-term-grade ${btnClass}"
-            type="button"
-            data-student-id="${escapeHtml(String(student.id))}"
-            data-academic-year="${escapeHtml(String(plan.academic_year))}"
-            data-term="${escapeHtml(String(plan.term))}"
-            data-class-level="${escapeHtml(plan.class_level)}"
-            data-term-label="${escapeHtml(plan.label)}"
-          >
-            <span class="term-btn-class">${escapeHtml(plan.class_level)}</span>
-            <span class="term-btn-term">เทอม ${escapeHtml(String(plan.term))}</span>
-          </button>
-        `;
-      }).join('')}
-    </div>
-  `;
-};
+      return `
+        <div class="term-grade-buttons compact">
+          ${classPlans.map(plan => {
+            const termFlag = student.term_flags?.[plan.key] || {};
+            const hasRisk = !!termFlag.has_risk_grade;
+            const isRepeatRisk = !!termFlag.is_repeat_risk;
+
+            const btnClass = isRepeatRisk
+              ? 'has-risk'
+              : hasRisk
+                ? 'has-risk'
+                : 'has-grade';
+
+            const tooltip = termFlag.total_subject_count > 0
+              ? `ติด ${Number(termFlag.repeat_risk_count || 0)}/${Number(termFlag.total_subject_count || 0)} วิชา`
+              : '';
+
+            return `
+              <button
+                class="btn-term-grade ${btnClass}"
+                type="button"
+                data-student-id="${escapeHtml(student.id)}"
+                data-academic-year="${escapeHtml(plan.academic_year)}"
+                data-term="${escapeHtml(plan.term)}"
+                data-class-level="${escapeHtml(plan.class_level)}"
+                data-term-label="${escapeHtml(`${plan.label}/${plan.academic_year}`)}"
+                title="${escapeHtml(tooltip)}">
+                <span class="term-btn-class">${escapeHtml(plan.label)}</span>
+                <span class="term-btn-term">${escapeHtml(String(plan.academic_year))}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    };
 
     return `
       <tr>
-        <td class="text-center">${escapeHtml(formatPlainNumber(student.current_no))}</td>
+        <td class="text-center">
+          <strong>${escapeHtml(safeText(student.current_no, '-'))}</strong>
+        </td>
 
         <td>
           <div class="student-name-block">
@@ -9661,14 +9871,44 @@ const renderClassTermButtons = (classLevel) => {
           </div>
         </td>
 
-        <td class="text-center">${statusHtml}</td>
+        <td class="text-center">
+          <span class="teacher-student-gpa-pill ${escapeHtml(gpaClass)}">
+            ${escapeHtml(gpaText)}
+          </span>
+        </td>
+
+        <td class="text-center">
+          ${statusHtml}
+        </td>
+
+        <td class="text-center">
+          <button
+            class="btn-view-grade"
+            type="button"
+            data-student-overview-id="${escapeHtml(student.id)}">
+            ภาพรวม
+          </button>
+        </td>
 
         ${classColumns.map(classLevel => `
-          <td class="text-center">${renderClassTermButtons(classLevel)}</td>
+          <td class="text-center">
+            ${renderClassTermButtons(classLevel)}
+          </td>
         `).join('')}
       </tr>
     `;
   }).join('');
+
+  tbody.querySelectorAll('[data-student-overview-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const studentId = String(btn.dataset.studentOverviewId || '');
+      const student = state.adviserStudents.find(s => String(s.id) === studentId);
+
+      if(student){
+        await openStudentOverviewFromAdviser(student);
+      }
+    });
+  });
 
   tbody.querySelectorAll('[data-student-id][data-academic-year][data-term]').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -10298,7 +10538,11 @@ renderStudentRiskList(courseRows);
 // สรุปผลการประเมินตลอดหลักสูตร
 renderStudentCourseSummary(state.currentStudentCourseSummary);
 
-setStudentDetailTab('grades');
+if(termContext?.mode === 'overview'){
+  setStudentDetailTab('grades');
+}else{
+  setStudentDetailTab('grades');
+}
       }catch(err){
         console.error('openStudentDetail ERROR', err);
         resetStudentDetail();
@@ -12980,10 +13224,20 @@ bindIfExists('menuTeacherStudentBtn', 'click', async () => {
 });
 
 
-  bindIfExists('menuAdviserBtn', 'click', async () => {
-    setActivePage('adviser');
-    await loadAdviserRooms();
-  });
+bindIfExists('menuAdviserBtn', 'click', async () => {
+  setActivePage('adviser');
+  await loadAdviserRooms();
+});
+
+  bindIfExists('menuAdviserRetestBtn', 'click', async () => {
+  setActivePage('adviserretest');
+
+  if(!state.adviserSettings){
+    await loadImportSettingsFromSheet();
+  }
+
+  await loadAdviserRetestRooms();
+});
 
   bindIfExists('menuRetestBtn', 'click', async () => {
     setActivePage('retest');
@@ -13383,7 +13637,268 @@ document.querySelectorAll('[data-risk-status-filter]').forEach(btn => {
 el('gradeStatsSubject')?.addEventListener('change', () => {
   setGradeStatsExportButtonEnabled(false);
 });
+
+  bindIfExists('adviserRetestYear', 'change', async () => {
+  renderAdviserRetestRows([]);
+  await loadAdviserRetestRooms();
+});
+
+bindIfExists('adviserRetestTerm', 'change', async () => {
+  renderAdviserRetestRows([]);
+  await loadAdviserRetestRooms();
+});
+
+bindIfExists('loadAdviserRetestBtn', 'click', loadAdviserRetestRows);
+
+bindIfExists('adviserRetestKeyword', 'input', () => {
+  clearTimeout(window.__adviserRetestSearchTimer);
+  window.__adviserRetestSearchTimer = setTimeout(loadAdviserRetestRows, 250);
+});
   
+}
+
+    async function loadAdviserRetestRooms(){
+  try{
+    if(!state.currentUser?.id){
+      renderAdviserRetestRoomOptions([]);
+      return;
+    }
+
+    const year = safeNum(el('adviserRetestYear')?.value) ?? getCurrentAcademicYear();
+    const term = safeNum(el('adviserRetestTerm')?.value) ?? getCurrentTerm();
+
+    const { data, error } = await supabaseClient
+      .from('teacher_advisers')
+      .select('id, teacher_id, academic_year, term, class_level, room, adviser_role')
+      .eq('teacher_id', state.currentUser.id)
+      .eq('academic_year', year)
+      .eq('term', term)
+      .order('class_level', { ascending:true })
+      .order('room', { ascending:true });
+
+    if(error) throw error;
+
+    renderAdviserRetestRoomOptions(Array.isArray(data) ? data : []);
+
+    if(data?.length){
+      setStatus('adviserRetestStatus', `พบห้องที่ปรึกษา ${data.length} ห้อง`, 'success');
+    }else{
+      setStatus('adviserRetestStatus', 'ไม่พบข้อมูลห้องที่ปรึกษาในปี/เทอมที่เลือก', 'warn');
+    }
+  }catch(err){
+    renderAdviserRetestRoomOptions([]);
+    setStatus('adviserRetestStatus', err.message || 'โหลดห้องที่ปรึกษาไม่สำเร็จ', 'error');
+  }
+}
+
+function renderAdviserRetestRoomOptions(rows){
+  const select = el('adviserRetestRoomSelect');
+  if(!select) return;
+
+  if(!rows || !rows.length){
+    select.innerHTML = `<option value="">โปรดเลือกห้อง</option>`;
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">โปรดเลือกห้อง</option>
+    ${rows.map(row => {
+      const key = [
+        safeText(row.academic_year,''),
+        safeText(row.term,''),
+        safeText(row.class_level,''),
+        safeText(row.room,'')
+      ].join('|');
+
+      const roleText = safeText(row.adviser_role, '');
+      const label = `${safeText(row.class_level,'-')}/${safeText(row.room,'-')}${roleText ? ` (${roleText})` : ''}`;
+
+      return `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`;
+    }).join('')}
+  `;
+
+  if(rows.length === 1){
+    select.value = [
+      safeText(rows[0].academic_year,''),
+      safeText(rows[0].term,''),
+      safeText(rows[0].class_level,''),
+      safeText(rows[0].room,'')
+    ].join('|');
+  }
+}
+
+    function renderAdviserRetestRows(rows){
+  const tbody = el('adviserRetestTbody');
+  if(!tbody) return;
+
+  const list = Array.isArray(rows) ? rows : [];
+
+  const total = list.length;
+  const done = list.filter(isRiskTrackingDone).length;
+  const pending = list.filter(isRiskTrackingPending).length;
+  const studentCount = new Set(list.map(row => String(row.student_id || '')).filter(Boolean)).size;
+
+  if(el('adviserRetestTotalCount')) el('adviserRetestTotalCount').textContent = total;
+  if(el('adviserRetestPendingCount')) el('adviserRetestPendingCount').textContent = pending;
+  if(el('adviserRetestDoneCount')) el('adviserRetestDoneCount').textContent = done;
+  if(el('adviserRetestStudentCount')) el('adviserRetestStudentCount').textContent = studentCount;
+
+  if(!list.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="empty-state">ไม่พบรายการติดตามสอบแก้ตัว</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = list.map(row => {
+    const originalGrade = normalizeGradeValue(row.grade_code);
+    const retestGrade = normalizeGradeValue(row.retest_grade_code);
+    const isDone = isRiskTrackingDone(row);
+
+    return `
+      <tr>
+        <td class="text-center">${escapeHtml(safeText(row.student_no, '-'))}</td>
+
+        <td>
+          <div class="retest-student-main">${escapeHtml(safeText(row.student_name, '-'))}</div>
+          <div class="retest-student-sub">${escapeHtml(safeText(row.student_code, '-'))}</div>
+        </td>
+
+        <td>
+          <div class="retest-subject-main">${escapeHtml(safeText(row.subject_name, '-'))}</div>
+          <div class="retest-subject-sub">${escapeHtml(safeText(row.subject_code, '-'))}</div>
+        </td>
+
+        <td class="text-center">
+          ${escapeHtml(safeText(row.class_level, '-'))}<br>
+          <span class="small">ท.${escapeHtml(String(row.term || '-'))}/${escapeHtml(String(row.academic_year || '-'))}</span>
+        </td>
+
+        <td class="text-center">${renderStudentGradePill(originalGrade)}</td>
+
+        <td class="text-center">
+          ${
+            retestGrade
+              ? renderStudentGradePill(retestGrade)
+              : `<span class="student-grade-pill neutral">-</span>`
+          }
+        </td>
+
+        <td class="text-center">
+          <span class="risk-subject-status ${isDone ? 'done' : 'pending'}">
+            ${isDone ? 'แก้แล้ว' : 'ยังไม่แก้'}
+          </span>
+        </td>
+
+        <td>
+          <div class="retest-subject-main">${escapeHtml(safeText(row.teacher_name, '-'))}</div>
+          <div class="retest-subject-sub">${escapeHtml(safeText(row.teacher_code, ''))}</div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+    async function loadAdviserRetestRows(){
+  try{
+    const roomKey = safeText(el('adviserRetestRoomSelect')?.value, '');
+    if(!roomKey){
+      renderAdviserRetestRows([]);
+      setStatus('adviserRetestStatus', 'กรุณาเลือกห้องที่ปรึกษา', 'warn');
+      return;
+    }
+
+    const [academicYear, term, classLevel, room] = roomKey.split('|');
+
+    const keyword = safeText(el('adviserRetestKeyword')?.value, '').toLowerCase();
+
+    setStatus('adviserRetestStatus', 'กำลังโหลดรายการติดตามสอบแก้ตัว...', 'info');
+
+    const { data, error } = await supabaseClient
+      .from('grade_results')
+      .select(`
+        id,
+        student_id,
+        student_code,
+        student_name,
+        student_no,
+        academic_year,
+        term,
+        class_level,
+        room,
+        grade_code,
+        retest_grade_code,
+        is_active,
+        subjects:subjects!fk_grade_results_subject (
+          subject_code,
+          subject_name,
+          credit,
+          subject_type
+        ),
+        teachers:teachers!fk_grade_results_teacher (
+          teacher_code,
+          full_name
+        )
+      `)
+      .eq('academic_year', safeNum(academicYear))
+      .eq('term', safeNum(term))
+      .eq('class_level', classLevel)
+      .eq('room', room)
+      .eq('is_active', true)
+      .in('grade_code', ['0', 'ร', 'มส', 'มผ'])
+      .order('student_no', { ascending:true });
+
+    if(error) throw error;
+
+    let rows = (data || []).map(row => ({
+      id: row.id,
+      student_id: row.student_id,
+      student_code: safeText(row.student_code, ''),
+      student_name: safeText(row.student_name, ''),
+      student_no: safeText(row.student_no, ''),
+      academic_year: row.academic_year,
+      term: row.term,
+      class_level: row.class_level,
+      room: row.room,
+      grade_code: normalizeGradeValue(row.grade_code),
+      retest_grade_code: normalizeGradeValue(row.retest_grade_code),
+      subject_code: safeText(row.subjects?.subject_code, ''),
+      subject_name: safeText(row.subjects?.subject_name, ''),
+      credit: safeNum(row.subjects?.credit) ?? 0,
+      subject_type: safeText(row.subjects?.subject_type, ''),
+      teacher_code: safeText(row.teachers?.teacher_code, ''),
+      teacher_name: safeText(row.teachers?.full_name, '')
+    }));
+
+    if(keyword){
+      rows = rows.filter(row => {
+        const haystack = [
+          row.student_code,
+          row.student_name,
+          row.subject_code,
+          row.subject_name,
+          row.teacher_name,
+          row.teacher_code
+        ].join(' ').toLowerCase();
+
+        return haystack.includes(keyword);
+      });
+    }
+
+    renderAdviserRetestRows(rows);
+
+    setStatus(
+      'adviserRetestStatus',
+      `พบรายการติดตามสอบแก้ตัว ${rows.length} รายการ`,
+      rows.length ? 'success' : 'warn'
+    );
+  }catch(err){
+    console.error('loadAdviserRetestRows ERROR', err);
+    renderAdviserRetestRows([]);
+    setStatus('adviserRetestStatus', err.message || 'โหลดรายการติดตามสอบแก้ตัวไม่สำเร็จ', 'error');
+  }
 }
 
     function init(){
