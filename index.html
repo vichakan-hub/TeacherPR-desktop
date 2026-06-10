@@ -4483,6 +4483,98 @@
     grid-template-columns:1fr;
   }
 }
+    /* ===== Teacher Student Overview Compare Layout ===== */
+.teacher-student-overview-chart-grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.teacher-student-chart-title{
+  margin:0 0 12px;
+  color:#17324d;
+}
+
+.teacher-student-compare-table{
+  width:100%;
+  min-width:760px;
+  border-collapse:collapse;
+}
+
+.teacher-student-compare-table th,
+.teacher-student-compare-table td{
+  padding:13px 12px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+  vertical-align:middle;
+}
+
+.teacher-student-compare-table th{
+  background:#f8fbff;
+  color:#41536c;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+.compare-diff-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:72px;
+  min-height:30px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-family:'Sarabun',sans-serif;
+  font-weight:900;
+  border:1px solid #dbe7f3;
+  background:#f8fbff;
+  color:#334155;
+}
+
+.compare-status-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:5px 11px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+
+.compare-status-pill.high{
+  background:#dcfce7;
+  color:#166534;
+  border-color:#86efac;
+}
+
+.compare-status-pill.near{
+  background:#eef4ff;
+  color:#1d4ed8;
+  border-color:#cfe0ff;
+}
+
+.compare-status-pill.low{
+  background:#ffedd5;
+  color:#c2410c;
+  border-color:#fdba74;
+}
+
+.compare-status-pill.very-low{
+  background:#fee2e2;
+  color:#b91c1c;
+  border-color:#fca5a5;
+}
+
+@media (max-width:1100px){
+  .teacher-student-overview-chart-grid{
+    grid-template-columns:1fr;
+  }
+}
 
 
 </style>
@@ -5656,6 +5748,7 @@
         </div>
 
 <div class="teacher-student-overview-chart-grid">
+<div class="teacher-student-overview-chart-grid">
   <div class="teacher-student-chart-card">
     <h3 class="teacher-student-chart-title">กราฟเปรียบเทียบ GPA รายเทอม</h3>
     <div class="teacher-student-chart-box">
@@ -5664,11 +5757,40 @@
   </div>
 
   <div class="teacher-student-chart-card">
-    <h3 class="teacher-student-chart-title">กราฟเรดาร์ผลการเรียนตามกลุ่มสาระ</h3>
+    <h3 class="teacher-student-chart-title">กราฟเรดาร์ 8 กลุ่มสาระ</h3>
     <div class="teacher-student-chart-box">
       <canvas id="teacherStudentRadarChart"></canvas>
     </div>
   </div>
+</div>
+
+<div class="student-panel">
+  <div class="student-panel-head">
+    <h3>ตารางเปรียบเทียบเกรดเฉลี่ยกลุ่มสาระ</h3>
+    <p>เปรียบเทียบค่าเฉลี่ยของนักเรียนกับค่าเฉลี่ยทั้งห้อง เฉพาะ 8 กลุ่มสาระ</p>
+  </div>
+
+  <div class="student-panel-body">
+    <div class="table-wrap">
+      <table class="teacher-student-compare-table">
+        <thead>
+          <tr>
+            <th>กลุ่มสาระ</th>
+            <th style="width:150px;" class="text-center">GPA นักเรียน</th>
+            <th style="width:160px;" class="text-center">GPA เฉลี่ยห้อง</th>
+            <th style="width:130px;" class="text-center">ส่วนต่าง</th>
+            <th style="width:160px;" class="text-center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="teacherStudentCompareTbody">
+          <tr>
+            <td colspan="5" class="empty-state">ยังไม่มีข้อมูลเปรียบเทียบ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 </div>
       </div>
 
@@ -6214,6 +6336,8 @@ teacherStudentCurrentSummary: null,
 teacherStudentCurrentTermKey: 'overview',
 teacherStudentGpaChart: null,
 teacherStudentRadarChart: null,
+teacherStudentClassRows: [],
+teacherStudentCompareRows: [],
 };
 
     function setStatus(id, text, type='info'){
@@ -7079,10 +7203,13 @@ if(state.teacherStudentGpaChart){
   state.teacherStudentGpaChart.destroy();
   state.teacherStudentGpaChart = null;
 }
-      if(state.teacherStudentRadarChart){
+if(state.teacherStudentRadarChart){
   state.teacherStudentRadarChart.destroy();
   state.teacherStudentRadarChart = null;
 }
+
+state.teacherStudentClassRows = [];
+state.teacherStudentCompareRows = [];
 
       sessionStorage.removeItem('teacherPageUser');
       el('appView').classList.add('hidden');
@@ -9636,6 +9763,84 @@ const renderClassTermButtons = (classLevel) => {
         teacher_name: safeText(row.teachers?.full_name, '')
       }));
     }
+
+    async function fetchTeacherStudentClassGrades(student, termGroups){
+  const studentId = student?.id;
+  const classRoomPairs = [];
+
+  (termGroups || []).forEach(group => {
+    const academicYear = safeNum(group.academic_year);
+    const term = safeNum(group.term);
+    const classLevel = safeText(group.class_level, '');
+    const room = safeText(group.room || student.current_teaching_room || student.current_room, '');
+
+    if(!academicYear || !term || !classLevel || !room) return;
+
+    const key = `${academicYear}|${term}|${classLevel}|${room}`;
+    if(!classRoomPairs.some(item => item.key === key)){
+      classRoomPairs.push({
+        key,
+        academic_year: academicYear,
+        term,
+        class_level: classLevel,
+        room
+      });
+    }
+  });
+
+  const allRows = [];
+
+  for(const pair of classRoomPairs){
+    const { data, error } = await supabaseClient
+      .from('grade_results')
+      .select(`
+        id,
+        student_id,
+        academic_year,
+        term,
+        class_level,
+        room,
+        grade_code,
+        retest_grade_code,
+        is_active,
+        subjects:subjects!fk_grade_results_subject (
+          subject_code,
+          subject_name,
+          credit,
+          learning_area,
+          subject_type
+        )
+      `)
+      .eq('academic_year', pair.academic_year)
+      .eq('term', pair.term)
+      .eq('class_level', pair.class_level)
+      .eq('room', pair.room)
+      .eq('is_active', true);
+
+    if(error) throw error;
+
+    (data || []).forEach(row => {
+      allRows.push({
+        id: row.id,
+        student_id: row.student_id,
+        academic_year: row.academic_year,
+        term: row.term,
+        class_level: row.class_level,
+        room: row.room,
+        grade_code: normalizeGradeValue(row.grade_code),
+        retest_grade_code: normalizeGradeValue(row.retest_grade_code),
+        subject_code: safeText(row.subjects?.subject_code, ''),
+        subject_name: safeText(row.subjects?.subject_name, ''),
+        credit: safeNum(row.subjects?.credit) ?? 0,
+        learning_area: safeText(row.subjects?.learning_area, ''),
+        subject_type: safeText(row.subjects?.subject_type, ''),
+        is_current_student: String(row.student_id) === String(studentId)
+      });
+    });
+  }
+
+  return allRows;
+}
 
     function buildStudentSummary(rows){
       const summary = {
@@ -12237,7 +12442,7 @@ function teacherStudentBuildRadarData(rows){
   };
 }
 
-function teacherStudentRenderRadarChart(rows){
+function teacherStudentRenderRadarChart(compareRows){
   const canvas = el('teacherStudentRadarChart');
   if(!canvas || typeof Chart === 'undefined') return;
 
@@ -12246,24 +12451,37 @@ function teacherStudentRenderRadarChart(rows){
     state.teacherStudentRadarChart = null;
   }
 
-  const radar = teacherStudentBuildRadarData(rows);
+  const rows = (compareRows || []).filter(row =>
+    TEACHER_STUDENT_CORE_AREAS.includes(row.area)
+  );
 
-  if(!radar.labels.length){
-    return;
-  }
+  const labels = rows.map(row => row.area);
+  const studentData = rows.map(row => row.studentAvg === null ? null : Number(row.studentAvg.toFixed(2)));
+  const classData = rows.map(row => row.classAvg === null ? null : Number(row.classAvg.toFixed(2)));
 
   state.teacherStudentRadarChart = new Chart(canvas, {
     type: 'radar',
     data: {
-      labels: radar.labels,
-      datasets: [{
-        label: 'ค่าเฉลี่ยผลการเรียนตามกลุ่มสาระ',
-        data: radar.data,
-        fill: true,
-        borderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6
-      }]
+      labels,
+      datasets: [
+        {
+          label: 'นักเรียน',
+          data: studentData,
+          fill: true,
+          borderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'เฉลี่ยห้อง',
+          data: classData,
+          fill: true,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -12272,7 +12490,7 @@ function teacherStudentRenderRadarChart(rows){
         legend: { display: true },
         tooltip: {
           callbacks: {
-            label: (context) => `ค่าเฉลี่ย: ${Number(context.parsed.r || 0).toFixed(2)}`
+            label: context => `${context.dataset.label}: ${Number(context.parsed.r || 0).toFixed(2)}`
           }
         }
       },
@@ -12289,7 +12507,214 @@ function teacherStudentRenderRadarChart(rows){
   });
 }
 
-function teacherStudentRenderGpaChart(termGroups){
+    const TEACHER_STUDENT_CORE_AREAS = [
+  'ภาษาไทย',
+  'คณิตศาสตร์',
+  'วิทยาศาสตร์',
+  'สังคมศึกษา',
+  'สุขศึกษาและพลศึกษา',
+  'ศิลปะ',
+  'การงานอาชีพ',
+  'ภาษาต่างประเทศ'
+];
+
+function normalizeTeacherStudentLearningArea(area){
+  const text = safeText(area, '');
+
+  if(!text) return '';
+
+  if(text.includes('ไทย')) return 'ภาษาไทย';
+  if(text.includes('คณิต')) return 'คณิตศาสตร์';
+  if(text.includes('วิทย')) return 'วิทยาศาสตร์';
+  if(text.includes('สังคม')) return 'สังคมศึกษา';
+  if(text.includes('สุข') || text.includes('พละ') || text.includes('พลศึกษา')) return 'สุขศึกษาและพลศึกษา';
+  if(text.includes('ศิลป')) return 'ศิลปะ';
+  if(text.includes('การงาน')) return 'การงานอาชีพ';
+  if(text.includes('ต่างประเทศ') || text.includes('อังกฤษ')) return 'ภาษาต่างประเทศ';
+
+  return '';
+}
+
+function teacherStudentBuildSubjectAreaAverage(rows){
+  const map = new Map(
+    TEACHER_STUDENT_CORE_AREAS.map(area => [area, { total: 0, count: 0 }])
+  );
+
+  (rows || []).forEach(row => {
+    const area = normalizeTeacherStudentLearningArea(row.learning_area);
+    if(!area || !map.has(area)) return;
+
+    const numericGrade = getNumericGradeForGpa(getEffectiveGrade(row));
+    if(numericGrade === null) return;
+
+    const item = map.get(area);
+    item.total += numericGrade;
+    item.count += 1;
+  });
+
+  return TEACHER_STUDENT_CORE_AREAS.map(area => {
+    const item = map.get(area);
+    const avg = item && item.count > 0
+      ? item.total / item.count
+      : null;
+
+    return {
+      area,
+      avg,
+      count: item?.count || 0
+    };
+  });
+}
+
+function teacherStudentBuildCompareRows(studentRows, classRows){
+  const studentAvg = teacherStudentBuildSubjectAreaAverage(studentRows);
+  const classAvg = teacherStudentBuildSubjectAreaAverage(classRows);
+
+  return TEACHER_STUDENT_CORE_AREAS.map(area => {
+    const s = studentAvg.find(item => item.area === area) || { avg: null, count: 0 };
+    const c = classAvg.find(item => item.area === area) || { avg: null, count: 0 };
+
+    const diff = s.avg !== null && c.avg !== null
+      ? s.avg - c.avg
+      : null;
+
+    return {
+      area,
+      studentAvg: s.avg,
+      classAvg: c.avg,
+      diff,
+      studentCount: s.count,
+      classCount: c.count,
+      status: teacherStudentGetCompareStatus(diff)
+    };
+  });
+}
+
+function teacherStudentGetCompareStatus(diff){
+  if(diff === null || diff === undefined || !Number.isFinite(Number(diff))){
+    return {
+      text: '-',
+      cls: 'near'
+    };
+  }
+
+  const n = Number(diff);
+
+  if(n <= -0.50){
+    return {
+      text: 'ต่ำกว่าห้องมาก',
+      cls: 'very-low'
+    };
+  }
+
+  if(n < -0.10){
+    return {
+      text: 'ต่ำกว่าห้อง',
+      cls: 'low'
+    };
+  }
+
+  if(n <= 0.10){
+    return {
+      text: 'ใกล้เคียงห้อง',
+      cls: 'near'
+    };
+  }
+
+  return {
+    text: 'สูงกว่าห้อง',
+    cls: 'high'
+  };
+}
+
+function teacherStudentFormatCompareNumber(value){
+  if(value === null || value === undefined || !Number.isFinite(Number(value))){
+    return '-';
+  }
+
+  return Number(value).toFixed(2);
+}
+
+function teacherStudentFormatDiff(value){
+  if(value === null || value === undefined || !Number.isFinite(Number(value))){
+    return '-';
+  }
+
+  const n = Number(value);
+  const sign = n > 0 ? '+' : '';
+  return `${sign}${n.toFixed(2)}`;
+}
+
+function teacherStudentRenderCompareTable(compareRows){
+  const tbody = el('teacherStudentCompareTbody');
+  if(!tbody) return;
+
+  if(!compareRows || !compareRows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-state">ยังไม่มีข้อมูลเปรียบเทียบ</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = compareRows.map(row => `
+    <tr>
+      <td>
+        <div class="student-name-main">${escapeHtml(row.area)}</div>
+        <div class="student-name-sub">
+          นักเรียน ${Number(row.studentCount || 0)} รายการ · ห้อง ${Number(row.classCount || 0)} รายการ
+        </div>
+      </td>
+      <td class="text-center">${escapeHtml(teacherStudentFormatCompareNumber(row.studentAvg))}</td>
+      <td class="text-center">${escapeHtml(teacherStudentFormatCompareNumber(row.classAvg))}</td>
+      <td class="text-center">
+        <span class="compare-diff-pill">${escapeHtml(teacherStudentFormatDiff(row.diff))}</span>
+      </td>
+      <td class="text-center">
+        <span class="compare-status-pill ${escapeHtml(row.status.cls)}">
+          ${escapeHtml(row.status.text)}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function teacherStudentBuildClassTermAverage(termGroups, classRows){
+  return (termGroups || []).map(group => {
+    const rows = (classRows || []).filter(row =>
+      Number(row.academic_year) === Number(group.academic_year) &&
+      Number(row.term) === Number(group.term) &&
+      safeText(row.class_level, '') === safeText(group.class_level, '') &&
+      safeText(row.room, '') === safeText(group.room, '')
+    );
+
+    const studentMap = new Map();
+
+    rows.forEach(row => {
+      const studentId = safeText(row.student_id, '');
+      if(!studentId) return;
+
+      if(!studentMap.has(studentId)){
+        studentMap.set(studentId, []);
+      }
+
+      studentMap.get(studentId).push(row);
+    });
+
+    const gpas = Array.from(studentMap.values())
+      .map(studentRows => buildStudentSummary(studentRows).gpa)
+      .filter(gpa => Number.isFinite(Number(gpa)));
+
+    const avg = gpas.length
+      ? gpas.reduce((sum, value) => sum + Number(value || 0), 0) / gpas.length
+      : null;
+
+    return avg;
+  });
+}
+
+function teacherStudentRenderGpaChart(termGroups, classRows){
   const canvas = el('teacherStudentGpaChart');
   if(!canvas || typeof Chart === 'undefined') return;
 
@@ -12299,20 +12724,33 @@ function teacherStudentRenderGpaChart(termGroups){
   }
 
   const labels = (termGroups || []).map(group => group.label);
-  const data = (termGroups || []).map(group => Number(formatDecimalFloor(group.summary.gpa, 2)));
+  const studentData = (termGroups || []).map(group => Number(formatDecimalFloor(group.summary.gpa, 2)));
+  const classData = teacherStudentBuildClassTermAverage(termGroups, classRows)
+    .map(value => value === null ? null : Number(formatDecimalFloor(value, 2)));
 
   state.teacherStudentGpaChart = new Chart(canvas, {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        label: 'GPA รายเทอม',
-        data,
-        tension: 0.32,
-        fill: false,
-        pointRadius: 4,
-        pointHoverRadius: 6
-      }]
+      datasets: [
+        {
+          label: 'GPA นักเรียน',
+          data: studentData,
+          tension: 0.32,
+          fill: false,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'GPA เฉลี่ยห้อง',
+          data: classData,
+          tension: 0.32,
+          fill: false,
+          borderDash: [6, 4],
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -12321,7 +12759,7 @@ function teacherStudentRenderGpaChart(termGroups){
         legend: { display: true },
         tooltip: {
           callbacks: {
-            label: context => `GPA: ${Number(context.parsed.y || 0).toFixed(2)}`
+            label: context => `${context.dataset.label}: ${Number(context.parsed.y || 0).toFixed(2)}`
           }
         }
       },
@@ -12337,6 +12775,8 @@ function teacherStudentRenderGpaChart(termGroups){
     }
   });
 }
+
+    
 
 function teacherStudentSetOverlayTab(tabKey){
   state.teacherStudentCurrentTermKey = tabKey || 'overview';
@@ -12403,6 +12843,9 @@ function closeTeacherStudentGradeOverlay(){
     state.teacherStudentRadarChart.destroy();
     state.teacherStudentRadarChart = null;
   }
+
+  state.teacherStudentClassRows = [];
+  state.teacherStudentCompareRows = [];
 }
 
 async function openTeacherStudentGradeOverlay(student){
@@ -12435,14 +12878,28 @@ async function openTeacherStudentGradeOverlay(student){
       </tr>
     `;
 
+    if(el('teacherStudentCompareTbody')){
+  el('teacherStudentCompareTbody').innerHTML = `
+    <tr>
+      <td colspan="5" class="empty-state">กำลังโหลดข้อมูลเปรียบเทียบ...</td>
+    </tr>
+  `;
+}
+
     const rows = await fetchStudentGrades(student.id, null, null);
     state.teacherStudentCurrentGrades = rows || [];
 
     const courseSummary = buildStudentCourseSummary(rows || []);
     state.teacherStudentCurrentSummary = courseSummary;
 
-    const termGroups = teacherStudentBuildTermGroups(rows || []);
-    const riskCount = (rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
+const termGroups = teacherStudentBuildTermGroups(rows || []);
+const classRows = await fetchTeacherStudentClassGrades(student, termGroups);
+state.teacherStudentClassRows = classRows || [];
+
+const compareRows = teacherStudentBuildCompareRows(rows || [], classRows || []);
+state.teacherStudentCompareRows = compareRows;
+
+const riskCount = (rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
 
     el('teacherStudentDetailGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
     el('teacherStudentOvGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
@@ -12451,8 +12908,9 @@ async function openTeacherStudentGradeOverlay(student){
     el('teacherStudentOvRiskCount').textContent = String(riskCount);
 
 teacherStudentRenderOverlayTabs(termGroups);
-teacherStudentRenderGpaChart(termGroups);
-teacherStudentRenderRadarChart(rows);
+teacherStudentRenderGpaChart(termGroups, classRows || []);
+teacherStudentRenderRadarChart(compareRows);
+teacherStudentRenderCompareTable(compareRows);
 teacherStudentSetOverlayTab('overview');
   }catch(err){
     console.error('openTeacherStudentGradeOverlay ERROR', err);
