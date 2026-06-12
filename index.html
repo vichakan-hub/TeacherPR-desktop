@@ -6037,6 +6037,34 @@
   </div>
 
   <div class="student-panel">
+  <div class="student-panel-head">
+    <h3>ตารางเปรียบเทียบเกรดเฉลี่ยกลุ่มสาระ</h3>
+    <p>เปรียบเทียบค่าเฉลี่ยของนักเรียนกับค่าเฉลี่ยทั้งห้อง เฉพาะ 8 กลุ่มสาระ</p>
+  </div>
+
+  <div class="student-panel-body">
+    <div class="table-wrap">
+      <table class="teacher-student-compare-table">
+        <thead>
+          <tr>
+            <th>กลุ่มสาระ</th>
+            <th style="width:150px;" class="text-center">GPA นักเรียน</th>
+            <th style="width:160px;" class="text-center">GPA เฉลี่ยห้อง</th>
+            <th style="width:130px;" class="text-center">ส่วนต่าง</th>
+            <th style="width:160px;" class="text-center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="studentDetailOverviewCompareTbody">
+          <tr>
+            <td colspan="5" class="empty-state">ยังไม่มีข้อมูลเปรียบเทียบ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+  <div class="student-panel">
     <div class="student-panel-head">
       <h3>สรุปผลการประเมินตลอดหลักสูตร</h3>
       <p>สรุปผลการเรียนสะสมจากทุกภาคเรียนที่มีข้อมูล</p>
@@ -6913,13 +6941,14 @@ function closeStudentDetailOverlay(){
 }
 
 function setStudentDetailTab(tabName = 'overview'){
-  const isOverview = tabName === 'overview';
-  const isGrades = tabName === 'grades' || tabName === 'term';
+  const key = safeText(tabName, 'overview');
+  const isOverview = key === 'overview';
+  const isGrades = !isOverview;
 
   el('studentDetailOverviewPanel')?.classList.toggle('hidden', !isOverview);
   el('studentDetailTabGradesPanel')?.classList.toggle('hidden', !isGrades);
 
-  // แท็บวิชาที่ต้องติดตามย้ายออกไปเป็นเมนู "ติดตามสอบแก้ตัว" แล้ว
+  // ย้ายวิชาที่ต้องติดตามออกไปเป็นเมนู "ติดตามสอบแก้ตัว" แล้ว
   el('studentDetailTabRiskPanel')?.classList.add('hidden');
 
   document
@@ -6927,7 +6956,7 @@ function setStudentDetailTab(tabName = 'overview'){
     .forEach(btn => {
       btn.classList.toggle(
         'active',
-        safeText(btn.dataset.studentDetailTab, '') === tabName
+        safeText(btn.dataset.studentDetailTab, '') === key
       );
     });
 }
@@ -8424,6 +8453,14 @@ document
   .forEach(btn => {
     btn.classList.toggle('active', safeText(btn.dataset.riskStatusFilter, '') === '');
   });
+if(el('studentDetailOverviewCompareTbody')){
+  el('studentDetailOverviewCompareTbody').innerHTML = `
+    <tr>
+      <td colspan="5" class="empty-state">ยังไม่มีข้อมูลเปรียบเทียบ</td>
+    </tr>
+  `;
+}
+      
     }
 
     function updateAdviserStatusSummary(rows){
@@ -10566,18 +10603,38 @@ function populateStudentDetailHeader(student, gradeRows, selectedRoom){
   const firstRow = gradeRows[0] || null;
 
   const classLevel = safeText(
-    firstRow?.class_level || selectedRoom?.class_level || student.computed_class_level || '',
+    firstRow?.class_level ||
+    selectedRoom?.class_level ||
+    student.computed_class_level ||
+    '',
     ''
   );
 
   const room = safeText(
-    firstRow?.room || student.current_room || selectedRoom?.room || '',
+    firstRow?.room ||
+    student.current_room ||
+    selectedRoom?.room ||
+    '',
     ''
   );
 
   const no = safeText(student.current_no, '');
-  const year = safeText(firstRow?.academic_year || selectedRoom?.academic_year || '', '-');
-  const term = safeText(firstRow?.term || selectedRoom?.term || '', '-');
+
+  const year = safeText(
+    firstRow?.academic_year ||
+    selectedRoom?.academic_year ||
+    '',
+    ''
+  );
+
+  const term = safeText(
+    firstRow?.term ||
+    selectedRoom?.term ||
+    '',
+    ''
+  );
+
+  const label = safeText(selectedRoom?.label, '');
 
   const classRoomText = classLevel && room
     ? `${classLevel}/${room}`
@@ -10587,7 +10644,22 @@ function populateStudentDetailHeader(student, gradeRows, selectedRoom){
   el('detailStudentName').textContent = safeText(student.raw_full_name, '-');
   el('detailStudentClass').textContent = classRoomText;
   el('detailStudentRoomNo').textContent = no || '-';
-  el('detailStudentYearTerm').textContent = `${term} / ${year}`;
+
+  let yearTermText = '-';
+
+  if(label === 'ภาพรวม'){
+    yearTermText = 'ภาพรวมทุกภาคเรียน';
+  }else if(label && year){
+    yearTermText = `${label} ปีการศึกษา ${year}`;
+  }else if(classLevel && term && year){
+    yearTermText = `${classLevel} เทอม ${term} ปีการศึกษา ${year}`;
+  }else if(term && year){
+    yearTermText = `เทอม ${term} ปีการศึกษา ${year}`;
+  }else if(year){
+    yearTermText = `ปีการศึกษา ${year}`;
+  }
+
+  el('detailStudentYearTerm').textContent = yearTermText;
 }
 
     function getStudentDetailTermKey(year, term){
@@ -10659,23 +10731,26 @@ function renderStudentDetailTermTabs(student, courseRows, activeKey = 'overview'
       ภาพรวม
     </button>
 
-    ${plans.map(plan => {
-      const tabKey = getStudentDetailTermKey(plan.academic_year, plan.term);
-      const label = safeText(plan.label, `${safeText(plan.class_level, '')} เทอม ${safeText(plan.term, '')}`);
+${plans.map(plan => {
+  const tabKey = getStudentDetailTermKey(plan.academic_year, plan.term);
+  const label = safeText(
+    plan.label,
+    `${safeText(plan.class_level, '')} เทอม ${safeText(plan.term, '')}`
+  );
 
-      return `
-        <button
-          class="student-detail-tab-btn ${activeKey === tabKey ? 'active' : ''}"
-          type="button"
-          data-student-detail-tab="${escapeHtml(tabKey)}"
-          data-academic-year="${escapeHtml(String(plan.academic_year))}"
-          data-term="${escapeHtml(String(plan.term))}"
-          data-class-level="${escapeHtml(plan.class_level)}"
-          data-term-label="${escapeHtml(label)}">
-          ${escapeHtml(label)}
-        </button>
-      `;
-    }).join('')}
+  return `
+    <button
+      class="student-detail-tab-btn ${activeKey === tabKey ? 'active' : ''}"
+      type="button"
+      data-student-detail-tab="${escapeHtml(tabKey)}"
+      data-academic-year="${escapeHtml(String(plan.academic_year))}"
+      data-term="${escapeHtml(String(plan.term))}"
+      data-class-level="${escapeHtml(plan.class_level)}"
+      data-term-label="${escapeHtml(label)}">
+      ${escapeHtml(label)}
+    </button>
+  `;
+}).join('')}
   `;
 
   wrap.querySelector('[data-student-detail-tab="overview"]')?.addEventListener('click', async () => {
@@ -10756,6 +10831,51 @@ function renderStudentDetailOverview(courseRows, courseSummary, classRows = []){
   renderStudentDetailOverviewCharts(rows, classRows || []);
 }
 
+    function renderStudentDetailOverviewCompareTable(compareRows){
+  const tbody = el('studentDetailOverviewCompareTbody');
+  if(!tbody) return;
+
+  if(!compareRows || !compareRows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-state">ยังไม่มีข้อมูลเปรียบเทียบ</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = compareRows.map(row => `
+    <tr>
+      <td>
+        <div class="student-name-main">${escapeHtml(row.area)}</div>
+        <div class="student-name-sub">
+          นักเรียน ${Number(row.studentCount || 0)} รายการ · ห้อง ${Number(row.classCount || 0)} รายการ
+        </div>
+      </td>
+
+      <td class="text-center">
+        ${escapeHtml(teacherStudentFormatCompareNumber(row.studentAvg))}
+      </td>
+
+      <td class="text-center">
+        ${escapeHtml(teacherStudentFormatCompareNumber(row.classAvg))}
+      </td>
+
+      <td class="text-center">
+        <span class="compare-diff-pill">
+          ${escapeHtml(teacherStudentFormatDiff(row.diff))}
+        </span>
+      </td>
+
+      <td class="text-center">
+        <span class="compare-status-pill ${escapeHtml(row.status.cls)}">
+          ${escapeHtml(row.status.text)}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
     function renderStudentDetailOverviewCharts(courseRows, classRows){
   const termGroups = teacherStudentBuildTermGroups(courseRows || []);
   const lineCanvas = el('studentDetailOverviewGpaChart');
@@ -10825,6 +10945,8 @@ function renderStudentDetailOverview(courseRows, courseSummary, classRows = []){
     }
 
     const compareRows = teacherStudentBuildCompareRows(courseRows || [], classRows || []);
+    renderStudentDetailOverviewCompareTable(compareRows);
+    
     const labels = compareRows.map(row => row.area);
     const studentData = compareRows.map(row => row.studentAvg === null ? null : Number(row.studentAvg.toFixed(2)));
     const classData = compareRows.map(row => row.classAvg === null ? null : Number(row.classAvg.toFixed(2)));
@@ -11007,20 +11129,19 @@ async function openStudentDetail(student, termContext = null){
       state.currentStudentGrades = courseRows;
       state.currentStudentSummary = courseSummary;
 
-      populateStudentDetailHeader(student, courseRows, {
-        ...selectedRoom,
-        academic_year: '',
-        term: '',
-        class_level: selectedRoom?.class_level || student.computed_class_level,
-        label: 'ภาพรวม'
-      });
+populateStudentDetailHeader(student, courseRows, {
+  ...selectedRoom,
+  academic_year: '',
+  term: '',
+  class_level: selectedRoom?.class_level || student.computed_class_level,
+  label: 'ภาพรวม'
+});
 
-      el('detailStudentYearTerm').textContent = 'ภาพรวมทุกภาคเรียน';
-      setStudentDetailTab('overview');
-      return;
+setStudentDetailTab('overview');
+return;
     }
 
-    setStudentDetailTab('grades');
+    setStudentDetailTab(activeKey);
 
     const rows = (courseRows || []).filter(row =>
       Number(row.academic_year) === Number(targetYear) &&
@@ -11030,13 +11151,13 @@ async function openStudentDetail(student, termContext = null){
     state.currentStudentGrades = rows;
     state.currentStudentSummary = buildStudentSummary(rows);
 
-    populateStudentDetailHeader(student, rows, {
-      ...selectedRoom,
-      academic_year: targetYear,
-      term: targetTerm,
-      class_level: termContext?.class_level || selectedRoom?.class_level,
-      label: termContext?.label || ''
-    });
+populateStudentDetailHeader(student, rows, {
+  ...selectedRoom,
+  academic_year: targetYear,
+  term: targetTerm,
+  class_level: termContext?.class_level || selectedRoom?.class_level,
+  label: termContext?.label || ''
+});
 
     renderStudentGradeTable(rows);
     renderStudentSummary(state.currentStudentSummary);
