@@ -4576,10 +4576,10 @@
   }
 }
 
-    /* ===== Student Detail Overview : compare + course summary same row, no scrollbar ===== */
+/* ===== Student Detail Overview : compare + course summary same row, no scrollbar, clean corners ===== */
 .student-detail-overview-bottom-grid{
   display:grid;
-  grid-template-columns:minmax(0, 1.45fr) minmax(330px, .75fr);
+  grid-template-columns:minmax(0, 1.45fr) minmax(360px, .72fr);
   gap:16px;
   align-items:start;
 }
@@ -4588,15 +4588,21 @@
   min-width:0;
 }
 
+/* แก้มุมตารางแปลก: ให้ขอบโค้งครอบตาราง */
 .student-detail-overview-bottom-grid .table-wrap{
-  overflow:visible !important;
+  overflow:hidden !important;
   max-width:100%;
+  border-radius:18px;
+  border:1px solid var(--line);
 }
 
+/* ตารางเปรียบเทียบกลุ่มสาระ ไม่ให้มี scrollbar */
 .student-detail-overview-bottom-grid .teacher-student-compare-table{
   width:100%;
   min-width:0 !important;
   table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
 }
 
 .student-detail-overview-bottom-grid .teacher-student-compare-table th,
@@ -4653,10 +4659,25 @@
   line-height:1.25;
 }
 
+/* ตารางสรุปผลการประเมินตลอดหลักสูตร */
 .student-detail-overview-bottom-grid .summary-table{
   width:100%;
   min-width:0 !important;
   table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+/* คอลัมน์ซ้ายกว้าง / ที่เรียน-ที่ได้แคบ */
+.student-detail-overview-bottom-grid .summary-table th:first-child,
+.student-detail-overview-bottom-grid .summary-table td.label-cell{
+  width:64%;
+}
+
+.student-detail-overview-bottom-grid .summary-table .value-cell,
+.student-detail-overview-bottom-grid .summary-table th:nth-child(2),
+.student-detail-overview-bottom-grid .summary-table th:nth-child(3){
+  width:18%;
 }
 
 .student-detail-overview-bottom-grid .summary-table th,
@@ -4664,10 +4685,23 @@
   padding:10px 8px;
   font-size:13px;
   line-height:1.35;
+  white-space:normal;
+  word-break:break-word;
+}
+
+.student-detail-overview-bottom-grid .summary-table .label-cell{
+  font-weight:700;
 }
 
 .student-detail-overview-bottom-grid .summary-table .value-cell{
-  width:82px;
+  text-align:center;
+  font-weight:900;
+}
+
+/* ปิดเส้นขอบขวาสุดให้มุมดูสะอาด */
+.student-detail-overview-bottom-grid table th:last-child,
+.student-detail-overview-bottom-grid table td:last-child{
+  border-right:0;
 }
 
 @media (max-width:1100px){
@@ -4675,12 +4709,8 @@
     grid-template-columns:1fr;
   }
 
-  .student-detail-overview-bottom-grid .table-wrap{
-    overflow:auto !important;
-  }
-
   .student-detail-overview-bottom-grid .teacher-student-compare-table{
-    min-width:680px !important;
+    min-width:0 !important;
   }
 }
 
