@@ -5988,16 +5988,85 @@
   </div>
 </div>
 
-<div class="student-detail-tabs">
-  <button id="studentDetailTabGradesBtn" class="student-detail-tab-btn active" type="button">
-    รายวิชาและผลการเรียน
-  </button>
-  <button id="studentDetailTabRiskBtn" class="student-detail-tab-btn" type="button">
-    วิชาที่ต้องติดตาม
+<div id="studentDetailTermTabs" class="student-detail-tabs">
+  <button
+    class="student-detail-tab-btn active"
+    type="button"
+    data-student-detail-tab="overview">
+    ภาพรวม
   </button>
 </div>
 
-<div id="studentDetailTabGradesPanel" class="student-detail-tab-panel">
+<div id="studentDetailOverviewPanel" class="student-detail-tab-panel">
+  <div class="teacher-student-overview-grid">
+    <div class="mini-card">
+      <div class="mini-label">GPA สะสม</div>
+      <div id="studentDetailOvGpa" class="mini-value">0.00</div>
+    </div>
+
+    <div class="mini-card">
+      <div class="mini-label">จำนวนเทอมที่มีผลการเรียน</div>
+      <div id="studentDetailOvTermCount" class="mini-value">0</div>
+    </div>
+
+    <div class="mini-card">
+      <div class="mini-label">จำนวนวิชาทั้งหมด</div>
+      <div id="studentDetailOvSubjectCount" class="mini-value">0</div>
+    </div>
+
+    <div class="mini-card">
+      <div class="mini-label">วิชาเสี่ยง 0/ร/มส/มผ</div>
+      <div id="studentDetailOvRiskCount" class="mini-value">0</div>
+    </div>
+  </div>
+
+  <div class="student-panel">
+    <div class="student-panel-head">
+      <h3>ภาพรวมนักเรียน</h3>
+      <p>สรุปผลการเรียนสะสมจากทุกภาคเรียนที่มีข้อมูล</p>
+    </div>
+
+    <div class="student-panel-body">
+      <div class="table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr class="group">
+              <th rowspan="2">สรุปผลการประเมินตลอดหลักสูตร</th>
+              <th colspan="2">ผลการเรียน</th>
+            </tr>
+            <tr>
+              <th>ที่เรียน</th>
+              <th>ที่ได้</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาพื้นฐาน</td>
+              <td id="overviewCourseBasicLearned" class="value-cell">0.0</td>
+              <td id="overviewCourseBasicEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาเพิ่มเติม</td>
+              <td id="overviewCourseAdditionalLearned" class="value-cell">0.0</td>
+              <td id="overviewCourseAdditionalEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">รวมจำนวนหน่วยกิต/น้ำหนัก</td>
+              <td id="overviewCourseTotalLearned" class="value-cell">0.0</td>
+              <td id="overviewCourseTotalEarned" class="value-cell">0.0</td>
+            </tr>
+            <tr>
+              <td class="label-cell">ระดับผลการเรียนเฉลี่ยรวม</td>
+              <td id="overviewCourseGpa" class="value-cell" colspan="2">0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="studentDetailTabGradesPanel" class="student-detail-tab-panel hidden">
   <div class="student-panel">
     <div class="student-panel-head">
       <h3>รายวิชาและผลการเรียน</h3>
@@ -6838,14 +6907,24 @@ function updateSidebarUserInfo(){
       closeOverlay('studentDetailOverlay');
     }
 
-    function setStudentDetailTab(tabName = 'grades'){
-  const isGrades = tabName === 'grades';
+function setStudentDetailTab(tabName = 'overview'){
+  const isOverview = tabName === 'overview';
+  const isGrades = tabName === 'grades' || tabName === 'term';
 
-  el('studentDetailTabGradesBtn')?.classList.toggle('active', isGrades);
-  el('studentDetailTabRiskBtn')?.classList.toggle('active', !isGrades);
-
+  el('studentDetailOverviewPanel')?.classList.toggle('hidden', !isOverview);
   el('studentDetailTabGradesPanel')?.classList.toggle('hidden', !isGrades);
-  el('studentDetailTabRiskPanel')?.classList.toggle('hidden', isGrades);
+
+  // แท็บวิชาที่ต้องติดตามย้ายออกไปเป็นเมนู "ติดตามสอบแก้ตัว" แล้ว
+  el('studentDetailTabRiskPanel')?.classList.add('hidden');
+
+  document
+    .querySelectorAll('#studentDetailTermTabs [data-student-detail-tab]')
+    .forEach(btn => {
+      btn.classList.toggle(
+        'active',
+        safeText(btn.dataset.studentDetailTab, '') === tabName
+      );
+    });
 }
 
 
@@ -8287,7 +8366,19 @@ function resetRetestPage(){
   if(el(id)) el(id).textContent = value;
 });
 
-setStudentDetailTab('grades');
+if(el('studentDetailTermTabs')){
+  el('studentDetailTermTabs').innerHTML = `
+    <button
+      class="student-detail-tab-btn active"
+      type="button"
+      data-student-detail-tab="overview">
+      ภาพรวม
+    </button>
+  `;
+}
+
+renderStudentDetailOverview([], buildStudentCourseSummary([]));
+setStudentDetailTab('overview');
 
       el('studentGradeTableBody').innerHTML = `
         <tr>
@@ -10492,71 +10583,271 @@ function populateStudentDetailHeader(student, gradeRows, selectedRoom){
   el('detailStudentYearTerm').textContent = `${term} / ${year}`;
 }
 
-    async function openStudentDetail(student, termContext = null){
-      try{
-        state.currentStudentProfile = student;
-        state.currentStudentGrades = [];
-        state.currentStudentSummary = null;
-
-        resetStudentDetail();
-        openStudentDetailOverlay();
-
-        el('studentGradeTableBody').innerHTML = `
-          <tr>
-            <td colspan="11" class="empty-state">กำลังโหลดข้อมูลผลการเรียน...</td>
-          </tr>
-        `;
-
-const selectedRoom = getSelectedAdviserRoom();
-
-const targetYear = termContext
-  ? safeNum(termContext.academic_year)
-  : safeNum(selectedRoom?.academic_year);
-
-const targetTerm = termContext
-  ? safeNum(termContext.term)
-  : safeNum(selectedRoom?.term);
-
-let rows = await fetchStudentGrades(student.id, targetYear, targetTerm);
-
-// ดึงผลการเรียนทั้งหมดของนักเรียน เพื่อคำนวณตลอดหลักสูตร
-const courseRows = await fetchStudentGrades(student.id, null, null);
-
-state.currentStudentGrades = rows;
-state.currentStudentSummary = buildStudentSummary(rows);
-state.currentStudentCourseSummary = buildStudentCourseSummary(courseRows);
-
-        populateStudentDetailHeader(student, rows, {
-  ...selectedRoom,
-  academic_year: targetYear,
-  term: targetTerm,
-  class_level: termContext?.class_level || selectedRoom?.class_level,
-  label: termContext?.label || ''
-});
-renderStudentGradeTable(rows);
-renderStudentSummary(state.currentStudentSummary);
-
-// วิชาที่ต้องติดตามให้ดูจากทุกเทอมที่มีผลการเรียนแล้ว
-renderStudentRiskList(courseRows);
-
-// สรุปผลการประเมินตลอดหลักสูตร
-renderStudentCourseSummary(state.currentStudentCourseSummary);
-
-if(termContext?.mode === 'overview'){
-  setStudentDetailTab('grades');
-}else{
-  setStudentDetailTab('grades');
+    function getStudentDetailTermKey(year, term){
+  return `${safeText(year, '')}|${safeText(term, '')}`;
 }
-      }catch(err){
-        console.error('openStudentDetail ERROR', err);
-        resetStudentDetail();
-        el('studentGradeTableBody').innerHTML = `
-          <tr>
-            <td colspan="11" class="empty-state">${escapeHtml(err.message || 'โหลดข้อมูลผลการเรียนไม่สำเร็จ')}</td>
-          </tr>
-        `;
-      }
+
+function buildStudentDetailTermPlans(student, courseRows){
+  const fromStudentPlans = (student.term_plans || student.junior_term_plans || [])
+    .filter(plan => plan && plan.academic_year && plan.term)
+    .map(plan => ({
+      academic_year: safeNum(plan.academic_year),
+      term: safeNum(plan.term),
+      class_level: safeText(plan.class_level, ''),
+      label: safeText(plan.label, `${safeText(plan.class_level, '')} เทอม ${safeText(plan.term, '')}`),
+      key: getStudentDetailTermKey(plan.academic_year, plan.term)
+    }));
+
+  if(fromStudentPlans.length){
+    const hasGradeMap = new Map();
+
+    (courseRows || []).forEach(row => {
+      const key = getStudentDetailTermKey(row.academic_year, row.term);
+      hasGradeMap.set(key, true);
+    });
+
+    return fromStudentPlans.filter(plan => hasGradeMap.has(plan.key));
+  }
+
+  const map = new Map();
+
+  (courseRows || []).forEach(row => {
+    const year = safeNum(row.academic_year);
+    const term = safeNum(row.term);
+    if(!year || !term) return;
+
+    const key = getStudentDetailTermKey(year, term);
+
+    if(!map.has(key)){
+      const classLevel = safeText(row.class_level, '');
+      map.set(key, {
+        academic_year: year,
+        term,
+        class_level: classLevel,
+        label: `${classLevel || '-'} เทอม ${term}`,
+        key
+      });
     }
+  });
+
+  return [...map.values()].sort((a, b) => {
+    const yearCompare = Number(a.academic_year || 0) - Number(b.academic_year || 0);
+    if(yearCompare !== 0) return yearCompare;
+
+    return Number(a.term || 0) - Number(b.term || 0);
+  });
+}
+
+function renderStudentDetailTermTabs(student, courseRows, activeKey = 'overview'){
+  const wrap = el('studentDetailTermTabs');
+  if(!wrap) return;
+
+  const plans = buildStudentDetailTermPlans(student, courseRows);
+
+  wrap.innerHTML = `
+    <button
+      class="student-detail-tab-btn ${activeKey === 'overview' ? 'active' : ''}"
+      type="button"
+      data-student-detail-tab="overview">
+      ภาพรวม
+    </button>
+
+    ${plans.map(plan => {
+      const tabKey = getStudentDetailTermKey(plan.academic_year, plan.term);
+      const label = `${plan.label}/${plan.academic_year}`;
+
+      return `
+        <button
+          class="student-detail-tab-btn ${activeKey === tabKey ? 'active' : ''}"
+          type="button"
+          data-student-detail-tab="${escapeHtml(tabKey)}"
+          data-academic-year="${escapeHtml(String(plan.academic_year))}"
+          data-term="${escapeHtml(String(plan.term))}"
+          data-class-level="${escapeHtml(plan.class_level)}"
+          data-term-label="${escapeHtml(label)}">
+          ${escapeHtml(label)}
+        </button>
+      `;
+    }).join('')}
+  `;
+
+  wrap.querySelector('[data-student-detail-tab="overview"]')?.addEventListener('click', async () => {
+    await openStudentDetail(student, {
+      mode: 'overview'
+    });
+  });
+
+  wrap.querySelectorAll('[data-academic-year][data-term]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await openStudentDetail(student, {
+        academic_year: safeNum(btn.dataset.academicYear),
+        term: safeNum(btn.dataset.term),
+        class_level: safeText(btn.dataset.classLevel, ''),
+        label: safeText(btn.dataset.termLabel, '')
+      });
+    });
+  });
+}
+
+    function renderStudentDetailOverview(courseRows, courseSummary){
+  const rows = Array.isArray(courseRows) ? courseRows : [];
+  const summary = courseSummary || buildStudentCourseSummary(rows);
+
+  const termCount = new Set(
+    rows
+      .map(row => getStudentDetailTermKey(row.academic_year, row.term))
+      .filter(key => key !== '|')
+  ).size;
+
+  const subjectCount = rows.length;
+  const riskCount = rows.filter(row => isRiskGrade(getEffectiveGrade(row))).length;
+
+  if(el('studentDetailOvGpa')){
+    el('studentDetailOvGpa').textContent = formatDecimalFloor(summary.gpa, 2);
+  }
+
+  if(el('studentDetailOvTermCount')){
+    el('studentDetailOvTermCount').textContent = String(termCount);
+  }
+
+  if(el('studentDetailOvSubjectCount')){
+    el('studentDetailOvSubjectCount').textContent = String(subjectCount);
+  }
+
+  if(el('studentDetailOvRiskCount')){
+    el('studentDetailOvRiskCount').textContent = String(riskCount);
+  }
+
+  if(el('overviewCourseBasicLearned')){
+    el('overviewCourseBasicLearned').textContent = formatDecimal(summary.basicLearned, 1);
+  }
+
+  if(el('overviewCourseBasicEarned')){
+    el('overviewCourseBasicEarned').textContent = formatDecimal(summary.basicEarned, 1);
+  }
+
+  if(el('overviewCourseAdditionalLearned')){
+    el('overviewCourseAdditionalLearned').textContent = formatDecimal(summary.additionalLearned, 1);
+  }
+
+  if(el('overviewCourseAdditionalEarned')){
+    el('overviewCourseAdditionalEarned').textContent = formatDecimal(summary.additionalEarned, 1);
+  }
+
+  if(el('overviewCourseTotalLearned')){
+    el('overviewCourseTotalLearned').textContent = formatDecimal(summary.totalLearned, 1);
+  }
+
+  if(el('overviewCourseTotalEarned')){
+    el('overviewCourseTotalEarned').textContent = formatDecimal(summary.totalEarned, 1);
+  }
+
+  if(el('overviewCourseGpa')){
+    el('overviewCourseGpa').textContent = formatDecimalFloor(summary.gpa, 2);
+  }
+}
+
+async function openStudentDetail(student, termContext = null){
+  try{
+    state.currentStudentProfile = student;
+    state.currentStudentGrades = [];
+    state.currentStudentSummary = null;
+
+    resetStudentDetail();
+    openStudentDetailOverlay();
+
+    el('studentGradeTableBody').innerHTML = `
+      <tr>
+        <td colspan="11" class="empty-state">กำลังโหลดข้อมูลผลการเรียน...</td>
+      </tr>
+    `;
+
+    const selectedRoom = getSelectedAdviserRoom();
+
+    // ดึงผลการเรียนทั้งหมดของนักเรียน เพื่อใช้สร้างปุ่มรายเทอม + ภาพรวม
+    const courseRows = await fetchStudentGrades(student.id, null, null);
+    const courseSummary = buildStudentCourseSummary(courseRows);
+
+    state.currentStudentCourseSummary = courseSummary;
+
+    const isOverviewMode = termContext?.mode === 'overview';
+
+    const targetYear = isOverviewMode
+      ? null
+      : termContext
+        ? safeNum(termContext.academic_year)
+        : safeNum(selectedRoom?.academic_year);
+
+    const targetTerm = isOverviewMode
+      ? null
+      : termContext
+        ? safeNum(termContext.term)
+        : safeNum(selectedRoom?.term);
+
+    const activeKey = isOverviewMode
+      ? 'overview'
+      : getStudentDetailTermKey(targetYear, targetTerm);
+
+    renderStudentDetailTermTabs(student, courseRows, activeKey);
+    renderStudentDetailOverview(courseRows, courseSummary);
+
+    // วิชาที่ต้องติดตามให้ดูจากทุกเทอมที่มีผลการเรียนแล้ว
+    // แม้ตอนนี้ซ่อนแท็บนี้ไว้ แต่ยังเก็บข้อมูลไว้ใช้ต่อได้
+    renderStudentRiskList(courseRows);
+
+    // สรุปผลการประเมินตลอดหลักสูตรในแผงรายเทอมเดิม
+    renderStudentCourseSummary(courseSummary);
+
+    if(isOverviewMode){
+      state.currentStudentGrades = courseRows;
+      state.currentStudentSummary = courseSummary;
+
+      populateStudentDetailHeader(student, courseRows, {
+        ...selectedRoom,
+        academic_year: '',
+        term: '',
+        class_level: selectedRoom?.class_level || student.computed_class_level,
+        label: 'ภาพรวม'
+      });
+
+      el('detailStudentYearTerm').textContent = 'ภาพรวมทุกภาคเรียน';
+
+      setStudentDetailTab('overview');
+      return;
+    }
+
+    const rows = await fetchStudentGrades(student.id, targetYear, targetTerm);
+
+    state.currentStudentGrades = rows;
+    state.currentStudentSummary = buildStudentSummary(rows);
+
+    populateStudentDetailHeader(student, rows, {
+      ...selectedRoom,
+      academic_year: targetYear,
+      term: targetTerm,
+      class_level: termContext?.class_level || selectedRoom?.class_level,
+      label: termContext?.label || ''
+    });
+
+    renderStudentGradeTable(rows);
+    renderStudentSummary(state.currentStudentSummary);
+
+    setStudentDetailTab('grades');
+  }catch(err){
+    console.error('openStudentDetail ERROR', err);
+    resetStudentDetail();
+
+    if(el('studentGradeTableBody')){
+      el('studentGradeTableBody').innerHTML = `
+        <tr>
+          <td colspan="11" class="empty-state">
+            ${escapeHtml(err.message || 'โหลดข้อมูลผลการเรียนไม่สำเร็จ')}
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
 
     function bindIfExists(id, eventName, handler){
   const node = el(id);
@@ -13608,13 +13899,7 @@ bindIfExists('fpPrintMineSelectedBtn', 'click', () => {
       await handleTeacherImportFileFallback(e);
     }
   );
-  bindIfExists('studentDetailTabGradesBtn', 'click', () => {
-  setStudentDetailTab('grades');
-});
 
-bindIfExists('studentDetailTabRiskBtn', 'click', () => {
-  setStudentDetailTab('risk');
-});
 bindIfExists('studentRiskClassFilter', 'change', () => {
   renderStudentRiskFilteredList();
 });
