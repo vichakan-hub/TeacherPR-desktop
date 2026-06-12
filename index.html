@@ -6020,9 +6020,25 @@
     </div>
   </div>
 
+  <div class="teacher-student-overview-chart-grid">
+    <div class="teacher-student-chart-card">
+      <h3 class="teacher-student-chart-title">กราฟเปรียบเทียบ GPA รายเทอม</h3>
+      <div class="teacher-student-chart-box">
+        <canvas id="studentDetailOverviewGpaChart"></canvas>
+      </div>
+    </div>
+
+    <div class="teacher-student-chart-card">
+      <h3 class="teacher-student-chart-title">กราฟเรดาร์ 8 กลุ่มสาระ</h3>
+      <div class="teacher-student-chart-box">
+        <canvas id="studentDetailOverviewRadarChart"></canvas>
+      </div>
+    </div>
+  </div>
+
   <div class="student-panel">
     <div class="student-panel-head">
-      <h3>ภาพรวมนักเรียน</h3>
+      <h3>สรุปผลการประเมินตลอดหลักสูตร</h3>
       <p>สรุปผลการเรียนสะสมจากทุกภาคเรียนที่มีข้อมูล</p>
     </div>
 
@@ -6148,49 +6164,18 @@
     </div>
   </div>
 
-  <div class="student-panel">
-    <div class="student-panel-head">
-      <h3>สรุปผลการประเมินตลอดหลักสูตร</h3>
-    </div>
+<div class="student-panel">
+  <div class="student-panel-head">
+    <h3>กราฟเรดาร์ของภาคเรียนนี้</h3>
+    <p>เปรียบเทียบผลการเรียนของนักเรียนกับค่าเฉลี่ยทั้งห้อง เฉพาะ 8 กลุ่มสาระ</p>
+  </div>
 
-    <div class="student-panel-body">
-      <div class="table-wrap">
-        <table class="summary-table">
-          <thead>
-            <tr class="group">
-              <th rowspan="2">สรุปผลการประเมินตลอดหลักสูตร</th>
-              <th colspan="2">ผลการเรียน</th>
-            </tr>
-            <tr>
-              <th>ที่เรียน</th>
-              <th>ที่ได้</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาพื้นฐาน</td>
-              <td id="detailCourseBasicLearned" class="value-cell">0.0</td>
-              <td id="detailCourseBasicEarned" class="value-cell">0.0</td>
-            </tr>
-            <tr>
-              <td class="label-cell">จำนวนหน่วยกิต/น้ำหนักวิชาเพิ่มเติม</td>
-              <td id="detailCourseAdditionalLearned" class="value-cell">0.0</td>
-              <td id="detailCourseAdditionalEarned" class="value-cell">0.0</td>
-            </tr>
-            <tr>
-              <td class="label-cell">รวมจำนวนหน่วยกิต/น้ำหนัก</td>
-              <td id="detailCourseTotalLearned" class="value-cell">0.0</td>
-              <td id="detailCourseTotalEarned" class="value-cell">0.0</td>
-            </tr>
-            <tr>
-              <td class="label-cell">ระดับผลการเรียนเฉลี่ยรวม</td>
-              <td id="detailCourseGpa" class="value-cell" colspan="2">0.00</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="student-panel-body">
+    <div class="teacher-student-chart-box">
+      <canvas id="studentDetailTermRadarChart"></canvas>
     </div>
   </div>
+</div>
 </div>
 </div>
 
@@ -6510,6 +6495,12 @@ teacherStudentGpaChart: null,
 teacherStudentRadarChart: null,
 teacherStudentClassRows: [],
 teacherStudentCompareRows: [],
+  
+currentStudentAllGrades: [],
+currentStudentClassRows: [],
+studentDetailOverviewGpaChart: null,
+studentDetailOverviewRadarChart: null,
+studentDetailTermRadarChart: null,
 };
 
     function setStatus(id, text, type='info'){
@@ -6899,13 +6890,27 @@ function updateSidebarUserInfo(){
       closeOverlay('confirmOverlay');
     }
 
+    function destroyStudentDetailCharts(){
+  [
+    'studentDetailOverviewGpaChart',
+    'studentDetailOverviewRadarChart',
+    'studentDetailTermRadarChart'
+  ].forEach(key => {
+    if(state[key]){
+      state[key].destroy();
+      state[key] = null;
+    }
+  });
+}
+
     function openStudentDetailOverlay(){
       openOverlay('studentDetailOverlay');
     }
 
-    function closeStudentDetailOverlay(){
-      closeOverlay('studentDetailOverlay');
-    }
+function closeStudentDetailOverlay(){
+  destroyStudentDetailCharts();
+  closeOverlay('studentDetailOverlay');
+}
 
 function setStudentDetailTab(tabName = 'overview'){
   const isOverview = tabName === 'overview';
@@ -7580,15 +7585,15 @@ function renderAdviserStudentsThead(){
   thead.innerHTML = `
     <tr>
       <th rowspan="2" style="width:80px;" class="text-center">เลขที่</th>
-      <th rowspan="2">ชื่อ-สกุล</th>
-      <th rowspan="2" style="width:150px;" class="text-center">เกรดเฉลี่ย</th>
-      <th rowspan="2" style="width:260px;" class="text-center">สถานะความเสี่ยง</th>
-      <th rowspan="2" style="width:140px;" class="text-center">ภาพรวม</th>
+      <th rowspan="2" style="width:280px;">ชื่อ-สกุล</th>
+      <th rowspan="2" style="width:140px;" class="text-center">เกรดเฉลี่ย</th>
+      <th rowspan="2" style="width:220px;" class="text-center">สถานะความเสี่ยง</th>
+      <th rowspan="2" style="width:130px;" class="text-center">ภาพรวม</th>
       <th colspan="${columns.length}" class="text-center">ผลรายเทอม</th>
     </tr>
     <tr>
       ${columns.map(classLevel => `
-        <th style="width:190px;" class="text-center">${escapeHtml(classLevel)}</th>
+        <th style="width:160px;" class="text-center">${escapeHtml(classLevel)}</th>
       `).join('')}
     </tr>
   `;
@@ -8341,6 +8346,7 @@ function resetRetestPage(){
     }
 
     function resetStudentDetail(){
+      destroyStudentDetailCharts();
       el('detailStudentCode').textContent = '-';
       el('detailStudentName').textContent = '-';
       el('detailStudentClass').textContent = '-';
@@ -8406,6 +8412,8 @@ if(el('studentRiskTermFilter')){
 state.currentStudentRiskClassFilter = '';
 state.currentStudentRiskTermFilter = '';
 state.currentStudentRiskStatusFilter = '';
+state.currentStudentAllGrades = [];
+state.currentStudentClassRows = [];
 
 if(el('studentRiskTotalCount')) el('studentRiskTotalCount').textContent = '0';
 if(el('studentRiskPendingCount')) el('studentRiskPendingCount').textContent = '0';
@@ -9940,11 +9948,10 @@ function renderAdviserStudents(rows){
                 data-academic-year="${escapeHtml(String(plan.academic_year))}"
                 data-term="${escapeHtml(String(plan.term))}"
                 data-class-level="${escapeHtml(plan.class_level)}"
-                data-term-label="${escapeHtml(`${plan.label}/${plan.academic_year}`)}"
-                title="${escapeHtml(tooltip)}">
-                <span class="term-btn-class">${escapeHtml(plan.label)}</span>
-                <span class="term-btn-term">${escapeHtml(String(plan.academic_year))}</span>
-              </button>
+data-term-label="${escapeHtml(plan.label)}"
+title="${escapeHtml(tooltip)}">
+  <span class="term-btn-class">${escapeHtml(plan.label)}</span>
+</button>
             `;
           }).join('')}
         </div>
@@ -10654,7 +10661,7 @@ function renderStudentDetailTermTabs(student, courseRows, activeKey = 'overview'
 
     ${plans.map(plan => {
       const tabKey = getStudentDetailTermKey(plan.academic_year, plan.term);
-      const label = `${plan.label}/${plan.academic_year}`;
+      const label = safeText(plan.label, `${safeText(plan.class_level, '')} เทอม ${safeText(plan.term, '')}`);
 
       return `
         <button
@@ -10689,7 +10696,7 @@ function renderStudentDetailTermTabs(student, courseRows, activeKey = 'overview'
   });
 }
 
-    function renderStudentDetailOverview(courseRows, courseSummary){
+function renderStudentDetailOverview(courseRows, courseSummary, classRows = []){
   const rows = Array.isArray(courseRows) ? courseRows : [];
   const summary = courseSummary || buildStudentCourseSummary(rows);
 
@@ -10745,32 +10752,237 @@ function renderStudentDetailTermTabs(student, courseRows, activeKey = 'overview'
   if(el('overviewCourseGpa')){
     el('overviewCourseGpa').textContent = formatDecimalFloor(summary.gpa, 2);
   }
+
+  renderStudentDetailOverviewCharts(rows, classRows || []);
+}
+
+    function renderStudentDetailOverviewCharts(courseRows, classRows){
+  const termGroups = teacherStudentBuildTermGroups(courseRows || []);
+  const lineCanvas = el('studentDetailOverviewGpaChart');
+  const radarCanvas = el('studentDetailOverviewRadarChart');
+
+  if(lineCanvas && typeof Chart !== 'undefined'){
+    if(state.studentDetailOverviewGpaChart){
+      state.studentDetailOverviewGpaChart.destroy();
+      state.studentDetailOverviewGpaChart = null;
+    }
+
+    const labels = termGroups.map(group => `${safeText(group.class_level, '-') } เทอม ${safeText(group.term, '-')}`);
+    const studentData = termGroups.map(group => Number(formatDecimalFloor(group.summary.gpa, 2)));
+    const classData = teacherStudentBuildClassTermAverage(termGroups, classRows || [])
+      .map(value => value === null ? null : Number(formatDecimalFloor(value, 2)));
+
+    state.studentDetailOverviewGpaChart = new Chart(lineCanvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'GPA นักเรียน',
+            data: studentData,
+            tension: 0.32,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'GPA เฉลี่ยห้อง',
+            data: classData,
+            tension: 0.32,
+            fill: false,
+            borderDash: [6, 4],
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: ${Number(context.parsed.y || 0).toFixed(2)}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 4,
+            ticks: { stepSize: 0.5 }
+          }
+        }
+      }
+    });
+  }
+
+  if(radarCanvas && typeof Chart !== 'undefined'){
+    if(state.studentDetailOverviewRadarChart){
+      state.studentDetailOverviewRadarChart.destroy();
+      state.studentDetailOverviewRadarChart = null;
+    }
+
+    const compareRows = teacherStudentBuildCompareRows(courseRows || [], classRows || []);
+    const labels = compareRows.map(row => row.area);
+    const studentData = compareRows.map(row => row.studentAvg === null ? null : Number(row.studentAvg.toFixed(2)));
+    const classData = compareRows.map(row => row.classAvg === null ? null : Number(row.classAvg.toFixed(2)));
+
+    state.studentDetailOverviewRadarChart = new Chart(radarCanvas, {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'นักเรียน',
+            data: studentData,
+            fill: true,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'เฉลี่ยห้อง',
+            data: classData,
+            fill: true,
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.dataset.label}: ${Number(context.parsed.r || 0).toFixed(2)}`
+            }
+          }
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 4,
+            ticks: { stepSize: 0.5 }
+          }
+        }
+      }
+    });
+  }
+}
+
+function renderStudentDetailTermRadar(termRows, classRows){
+  const canvas = el('studentDetailTermRadarChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+
+  if(state.studentDetailTermRadarChart){
+    state.studentDetailTermRadarChart.destroy();
+    state.studentDetailTermRadarChart = null;
+  }
+
+  if(!termRows || !termRows.length){
+    return;
+  }
+
+  const ref = termRows[0];
+  const filteredClassRows = (classRows || []).filter(row =>
+    Number(row.academic_year) === Number(ref.academic_year) &&
+    Number(row.term) === Number(ref.term) &&
+    safeText(row.class_level, '') === safeText(ref.class_level, '') &&
+    safeText(row.room, '') === safeText(ref.room, '')
+  );
+
+  const compareRows = teacherStudentBuildCompareRows(termRows || [], filteredClassRows || []);
+  const labels = compareRows.map(row => row.area);
+  const studentData = compareRows.map(row => row.studentAvg === null ? null : Number(row.studentAvg.toFixed(2)));
+  const classData = compareRows.map(row => row.classAvg === null ? null : Number(row.classAvg.toFixed(2)));
+
+  state.studentDetailTermRadarChart = new Chart(canvas, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'นักเรียน',
+          data: studentData,
+          fill: true,
+          borderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'เฉลี่ยห้อง',
+          data: classData,
+          fill: true,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: context => `${context.dataset.label}: ${Number(context.parsed.r || 0).toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        r: {
+          min: 0,
+          max: 4,
+          ticks: { stepSize: 0.5 }
+        }
+      }
+    }
+  });
 }
 
 async function openStudentDetail(student, termContext = null){
   try{
-    state.currentStudentProfile = student;
-    state.currentStudentGrades = [];
-    state.currentStudentSummary = null;
-
-    resetStudentDetail();
-    openStudentDetailOverlay();
-
-    el('studentGradeTableBody').innerHTML = `
-      <tr>
-        <td colspan="11" class="empty-state">กำลังโหลดข้อมูลผลการเรียน...</td>
-      </tr>
-    `;
-
+    const sameStudent = String(state.currentStudentProfile?.id || '') === String(student?.id || '');
     const selectedRoom = getSelectedAdviserRoom();
-
-    // ดึงผลการเรียนทั้งหมดของนักเรียน เพื่อใช้สร้างปุ่มรายเทอม + ภาพรวม
-    const courseRows = await fetchStudentGrades(student.id, null, null);
-    const courseSummary = buildStudentCourseSummary(courseRows);
-
-    state.currentStudentCourseSummary = courseSummary;
-
     const isOverviewMode = termContext?.mode === 'overview';
+
+    if(!sameStudent){
+      state.currentStudentProfile = student;
+      state.currentStudentGrades = [];
+      state.currentStudentSummary = null;
+      state.currentStudentAllGrades = [];
+      state.currentStudentClassRows = [];
+
+      resetStudentDetail();
+      openStudentDetailOverlay();
+    }else{
+      openStudentDetailOverlay();
+    }
+
+    let courseRows = state.currentStudentAllGrades || [];
+    let classRows = state.currentStudentClassRows || [];
+
+    if(!sameStudent || !courseRows.length){
+      courseRows = await fetchStudentGrades(student.id, null, null);
+      state.currentStudentAllGrades = courseRows;
+
+      const termGroups = teacherStudentBuildTermGroups(courseRows || []);
+      classRows = await fetchTeacherStudentClassGrades(student, termGroups);
+      state.currentStudentClassRows = classRows || [];
+
+      renderStudentRiskList(courseRows);
+    }
+
+    const courseSummary = buildStudentCourseSummary(courseRows);
+    state.currentStudentCourseSummary = courseSummary;
 
     const targetYear = isOverviewMode
       ? null
@@ -10789,14 +11001,7 @@ async function openStudentDetail(student, termContext = null){
       : getStudentDetailTermKey(targetYear, targetTerm);
 
     renderStudentDetailTermTabs(student, courseRows, activeKey);
-    renderStudentDetailOverview(courseRows, courseSummary);
-
-    // วิชาที่ต้องติดตามให้ดูจากทุกเทอมที่มีผลการเรียนแล้ว
-    // แม้ตอนนี้ซ่อนแท็บนี้ไว้ แต่ยังเก็บข้อมูลไว้ใช้ต่อได้
-    renderStudentRiskList(courseRows);
-
-    // สรุปผลการประเมินตลอดหลักสูตรในแผงรายเทอมเดิม
-    renderStudentCourseSummary(courseSummary);
+    renderStudentDetailOverview(courseRows, courseSummary, classRows || []);
 
     if(isOverviewMode){
       state.currentStudentGrades = courseRows;
@@ -10811,12 +11016,16 @@ async function openStudentDetail(student, termContext = null){
       });
 
       el('detailStudentYearTerm').textContent = 'ภาพรวมทุกภาคเรียน';
-
       setStudentDetailTab('overview');
       return;
     }
 
-    const rows = await fetchStudentGrades(student.id, targetYear, targetTerm);
+    setStudentDetailTab('grades');
+
+    const rows = (courseRows || []).filter(row =>
+      Number(row.academic_year) === Number(targetYear) &&
+      Number(row.term) === Number(targetTerm)
+    );
 
     state.currentStudentGrades = rows;
     state.currentStudentSummary = buildStudentSummary(rows);
@@ -10831,8 +11040,7 @@ async function openStudentDetail(student, termContext = null){
 
     renderStudentGradeTable(rows);
     renderStudentSummary(state.currentStudentSummary);
-
-    setStudentDetailTab('grades');
+    renderStudentDetailTermRadar(rows, classRows || []);
   }catch(err){
     console.error('openStudentDetail ERROR', err);
     resetStudentDetail();
