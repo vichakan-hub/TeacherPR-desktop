@@ -7490,6 +7490,8 @@ function getAdviserClassColumns(){
     : ['ม.1', 'ม.2', 'ม.3'];
 }
 
+    
+
 function renderAdviserStudentsThead(){
   const thead = el('adviserStudentsThead');
   if(!thead) return;
@@ -9575,7 +9577,7 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
   return map;
 }
 
-    async function fetchAdviserStudentGpaMap(studentIds){
+async function fetchAdviserStudentGpaMap(studentIds){
   const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
   const map = new Map();
 
@@ -9607,9 +9609,11 @@ async function fetchStudentGradeFlags(studentIds, academicYear, term){
       const sid = String(row.student_id || '');
       if(!sid) return;
 
+      const subjectType = safeText(row.subjects?.subject_type, '');
+      if(subjectType !== 'พื้นฐาน' && subjectType !== 'เพิ่มเติม') return;
+
       const effectiveGrade = normalizeGradeValue(row.retest_grade_code || row.grade_code);
       const numericGrade = getNumericGradeForGpa(effectiveGrade);
-
       if(numericGrade === null) return;
 
       const credit = safeNum(row.subjects?.credit) ?? 0;
@@ -9829,11 +9833,9 @@ function renderAdviserStudents(rows){
             const hasRisk = !!termFlag.has_risk_grade;
             const isRepeatRisk = !!termFlag.is_repeat_risk;
 
-            const btnClass = isRepeatRisk
+            const btnClass = isRepeatRisk || hasRisk
               ? 'has-risk'
-              : hasRisk
-                ? 'has-risk'
-                : 'has-grade';
+              : 'has-grade';
 
             const tooltip = termFlag.total_subject_count > 0
               ? `ติด ${Number(termFlag.repeat_risk_count || 0)}/${Number(termFlag.total_subject_count || 0)} วิชา`
@@ -9843,9 +9845,9 @@ function renderAdviserStudents(rows){
               <button
                 class="btn-term-grade ${btnClass}"
                 type="button"
-                data-student-id="${escapeHtml(student.id)}"
-                data-academic-year="${escapeHtml(plan.academic_year)}"
-                data-term="${escapeHtml(plan.term)}"
+                data-student-id="${escapeHtml(String(student.id))}"
+                data-academic-year="${escapeHtml(String(plan.academic_year))}"
+                data-term="${escapeHtml(String(plan.term))}"
                 data-class-level="${escapeHtml(plan.class_level)}"
                 data-term-label="${escapeHtml(`${plan.label}/${plan.academic_year}`)}"
                 title="${escapeHtml(tooltip)}">
@@ -9861,7 +9863,7 @@ function renderAdviserStudents(rows){
     return `
       <tr>
         <td class="text-center">
-          <strong>${escapeHtml(safeText(student.current_no, '-'))}</strong>
+          <strong>${escapeHtml(formatPlainNumber(student.current_no))}</strong>
         </td>
 
         <td>
@@ -9885,7 +9887,7 @@ function renderAdviserStudents(rows){
           <button
             class="btn-view-grade"
             type="button"
-            data-student-overview-id="${escapeHtml(student.id)}">
+            data-student-overview-id="${escapeHtml(String(student.id))}">
             ภาพรวม
           </button>
         </td>
@@ -9905,7 +9907,9 @@ function renderAdviserStudents(rows){
       const student = state.adviserStudents.find(s => String(s.id) === studentId);
 
       if(student){
-        await openStudentOverviewFromAdviser(student);
+        await openStudentDetail(student, {
+          mode: 'overview'
+        });
       }
     });
   });
