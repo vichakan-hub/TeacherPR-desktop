@@ -15140,6 +15140,95 @@ function buildSignatureHtml(label, name){
   `;
 }
 
+function getReportLearningAreaFromSubjectCode(subjectCode){
+  const ch = String(subjectCode || '').trim().charAt(0);
+
+  const map = {
+    'ท': 'ภาษาไทย',
+    'ค': 'คณิตศาสตร์',
+    'ว': 'วิทยาศาสตร์และเทคโนโลยี',
+    'ส': 'สังคมศึกษา ศาสนา และวัฒนธรรม',
+    'พ': 'สุขศึกษาและพลศึกษา',
+    'ศ': 'ศิลปะ',
+    'ง': 'การงานอาชีพ',
+    'อ': 'ภาษาต่างประเทศ',
+    'ข': 'ภาษาต่างประเทศ',
+    'จ': 'ภาษาต่างประเทศ',
+    'ญ': 'ภาษาต่างประเทศ',
+    'ต': 'ภาษาต่างประเทศ',
+    'ก': 'ภาษาต่างประเทศ'
+  };
+
+  return map[ch] || 'ALL';
+}
+
+function getAreaHeadSignerKey(learningArea){
+  const area = String(learningArea || '').trim();
+
+  const map = {
+    'ภาษาไทย': 'AREA_HEAD_THAI',
+    'คณิตศาสตร์': 'AREA_HEAD_MATH',
+    'วิทยาศาสตร์และเทคโนโลยี': 'AREA_HEAD_SCIENCE',
+    'สังคมศึกษา ศาสนา และวัฒนธรรม': 'AREA_HEAD_SOCIAL',
+    'สุขศึกษาและพลศึกษา': 'AREA_HEAD_HEALTH',
+    'ศิลปะ': 'AREA_HEAD_ART',
+    'การงานอาชีพ': 'AREA_HEAD_CAREER',
+    'ภาษาต่างประเทศ': 'AREA_HEAD_FOREIGN'
+  };
+
+  return map[area] || 'AREA_HEAD_FOREIGN';
+}
+
+function getSignerFullName(row){
+  const prefix = safeText(row?.person_prefix, '');
+  const name = safeText(row?.person_name, '');
+  return [prefix, name].filter(Boolean).join('').trim();
+}
+
+async function loadAcademicReportSignersForTeacherReport(academicYear, term, subjectCode){
+  const learningArea = getReportLearningAreaFromSubjectCode(subjectCode);
+
+  const { data, error } = await supabaseClient
+    .from('academic_report_signers')
+    .select(`
+      id,
+      academic_year,
+      term,
+      learning_area,
+      position_key,
+      position_title,
+      person_prefix,
+      person_name,
+      sort_order,
+      is_active
+    `)
+    .eq('academic_year', academicYear)
+    .eq('term', term)
+    .eq('is_active', true)
+    .in('learning_area', ['ALL', learningArea])
+    .order('sort_order', { ascending:true });
+
+  if(error) throw error;
+
+  return {
+    learning_area: learningArea,
+    rows: data || []
+  };
+}
+
+function getReportSignerByKeys(signers, keys){
+  const keyList = Array.isArray(keys) ? keys : [keys];
+
+  return (signers || []).find(s =>
+    keyList.includes(String(s.position_key || '').trim())
+  ) || {
+    position_key: '',
+    position_title: '',
+    person_prefix: '',
+    person_name: ''
+  };
+}
+
 function buildGradeStatsReportHtml(payload){
   const {
     data,
@@ -15150,11 +15239,28 @@ function buildGradeStatsReportHtml(payload){
     roomAverages
   } = payload;
 
-  const signers = Array.isArray(extras.report_signers) ? extras.report_signers : [];
-  const learningAreaHead = getSignerByKey(signers, 'learning_area_head');
-  const measurementHead = getSignerByKey(signers, 'measurement_head');
-  const academicHead = getSignerByKey(signers, 'academic_head');
-  const director = getSignerByKey(signers, 'director');
+const signers = Array.isArray(extras.report_signers) ? extras.report_signers : [];
+const areaHeadKey = getAreaHeadSignerKey(extras.report_learning_area);
+
+const learningAreaHead = getReportSignerByKeys(signers, [
+  areaHeadKey,
+  'learning_area_head'
+]);
+
+const measurementHead = getReportSignerByKeys(signers, [
+  'EVALUATION_HEAD',
+  'measurement_head'
+]);
+
+const academicHead = getReportSignerByKeys(signers, [
+  'ACADEMIC_HEAD',
+  'academic_head'
+]);
+
+const director = getReportSignerByKeys(signers, [
+  'SCHOOL_DIRECTOR',
+  'director'
+]);
 
 const teacherNames = getTeacherNamesFromExtras(extras);
 const teacherNameText = getSingleLineTeacherNames(teacherNames);
@@ -15773,19 +15879,19 @@ function buildOfficialSignature(positionTitle, personName){
     <section class="signature-card">
       <div class="signature-grid">
         ${buildTeacherSignature(teacherSlots[0])}
-        ${buildOfficialSignature(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', learningAreaHead.person_name)}
+       ${buildOfficialSignature(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', getSignerFullName(learningAreaHead))}
 
         ${buildTeacherSignature(teacherSlots[1])}
-        ${buildOfficialSignature(measurementHead.position_title || 'หัวหน้างานวัดผล', measurementHead.person_name)}
+        ${buildOfficialSignature(measurementHead.position_title || 'หัวหน้างานวัดผล', getSignerFullName(measurementHead))}
 
         ${buildTeacherSignature(teacherSlots[2])}
-        ${buildOfficialSignature(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', academicHead.person_name)}
+        ${buildOfficialSignature(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', getSignerFullName(academicHead))}
       </div>
 
       <div class="approval-box">
         <div class="approval-text">อนุมัติ</div>
         <div class="director-box">
-          ${buildOfficialSignature(director.position_title || 'ผู้อำนวยการโรงเรียน', director.person_name)}
+          ${buildOfficialSignature(director.position_title || 'ผู้อำนวยการโรงเรียน', getSignerFullName(director))}
         </div>
       </div>
     </section>
@@ -15978,15 +16084,24 @@ async function exportTeacherGradeStatsPdf(){
       average: Number(r.average || 0)
     }));
 
-    const reportHtml = buildGradeStatsReportHtml({
-      data,
-      extras,
-      rows,
-      summary,
-      gradeTotals,
-      gradePercents,
-      roomAverages
-    });
+const signerResult = await loadAcademicReportSignersForTeacherReport(
+  academicYear,
+  term,
+  subjectCode
+);
+
+extras.report_signers = signerResult.rows;
+extras.report_learning_area = signerResult.learning_area;
+
+const reportHtml = buildGradeStatsReportHtml({
+  data,
+  extras,
+  rows,
+  summary,
+  gradeTotals,
+  gradePercents,
+  roomAverages
+});
 
     const reportWindow = window.open('', '_blank');
 
