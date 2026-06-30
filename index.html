@@ -14338,14 +14338,28 @@ async function openMidtermGroup(group){
     setStatus('midtermFormStatus', 'กำลังโหลดรายชื่อนักเรียน...', 'info');
     el('saveMidtermBtn').disabled = true;
 
-const currentRoom = `${group.class_level}/${group.room}`;
+const currentRoom = String(group.room || '').trim();
+const entryFilter = teacherStudentGetEntryFilterByClassLevel(
+  group.class_level,
+  group.academic_year
+);
 
-const { data: students, error: stuError } = await supabaseClient
+let studentQuery = supabaseClient
   .from('students')
-  .select('id, sid, current_room, current_no, raw_full_name, is_active')
-  .eq('current_room', currentRoom)
+  .select('id, sid, current_room, current_no, raw_full_name, entry_academic_year, entry_level, is_active')
   .eq('is_active', true)
-  .order('current_no', { ascending:true });
+  .eq('current_room', currentRoom)
+  .order('current_no', { ascending:true })
+  .order('raw_full_name', { ascending:true });
+
+if (entryFilter) {
+  studentQuery = studentQuery
+    .eq('entry_academic_year', entryFilter.entry_academic_year)
+    .eq('entry_level', entryFilter.entry_level);
+}
+
+const { data: students, error: stuError } = await studentQuery;
+if (stuError) throw stuError;
 
     if(stuError) throw stuError;
 
