@@ -14207,28 +14207,32 @@ async function loadMidtermTeachingList(){
 
     setStatus('midtermListStatus', 'กำลังโหลดรายการสอน...', 'info');
 
-    let query = supabaseClient
-      .from('v_subject_offerings')
-      .select(`
-        id,
-        subject_offering_id,
-        subject_id,
-        academic_year,
-        term,
-        class_level,
-        room,
-        subject_code,
-        subject_name,
-        teacher_id,
-        teacher_code,
-        teacher_name
-      `)
-      .eq('teacher_id', state.currentUser.id)
-      .eq('academic_year', Number(year))
-      .eq('term', Number(term))
-      .order('class_level', { ascending:true })
-      .order('room', { ascending:true })
-      .order('subject_code', { ascending:true });
+let query = supabaseClient
+  .from('v_subject_offerings')
+  .select(`
+    subject_offering_id,
+    subject_id,
+    teacher_id,
+    academic_year,
+    term,
+    class_level,
+    room,
+    credit,
+    section_code,
+    is_active,
+    subject_code,
+    subject_name,
+    subject_type,
+    teacher_code,
+    teacher_name
+  `)
+  .eq('teacher_id', state.currentUser.id)
+  .eq('academic_year', Number(year))
+  .eq('term', Number(term))
+  .eq('is_active', true)
+  .order('class_level', { ascending:true })
+  .order('room', { ascending:true })
+  .order('subject_code', { ascending:true });
 
     if(classFilter){
       query = query.eq('class_level', classFilter);
@@ -14570,7 +14574,7 @@ async function saveMidtermReport(){
       academic_year: Number(group.academic_year),
       term: Number(group.term),
 
-      subject_offering_id: firstOffering.subject_offering_id || firstOffering.id || null,
+      subject_offering_id: firstOffering.subject_offering_id || null,
       subject_id: group.subject_id || firstOffering.subject_id || null,
       teacher_id: user.id || null,
 
