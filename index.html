@@ -4819,6 +4819,71 @@
   box-shadow:0 0 0 3px rgba(37,99,235,.12);
 }
 
+    /* ===== Midterm teaching list: fix table overflow ===== */
+#pageMidtermReport .midterm-list-wrap{
+  overflow-x:hidden;
+  max-width:100%;
+}
+
+.midterm-list-table{
+  width:100%;
+  min-width:0 !important;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+.midterm-list-table th,
+.midterm-list-table td{
+  padding:12px 14px;
+  vertical-align:middle;
+  white-space:normal;
+  word-break:break-word;
+}
+
+.midterm-list-table th:nth-child(1),
+.midterm-list-table td:nth-child(1){
+  width:auto;
+}
+
+.midterm-list-table th:nth-child(2),
+.midterm-list-table td:nth-child(2){
+  width:105px;
+  text-align:center;
+}
+
+.midterm-list-table th:nth-child(3),
+.midterm-list-table td:nth-child(3){
+  width:80px;
+  text-align:center;
+}
+
+.midterm-list-table th:nth-child(4),
+.midterm-list-table td:nth-child(4){
+  width:80px;
+  text-align:center;
+}
+
+.midterm-list-table th:nth-child(5),
+.midterm-list-table td:nth-child(5){
+  width:105px;
+  text-align:center;
+}
+
+.midterm-list-table th:nth-child(6),
+.midterm-list-table td:nth-child(6){
+  width:128px;
+  text-align:center;
+}
+
+.midterm-list-table td:nth-child(6) button{
+  width:100%;
+  height:46px;
+  padding:0 10px;
+  border-radius:14px;
+  white-space:normal;
+  line-height:1.25;
+}
+
 
 </style>
 </head>
@@ -5112,8 +5177,8 @@
       กำลังโหลดรายการสอน...
     </div>
 
-    <div class="table-wrap">
-      <table>
+<div class="table-wrap midterm-list-wrap">
+  <table class="midterm-list-table">
         <thead>
           <tr>
             <th>รายวิชา</th>
@@ -14338,7 +14403,7 @@ function renderMidtermTeachingRows(rows){
             class="btn-primary"
             type="button"
             data-midterm-group-index="${idx}">
-            เปิดตารางคะแนน
+            กรอกคะแนน
           </button>
         </td>
       </tr>
