@@ -4714,6 +4714,76 @@
   }
 }
 
+/* ===== Midterm Report Page ===== */
+.midterm-table{
+  width:100%;
+  min-width:1080px;
+  border-collapse:collapse;
+}
+
+.midterm-table th,
+.midterm-table td{
+  padding:12px 10px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+  vertical-align:middle;
+}
+
+.midterm-table th{
+  background:#f8fbff;
+  color:#41536c;
+  position:sticky;
+  top:0;
+  z-index:1;
+  text-align:center;
+}
+
+.midterm-score-input{
+  width:100%;
+  height:38px;
+  border:1px solid #c8d6e4;
+  border-radius:12px;
+  padding:0 10px;
+  font-family:inherit;
+  font-size:14px;
+  text-align:center;
+  outline:none;
+}
+
+.midterm-score-input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+.midterm-score-input.invalid{
+  border-color:#d92d20;
+  background:#fff0ef;
+}
+
+.midterm-readonly{
+  display:inline-flex;
+  min-width:72px;
+  justify-content:center;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#f8fbff;
+  border:1px solid #d8e4ef;
+  font-family:'Sarabun',sans-serif;
+  font-weight:800;
+}
+
+.midterm-low-score{
+  background:#fff7ea;
+}
+
+.midterm-low-att{
+  background:#fff0ef;
+}
+
+.midterm-low-both{
+  background:#ffe9e1;
+}
+
 
 </style>
 </head>
@@ -4958,27 +5028,140 @@
         </div>
       </section>
 
-        <div id="pageMidtermReport" class="hidden">
+<div id="pageMidtermReport" class="hidden">
   <section class="card" style="margin-bottom:18px;">
     <div class="preview-topbar">
       <div>
         <h2>รายงานผลกลางภาค</h2>
         <div class="sub" style="margin-bottom:0;">
-          เตรียมไว้สำหรับระบบรายงานผลกลางภาค
+          เลือกรายวิชาที่ครูผู้สอนรับผิดชอบ แล้วกรอกคะแนนเก็บ คะแนนกลางภาค และเวลาเรียน
         </div>
       </div>
     </div>
 
-    <div class="info-box">
-      <div style="font-weight:800;color:#2563eb;font-size:18px;margin-bottom:8px;">
-        🕒 ระบบรายงานผลกลางภาค
+    <div class="toolbar-4">
+      <div class="field">
+        <span class="label-in-form">ปีการศึกษา</span>
+        <select id="midtermYear" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
       </div>
+
+      <div class="field">
+        <span class="label-in-form">ภาคเรียน</span>
+        <select id="midtermTerm" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ชั้น</span>
+        <select id="midtermClassFilter" class="std">
+          <option value="">ทั้งหมด</option>
+          <option value="ม.1">ม.1</option>
+          <option value="ม.2">ม.2</option>
+          <option value="ม.3">ม.3</option>
+          <option value="ม.4">ม.4</option>
+          <option value="ม.5">ม.5</option>
+          <option value="ม.6">ม.6</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ค้นหา</span>
+        <input id="midtermKeyword" class="std" type="text" placeholder="รหัสวิชา / ชื่อวิชา">
+      </div>
+    </div>
+
+    <div id="midtermListStatus" class="status info">
+      กำลังโหลดรายการสอน...
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>รายวิชา</th>
+            <th style="width:120px;" class="text-center">ปี/เทอม</th>
+            <th style="width:110px;" class="text-center">ชั้น</th>
+            <th style="width:130px;" class="text-center">ห้อง</th>
+            <th style="width:150px;" class="text-center">จำนวน section</th>
+            <th style="width:170px;" class="text-center">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="midtermTeachingTbody">
+          <tr>
+            <td colspan="6" class="empty-state">ยังไม่มีรายการสอน</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="preview-topbar">
       <div>
-        หน้านี้เตรียมไว้ก่อน สำหรับเพิ่มระบบรายงานผลกลางภาคในอนาคต
+        <h2 id="midtermSelectedTitle">ตารางบันทึกคะแนนกลางภาค</h2>
+        <div id="midtermSelectedSub" class="sub" style="margin-bottom:0;">
+          กรุณาเลือกรายวิชาจากรายการสอนด้านบน
+        </div>
       </div>
-      <div style="margin-top:8px;color:#6b7a90;">
-        ตอนนี้ยังไม่เปิดใช้งานการนำเข้า/บันทึกข้อมูลกลางภาค
+
+      <div class="actions" style="margin:0;">
+        <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
+          บันทึกคะแนนกลางภาค
+        </button>
+        <button id="clearMidtermBtn" class="btn-secondary" type="button">
+          ล้างตาราง
+        </button>
       </div>
+    </div>
+
+    <div class="toolbar-4">
+      <div class="field">
+        <span class="label-in-form">คะแนนเก็บเต็ม</span>
+        <input id="midtermKeepMax" class="std" type="number" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">กลางภาคเต็ม</span>
+        <input id="midtermScoreMax" class="std" type="number" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">เวลาเรียนเต็ม</span>
+        <input id="midtermAttendanceMax" class="std" type="number" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">สถานะ</span>
+        <div id="midtermFormStatus" class="status info" style="margin-top:8px;">
+          ยังไม่ได้เลือกวิชา
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="midterm-table">
+        <thead>
+          <tr>
+            <th style="width:70px;" class="text-center">เลขที่</th>
+            <th style="width:130px;" class="text-center">เลขประจำตัว</th>
+            <th>ชื่อ-สกุล</th>
+            <th style="width:120px;" class="text-center">คะแนนเก็บ</th>
+            <th style="width:120px;" class="text-center">กลางภาค</th>
+            <th style="width:120px;" class="text-center">รวมคะแนน</th>
+            <th style="width:110px;" class="text-center">%คะแนน</th>
+            <th style="width:120px;" class="text-center">เวลาเรียน</th>
+            <th style="width:120px;" class="text-center">%เวลาเรียน</th>
+          </tr>
+        </thead>
+        <tbody id="midtermTbody">
+          <tr>
+            <td colspan="9" class="empty-state">กรุณาเลือกรายวิชาจากรายการสอนด้านบน</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </div>
@@ -6673,6 +6856,15 @@ currentStudentClassRows: [],
 studentDetailOverviewGpaChart: null,
 studentDetailOverviewRadarChart: null,
 studentDetailTermRadarChart: null,
+
+midtermGroups: [],
+selectedMidtermGroup: null,
+midtermRows: [],
+midtermMax: {
+  keep: 0,
+  midterm: 0,
+  attendance: 0
+},
 };
 
     function setStatus(id, text, type='info'){
@@ -6844,6 +7036,11 @@ function setActivePage(page){
   if(isTeacherStudent){
     teacherStudentUpdateCurrentTermLabel();
   }
+
+  if(isMidtermReport){
+  applyMidtermSettings();
+  loadMidtermTeachingList();
+}
 
   closeMobileSidebar();
 }
@@ -13935,6 +14132,523 @@ teacherStudentSetOverlayTab('overview');
   }
 }
 
+function getMidtermSetting(){
+  return state.importSettings || buildDefaultOneSetting();
+}
+
+function applyMidtermSettings(){
+  const setting = getMidtermSetting();
+
+  renderYearTermControl(
+    el('midtermYear'),
+    setting.year_options,
+    setting.academic_year,
+    setting.lock,
+    null
+  );
+
+  renderYearTermControl(
+    el('midtermTerm'),
+    setting.term_options,
+    setting.term,
+    setting.lock,
+    null
+  );
+}
+
+function getMidtermGroupKey(row){
+  return [
+    row.academic_year,
+    row.term,
+    row.subject_code,
+    row.subject_name,
+    row.class_level,
+    row.room
+  ].map(v => String(v ?? '').trim()).join('|');
+}
+
+function groupMidtermOfferings(rows){
+  const map = new Map();
+
+  (rows || []).forEach(row => {
+    const key = getMidtermGroupKey(row);
+
+    if(!map.has(key)){
+      map.set(key, {
+        key,
+        academic_year: row.academic_year,
+        term: row.term,
+        subject_code: row.subject_code,
+        subject_name: row.subject_name,
+        subject_id: row.subject_id,
+        class_level: row.class_level,
+        room: row.room,
+        offerings: []
+      });
+    }
+
+    map.get(key).offerings.push(row);
+  });
+
+  return [...map.values()];
+}
+
+async function loadMidtermTeachingList(){
+  try{
+    if(!state.currentUser?.id){
+      setStatus('midtermListStatus', 'กรุณาเข้าสู่ระบบก่อน', 'warn');
+      return;
+    }
+
+    const year = safeNum(el('midtermYear')?.value);
+    const term = safeNum(el('midtermTerm')?.value);
+    const classFilter = safeText(el('midtermClassFilter')?.value, '');
+    const keyword = safeText(el('midtermKeyword')?.value, '').toLowerCase();
+
+    setStatus('midtermListStatus', 'กำลังโหลดรายการสอน...', 'info');
+
+    let query = supabaseClient
+      .from('v_subject_offerings')
+      .select(`
+        id,
+        subject_offering_id,
+        subject_id,
+        academic_year,
+        term,
+        class_level,
+        room,
+        subject_code,
+        subject_name,
+        teacher_id,
+        teacher_code,
+        teacher_name
+      `)
+      .eq('teacher_id', state.currentUser.id)
+      .eq('academic_year', Number(year))
+      .eq('term', Number(term))
+      .order('class_level', { ascending:true })
+      .order('room', { ascending:true })
+      .order('subject_code', { ascending:true });
+
+    if(classFilter){
+      query = query.eq('class_level', classFilter);
+    }
+
+    const { data, error } = await query;
+    if(error) throw error;
+
+    let groups = groupMidtermOfferings(data || []);
+
+    if(keyword){
+      groups = groups.filter(g => {
+        const text = `${g.subject_code || ''} ${g.subject_name || ''}`.toLowerCase();
+        return text.includes(keyword);
+      });
+    }
+
+    state.midtermGroups = groups;
+    renderMidtermTeachingRows(groups);
+
+    setStatus(
+      'midtermListStatus',
+      groups.length ? `พบรายการสอน ${groups.length} รายการ` : 'ไม่พบรายการสอน',
+      groups.length ? 'success' : 'warn'
+    );
+  }catch(err){
+    state.midtermGroups = [];
+    renderMidtermTeachingRows([]);
+    setStatus('midtermListStatus', err.message || 'โหลดรายการสอนไม่สำเร็จ', 'error');
+  }
+}
+
+function renderMidtermTeachingRows(rows){
+  const tbody = el('midtermTeachingTbody');
+  if(!tbody) return;
+
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">ไม่พบรายการสอน</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, idx) => {
+    const roomsText = safeText(r.room, '-');
+    const sectionCount = Array.isArray(r.offerings) ? r.offerings.length : 1;
+
+    return `
+      <tr>
+        <td>
+          <div class="grade-stats-subject-cell">
+            <div class="grade-stats-subject-code">${escapeHtml(r.subject_code || '-')}</div>
+            <div class="grade-stats-subject-name">${escapeHtml(r.subject_name || '-')}</div>
+          </div>
+        </td>
+        <td class="text-center">${escapeHtml(String(r.academic_year || '-'))}/${escapeHtml(String(r.term || '-'))}</td>
+        <td class="text-center">${escapeHtml(r.class_level || '-')}</td>
+        <td class="text-center">${escapeHtml(roomsText)}</td>
+        <td class="text-center">${escapeHtml(String(sectionCount))}</td>
+        <td class="text-center">
+          <button
+            class="btn-primary"
+            type="button"
+            data-midterm-group-index="${idx}">
+            เปิดตารางคะแนน
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('[data-midterm-group-index]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = Number(btn.dataset.midtermGroupIndex);
+      const group = state.midtermGroups[idx];
+
+      if(group){
+        await openMidtermGroup(group);
+      }
+    });
+  });
+}
+
+function getStudentFullName(row){
+  return (
+    row.full_name ||
+    row.raw_full_name ||
+    [row.prefix || '', row.first_name || '', row.last_name || ''].join(' ').trim() ||
+    row.student_name ||
+    '-'
+  );
+}
+
+async function openMidtermGroup(group){
+  try{
+    state.selectedMidtermGroup = group;
+    state.midtermRows = [];
+
+    el('midtermSelectedTitle').textContent =
+      `${group.subject_code || '-'} ${group.subject_name || '-'}`;
+
+    el('midtermSelectedSub').textContent =
+      `ชั้น ${group.class_level || '-'} ห้อง ${group.room || '-'} | ปี ${group.academic_year}/${group.term}`;
+
+    setStatus('midtermFormStatus', 'กำลังโหลดรายชื่อนักเรียน...', 'info');
+    el('saveMidtermBtn').disabled = true;
+
+    const { data: students, error: stuError } = await supabaseClient
+      .from('students')
+      .select('id, student_code, sid, student_no, no, full_name, raw_full_name, prefix, first_name, last_name, class_level, room, is_active')
+      .eq('class_level', group.class_level)
+      .eq('room', group.room)
+      .eq('is_active', true)
+      .order('student_no', { ascending:true });
+
+    if(stuError) throw stuError;
+
+    const studentRows = (students || []).map(stu => ({
+      student_id: stu.id || null,
+      student_code: safeText(stu.student_code || stu.sid, ''),
+      student_no: safeNum(stu.student_no ?? stu.no),
+      student_name: getStudentFullName(stu),
+      keep_score: '',
+      midterm_score: '',
+      total_score: 0,
+      score_percent: 0,
+      attendance_score: '',
+      attendance_percent: 0
+    }));
+
+    const { data: oldReports, error: oldError } = await supabaseClient
+      .from('midterm_reports')
+      .select('*')
+      .eq('academic_year', Number(group.academic_year))
+      .eq('term', Number(group.term))
+      .eq('subject_code', group.subject_code)
+      .eq('teacher_code', state.currentUser.teacher_code)
+      .eq('class_level', group.class_level)
+      .eq('room', group.room);
+
+    if(oldError) throw oldError;
+
+    const oldMap = new Map(
+      (oldReports || []).map(r => [String(r.student_code || '').trim(), r])
+    );
+
+    state.midtermRows = studentRows.map(row => {
+      const old = oldMap.get(String(row.student_code || '').trim());
+      if(!old) return row;
+
+      state.midtermMax.keep = Number(old.keep_max || state.midtermMax.keep || 0);
+      state.midtermMax.midterm = Number(old.midterm_max || state.midtermMax.midterm || 0);
+      state.midtermMax.attendance = Number(old.attendance_max || state.midtermMax.attendance || 0);
+
+      return {
+        ...row,
+        keep_score: old.keep_score ?? '',
+        midterm_score: old.midterm_score ?? '',
+        total_score: old.total_score ?? 0,
+        score_percent: old.score_percent ?? 0,
+        attendance_score: old.attendance_score ?? '',
+        attendance_percent: old.attendance_percent ?? 0
+      };
+    });
+
+    el('midtermKeepMax').value = state.midtermMax.keep || 0;
+    el('midtermScoreMax').value = state.midtermMax.midterm || 0;
+    el('midtermAttendanceMax').value = state.midtermMax.attendance || 0;
+
+    calculateAllMidtermRows();
+    renderMidtermRows();
+
+    setStatus(
+      'midtermFormStatus',
+      state.midtermRows.length
+        ? `โหลดรายชื่อนักเรียน ${state.midtermRows.length} คน`
+        : 'ไม่พบนักเรียนในห้องนี้',
+      state.midtermRows.length ? 'success' : 'warn'
+    );
+
+    el('saveMidtermBtn').disabled = !state.midtermRows.length;
+  }catch(err){
+    state.midtermRows = [];
+    renderMidtermRows();
+    setStatus('midtermFormStatus', err.message || 'โหลดข้อมูลไม่สำเร็จ', 'error');
+  }
+}
+
+function calculateMidtermRow(row){
+  const keep = Number(row.keep_score || 0);
+  const mid = Number(row.midterm_score || 0);
+  const att = Number(row.attendance_score || 0);
+
+  const keepMax = Number(state.midtermMax.keep || 0);
+  const midMax = Number(state.midtermMax.midterm || 0);
+  const attMax = Number(state.midtermMax.attendance || 0);
+
+  const scoreMax = keepMax + midMax;
+  const total = keep + mid;
+
+  row.total_score = total;
+  row.score_percent = scoreMax > 0 ? (total / scoreMax) * 100 : 0;
+  row.attendance_percent = attMax > 0 ? (att / attMax) * 100 : 0;
+
+  return row;
+}
+
+function calculateAllMidtermRows(){
+  state.midtermRows.forEach(calculateMidtermRow);
+}
+
+function renderMidtermRows(){
+  const tbody = el('midtermTbody');
+  if(!tbody) return;
+
+  if(!state.midtermRows.length){
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">กรุณาเลือกรายวิชาจากรายการสอนด้านบน</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = state.midtermRows.map((r, idx) => {
+    const scoreLow = Number(r.score_percent || 0) < 50;
+    const attLow = Number(r.attendance_percent || 0) < 80;
+
+    let rowClass = '';
+    if(scoreLow && attLow) rowClass = 'midterm-low-both';
+    else if(scoreLow) rowClass = 'midterm-low-score';
+    else if(attLow) rowClass = 'midterm-low-att';
+
+    return `
+      <tr class="${rowClass}">
+        <td class="text-center">${escapeHtml(formatPlainNumber(r.student_no))}</td>
+        <td class="text-center">${escapeHtml(r.student_code || '-')}</td>
+        <td>${escapeHtml(r.student_name || '-')}</td>
+
+        <td>
+          <input
+            class="midterm-score-input"
+            type="number"
+            min="0"
+            data-midterm-idx="${idx}"
+            data-midterm-key="keep_score"
+            value="${escapeHtml(r.keep_score ?? '')}">
+        </td>
+
+        <td>
+          <input
+            class="midterm-score-input"
+            type="number"
+            min="0"
+            data-midterm-idx="${idx}"
+            data-midterm-key="midterm_score"
+            value="${escapeHtml(r.midterm_score ?? '')}">
+        </td>
+
+        <td class="text-center">
+          <span class="midterm-readonly">${formatDecimal(r.total_score, 2)}</span>
+        </td>
+
+        <td class="text-center">
+          <span class="midterm-readonly">${formatDecimal(r.score_percent, 2)}</span>
+        </td>
+
+        <td>
+          <input
+            class="midterm-score-input"
+            type="number"
+            min="0"
+            data-midterm-idx="${idx}"
+            data-midterm-key="attendance_score"
+            value="${escapeHtml(r.attendance_score ?? '')}">
+        </td>
+
+        <td class="text-center">
+          <span class="midterm-readonly">${formatDecimal(r.attendance_percent, 2)}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function syncMidtermMaxFromInputs(){
+  state.midtermMax.keep = Number(el('midtermKeepMax')?.value || 0);
+  state.midtermMax.midterm = Number(el('midtermScoreMax')?.value || 0);
+  state.midtermMax.attendance = Number(el('midtermAttendanceMax')?.value || 0);
+}
+
+function validateMidtermRows(){
+  syncMidtermMaxFromInputs();
+
+  const keepMax = Number(state.midtermMax.keep || 0);
+  const midMax = Number(state.midtermMax.midterm || 0);
+  const attMax = Number(state.midtermMax.attendance || 0);
+
+  if(keepMax <= 0 || midMax <= 0 || attMax <= 0){
+    throw new Error('กรุณากำหนดคะแนนเต็มของ คะแนนเก็บ / กลางภาค / เวลาเรียน ให้มากกว่า 0');
+  }
+
+  for(const row of state.midtermRows){
+    const keep = Number(row.keep_score);
+    const mid = Number(row.midterm_score);
+    const att = Number(row.attendance_score);
+
+    if(row.keep_score === '' || row.midterm_score === '' || row.attendance_score === ''){
+      throw new Error(`กรุณากรอกคะแนนให้ครบทุกช่อง: ${row.student_name}`);
+    }
+
+    if(keep < 0 || keep > keepMax){
+      throw new Error(`คะแนนเก็บของ ${row.student_name} ต้องอยู่ระหว่าง 0-${keepMax}`);
+    }
+
+    if(mid < 0 || mid > midMax){
+      throw new Error(`คะแนนกลางภาคของ ${row.student_name} ต้องอยู่ระหว่าง 0-${midMax}`);
+    }
+
+    if(att < 0 || att > attMax){
+      throw new Error(`เวลาเรียนของ ${row.student_name} ต้องอยู่ระหว่าง 0-${attMax}`);
+    }
+  }
+}
+
+async function saveMidtermReport(){
+  try{
+    if(!state.selectedMidtermGroup){
+      throw new Error('กรุณาเลือกรายวิชาก่อนบันทึก');
+    }
+
+    if(!state.midtermRows.length){
+      throw new Error('ยังไม่มีรายชื่อนักเรียน');
+    }
+
+    validateMidtermRows();
+    calculateAllMidtermRows();
+
+    const group = state.selectedMidtermGroup;
+    const user = state.currentUser || {};
+
+    const firstOffering = (group.offerings || [])[0] || {};
+
+    const payload = state.midtermRows.map(row => ({
+      academic_year: Number(group.academic_year),
+      term: Number(group.term),
+
+      subject_offering_id: firstOffering.subject_offering_id || firstOffering.id || null,
+      subject_id: group.subject_id || firstOffering.subject_id || null,
+      teacher_id: user.id || null,
+
+      teacher_code: user.teacher_code || '',
+      teacher_name: user.full_name || '',
+
+      subject_code: group.subject_code || '',
+      subject_name: group.subject_name || '',
+
+      class_level: group.class_level || '',
+      room: group.room || '',
+
+      student_id: row.student_id || null,
+      student_code: row.student_code || '',
+      student_no: safeNum(row.student_no),
+      student_name: row.student_name || '',
+
+      keep_score: Number(row.keep_score || 0),
+      midterm_score: Number(row.midterm_score || 0),
+      total_score: Number(row.total_score || 0),
+      score_percent: Number(row.score_percent || 0),
+
+      attendance_score: Number(row.attendance_score || 0),
+      attendance_percent: Number(row.attendance_percent || 0),
+
+      keep_max: Number(state.midtermMax.keep || 0),
+      midterm_max: Number(state.midtermMax.midterm || 0),
+      attendance_max: Number(state.midtermMax.attendance || 0),
+
+      updated_at: new Date().toISOString()
+    }));
+
+    setStatus('midtermFormStatus', 'กำลังบันทึกคะแนนกลางภาค...', 'info');
+
+    const { error } = await supabaseClient
+      .from('midterm_reports')
+      .upsert(payload, {
+        onConflict: 'academic_year,term,subject_code,teacher_code,class_level,room,student_code'
+      });
+
+    if(error) throw error;
+
+    renderMidtermRows();
+
+    setStatus(
+      'midtermFormStatus',
+      `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
+      'success'
+    );
+
+    showToast(
+      'บันทึกสำเร็จ',
+      `บันทึกคะแนนกลางภาค ${payload.length} รายการเรียบร้อยแล้ว`,
+      'success'
+    );
+  }catch(err){
+    setStatus('midtermFormStatus', err.message || 'บันทึกไม่สำเร็จ', 'error');
+    showToast('บันทึกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+  }
+}
+
+function clearMidtermForm(){
+  state.selectedMidtermGroup = null;
+  state.midtermRows = [];
+  state.midtermMax = { keep:0, midterm:0, attendance:0 };
+
+  if(el('midtermSelectedTitle')) el('midtermSelectedTitle').textContent = 'ตารางบันทึกคะแนนกลางภาค';
+  if(el('midtermSelectedSub')) el('midtermSelectedSub').textContent = 'กรุณาเลือกรายวิชาจากรายการสอนด้านบน';
+
+  if(el('midtermKeepMax')) el('midtermKeepMax').value = 0;
+  if(el('midtermScoreMax')) el('midtermScoreMax').value = 0;
+  if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = 0;
+  if(el('saveMidtermBtn')) el('saveMidtermBtn').disabled = true;
+
+  setStatus('midtermFormStatus', 'ยังไม่ได้เลือกวิชา', 'info');
+  renderMidtermRows();
+}
+
 
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
@@ -14096,6 +14810,50 @@ bindIfExists('fpAllClearSearchBtn', 'click', () => {
   bindIfExists('importFilterYear', 'change', loadImportTeachingList);
   bindIfExists('importFilterTerm', 'change', loadImportTeachingList);
   bindIfExists('importFilterClass', 'change', loadImportTeachingList);
+
+  bindIfExists('midtermYear', 'change', loadMidtermTeachingList);
+bindIfExists('midtermTerm', 'change', loadMidtermTeachingList);
+bindIfExists('midtermClassFilter', 'change', loadMidtermTeachingList);
+
+bindIfExists('midtermKeyword', 'input', () => {
+  clearTimeout(window.__midtermSearchTimer);
+  window.__midtermSearchTimer = setTimeout(loadMidtermTeachingList, 250);
+});
+
+bindIfExists('midtermKeepMax', 'input', () => {
+  syncMidtermMaxFromInputs();
+  calculateAllMidtermRows();
+  renderMidtermRows();
+});
+
+bindIfExists('midtermScoreMax', 'input', () => {
+  syncMidtermMaxFromInputs();
+  calculateAllMidtermRows();
+  renderMidtermRows();
+});
+
+bindIfExists('midtermAttendanceMax', 'input', () => {
+  syncMidtermMaxFromInputs();
+  calculateAllMidtermRows();
+  renderMidtermRows();
+});
+
+bindIfExists('midtermTbody', 'input', (e) => {
+  const target = e.target;
+  if(!target?.matches('[data-midterm-idx][data-midterm-key]')) return;
+
+  const idx = Number(target.dataset.midtermIdx);
+  const key = target.dataset.midtermKey;
+
+  if(!state.midtermRows[idx]) return;
+
+  state.midtermRows[idx][key] = target.value;
+  calculateMidtermRow(state.midtermRows[idx]);
+  renderMidtermRows();
+});
+
+bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
+bindIfExists('clearMidtermBtn', 'click', clearMidtermForm);
 
   bindIfExists('importFilterKeyword', 'input', () => {
     clearTimeout(window.__importSearchTimer);
