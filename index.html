@@ -14545,11 +14545,11 @@ function renderMidtermRows(){
         </td>
 
         <td class="text-center">
-          <span class="midterm-readonly">${formatDecimal(r.total_score, 2)}</span>
+          <span class="midterm-readonly midterm-total-display">${formatDecimal(r.total_score, 2)}</span>
         </td>
 
         <td class="text-center">
-          <span class="midterm-readonly">${formatDecimal(r.score_percent, 2)}</span>
+          <span class="midterm-readonly midterm-score-pct-display">${formatDecimal(r.score_percent, 2)}</span>
         </td>
 
         <td>
@@ -14563,7 +14563,7 @@ function renderMidtermRows(){
         </td>
 
         <td class="text-center">
-          <span class="midterm-readonly">${formatDecimal(r.attendance_percent, 2)}</span>
+          <span class="midterm-readonly midterm-att-pct-display">${formatDecimal(r.attendance_percent, 2)}</span>
         </td>
       </tr>
     `;
