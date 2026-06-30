@@ -14711,6 +14711,64 @@ function clearMidtermForm(){
   renderMidtermRows();
 }
 
+function getMidtermInputMaxByKey(key){
+  if(key === 'keep_score') return Number(state.midtermMax.keep || 0);
+  if(key === 'midterm_score') return Number(state.midtermMax.midterm || 0);
+  if(key === 'attendance_score') return Number(state.midtermMax.attendance || 0);
+  return 0;
+}
+
+function validateMidtermInput(input){
+  if(!input) return;
+
+  const key = input.dataset.midtermKey;
+  const raw = String(input.value ?? '').trim();
+  const max = getMidtermInputMaxByKey(key);
+  const n = Number(raw);
+
+  const invalid =
+    raw !== '' &&
+    (
+      !Number.isFinite(n) ||
+      n < 0 ||
+      (max > 0 && n > max)
+    );
+
+  input.classList.toggle('invalid', invalid);
+  input.title = invalid ? `ต้องอยู่ระหว่าง 0 - ${max}` : '';
+}
+
+function updateMidtermRowDom(idx){
+  const tbody = el('midtermTbody');
+  if(!tbody) return;
+
+  const tr = tbody.querySelectorAll('tr')[idx];
+  const row = state.midtermRows[idx];
+
+  if(!tr || !row) return;
+
+  const scoreLow = Number(row.score_percent || 0) < 50;
+  const attLow = Number(row.attendance_percent || 0) < 80;
+
+  tr.classList.remove('midterm-low-score', 'midterm-low-att', 'midterm-low-both');
+
+  if(scoreLow && attLow){
+    tr.classList.add('midterm-low-both');
+  }else if(scoreLow){
+    tr.classList.add('midterm-low-score');
+  }else if(attLow){
+    tr.classList.add('midterm-low-att');
+  }
+
+  const totalBox = tr.querySelector('.midterm-total-display');
+  const scorePctBox = tr.querySelector('.midterm-score-pct-display');
+  const attPctBox = tr.querySelector('.midterm-att-pct-display');
+
+  if(totalBox) totalBox.textContent = formatDecimal(row.total_score, 2);
+  if(scorePctBox) scorePctBox.textContent = formatDecimal(row.score_percent, 2);
+  if(attPctBox) attPctBox.textContent = formatDecimal(row.attendance_percent, 2);
+}
+
 
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
@@ -14909,9 +14967,13 @@ bindIfExists('midtermTbody', 'input', (e) => {
 
   if(!state.midtermRows[idx]) return;
 
+  syncMidtermMaxFromInputs();
+
   state.midtermRows[idx][key] = target.value;
   calculateMidtermRow(state.midtermRows[idx]);
-  renderMidtermRows();
+
+  validateMidtermInput(target);
+  updateMidtermRowDom(idx);
 });
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
