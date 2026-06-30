@@ -4784,6 +4784,41 @@
   background:#ffe9e1;
 }
 
+    .midterm-head-title{
+  font-weight:900;
+  margin-bottom:6px;
+  color:#17324d;
+}
+
+.midterm-head-max{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-size:12px;
+  color:#41536c;
+  font-weight:800;
+}
+
+.midterm-max-input{
+  width:72px;
+  height:32px;
+  border:1px solid #c8d6e4;
+  border-radius:10px;
+  padding:0 8px;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:800;
+  text-align:center;
+  background:#fff;
+  outline:none;
+}
+
+.midterm-max-input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+
 
 </style>
 </head>
@@ -5117,45 +5152,53 @@
       </div>
     </div>
 
-    <div class="toolbar-4">
-      <div class="field">
-        <span class="label-in-form">คะแนนเก็บเต็ม</span>
-        <input id="midtermKeepMax" class="std" type="number" min="0" value="0">
-      </div>
-
-      <div class="field">
-        <span class="label-in-form">กลางภาคเต็ม</span>
-        <input id="midtermScoreMax" class="std" type="number" min="0" value="0">
-      </div>
-
-      <div class="field">
-        <span class="label-in-form">เวลาเรียนเต็ม</span>
-        <input id="midtermAttendanceMax" class="std" type="number" min="0" value="0">
-      </div>
-
-      <div class="field">
-        <span class="label-in-form">สถานะ</span>
-        <div id="midtermFormStatus" class="status info" style="margin-top:8px;">
-          ยังไม่ได้เลือกวิชา
-        </div>
-      </div>
+<div class="toolbar-4" style="grid-template-columns:1fr;">
+  <div class="field">
+    <span class="label-in-form">สถานะ</span>
+    <div id="midtermFormStatus" class="status info" style="margin-top:8px;">
+      ยังไม่ได้เลือกวิชา
     </div>
+  </div>
+</div>
 
     <div class="table-wrap">
       <table class="midterm-table">
-        <thead>
-          <tr>
-            <th style="width:70px;" class="text-center">เลขที่</th>
-            <th style="width:130px;" class="text-center">เลขประจำตัว</th>
-            <th>ชื่อ-สกุล</th>
-            <th style="width:120px;" class="text-center">คะแนนเก็บ</th>
-            <th style="width:120px;" class="text-center">กลางภาค</th>
-            <th style="width:120px;" class="text-center">รวมคะแนน</th>
-            <th style="width:110px;" class="text-center">%คะแนน</th>
-            <th style="width:120px;" class="text-center">เวลาเรียน</th>
-            <th style="width:120px;" class="text-center">%เวลาเรียน</th>
-          </tr>
-        </thead>
+<thead>
+  <tr>
+    <th style="width:70px;" class="text-center">เลขที่</th>
+    <th style="width:130px;" class="text-center">เลขประจำตัว</th>
+    <th>ชื่อ-สกุล</th>
+
+    <th style="width:140px;" class="text-center">
+      <div class="midterm-head-title">คะแนนเก็บ</div>
+      <div class="midterm-head-max">
+        เต็ม
+        <input id="midtermKeepMax" class="midterm-max-input" type="number" min="0" value="0">
+      </div>
+    </th>
+
+    <th style="width:140px;" class="text-center">
+      <div class="midterm-head-title">กลางภาค</div>
+      <div class="midterm-head-max">
+        เต็ม
+        <input id="midtermScoreMax" class="midterm-max-input" type="number" min="0" value="0">
+      </div>
+    </th>
+
+    <th style="width:120px;" class="text-center">รวมคะแนน</th>
+    <th style="width:110px;" class="text-center">%คะแนน</th>
+
+    <th style="width:140px;" class="text-center">
+      <div class="midterm-head-title">เวลาเรียน</div>
+      <div class="midterm-head-max">
+        เต็ม
+        <input id="midtermAttendanceMax" class="midterm-max-input" type="number" min="0" value="0">
+      </div>
+    </th>
+
+    <th style="width:120px;" class="text-center">%เวลาเรียน</th>
+  </tr>
+</thead>
         <tbody id="midtermTbody">
           <tr>
             <td colspan="9" class="empty-state">กรุณาเลือกรายวิชาจากรายการสอนด้านบน</td>
