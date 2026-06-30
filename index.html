@@ -14338,28 +14338,29 @@ async function openMidtermGroup(group){
     setStatus('midtermFormStatus', 'กำลังโหลดรายชื่อนักเรียน...', 'info');
     el('saveMidtermBtn').disabled = true;
 
-    const { data: students, error: stuError } = await supabaseClient
-      .from('students')
-      .select('id, student_code, sid, student_no, no, full_name, raw_full_name, prefix, first_name, last_name, class_level, room, is_active')
-      .eq('class_level', group.class_level)
-      .eq('room', group.room)
-      .eq('is_active', true)
-      .order('student_no', { ascending:true });
+const currentRoom = `${group.class_level}/${group.room}`;
+
+const { data: students, error: stuError } = await supabaseClient
+  .from('students')
+  .select('id, sid, current_room, current_no, raw_full_name, is_active')
+  .eq('current_room', currentRoom)
+  .eq('is_active', true)
+  .order('current_no', { ascending:true });
 
     if(stuError) throw stuError;
 
-    const studentRows = (students || []).map(stu => ({
-      student_id: stu.id || null,
-      student_code: safeText(stu.student_code || stu.sid, ''),
-      student_no: safeNum(stu.student_no ?? stu.no),
-      student_name: getStudentFullName(stu),
-      keep_score: '',
-      midterm_score: '',
-      total_score: 0,
-      score_percent: 0,
-      attendance_score: '',
-      attendance_percent: 0
-    }));
+const studentRows = (students || []).map(stu => ({
+  student_id: stu.id || null,
+  student_code: safeText(stu.sid, ''),
+  student_no: safeNum(stu.current_no),
+  student_name: safeText(stu.raw_full_name, '-'),
+  keep_score: '',
+  midterm_score: '',
+  total_score: 0,
+  score_percent: 0,
+  attendance_score: '',
+  attendance_percent: 0
+}));
 
     const { data: oldReports, error: oldError } = await supabaseClient
       .from('midterm_reports')
