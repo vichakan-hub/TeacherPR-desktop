@@ -5523,6 +5523,13 @@
   📥 นำเข้า Excel
 </button>
 
+<input
+  id="midtermExcelInput"
+  type="file"
+  accept=".xlsx,.xls"
+  class="hidden"
+>
+
 <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
   💾 บันทึกคะแนนกลางภาค
 </button>
@@ -15751,14 +15758,26 @@ bindIfExists('downloadMidtermTemplateBtn', 'click', downloadMidtermTemplateExcel
 bindIfExists('importMidtermExcelBtn', 'click', () => {
   try{
     assertMidtermGroupReady();
-    el('midtermExcelInput')?.click();
+
+    const input = el('midtermExcelInput');
+    if(!input){
+      throw new Error('ไม่พบช่องรับไฟล์ midtermExcelInput กรุณาตรวจ HTML');
+    }
+
+    input.value = '';
+    input.click();
+
   }catch(err){
+    console.error('importMidtermExcelBtn error:', err);
     showToast('ยังนำเข้าไม่ได้', err.message || 'กรุณาเลือกรายวิชาก่อน', 'warn');
+    setStatus('midtermFormStatus', err.message || 'ยังนำเข้าไม่ได้', 'warn');
   }
 });
 
 bindIfExists('midtermExcelInput', 'change', (e) => {
   const file = e.target.files?.[0];
+  if(!file) return;
+
   importMidtermExcelFile(file);
 });
 
