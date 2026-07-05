@@ -4884,6 +4884,93 @@
   line-height:1.25;
 }
 
+/* ===== Midterm table: ลดความกว้างคอลัมน์คะแนน ===== */
+#pageMidtermReport .midterm-table{
+  min-width:920px !important;
+  table-layout:fixed;
+}
+
+/* เลขที่ */
+#pageMidtermReport .midterm-table th:nth-child(1),
+#pageMidtermReport .midterm-table td:nth-child(1){
+  width:55px !important;
+}
+
+/* เลขประจำตัว */
+#pageMidtermReport .midterm-table th:nth-child(2),
+#pageMidtermReport .midterm-table td:nth-child(2){
+  width:105px !important;
+}
+
+/* ชื่อ-สกุล */
+#pageMidtermReport .midterm-table th:nth-child(3),
+#pageMidtermReport .midterm-table td:nth-child(3){
+  width:auto !important;
+}
+
+/* คะแนนเก็บ */
+#pageMidtermReport .midterm-table th:nth-child(4),
+#pageMidtermReport .midterm-table td:nth-child(4){
+  width:105px !important;
+}
+
+/* กลางภาค */
+#pageMidtermReport .midterm-table th:nth-child(5),
+#pageMidtermReport .midterm-table td:nth-child(5){
+  width:105px !important;
+}
+
+/* รวมคะแนน */
+#pageMidtermReport .midterm-table th:nth-child(6),
+#pageMidtermReport .midterm-table td:nth-child(6){
+  width:92px !important;
+}
+
+/* %คะแนน */
+#pageMidtermReport .midterm-table th:nth-child(7),
+#pageMidtermReport .midterm-table td:nth-child(7){
+  width:88px !important;
+}
+
+/* เวลาเรียน */
+#pageMidtermReport .midterm-table th:nth-child(8),
+#pageMidtermReport .midterm-table td:nth-child(8){
+  width:105px !important;
+}
+
+/* %เวลาเรียน */
+#pageMidtermReport .midterm-table th:nth-child(9),
+#pageMidtermReport .midterm-table td:nth-child(9){
+  width:88px !important;
+}
+
+/* ลด padding ในตาราง */
+#pageMidtermReport .midterm-table th,
+#pageMidtermReport .midterm-table td{
+  padding:10px 6px !important;
+}
+
+/* ลดขนาดช่องกรอกคะแนน */
+#pageMidtermReport .midterm-score-input{
+  width:82px !important;
+  max-width:100%;
+  height:36px;
+  padding:0 6px;
+}
+
+/* ลดขนาดช่องคะแนนเต็มในหัวตาราง */
+#pageMidtermReport .midterm-max-input{
+  width:54px !important;
+  height:30px;
+  padding:0 5px;
+}
+
+/* ลดป้ายรวมคะแนน / % */
+#pageMidtermReport .midterm-readonly{
+  min-width:58px !important;
+  padding:6px 8px;
+}
+
 
 </style>
 </head>
