@@ -15176,18 +15176,7 @@ function downloadMidtermTemplateExcel(){
       throw new Error('ไม่พบไลบรารี XLSX สำหรับสร้างไฟล์ Excel');
     }
 
-    syncMidtermMaxFromInputs();
-
-    const group = state.selectedMidtermGroup;
-    const user = state.currentUser || {};
-
     const aoa = [
-      ['รายงานผลกลางภาค'],
-      ['รหัสวิชา', group.subject_code || '', 'รายวิชา', group.subject_name || ''],
-      ['ครูผู้สอน', `${user.teacher_code || ''} ${user.full_name || ''}`.trim(), 'ปี/เทอม', `${group.academic_year || ''}/${group.term || ''}`],
-      ['ชั้น', group.class_level || '', 'ห้อง', group.room || ''],
-      ['คะแนนเก็บเต็ม', Number(state.midtermMax.keep || 0), 'กลางภาคเต็ม', Number(state.midtermMax.midterm || 0), 'เวลาเรียนเต็ม', Number(state.midtermMax.attendance || 0)],
-      [],
       ['เลขที่', 'เลขประจำตัว', 'ชื่อ-สกุล', 'คะแนนเก็บ', 'กลางภาค', 'เวลาเรียน']
     ];
 
@@ -15196,27 +15185,25 @@ function downloadMidtermTemplateExcel(){
         row.student_no ?? '',
         row.student_code || '',
         row.student_name || '',
-        row.keep_score ?? '',
-        row.midterm_score ?? '',
-        row.attendance_score ?? ''
+        '',
+        '',
+        ''
       ]);
     });
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
 
     ws['!cols'] = [
-      { wch: 10 },
-      { wch: 14 },
-      { wch: 34 },
-      { wch: 14 },
-      { wch: 14 },
-      { wch: 14 }
+      { wch: 8 },   // เลขที่
+      { wch: 14 },  // เลขประจำตัว
+      { wch: 36 },  // ชื่อ-สกุล
+      { wch: 14 },  // คะแนนเก็บ
+      { wch: 14 },  // กลางภาค
+      { wch: 14 }   // เวลาเรียน
     ];
 
-    ws['!freeze'] = { xSplit:0, ySplit:7 };
-
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Midterm');
+    XLSX.utils.book_append_sheet(wb, ws, 'คะแนนกลางภาค');
 
     XLSX.writeFile(wb, getMidtermTemplateFileName());
 
