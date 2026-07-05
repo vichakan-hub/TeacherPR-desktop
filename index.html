@@ -4977,6 +4977,119 @@
   box-shadow:0 0 0 3px rgba(241,196,15,.12);
 }
 
+/* ===== Midterm Excel Toolbar ===== */
+#pageMidtermReport .midterm-excel-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:10px 0 14px;
+  padding:12px 14px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+#pageMidtermReport .midterm-excel-title{
+  font-size:14px;
+  font-weight:900;
+  color:#17324d;
+}
+
+#pageMidtermReport .midterm-excel-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+#pageMidtermReport .midterm-excel-actions button{
+  min-width:170px;
+  height:42px;
+  white-space:nowrap;
+}
+
+/* ===== Fix รายการสอนกลางภาค ไม่ให้รายวิชาแตกเป็นตัวอักษรแนวตั้ง ===== */
+#pageMidtermReport .midterm-list-wrap{
+  overflow-x:auto !important;
+  max-width:100%;
+}
+
+#pageMidtermReport .midterm-list-table{
+  width:100%;
+  min-width:780px !important;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+#pageMidtermReport .midterm-list-table th,
+#pageMidtermReport .midterm-list-table td{
+  padding:12px 10px !important;
+  vertical-align:middle;
+  white-space:normal;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+}
+
+/* รายวิชา */
+#pageMidtermReport .midterm-list-table th:nth-child(1),
+#pageMidtermReport .midterm-list-table td:nth-child(1){
+  width:260px !important;
+  min-width:260px !important;
+}
+
+/* ปี/เทอม */
+#pageMidtermReport .midterm-list-table th:nth-child(2),
+#pageMidtermReport .midterm-list-table td:nth-child(2){
+  width:95px !important;
+  text-align:center;
+}
+
+/* ชั้น */
+#pageMidtermReport .midterm-list-table th:nth-child(3),
+#pageMidtermReport .midterm-list-table td:nth-child(3){
+  width:75px !important;
+  text-align:center;
+}
+
+/* ห้อง */
+#pageMidtermReport .midterm-list-table th:nth-child(4),
+#pageMidtermReport .midterm-list-table td:nth-child(4){
+  width:75px !important;
+  text-align:center;
+}
+
+/* section */
+#pageMidtermReport .midterm-list-table th:nth-child(5),
+#pageMidtermReport .midterm-list-table td:nth-child(5){
+  width:110px !important;
+  text-align:center;
+}
+
+/* จัดการ */
+#pageMidtermReport .midterm-list-table th:nth-child(6),
+#pageMidtermReport .midterm-list-table td:nth-child(6){
+  width:140px !important;
+  text-align:center;
+}
+
+#pageMidtermReport .midterm-list-table td:nth-child(6) button{
+  width:120px;
+  height:42px;
+  padding:0 10px;
+  border-radius:14px;
+  white-space:normal;
+  line-height:1.2;
+}
+
+#pageMidtermReport .grade-stats-subject-code,
+#pageMidtermReport .grade-stats-subject-name{
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+  line-height:1.45;
+}
+
 </style>
 </head>
 <body>
@@ -5300,21 +5413,6 @@
       </div>
 
 <div class="actions" style="margin:0;">
-  <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
-    ดาวน์โหลด Template Excel
-  </button>
-
-  <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
-    นำเข้า Excel
-  </button>
-
-  <input
-    id="midtermExcelInput"
-    type="file"
-    accept=".xlsx,.xls"
-    class="hidden"
-  >
-
   <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
     บันทึกคะแนนกลางภาค
   </button>
@@ -5324,6 +5422,29 @@
   </button>
 </div>
     </div>
+
+<div id="midtermExcelToolbar" class="midterm-excel-toolbar">
+  <div class="midterm-excel-title">
+    📄 จัดการไฟล์ Excel สำหรับกรอกคะแนน
+  </div>
+
+  <div class="midterm-excel-actions">
+    <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
+      ดาวน์โหลด Template Excel
+    </button>
+
+    <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
+      นำเข้า Excel
+    </button>
+
+    <input
+      id="midtermExcelInput"
+      type="file"
+      accept=".xlsx,.xls"
+      class="hidden"
+    >
+  </div>
+</div>    
 
 <div class="toolbar-4" style="grid-template-columns:1fr;">
   <div class="field">
@@ -14704,7 +14825,22 @@ if(el('importMidtermExcelBtn')){
     renderMidtermRows();
     setStatus('midtermFormStatus', err.message || 'โหลดข้อมูลไม่สำเร็จ', 'error');
   }
+  const hasMidtermRows = !!state.midtermRows.length;
+
+if(el('saveMidtermBtn')){
+  el('saveMidtermBtn').disabled = !hasMidtermRows;
 }
+
+if(el('downloadMidtermTemplateBtn')){
+  el('downloadMidtermTemplateBtn').disabled = !hasMidtermRows;
+}
+
+if(el('importMidtermExcelBtn')){
+  el('importMidtermExcelBtn').disabled = !hasMidtermRows;
+}
+}
+
+
 
 function calculateMidtermRow(row){
   const keep = Number(row.keep_score || 0);
@@ -14935,6 +15071,9 @@ function clearMidtermForm(){
   if(el('midtermScoreMax')) el('midtermScoreMax').value = 0;
   if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = 0;
   if(el('saveMidtermBtn')) el('saveMidtermBtn').disabled = true;
+  if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
+  if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
+  if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
   if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
   if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
   if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
