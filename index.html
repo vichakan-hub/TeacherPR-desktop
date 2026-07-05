@@ -7474,7 +7474,7 @@ midtermMax: {
 
 function setActivePage(page){
   if(page !== 'midtermReport' && !shouldLeaveMidtermPage('เปลี่ยนหน้า')){
-    return;
+    return false;
   }
   const isHome = page === 'home';
   const isMidtermReport = page === 'midtermReport';
@@ -7518,6 +7518,7 @@ function setActivePage(page){
 }
 
   closeMobileSidebar();
+  return true;
 }
 
 function isMobileSidebarMode(){
@@ -7667,10 +7668,11 @@ function openGradeReportFromSidebar(page = null){
   closeAllSidebarGroups();
   el('sidebarGradeReportGroup')?.classList.add('open');
 
-  setActivePage(page);
-  setSidebarActiveGradeSubPage(page);
-  updateAppTopbarTitle(page);
-  closeMobileSidebar();
+if(!setActivePage(page)) return;
+
+setSidebarActiveGradeSubPage(page);
+updateAppTopbarTitle(page);
+closeMobileSidebar();
 }
 
 function openFreePeriodFromSidebar(subPage = 'search'){
@@ -7683,11 +7685,12 @@ function openFreePeriodFromSidebar(subPage = 'search'){
   closeAllSidebarGroups();
   el('sidebarFreePeriodGroup')?.classList.add('open');
 
-  setActivePage('freeperiod');
-  fpSetSubPage(subPage);
-  setSidebarActiveFpSubPage(subPage);
-  updateAppTopbarFreePeriodSubTitle(subPage);
-  closeMobileSidebar();
+if(!setActivePage('freeperiod')) return;
+
+fpSetSubPage(subPage);
+setSidebarActiveFpSubPage(subPage);
+updateAppTopbarFreePeriodSubTitle(subPage);
+closeMobileSidebar();
 }
 
 function updateSidebarUserInfo(){
@@ -15928,9 +15931,10 @@ bindIfExists('midtermKeepMax', 'input', handleMidtermMaxInput);
 bindIfExists('midtermScoreMax', 'input', handleMidtermMaxInput);
 bindIfExists('midtermAttendanceMax', 'input', handleMidtermMaxInput);
 
-bindIfExists('midtermTbody', 'input', (e) => {
+function handleMidtermScoreChanged(e){
   const target = e.target;
-  if(!target?.matches('[data-midterm-idx][data-midterm-key]')) return;
+
+  if(!target?.matches('#midtermTbody [data-midterm-idx][data-midterm-key]')) return;
 
   const idx = Number(target.dataset.midtermIdx);
   const key = target.dataset.midtermKey;
@@ -15939,13 +15943,28 @@ bindIfExists('midtermTbody', 'input', (e) => {
 
   syncMidtermMaxFromInputs();
 
+  // อัปเดตค่าเข้า state ทันที
   state.midtermRows[idx][key] = target.value;
+
+  // คำนวณรวม / %
   calculateMidtermRow(state.midtermRows[idx]);
 
+  // ตรวจ validation และอัปเดตแถว
   validateMidtermInput(target);
   updateMidtermRowDom(idx);
+
+  // บังคับเช็ก dirty ทันที
+  const changed = isMidtermScoreChanged(idx, key);
+  target.classList.toggle('changed-score', changed);
+
   refreshMidtermDirtyUI();
-});
+
+  // กันกรณี browser บางจังหวะอัปเดต DOM ช้ากว่า event
+  setTimeout(refreshMidtermDirtyUI, 0);
+}
+
+bindIfExists('midtermTbody', 'input', handleMidtermScoreChanged);
+bindIfExists('midtermTbody', 'change', handleMidtermScoreChanged);
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
 bindIfExists('clearMidtermBtn', 'click', clearMidtermForm);
