@@ -15040,23 +15040,17 @@ async function saveMidtermReport(){
 
 if(error) throw error;
 
-const savedCount = payload.length;
-const savedSubject = `${group.subject_code || ''} ${group.subject_name || ''}`.trim();
-const savedClassRoom = `ชั้น ${group.class_level || '-'} ห้อง ${group.room || '-'}`;
+renderMidtermRows();
 
-// ล้างตารางอัตโนมัติหลังบันทึกสำเร็จ
-clearMidtermForm();
-
-// แสดงสถานะสำเร็จหลังล้างตาราง
 setStatus(
   'midtermFormStatus',
-  `บันทึกคะแนนกลางภาคสำเร็จ ${savedCount} รายการ (${savedSubject} ${savedClassRoom}) และล้างตารางเรียบร้อยแล้ว`,
+  `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
   'success'
 );
 
 showToast(
   'บันทึกสำเร็จ',
-  `บันทึกคะแนนกลางภาค ${savedCount} รายการเรียบร้อยแล้ว`,
+  `บันทึกคะแนนกลางภาค ${payload.length} รายการเรียบร้อยแล้ว`,
   'success'
 );
     
