@@ -5221,6 +5221,109 @@
   0%,100%{ transform:translateY(0); }
   50%{ transform:translateY(-1px); }
 }
+.custom-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20, 24, 35, 0.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  padding:20px;
+}
+
+.custom-overlay-box{
+  width:min(460px, 100%);
+  background:#ffffff;
+  border-radius:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.22);
+  overflow:hidden;
+  animation:overlayPop .18s ease-out;
+}
+
+@keyframes overlayPop{
+  from{
+    opacity:0;
+    transform:translateY(10px) scale(0.98);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+.custom-overlay-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:20px 22px 10px;
+}
+
+.custom-overlay-icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#fff4d6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+.custom-overlay-title{
+  font-size:22px;
+  font-weight:700;
+  color:#1f2d3d;
+}
+
+.custom-overlay-body{
+  padding:0 22px 10px;
+  color:#435166;
+  font-size:16px;
+  line-height:1.6;
+}
+
+.custom-overlay-subtext{
+  margin-top:8px;
+  color:#7b8794;
+  font-size:14px;
+}
+
+.custom-overlay-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:16px 22px 22px;
+}
+
+.btn-unsaved-cancel,
+.btn-unsaved-discard{
+  border:none;
+  border-radius:12px;
+  padding:11px 18px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s ease;
+}
+
+.btn-unsaved-cancel{
+  background:#eef2f7;
+  color:#334155;
+}
+
+.btn-unsaved-cancel:hover{
+  background:#e3e9f1;
+}
+
+.btn-unsaved-discard{
+  background:#f97316;
+  color:#fff;
+}
+
+.btn-unsaved-discard:hover{
+  background:#ea580c;
+}
 
 </style>
 </head>
@@ -7174,6 +7277,34 @@
 
   <div id="toastWrap" class="toast-wrap"></div>
   <div id="fpFloatingTooltip" class="fp-floating-tooltip hidden"></div>
+
+ <!-- ===== Unsaved Changes Overlay ===== -->
+<div id="unsavedOverlay" class="custom-overlay" style="display:none;">
+  <div class="custom-overlay-box">
+    <div class="custom-overlay-header">
+      <div class="custom-overlay-icon">⚠️</div>
+      <div class="custom-overlay-title">ยังไม่ได้บันทึกคะแนน</div>
+    </div>
+
+    <div class="custom-overlay-body">
+      <div id="unsavedOverlayMessage">
+        คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก
+      </div>
+      <div class="custom-overlay-subtext">
+        หากออกจากหน้านี้ การแก้ไขล่าสุดจะหายไป
+      </div>
+    </div>
+
+    <div class="custom-overlay-actions">
+      <button type="button" id="unsavedCancelBtn" class="btn-unsaved-cancel">
+        อยู่หน้านี้ต่อ
+      </button>
+      <button type="button" id="unsavedDiscardBtn" class="btn-unsaved-discard">
+        ออกจากหน้านี้
+      </button>
+    </div>
+  </div>
+</div>
 
   <script>
     const SUPABASE_URL = 'https://jiorecubzlmfhwalhrsz.supabase.co';
@@ -15740,16 +15871,24 @@ function importMidtermExcelFile(file){
   }
 }
 
-function shouldLeaveMidtermPage(actionText = 'เปลี่ยนหน้า'){
-  const isOnMidtermPage =
-    el('pageMidtermReport') &&
-    !el('pageMidtermReport').classList.contains('hidden');
+function guardMidtermUnsaved(actionLabel, onProceed){
+  if (!state.midtermDirty){
+    if (typeof onProceed === 'function') onProceed();
+    return true;
+  }
 
-  if(!isOnMidtermPage) return true;
-  if(!state.midtermDirty) return true;
+  openUnsavedOverlay(
+    'คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก',
+    () => {
+      // ถ้าผู้ใช้ยืนยันว่าจะออก
+      state.midtermDirty = false;
+      if (typeof onProceed === 'function') onProceed();
+    }
+  );
 
-  return confirmDiscardMidtermChanges(actionText);
+  return false;
 }
+    
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
   bindIfExists('loginBtn', 'click', login);
@@ -18337,6 +18476,38 @@ el('gradeStatsTerm')?.addEventListener('change', () => {
 });
 
 el('loadGradeStatsBtn')?.addEventListener('click', loadTeacherGradeStats);
+
+let pendingUnsavedAction = null;
+
+function openUnsavedOverlay(message, onDiscard){
+  const overlay = document.getElementById('unsavedOverlay');
+  const msgEl   = document.getElementById('unsavedOverlayMessage');
+
+  if (msgEl) {
+    msgEl.textContent = message || 'คุณมีข้อมูลที่ยังไม่ได้บันทึก';
+  }
+
+  pendingUnsavedAction = (typeof onDiscard === 'function') ? onDiscard : null;
+
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function closeUnsavedOverlay(){
+  const overlay = document.getElementById('unsavedOverlay');
+  if (overlay) overlay.style.display = 'none';
+  pendingUnsavedAction = null;
+}
+
+document.getElementById('unsavedCancelBtn')?.addEventListener('click', () => {
+  closeUnsavedOverlay();
+});
+
+document.getElementById('unsavedDiscardBtn')?.addEventListener('click', () => {
+  const action = pendingUnsavedAction;
+  closeUnsavedOverlay();
+  if (action) action();
+});
   </script>
+  
 </body>
 </html>
