@@ -7618,16 +7618,25 @@ function normalizeGradeReportDefaultPage(raw){
     }
   }
 
-  if(value && typeof value === 'object' && value.default_page){
-    value = value.default_page;
+  if(value && typeof value === 'object'){
+    value = value.default_page || value.page || value.value || '';
   }
 
   value = String(value || '').trim();
 
-  if(value === 'import' || value === 'midtermReport'){
-    return value;
-  }
+  // ค่าที่จำง่ายในฐานข้อมูล
+  if(value === 'กลางภาค') return 'midtermReport';
+  if(value === 'ปลายภาค') return 'import';
 
+  // เผื่อใช้ภาษาอังกฤษแบบอ่านง่าย
+  if(value.toLowerCase() === 'midterm') return 'midtermReport';
+  if(value.toLowerCase() === 'final') return 'import';
+
+  // เผื่อของเดิมที่เคยใช้
+  if(value === 'midtermReport') return 'midtermReport';
+  if(value === 'import') return 'import';
+
+  // ค่าเริ่มต้น ถ้าพิมพ์ผิด
   return 'midtermReport';
 }
 
