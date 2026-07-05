@@ -15038,21 +15038,28 @@ async function saveMidtermReport(){
         onConflict: 'academic_year,term,subject_code,teacher_code,class_level,room,student_code'
       });
 
-    if(error) throw error;
+if(error) throw error;
 
-    renderMidtermRows();
+const savedCount = payload.length;
+const savedSubject = `${group.subject_code || ''} ${group.subject_name || ''}`.trim();
+const savedClassRoom = `ชั้น ${group.class_level || '-'} ห้อง ${group.room || '-'}`;
 
-    setStatus(
-      'midtermFormStatus',
-      `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
-      'success'
-    );
+// ล้างตารางอัตโนมัติหลังบันทึกสำเร็จ
+clearMidtermForm();
 
-    showToast(
-      'บันทึกสำเร็จ',
-      `บันทึกคะแนนกลางภาค ${payload.length} รายการเรียบร้อยแล้ว`,
-      'success'
-    );
+// แสดงสถานะสำเร็จหลังล้างตาราง
+setStatus(
+  'midtermFormStatus',
+  `บันทึกคะแนนกลางภาคสำเร็จ ${savedCount} รายการ (${savedSubject} ${savedClassRoom}) และล้างตารางเรียบร้อยแล้ว`,
+  'success'
+);
+
+showToast(
+  'บันทึกสำเร็จ',
+  `บันทึกคะแนนกลางภาค ${savedCount} รายการเรียบร้อยแล้ว`,
+  'success'
+);
+    
   }catch(err){
     setStatus('midtermFormStatus', err.message || 'บันทึกไม่สำเร็จ', 'error');
     showToast('บันทึกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
