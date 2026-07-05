@@ -7604,7 +7604,12 @@ midtermMax: {
 }
 
 function setActivePage(page){
-  if(page !== 'midtermReport' && !shouldLeaveMidtermPage('เปลี่ยนหน้า')){
+  if(
+    page !== 'midtermReport' &&
+    !shouldLeaveMidtermPage('เปลี่ยนหน้า', () => {
+      setActivePage(page);
+    })
+  ){
     return false;
   }
   const isHome = page === 'home';
@@ -8400,10 +8405,13 @@ function getSettingTerm(settingName, fallback = null){
     }
 
 function logout(){
-  if(!shouldLeaveMidtermPage('ออกจากระบบ')){
+  if(!shouldLeaveMidtermPage('ออกจากระบบ', () => {
+    logout();
+  })){
     return;
   }
-      state.currentUser = null;
+
+  state.currentUser = null;
       state.groupedOfferings = [];
       state.selectedTeachingGroup = null;
       state.previewRows = [];
@@ -8464,6 +8472,10 @@ state.teacherStudentCompareRows = [];
         el('sidebarUserCode').textContent = 'Teacher';
       }
     }
+
+    function shouldLeaveMidtermPage(actionText = 'เปลี่ยนหน้า', onConfirm = null){
+  return confirmDiscardMidtermChanges(actionText, onConfirm);
+}
 
     function togglePassword(){
       const input = el('loginPassword');
@@ -14982,7 +14994,9 @@ function getStudentFullName(row){
 
 async function openMidtermGroup(group){
   try{
-    if(!confirmDiscardMidtermChanges('เปิดรายวิชาอื่น')){
+    if(!confirmDiscardMidtermChanges('เปิดรายวิชาอื่น', () => {
+      openMidtermGroup(group);
+    })){
       return;
     }
 
@@ -15342,7 +15356,9 @@ showToast(
 }
 
 function clearMidtermForm(){
-  if(!confirmDiscardMidtermChanges('ล้างตาราง')){
+  if(!confirmDiscardMidtermChanges('ล้างตาราง', () => {
+    clearMidtermForm();
+  })){
     return;
   }
 
@@ -15480,14 +15496,29 @@ function refreshMidtermDirtyUI(options = {}){
   }
 }
 
-function confirmDiscardMidtermChanges(actionText = 'ดำเนินการต่อ'){
+function isOnMidtermReportPage(){
+  return (
+    el('pageMidtermReport') &&
+    !el('pageMidtermReport').classList.contains('hidden')
+  );
+}
+
+function confirmDiscardMidtermChanges(actionText = 'ดำเนินการต่อ', onConfirm = null){
+  if(!isOnMidtermReportPage()) return true;
   if(!state.midtermDirty) return true;
 
-  return window.confirm(
-    'คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก\n\n' +
-    `กด “ตกลง” เพื่อทิ้งการเปลี่ยนแปลงและ${actionText}\n` +
-    'กด “ยกเลิก” เพื่อกลับไปบันทึกคะแนน'
+  openUnsavedOverlay(
+    `คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก`,
+    () => {
+      resetMidtermDirtyState();
+
+      if(typeof onConfirm === 'function'){
+        onConfirm();
+      }
+    }
   );
+
+  return false;
 }
 
 window.addEventListener('beforeunload', (e) => {
