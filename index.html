@@ -6988,6 +6988,7 @@ const state = {
   importSettings: null,
   retestSettings: null,
   adviserSettings: null,
+  gradeReportDefaultPage: 'midtermReport',
 
   groupedOfferings: [],
   selectedTeachingGroup: null,
@@ -7375,7 +7376,9 @@ function updateAppTopbarFreePeriodSubTitle(subPage){
   }
 }
 
-function openGradeReportFromSidebar(page = 'import'){
+function openGradeReportFromSidebar(page = null){
+  page = page || getGradeReportDefaultPage();
+
   const shell = el('appShell');
 
   if(shell?.classList.contains('sidebar-collapsed')){
@@ -7507,7 +7510,8 @@ const TEACHER_SETTING_KEYS = [
   'teacher_import_settings',
   'teacher_retest_settings',
   'teacher_adviser_settings',
-  'teacher_free_period_settings'
+  'teacher_free_period_settings',
+  'teacher_grade_report_default_page'
 ];
 
 function getCurrentAcademicYear(){
@@ -7603,6 +7607,34 @@ async function loadTeacherSettingsMap(){
   return map;
 }
 
+function normalizeGradeReportDefaultPage(raw){
+  let value = raw;
+
+  if(typeof raw === 'string'){
+    try{
+      value = JSON.parse(raw);
+    }catch(e){
+      value = raw;
+    }
+  }
+
+  if(value && typeof value === 'object' && value.default_page){
+    value = value.default_page;
+  }
+
+  value = String(value || '').trim();
+
+  if(value === 'import' || value === 'midtermReport'){
+    return value;
+  }
+
+  return 'midtermReport';
+}
+
+function getGradeReportDefaultPage(){
+  return normalizeGradeReportDefaultPage(state.gradeReportDefaultPage);
+}
+    
 async function loadTeacherSettings(){
   const defaults = buildDefaultTeacherSettings();
   let map = {};
@@ -7643,6 +7675,10 @@ async function loadTeacherSettings(){
   state.retestSettings = settings.retest;
   state.adviserSettings = settings.adviser;
   state.freePeriodSettings = settings.free_period;
+
+  state.gradeReportDefaultPage = normalizeGradeReportDefaultPage(
+  map.teacher_grade_report_default_page
+);
 
   applyTeacherSettingsToPage(settings);
 
@@ -14956,7 +14992,7 @@ bindIfExists('menuGradeReportBtn', 'click', () => {
   }
 
   group?.classList.add('open');
-  openGradeReportFromSidebar('import');
+  openGradeReportFromSidebar();
 });
 
 bindIfExists('sideMidtermReportBtn', 'click', () => {
@@ -14964,7 +15000,7 @@ bindIfExists('sideMidtermReportBtn', 'click', () => {
 });
 
 bindIfExists('sideFinalReportBtn', 'click', () => {
-  openGradeReportFromSidebar('import');
+  openGradeReportFromSidebar();
 });
 
 bindIfExists('menuTeacherStudentBtn', 'click', async () => {
