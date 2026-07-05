@@ -7473,6 +7473,9 @@ midtermMax: {
 }
 
 function setActivePage(page){
+  if(page !== 'midtermReport' && !shouldLeaveMidtermPage('เปลี่ยนหน้า')){
+    return;
+  }
   const isHome = page === 'home';
   const isMidtermReport = page === 'midtermReport';
   const isImport = page === 'import';
@@ -8262,7 +8265,10 @@ function getSettingTerm(settingName, fallback = null){
       }
     }
 
-    function logout(){
+function logout(){
+  if(!shouldLeaveMidtermPage('ออกจากระบบ')){
+    return;
+  }
       state.currentUser = null;
       state.groupedOfferings = [];
       state.selectedTeachingGroup = null;
@@ -15183,13 +15189,11 @@ if(error) throw error;
 
 captureMidtermOriginalState();
 renderMidtermRows();
-refreshMidtermDirtyUI();
 
-setStatus(
-  'midtermFormStatus',
-  `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
-  'success'
-);
+refreshMidtermDirtyUI({
+  cleanText: `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
+  cleanType: 'success'
+});
 
 showToast(
   'บันทึกสำเร็จ',
@@ -15642,13 +15646,24 @@ function applyMidtermExcelRows(aoa){
   });
   refreshMidtermDirtyUI();
 
-  const invalidCount = validateMidtermImportedInputs();
+const invalidCount = validateMidtermImportedInputs();
 
+const importStatusText =
+  `นำเข้า Excel สำเร็จ: เปลี่ยนแปลง ${changedRowCount} แถว | จับคู่ได้ ${matchCount} แถว | ไม่พบในตาราง ${missCount} แถว${invalidCount ? ` | พบค่าผิดปกติ ${invalidCount} ช่อง` : ''}`;
+
+if(state.midtermDirty){
   setStatus(
     'midtermFormStatus',
-    `นำเข้า Excel สำเร็จ: เปลี่ยนแปลง ${changedRowCount} แถว | จับคู่ได้ ${matchCount} แถว | ไม่พบในตาราง ${missCount} แถว${invalidCount ? ` | พบค่าผิดปกติ ${invalidCount} ช่อง` : ''}`,
+    `${importStatusText}\nมีการแก้ไขคะแนนที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”`,
+    'warn'
+  );
+}else{
+  setStatus(
+    'midtermFormStatus',
+    importStatusText,
     invalidCount ? 'warn' : 'success'
   );
+}
 
   showToast(
     'นำเข้าสำเร็จ',
@@ -15722,7 +15737,16 @@ function importMidtermExcelFile(file){
   }
 }
 
+function shouldLeaveMidtermPage(actionText = 'เปลี่ยนหน้า'){
+  const isOnMidtermPage =
+    el('pageMidtermReport') &&
+    !el('pageMidtermReport').classList.contains('hidden');
 
+  if(!isOnMidtermPage) return true;
+  if(!state.midtermDirty) return true;
+
+  return confirmDiscardMidtermChanges(actionText);
+}
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
   bindIfExists('loginBtn', 'click', login);
