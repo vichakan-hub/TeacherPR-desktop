@@ -5192,6 +5192,17 @@
   background:#fad9d7 !important;
 }
 
+    /* ซ่อน input เลือกไฟล์ แต่ยังให้ JS click() เปิด file picker ได้ */
+#midtermExcelInput.midterm-file-input{
+  position:fixed !important;
+  left:-9999px !important;
+  top:-9999px !important;
+  width:1px !important;
+  height:1px !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
 </style>
 </head>
 <body>
@@ -5527,7 +5538,7 @@
   id="midtermExcelInput"
   type="file"
   accept=".xlsx,.xls"
-  class="hidden"
+  class="midterm-file-input"
 >
 
 <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
@@ -15755,8 +15766,16 @@ bindIfExists('clearMidtermBtn', 'click', clearMidtermForm);
 
 bindIfExists('downloadMidtermTemplateBtn', 'click', downloadMidtermTemplateExcel);
 
-bindIfExists('importMidtermExcelBtn', 'click', () => {
+bindIfExists('importMidtermExcelBtn', 'click', (e) => {
+  e.preventDefault();
+
   try{
+    const btn = el('importMidtermExcelBtn');
+
+    if(btn && btn.disabled){
+      throw new Error('ปุ่มนำเข้า Excel ยังไม่พร้อม กรุณาเลือกรายวิชาให้โหลดรายชื่อนักเรียนก่อน');
+    }
+
     assertMidtermGroupReady();
 
     const input = el('midtermExcelInput');
@@ -15776,7 +15795,11 @@ bindIfExists('importMidtermExcelBtn', 'click', () => {
 
 bindIfExists('midtermExcelInput', 'change', (e) => {
   const file = e.target.files?.[0];
-  if(!file) return;
+
+  if(!file){
+    setStatus('midtermFormStatus', 'ยกเลิกการเลือกไฟล์ Excel', 'info');
+    return;
+  }
 
   importMidtermExcelFile(file);
 });
