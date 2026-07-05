@@ -4970,7 +4970,12 @@
   min-width:58px !important;
   padding:6px 8px;
 }
-
+/* ===== Midterm Excel Import Highlight ===== */
+#pageMidtermReport .midterm-score-input.changed-score{
+  background:#fff8c4 !important;
+  border-color:#f1c40f !important;
+  box-shadow:0 0 0 3px rgba(241,196,15,.12);
+}
 
 </style>
 </head>
@@ -5294,14 +5299,30 @@
         </div>
       </div>
 
-      <div class="actions" style="margin:0;">
-        <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
-          บันทึกคะแนนกลางภาค
-        </button>
-        <button id="clearMidtermBtn" class="btn-secondary" type="button">
-          ล้างตาราง
-        </button>
-      </div>
+<div class="actions" style="margin:0;">
+  <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
+    ดาวน์โหลด Template Excel
+  </button>
+
+  <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
+    นำเข้า Excel
+  </button>
+
+  <input
+    id="midtermExcelInput"
+    type="file"
+    accept=".xlsx,.xls"
+    class="hidden"
+  >
+
+  <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
+    บันทึกคะแนนกลางภาค
+  </button>
+
+  <button id="clearMidtermBtn" class="btn-secondary" type="button">
+    ล้างตาราง
+  </button>
+</div>
     </div>
 
 <div class="toolbar-4" style="grid-template-columns:1fr;">
@@ -14666,7 +14687,18 @@ const studentRows = (students || []).map(stu => ({
       state.midtermRows.length ? 'success' : 'warn'
     );
 
-    el('saveMidtermBtn').disabled = !state.midtermRows.length;
+    const hasMidtermRows = !!state.midtermRows.length;
+
+el('saveMidtermBtn').disabled = !hasMidtermRows;
+
+if(el('downloadMidtermTemplateBtn')){
+  el('downloadMidtermTemplateBtn').disabled = !hasMidtermRows;
+}
+
+if(el('importMidtermExcelBtn')){
+  el('importMidtermExcelBtn').disabled = !hasMidtermRows;
+}
+    
   }catch(err){
     state.midtermRows = [];
     renderMidtermRows();
@@ -14903,6 +14935,9 @@ function clearMidtermForm(){
   if(el('midtermScoreMax')) el('midtermScoreMax').value = 0;
   if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = 0;
   if(el('saveMidtermBtn')) el('saveMidtermBtn').disabled = true;
+  if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
+  if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
+  if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
 
   setStatus('midtermFormStatus', 'ยังไม่ได้เลือกวิชา', 'info');
   renderMidtermRows();
@@ -14964,6 +14999,323 @@ function updateMidtermRowDom(idx){
   if(totalBox) totalBox.textContent = formatDecimal(row.total_score, 2);
   if(scorePctBox) scorePctBox.textContent = formatDecimal(row.score_percent, 2);
   if(attPctBox) attPctBox.textContent = formatDecimal(row.attendance_percent, 2);
+}
+
+function getMidtermTemplateFileName(){
+  const group = state.selectedMidtermGroup;
+  const user = state.currentUser || {};
+
+  if(!group){
+    return 'midterm_template.xlsx';
+  }
+
+  const teacherCode = safeText(user.teacher_code, 'T000');
+  const subjectCode = safeText(group.subject_code, 'subject');
+  const year = safeText(group.academic_year, '');
+  const term = safeText(group.term, '');
+  const classNum = String(group.class_level || '').replace(/[^\d]/g, '') || group.class_level;
+  const room = safeText(group.room, '');
+
+  return `midterm_${subjectCode}_${teacherCode}_${year}_${term}_${classNum}_${room}.xlsx`;
+}
+
+function assertMidtermGroupReady(){
+  if(!state.selectedMidtermGroup){
+    throw new Error('กรุณาเลือกรายวิชาก่อน');
+  }
+
+  if(!Array.isArray(state.midtermRows) || state.midtermRows.length === 0){
+    throw new Error('ยังไม่มีรายชื่อนักเรียนในตาราง');
+  }
+}
+
+function downloadMidtermTemplateExcel(){
+  try{
+    assertMidtermGroupReady();
+
+    if(typeof XLSX === 'undefined'){
+      throw new Error('ไม่พบไลบรารี XLSX สำหรับสร้างไฟล์ Excel');
+    }
+
+    syncMidtermMaxFromInputs();
+
+    const group = state.selectedMidtermGroup;
+    const user = state.currentUser || {};
+
+    const aoa = [
+      ['รายงานผลกลางภาค'],
+      ['รหัสวิชา', group.subject_code || '', 'รายวิชา', group.subject_name || ''],
+      ['ครูผู้สอน', `${user.teacher_code || ''} ${user.full_name || ''}`.trim(), 'ปี/เทอม', `${group.academic_year || ''}/${group.term || ''}`],
+      ['ชั้น', group.class_level || '', 'ห้อง', group.room || ''],
+      ['คะแนนเก็บเต็ม', Number(state.midtermMax.keep || 0), 'กลางภาคเต็ม', Number(state.midtermMax.midterm || 0), 'เวลาเรียนเต็ม', Number(state.midtermMax.attendance || 0)],
+      [],
+      ['เลขที่', 'เลขประจำตัว', 'ชื่อ-สกุล', 'คะแนนเก็บ', 'กลางภาค', 'เวลาเรียน']
+    ];
+
+    state.midtermRows.forEach(row => {
+      aoa.push([
+        row.student_no ?? '',
+        row.student_code || '',
+        row.student_name || '',
+        row.keep_score ?? '',
+        row.midterm_score ?? '',
+        row.attendance_score ?? ''
+      ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    ws['!cols'] = [
+      { wch: 10 },
+      { wch: 14 },
+      { wch: 34 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 }
+    ];
+
+    ws['!freeze'] = { xSplit:0, ySplit:7 };
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Midterm');
+
+    XLSX.writeFile(wb, getMidtermTemplateFileName());
+
+    showToast(
+      'ดาวน์โหลดสำเร็จ',
+      'ดาวน์โหลด Template Excel สำหรับกรอกคะแนนกลางภาคแล้ว',
+      'success'
+    );
+  }catch(err){
+    showToast('ดาวน์โหลดไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+  }
+}
+
+function normalizeMidtermHeader(value){
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[()]/g, '');
+}
+
+function findMidtermHeaderRow(aoa){
+  return aoa.findIndex(row => {
+    const headers = (row || []).map(normalizeMidtermHeader);
+    return headers.includes('เลขประจำตัว') &&
+           headers.includes('คะแนนเก็บ') &&
+           headers.includes('กลางภาค') &&
+           headers.includes('เวลาเรียน');
+  });
+}
+
+function findMidtermColumnIndex(headers, names){
+  const normalizedNames = names.map(normalizeMidtermHeader);
+  return headers.findIndex(h => normalizedNames.includes(h));
+}
+
+function readMidtermMaxFromExcel(aoa){
+  const flatRows = aoa.slice(0, 8);
+
+  flatRows.forEach(row => {
+    (row || []).forEach((cell, idx) => {
+      const label = normalizeMidtermHeader(cell);
+      const nextValue = row[idx + 1];
+
+      if(label === 'คะแนนเก็บเต็ม'){
+        const n = Number(nextValue);
+        if(Number.isFinite(n) && n > 0) state.midtermMax.keep = n;
+      }
+
+      if(label === 'กลางภาคเต็ม'){
+        const n = Number(nextValue);
+        if(Number.isFinite(n) && n > 0) state.midtermMax.midterm = n;
+      }
+
+      if(label === 'เวลาเรียนเต็ม'){
+        const n = Number(nextValue);
+        if(Number.isFinite(n) && n > 0) state.midtermMax.attendance = n;
+      }
+    });
+  });
+
+  if(el('midtermKeepMax')) el('midtermKeepMax').value = state.midtermMax.keep || 0;
+  if(el('midtermScoreMax')) el('midtermScoreMax').value = state.midtermMax.midterm || 0;
+  if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = state.midtermMax.attendance || 0;
+}
+
+function applyMidtermExcelRows(aoa){
+  assertMidtermGroupReady();
+
+  const headerRowIndex = findMidtermHeaderRow(aoa);
+  if(headerRowIndex < 0){
+    throw new Error('ไม่พบหัวตารางที่ถูกต้องในไฟล์ Excel\nต้องมีคอลัมน์ เลขประจำตัว, คะแนนเก็บ, กลางภาค, เวลาเรียน');
+  }
+
+  readMidtermMaxFromExcel(aoa);
+
+  const headers = (aoa[headerRowIndex] || []).map(normalizeMidtermHeader);
+
+  const idxSid = findMidtermColumnIndex(headers, ['เลขประจำตัว', 'sid', 'รหัสนักเรียน']);
+  const idxKeep = findMidtermColumnIndex(headers, ['คะแนนเก็บ', 'keep_score', 'keep']);
+  const idxMid = findMidtermColumnIndex(headers, ['กลางภาค', 'midterm_score', 'midterm']);
+  const idxAtt = findMidtermColumnIndex(headers, ['เวลาเรียน', 'attendance_score', 'attendance']);
+
+  if(idxSid < 0 || idxKeep < 0 || idxMid < 0 || idxAtt < 0){
+    throw new Error('หัวตารางไม่ครบ กรุณาใช้ Template ที่ระบบดาวน์โหลดให้');
+  }
+
+  const rowMap = new Map(
+    state.midtermRows.map((row, idx) => [
+      String(row.student_code || '').trim(),
+      { row, idx }
+    ])
+  );
+
+  const changedCells = [];
+  let matchCount = 0;
+  let missCount = 0;
+  let changedRowCount = 0;
+
+  const dataRows = aoa.slice(headerRowIndex + 1);
+
+  dataRows.forEach(excelRow => {
+    if(!excelRow || excelRow.every(v => String(v || '').trim() === '')) return;
+
+    const sid = String(excelRow[idxSid] || '').trim();
+    if(!sid) return;
+
+    const target = rowMap.get(sid);
+    if(!target){
+      missCount++;
+      return;
+    }
+
+    let rowChanged = false;
+
+    const updates = [
+      { key:'keep_score', value:excelRow[idxKeep] },
+      { key:'midterm_score', value:excelRow[idxMid] },
+      { key:'attendance_score', value:excelRow[idxAtt] }
+    ];
+
+    updates.forEach(item => {
+      const raw = String(item.value ?? '').trim();
+      if(raw === '') return;
+
+      const n = Number(raw);
+      if(!Number.isFinite(n)) return;
+
+      const oldValue = String(target.row[item.key] ?? '').trim();
+      const newValue = String(n);
+
+      if(oldValue !== newValue){
+        target.row[item.key] = n;
+        changedCells.push({
+          rowIndex: target.idx,
+          key: item.key
+        });
+        rowChanged = true;
+      }
+    });
+
+    calculateMidtermRow(target.row);
+
+    if(rowChanged) changedRowCount++;
+    matchCount++;
+  });
+
+  calculateAllMidtermRows();
+  renderMidtermRows();
+
+  changedCells.forEach(ch => {
+    const input = document.querySelector(
+      `#midtermTbody [data-midterm-idx="${ch.rowIndex}"][data-midterm-key="${ch.key}"]`
+    );
+
+    if(input){
+      input.classList.add('changed-score');
+    }
+  });
+
+  const invalidCount = validateMidtermImportedInputs();
+
+  setStatus(
+    'midtermFormStatus',
+    `นำเข้า Excel สำเร็จ: เปลี่ยนแปลง ${changedRowCount} แถว | จับคู่ได้ ${matchCount} แถว | ไม่พบในตาราง ${missCount} แถว${invalidCount ? ` | พบค่าผิดปกติ ${invalidCount} ช่อง` : ''}`,
+    invalidCount ? 'warn' : 'success'
+  );
+
+  showToast(
+    'นำเข้าสำเร็จ',
+    `นำเข้าคะแนนจาก Excel แล้ว ${changedRowCount} แถว`,
+    invalidCount ? 'warn' : 'success'
+  );
+}
+
+function validateMidtermImportedInputs(){
+  syncMidtermMaxFromInputs();
+
+  let invalidCount = 0;
+
+  document
+    .querySelectorAll('#midtermTbody [data-midterm-idx][data-midterm-key]')
+    .forEach(input => {
+      validateMidtermInput(input);
+      if(input.classList.contains('invalid')){
+        invalidCount++;
+      }
+    });
+
+  return invalidCount;
+}
+
+function importMidtermExcelFile(file){
+  try{
+    assertMidtermGroupReady();
+
+    if(!file){
+      throw new Error('กรุณาเลือกไฟล์ Excel ก่อน');
+    }
+
+    if(typeof XLSX === 'undefined'){
+      throw new Error('ไม่พบไลบรารี XLSX สำหรับอ่านไฟล์ Excel');
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      try{
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type:'array' });
+
+        const sheetName = wb.SheetNames[0];
+        if(!sheetName){
+          throw new Error('ไม่พบ Sheet ในไฟล์ Excel');
+        }
+
+        const ws = wb.Sheets[sheetName];
+        const aoa = XLSX.utils.sheet_to_json(ws, {
+          header:1,
+          defval:''
+        });
+
+        applyMidtermExcelRows(aoa);
+      }catch(err){
+        setStatus('midtermFormStatus', err.message || 'นำเข้า Excel ไม่สำเร็จ', 'error');
+        showToast('นำเข้าไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+      }finally{
+        if(el('midtermExcelInput')){
+          el('midtermExcelInput').value = '';
+        }
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  }catch(err){
+    setStatus('midtermFormStatus', err.message || 'นำเข้า Excel ไม่สำเร็จ', 'error');
+    showToast('นำเข้าไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+  }
 }
 
 
@@ -15171,10 +15523,28 @@ bindIfExists('midtermTbody', 'input', (e) => {
 
   validateMidtermInput(target);
   updateMidtermRowDom(idx);
+
+  target.classList.remove('changed-score');
 });
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
 bindIfExists('clearMidtermBtn', 'click', clearMidtermForm);
+
+bindIfExists('downloadMidtermTemplateBtn', 'click', downloadMidtermTemplateExcel);
+
+bindIfExists('importMidtermExcelBtn', 'click', () => {
+  try{
+    assertMidtermGroupReady();
+    el('midtermExcelInput')?.click();
+  }catch(err){
+    showToast('ยังนำเข้าไม่ได้', err.message || 'กรุณาเลือกรายวิชาก่อน', 'warn');
+  }
+});
+
+bindIfExists('midtermExcelInput', 'change', (e) => {
+  const file = e.target.files?.[0];
+  importMidtermExcelFile(file);
+});
 
   bindIfExists('importFilterKeyword', 'input', () => {
     clearTimeout(window.__importSearchTimer);
