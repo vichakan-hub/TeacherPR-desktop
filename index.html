@@ -5107,6 +5107,91 @@
   min-width:160px;
 }
 
+/* ===== ปุ่ม action ของรายงานกลางภาค ===== */
+#pageMidtermReport .midterm-main-actions,
+#pageMidtermReport .actions{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:12px !important;
+}
+
+#pageMidtermReport .midterm-main-actions button,
+#pageMidtermReport .actions button{
+  min-width:170px;
+  height:48px;
+  padding:0 18px;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:800;
+  white-space:nowrap;
+  border:1px solid transparent;
+  transition:all .18s ease;
+  box-shadow:0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* hover */
+#pageMidtermReport .midterm-main-actions button:hover,
+#pageMidtermReport .actions button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(0,0,0,0.10);
+}
+
+/* disabled */
+#pageMidtermReport .midterm-main-actions button:disabled,
+#pageMidtermReport .actions button:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+/* ดาวน์โหลด */
+#downloadMidtermTemplateBtn{
+  background:#e8f1ff !important;
+  color:#1453cc !important;
+  border-color:#bdd2ff !important;
+}
+
+/* นำเข้า */
+#importMidtermExcelBtn{
+  background:#fff3db !important;
+  color:#b86a00 !important;
+  border-color:#ffd89a !important;
+}
+
+/* บันทึก */
+#saveMidtermBtn{
+  background:#e4f7e8 !important;
+  color:#16803b !important;
+  border-color:#aee1b8 !important;
+}
+
+/* ล้าง */
+#clearMidtermBtn{
+  background:#fdeaea !important;
+  color:#c0392b !important;
+  border-color:#f3b1ad !important;
+}
+
+/* hover เฉพาะปุ่ม */
+#downloadMidtermTemplateBtn:hover:not(:disabled){
+  background:#dbe9ff !important;
+}
+
+#importMidtermExcelBtn:hover:not(:disabled){
+  background:#ffeac0 !important;
+}
+
+#saveMidtermBtn:hover:not(:disabled){
+  background:#d6f2dd !important;
+}
+
+#clearMidtermBtn:hover:not(:disabled){
+  background:#fad9d7 !important;
+}
+
 </style>
 </head>
 <body>
@@ -5430,28 +5515,21 @@
   </div>
 
   <div class="actions midterm-main-actions" style="margin:0;">
-    <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
-      ดาวน์โหลด Template Excel
-    </button>
+   <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
+  ⬇ ดาวน์โหลด Template
+</button>
 
-    <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
-      นำเข้า Excel
-    </button>
+<button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
+  📥 นำเข้า Excel
+</button>
 
-    <input
-      id="midtermExcelInput"
-      type="file"
-      accept=".xlsx,.xls"
-      class="hidden"
-    >
+<button id="saveMidtermBtn" class="btn-success" type="button" disabled>
+  💾 บันทึกคะแนนกลางภาค
+</button>
 
-    <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
-      บันทึกคะแนนกลางภาค
-    </button>
-
-    <button id="clearMidtermBtn" class="btn-secondary" type="button">
-      ล้างตาราง
-    </button>
+<button id="clearMidtermBtn" class="btn-secondary" type="button">
+  🗑 ล้างตาราง
+</button>
   </div>
 </div>
 
