@@ -5090,6 +5090,23 @@
   line-height:1.45;
 }
 
+#pageMidtermReport .midterm-main-actions{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  align-items:center !important;
+  gap:10px !important;
+}
+
+#pageMidtermReport .midterm-main-actions button{
+  white-space:nowrap;
+}
+
+#pageMidtermReport .midterm-main-actions #downloadMidtermTemplateBtn,
+#pageMidtermReport .midterm-main-actions #importMidtermExcelBtn{
+  min-width:160px;
+}
+
 </style>
 </head>
 <body>
@@ -5404,32 +5421,39 @@
   </section>
 
   <section class="card">
-    <div class="preview-topbar">
-      <div>
-        <h2 id="midtermSelectedTitle">ตารางบันทึกคะแนนกลางภาค</h2>
-        <div id="midtermSelectedSub" class="sub" style="margin-bottom:0;">
-          กรุณาเลือกรายวิชาจากรายการสอนด้านบน
-        </div>
-      </div>
+<div class="preview-topbar">
+  <div>
+    <h2 id="midtermSelectedTitle">ตารางบันทึกคะแนนกลางภาค</h2>
+    <div id="midtermSelectedSub" class="sub" style="margin-bottom:0;">
+      กรุณาเลือกรายวิชาจากรายการสอนด้านบน
+    </div>
+  </div>
 
-<div class="actions" style="margin:0;">
-  <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
+  <div class="actions midterm-main-actions" style="margin:0;">
+    <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
       ดาวน์โหลด Template Excel
     </button>
 
-      <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
+    <button id="importMidtermExcelBtn" class="btn-secondary" type="button" disabled>
       นำเข้า Excel
     </button>
-  
-  <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
-    บันทึกคะแนนกลางภาค
-  </button>
 
-  <button id="clearMidtermBtn" class="btn-secondary" type="button">
-    ล้างตาราง
-  </button>
+    <input
+      id="midtermExcelInput"
+      type="file"
+      accept=".xlsx,.xls"
+      class="hidden"
+    >
+
+    <button id="saveMidtermBtn" class="btn-success" type="button" disabled>
+      บันทึกคะแนนกลางภาค
+    </button>
+
+    <button id="clearMidtermBtn" class="btn-secondary" type="button">
+      ล้างตาราง
+    </button>
+  </div>
 </div>
-    </div>
 
    
 
