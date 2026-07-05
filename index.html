@@ -5203,6 +5203,25 @@
   pointer-events:none !important;
 }
 
+/* ===== Unsaved midterm changes ===== */
+#pageMidtermReport .midterm-score-input.changed-score,
+#pageMidtermReport .midterm-max-input.changed-score{
+  background:#fff8c4 !important;
+  border-color:#f1c40f !important;
+  box-shadow:0 0 0 3px rgba(241,196,15,.16) !important;
+}
+
+#saveMidtermBtn.has-unsaved{
+  border-color:#16a34a !important;
+  box-shadow:0 0 0 4px rgba(22,163,74,.16), 0 10px 22px rgba(22,163,74,.16) !important;
+  animation:midtermSavePulse 1.15s ease-in-out infinite;
+}
+
+@keyframes midtermSavePulse{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-1px); }
+}
+
 </style>
 </head>
 <body>
@@ -7305,11 +7324,19 @@ studentDetailTermRadarChart: null,
 midtermGroups: [],
 selectedMidtermGroup: null,
 midtermRows: [],
+midtermOriginalRows: [],
+midtermOriginalMax: {
+  keep: 0,
+  midterm: 0,
+  attendance: 0
+},
+midtermDirty: false,
 midtermMax: {
   keep: 0,
   midterm: 0,
   attendance: 0
 },
+  
 };
 
     function setStatus(id, text, type='info'){
@@ -14815,6 +14842,10 @@ function getStudentFullName(row){
 
 async function openMidtermGroup(group){
   try{
+    if(!confirmDiscardMidtermChanges('เปิดรายวิชาอื่น')){
+      return;
+    }
+
     state.selectedMidtermGroup = group;
     state.midtermRows = [];
 
@@ -14904,16 +14935,19 @@ const studentRows = (students || []).map(stu => ({
     el('midtermScoreMax').value = state.midtermMax.midterm || 0;
     el('midtermAttendanceMax').value = state.midtermMax.attendance || 0;
 
-    calculateAllMidtermRows();
-    renderMidtermRows();
+calculateAllMidtermRows();
+renderMidtermRows();
 
-    setStatus(
-      'midtermFormStatus',
-      state.midtermRows.length
-        ? `โหลดรายชื่อนักเรียน ${state.midtermRows.length} คน`
-        : 'ไม่พบนักเรียนในห้องนี้',
-      state.midtermRows.length ? 'success' : 'warn'
-    );
+captureMidtermOriginalState();
+refreshMidtermDirtyUI();
+
+setStatus(
+  'midtermFormStatus',
+  state.midtermRows.length
+    ? `โหลดรายชื่อนักเรียน ${state.midtermRows.length} คน`
+    : 'ไม่พบนักเรียนในห้องนี้',
+  state.midtermRows.length ? 'success' : 'warn'
+);
 
     const hasMidtermRows = !!state.midtermRows.length;
 
@@ -15147,7 +15181,9 @@ async function saveMidtermReport(){
 
 if(error) throw error;
 
+captureMidtermOriginalState();
 renderMidtermRows();
+refreshMidtermDirtyUI();
 
 setStatus(
   'midtermFormStatus',
@@ -15168,9 +15204,14 @@ showToast(
 }
 
 function clearMidtermForm(){
+  if(!confirmDiscardMidtermChanges('ล้างตาราง')){
+    return;
+  }
+
   state.selectedMidtermGroup = null;
   state.midtermRows = [];
   state.midtermMax = { keep:0, midterm:0, attendance:0 };
+  resetMidtermDirtyState();
 
   if(el('midtermSelectedTitle')) el('midtermSelectedTitle').textContent = 'ตารางบันทึกคะแนนกลางภาค';
   if(el('midtermSelectedSub')) el('midtermSelectedSub').textContent = 'กรุณาเลือกรายวิชาจากรายการสอนด้านบน';
@@ -15189,6 +15230,134 @@ function clearMidtermForm(){
   setStatus('midtermFormStatus', 'ยังไม่ได้เลือกวิชา', 'info');
   renderMidtermRows();
 }
+
+function normalizeMidtermCompareValue(value){
+  if(value === null || value === undefined) return '';
+
+  const raw = String(value).trim();
+  if(raw === '') return '';
+
+  const n = Number(raw);
+  if(Number.isFinite(n)){
+    return String(n);
+  }
+
+  return raw;
+}
+
+function captureMidtermOriginalState(){
+  state.midtermOriginalRows = (state.midtermRows || []).map(row => ({
+    student_code: String(row.student_code || '').trim(),
+    keep_score: normalizeMidtermCompareValue(row.keep_score),
+    midterm_score: normalizeMidtermCompareValue(row.midterm_score),
+    attendance_score: normalizeMidtermCompareValue(row.attendance_score)
+  }));
+
+  state.midtermOriginalMax = {
+    keep: Number(state.midtermMax.keep || 0),
+    midterm: Number(state.midtermMax.midterm || 0),
+    attendance: Number(state.midtermMax.attendance || 0)
+  };
+
+  state.midtermDirty = false;
+}
+
+function resetMidtermDirtyState(){
+  state.midtermOriginalRows = [];
+  state.midtermOriginalMax = {
+    keep: 0,
+    midterm: 0,
+    attendance: 0
+  };
+  state.midtermDirty = false;
+
+  document
+    .querySelectorAll('#pageMidtermReport .changed-score')
+    .forEach(elm => elm.classList.remove('changed-score'));
+
+  el('saveMidtermBtn')?.classList.remove('has-unsaved');
+}
+
+function isMidtermScoreChanged(idx, key){
+  const row = state.midtermRows[idx];
+  const original = state.midtermOriginalRows[idx];
+
+  if(!row || !original) return false;
+
+  return normalizeMidtermCompareValue(row[key]) !== normalizeMidtermCompareValue(original[key]);
+}
+
+function isMidtermMaxChanged(key){
+  return normalizeMidtermCompareValue(state.midtermMax[key]) !== normalizeMidtermCompareValue(state.midtermOriginalMax[key]);
+}
+
+function hasMidtermUnsavedChanges(){
+  if(!state.selectedMidtermGroup) return false;
+
+  if(isMidtermMaxChanged('keep')) return true;
+  if(isMidtermMaxChanged('midterm')) return true;
+  if(isMidtermMaxChanged('attendance')) return true;
+
+  const keys = ['keep_score', 'midterm_score', 'attendance_score'];
+
+  return (state.midtermRows || []).some((row, idx) =>
+    keys.some(key => isMidtermScoreChanged(idx, key))
+  );
+}
+
+function refreshMidtermDirtyUI(options = {}){
+  state.midtermDirty = hasMidtermUnsavedChanges();
+
+  document
+    .querySelectorAll('#midtermTbody [data-midterm-idx][data-midterm-key]')
+    .forEach(input => {
+      const idx = Number(input.dataset.midtermIdx);
+      const key = input.dataset.midtermKey;
+      input.classList.toggle('changed-score', isMidtermScoreChanged(idx, key));
+    });
+
+  const maxMap = {
+    midtermKeepMax: 'keep',
+    midtermScoreMax: 'midterm',
+    midtermAttendanceMax: 'attendance'
+  };
+
+  Object.entries(maxMap).forEach(([id, key]) => {
+    const input = el(id);
+    if(input){
+      input.classList.toggle('changed-score', isMidtermMaxChanged(key));
+    }
+  });
+
+  el('saveMidtermBtn')?.classList.toggle('has-unsaved', state.midtermDirty);
+
+  if(state.midtermDirty){
+    setStatus(
+      'midtermFormStatus',
+      'มีการแก้ไขคะแนนที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”',
+      'warn'
+    );
+  }else if(options.cleanText){
+    setStatus('midtermFormStatus', options.cleanText, options.cleanType || 'success');
+  }
+}
+
+function confirmDiscardMidtermChanges(actionText = 'ดำเนินการต่อ'){
+  if(!state.midtermDirty) return true;
+
+  return window.confirm(
+    'คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก\n\n' +
+    `กด “ตกลง” เพื่อทิ้งการเปลี่ยนแปลงและ${actionText}\n` +
+    'กด “ยกเลิก” เพื่อกลับไปบันทึกคะแนน'
+  );
+}
+
+window.addEventListener('beforeunload', (e) => {
+  if(state.midtermDirty){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 
 function getMidtermInputMaxByKey(key){
   if(key === 'keep_score') return Number(state.midtermMax.keep || 0);
@@ -15471,6 +15640,7 @@ function applyMidtermExcelRows(aoa){
       input.classList.add('changed-score');
     }
   });
+  refreshMidtermDirtyUI();
 
   const invalidCount = validateMidtermImportedInputs();
 
@@ -15723,23 +15893,16 @@ bindIfExists('midtermKeyword', 'input', () => {
   window.__midtermSearchTimer = setTimeout(loadMidtermTeachingList, 250);
 });
 
-bindIfExists('midtermKeepMax', 'input', () => {
+function handleMidtermMaxInput(){
   syncMidtermMaxFromInputs();
   calculateAllMidtermRows();
   renderMidtermRows();
-});
+  refreshMidtermDirtyUI();
+}
 
-bindIfExists('midtermScoreMax', 'input', () => {
-  syncMidtermMaxFromInputs();
-  calculateAllMidtermRows();
-  renderMidtermRows();
-});
-
-bindIfExists('midtermAttendanceMax', 'input', () => {
-  syncMidtermMaxFromInputs();
-  calculateAllMidtermRows();
-  renderMidtermRows();
-});
+bindIfExists('midtermKeepMax', 'input', handleMidtermMaxInput);
+bindIfExists('midtermScoreMax', 'input', handleMidtermMaxInput);
+bindIfExists('midtermAttendanceMax', 'input', handleMidtermMaxInput);
 
 bindIfExists('midtermTbody', 'input', (e) => {
   const target = e.target;
@@ -15757,8 +15920,7 @@ bindIfExists('midtermTbody', 'input', (e) => {
 
   validateMidtermInput(target);
   updateMidtermRowDom(idx);
-
-  target.classList.remove('changed-score');
+  refreshMidtermDirtyUI();
 });
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
