@@ -17437,9 +17437,38 @@ const teacherSlots = [
   signatureTeacherNames[2] || ''
 ];
 
-  const topStudents = Array.isArray(extras.top_score_students)
-    ? extras.top_score_students
-    : [];
+// ข้อมูลนักเรียนที่ RPC ส่งมา
+const allTopStudents = Array.isArray(extras.top_score_students)
+  ? extras.top_score_students
+  : [];
+
+// เอาเฉพาะรายการที่มีคะแนนเป็นตัวเลข
+const scoredStudents = allTopStudents.filter(student => {
+  return (
+    student.total_score !== null &&
+    student.total_score !== undefined &&
+    student.total_score !== '' &&
+    Number.isFinite(Number(student.total_score))
+  );
+});
+
+// หาคะแนนสูงสุด
+const highestScore = scoredStudents.length
+  ? Math.max(
+      ...scoredStudents.map(student =>
+        Number(student.total_score)
+      )
+    )
+  : null;
+
+// แสดงนักเรียนทุกคนที่ได้คะแนนสูงสุดเท่ากัน
+const topStudents = highestScore === null
+  ? []
+  : scoredStudents.filter(student =>
+      Math.abs(
+        Number(student.total_score) - highestScore
+      ) < 0.000001
+    );
 
   const topStudentsRowsHtml = topStudents.length
     ? topStudents.map(st => `
