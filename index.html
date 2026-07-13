@@ -16928,7 +16928,14 @@ function renderTeacherGradeStatsSubjectOptions(){
     
 
 async function loadTeacherGradeStats(){
+  const loadBtn = el('loadGradeStatsBtn');
+  const originalBtnText = loadBtn?.innerHTML || 'แสดงสถิติ';
+
   try{
+    if(loadBtn?.disabled){
+      return;
+    }
+
     if(!state.currentUser?.id){
       throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
     }
@@ -16945,9 +16952,30 @@ async function loadTeacherGradeStats(){
       throw new Error('กรุณาเลือกภาคเรียน');
     }
 
-    const subjectCodes = subjectCode ? [subjectCode] : [];
+    /*
+      แนะนำให้เลือกรายวิชาเสมอ
+      เพราะตัวเลือกทุกวิชาอาจประมวลผลข้อมูลจำนวนมาก
+    */
+    if(!subjectCode){
+      throw new Error('กรุณาเลือกรายวิชาที่ต้องการแสดงสถิติ');
+    }
 
-    setStatus('gradeStatsStatus', 'กำลังประมวลผลสถิติผลการเรียน...', 'info');
+    const subjectCodes = [subjectCode];
+
+    if(loadBtn){
+      loadBtn.disabled = true;
+      loadBtn.innerHTML = '⏳ กำลังประมวลผล...';
+    }
+
+    if(el('exportGradeStatsPdfBtn')){
+      el('exportGradeStatsPdfBtn').disabled = true;
+    }
+
+    setStatus(
+      'gradeStatsStatus',
+      'กำลังประมวลผลสถิติผลการเรียน กรุณารอสักครู่...',
+      'info'
+    );
 
     const { data, error } = await supabaseClient.rpc(
       'get_teacher_grade_stat_summary',
@@ -16960,7 +16988,9 @@ async function loadTeacherGradeStats(){
       }
     );
 
-    if(error) throw error;
+    if(error){
+      throw error;
+    }
 
     if(!data || data.ok === false){
       throw new Error(data?.message || 'ประมวลผลไม่สำเร็จ');
@@ -16969,15 +16999,47 @@ async function loadTeacherGradeStats(){
     state.gradeStatsData = data;
     renderTeacherGradeStatsDashboard(data);
 
+    if(el('exportGradeStatsPdfBtn')){
+      el('exportGradeStatsPdfBtn').disabled = false;
+    }
+
     setStatus(
       'gradeStatsStatus',
-      `ประมวลผลสำเร็จ พบข้อมูล ${Number(data.summary?.total_results || 0).toLocaleString('th-TH')} รายการ`,
+      `ประมวลผลสำเร็จ พบข้อมูล ${
+        Number(data.summary?.total_results || 0).toLocaleString('th-TH')
+      } รายการ`,
       'success'
     );
+
   }catch(err){
     console.error('loadTeacherGradeStats ERROR', err);
+
+    const errorMessage = String(
+      err?.message || 'ประมวลผลไม่สำเร็จ'
+    );
+
+    state.gradeStatsData = null;
     resetTeacherGradeStatsDashboard();
-    setStatus('gradeStatsStatus', err.message || 'ประมวลผลไม่สำเร็จ', 'error');
+
+    if(errorMessage.toLowerCase().includes('statement timeout')){
+      setStatus(
+        'gradeStatsStatus',
+        'ฐานข้อมูลใช้เวลาประมวลผลนานเกินกำหนด กรุณาเลือกรายวิชาแล้วลองใหม่อีกครั้ง',
+        'error'
+      );
+    }else{
+      setStatus(
+        'gradeStatsStatus',
+        errorMessage,
+        'error'
+      );
+    }
+
+  }finally{
+    if(loadBtn){
+      loadBtn.disabled = false;
+      loadBtn.innerHTML = originalBtnText;
+    }
   }
 }
 
