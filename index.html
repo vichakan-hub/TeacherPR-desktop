@@ -18173,6 +18173,11 @@ function buildOfficialSignature(positionTitle, personName){
 }
 
 async function exportTeacherGradeStatsPdf(){
+  const exportBtn = el('exportGradeStatsPdfBtn');
+  const originalBtnText = exportBtn?.innerHTML || 'Export PDF';
+
+  let reportWindow = null;
+
   try{
     if(!state.currentUser?.id){
       throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
@@ -18195,75 +18200,270 @@ async function exportTeacherGradeStatsPdf(){
       throw new Error('กรุณาเลือกปีการศึกษาและภาคเรียน');
     }
 
-    setStatus('gradeStatsStatus', 'กำลังเตรียมรายงาน PDF...', 'info');
-
-    const { data: extras, error } = await supabaseClient.rpc(
-      'get_teacher_grade_stat_report_extras',
-      {
-        p_teacher_id: state.currentUser.id,
-        p_academic_year: academicYear,
-        p_term: term,
-        p_subject_code: subjectCode
-      }
-    );
-
-    if(error) throw error;
-
-    if(!extras || extras.ok === false){
-      throw new Error(extras?.message || 'โหลดข้อมูลรายงานไม่สำเร็จ');
-    }
-
+    /*
+      ใช้ข้อมูลที่โหลดมาแล้วจากหน้า Dashboard
+      ไม่เรียก get_teacher_grade_stat_report_extras ซ้ำ
+    */
     const data = state.gradeStatsData;
     const summary = data.summary || {};
     const rows = Array.isArray(data.rows) ? data.rows : [];
+    const topStudents = Array.isArray(data.top_students)
+      ? data.top_students
+      : [];
 
     if(!rows.length){
       throw new Error('ไม่พบข้อมูลรายห้องสำหรับ Export PDF');
     }
 
-    const gradeTotals = getReportGradeTotals(summary);
-    const gradePercents = getReportGradePercentages(summary);
-    const roomAverages = rows.map(r => ({
-      room_label: r.room_label || '-',
-      average: Number(r.average || 0)
-    }));
+    if(exportBtn){
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '⏳ กำลังเตรียม PDF...';
+    }
 
-const signerResult = await loadAcademicReportSignersForTeacherReport(
-  academicYear,
-  term,
-  subjectCode
-);
+    setStatus(
+      'gradeStatsStatus',
+      'กำลังเตรียมรายงาน PDF...',
+      'info'
+    );
 
-extras.report_signers = signerResult.rows;
-extras.report_learning_area = signerResult.learning_area;
-
-const reportHtml = buildGradeStatsReportHtml({
-  data,
-  extras,
-  rows,
-  summary,
-  gradeTotals,
-  gradePercents,
-  roomAverages
-});
-
-    const reportWindow = window.open('', '_blank');
+    /*
+      เปิดหน้าต่างก่อน await
+      ป้องกัน Chrome บล็อก popup
+    */
+    reportWindow = window.open('', '_blank');
 
     if(!reportWindow){
-      throw new Error('เบราว์เซอร์บล็อก popup กรุณาอนุญาต popup สำหรับหน้านี้');
+      throw new Error(
+        'เบราว์เซอร์บล็อก popup กรุณาอนุญาต popup สำหรับหน้านี้'
+      );
     }
+
+    reportWindow.document.open();
+    reportWindow.document.write(`
+      <!doctype html>
+      <html lang="th">
+      <head>
+        <meta charset="utf-8">
+        <title>กำลังเตรียมรายงาน</title>
+      </head>
+      <body style="
+        margin:0;
+        padding:40px;
+        font-family:Kanit, Sarabun, sans-serif;
+        color:#17324d;
+        background:#f8fbff;
+      ">
+        <div style="
+          max-width:520px;
+          margin:80px auto;
+          padding:30px;
+          background:#fff;
+          border:1px solid #d8e4ef;
+          border-radius:20px;
+          text-align:center;
+        ">
+          <div style="font-size:28px;margin-bottom:12px;">⏳</div>
+          <div style="font-size:20px;font-weight:700;">
+            กำลังเตรียมรายงาน
+          </div>
+          <div style="margin-top:8px;color:#64748b;">
+            กรุณารอสักครู่
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    reportWindow.document.close();
+
+    /*
+      รวบรวมชื่อครูจากข้อมูลรายห้องที่มีอยู่แล้ว
+    */
+    const teacherNameSet = new Set();
+
+    rows.forEach(row => {
+      String(row.teacher_name || '')
+        .split(/[,;]+/)
+        .map(name => name.trim())
+        .filter(Boolean)
+        .forEach(name => teacherNameSet.add(name));
+    });
+
+    /*
+      fallback กรณีข้อมูลรายห้องไม่มีชื่อครู
+    */
+    if(
+      teacherNameSet.size === 0 &&
+      state.currentUser?.full_name
+    ){
+      teacherNameSet.add(
+        String(state.currentUser.full_name).trim()
+      );
+    }
+
+    const teacherNames = [...teacherNameSet];
+
+    /*
+      หาระดับชั้นสำหรับหัวรายงาน
+    */
+    const firstRoomLabel = safeText(
+      rows[0]?.room_label,
+      ''
+    );
+
+    const classLevelFromRoom = firstRoomLabel.includes('/')
+      ? firstRoomLabel.split('/')[0]
+      : firstRoomLabel;
+
+    const classLevel =
+      safeText(topStudents[0]?.class_level, '') ||
+      classLevelFromRoom ||
+      '';
+
+    /*
+      สร้าง extras จากข้อมูลเดิม
+      ไม่อ่าน grade_results ซ้ำ
+    */
+    const extras = {
+      ok: true,
+
+      academic_year: academicYear,
+      term: term,
+
+      subject_code: subjectCode,
+      subject_name: safeText(
+        summary.subject_name,
+        subjectCode
+      ),
+
+      class_level: classLevel,
+
+      subject_teachers: teacherNames.map(name => ({
+        teacher_name: name,
+        signature_name: name
+      })),
+
+      top_score_students: topStudents
+        .slice(0, 10)
+        .map(student => ({
+          student_code: safeText(
+            student.student_code,
+            ''
+          ),
+
+          student_name: safeText(
+            student.student_name,
+            ''
+          ),
+
+          class_level: safeText(
+            student.class_level,
+            ''
+          ),
+
+          room: safeText(
+            student.room,
+            ''
+          ),
+
+          total_score:
+            student.total_score !== null &&
+            student.total_score !== undefined
+              ? student.total_score
+              : ''
+        }))
+    };
+
+    /*
+      ตารางผู้ลงนามมีข้อมูลไม่มาก
+      โหลดเฉพาะปี เทอม และกลุ่มสาระที่ใช้จริง
+    */
+    const signerResult =
+      await loadAcademicReportSignersForTeacherReport(
+        academicYear,
+        term,
+        subjectCode
+      );
+
+    extras.report_signers = signerResult.rows;
+    extras.report_learning_area =
+      signerResult.learning_area;
+
+    const gradeTotals =
+      getReportGradeTotals(summary);
+
+    const gradePercents =
+      getReportGradePercentages(summary);
+
+    const roomAverages = rows.map(row => ({
+      room_label: row.room_label || '-',
+      average: Number(row.average || 0)
+    }));
+
+    const reportHtml = buildGradeStatsReportHtml({
+      data,
+      extras,
+      rows,
+      summary,
+      gradeTotals,
+      gradePercents,
+      roomAverages
+    });
 
     reportWindow.document.open();
     reportWindow.document.write(reportHtml);
     reportWindow.document.close();
 
-    setStatus('gradeStatsStatus', 'เปิดหน้ารายงานแล้ว กดพิมพ์ / Save as PDF ได้เลย', 'success');
+    setStatus(
+      'gradeStatsStatus',
+      'เปิดหน้ารายงานแล้ว กดพิมพ์ / Save as PDF ได้เลย',
+      'success'
+    );
+
   }catch(err){
-    console.error('exportTeacherGradeStatsPdf ERROR', err);
-    setStatus('gradeStatsStatus', err.message || 'Export PDF ไม่สำเร็จ', 'error');
-    showToast('Export PDF ไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+    console.error(
+      'exportTeacherGradeStatsPdf ERROR',
+      err
+    );
+
+    if(reportWindow && !reportWindow.closed){
+      reportWindow.close();
+    }
+
+    const message = String(
+      err?.message || 'Export PDF ไม่สำเร็จ'
+    );
+
+    if(message.toLowerCase().includes('statement timeout')){
+      setStatus(
+        'gradeStatsStatus',
+        'ฐานข้อมูลใช้เวลานานเกินกำหนดขณะโหลดข้อมูลผู้ลงนาม',
+        'error'
+      );
+    }else{
+      setStatus(
+        'gradeStatsStatus',
+        message,
+        'error'
+      );
+    }
+
+    showToast(
+      'Export PDF ไม่สำเร็จ',
+      message,
+      'error'
+    );
+
+  }finally{
+    if(exportBtn){
+      exportBtn.innerHTML = originalBtnText;
+
+      exportBtn.disabled =
+        !state.gradeStatsData?.summary ||
+        !getSelectedGradeStatsSubjectCode();
+    }
   }
 }
+    
 function renderTeacherGradeStatsRoomRows(rows){
   const tbody = el('gradeStatsRoomTbody');
 
