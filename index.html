@@ -13963,20 +13963,48 @@ function teacherStudentGetEntryFilterByClassLevel(classLevel, academicYear){
 }
 
 async function fetchTeacherStudentCumulativeSummaryMap(studentIds){
-  const ids = [...new Set((studentIds || []).filter(Boolean).map(String))];
+  const ids = [
+    ...new Set(
+      (studentIds || [])
+        .filter(Boolean)
+        .map(String)
+    )
+  ];
+
   const map = new Map();
 
-  if(!ids.length) return map;
+  if(!ids.length){
+    return map;
+  }
 
-  const chunkSize = 80;
+  /*
+    ลดจำนวนคนต่อรอบ
+    ห้องหนึ่งคนละประมาณ 42 ผลการเรียน
+    15 คน ≈ 630 แถว ไม่เกิน 1,000 แถวต่อหน้า
+  */
+  const chunkSize = 15;
 
   for(let i = 0; i < ids.length; i += chunkSize){
     const idChunk = ids.slice(i, i + chunkSize);
+
+    /*
+      สร้างกล่องรอไว้ให้นักเรียนทุกคนก่อน
+    */
+    idChunk.forEach(studentId => {
+      const key = String(studentId);
+
+      if(!map.has(key)){
+        map.set(key, {
+          rows: []
+        });
+      }
+    });
 
     const rows = await fetchAllPages(() => {
       return supabaseClient
         .from('grade_results')
         .select(`
+          id,
           student_id,
           grade_code,
           retest_grade_code,
@@ -13986,35 +14014,74 @@ async function fetchTeacherStudentCumulativeSummaryMap(studentIds){
           )
         `)
         .in('student_id', idChunk)
-        .eq('is_active', true);
+        .eq('is_active', true)
+
+        /*
+          สำคัญมาก:
+          กำหนดลำดับให้แน่นอนก่อนใช้ range แบ่งหน้า
+        */
+        .order('student_id', {
+          ascending: true
+        })
+        .order('id', {
+          ascending: true
+        });
     }, 1000);
 
-    idChunk.forEach(id => {
-      if(!map.has(String(id))) map.set(String(id), { rows: [] });
-    });
-
+    /*
+      นำผลการเรียนเข้ากล่องของนักเรียนแต่ละคน
+    */
     (rows || []).forEach(row => {
       const studentId = String(row.student_id || '');
-      if(!studentId) return;
 
-      if(!map.has(studentId)) map.set(studentId, { rows: [] });
+      if(!studentId){
+        return;
+      }
+
+      if(!map.has(studentId)){
+        map.set(studentId, {
+          rows: []
+        });
+      }
 
       map.get(studentId).rows.push({
-        grade_code: normalizeGradeValue(row.grade_code),
-        retest_grade_code: normalizeGradeValue(row.retest_grade_code),
-        credit: safeNum(row.subjects?.credit) || 0,
-        subject_type: safeText(row.subjects?.subject_type, '')
+        grade_result_id: row.id,
+
+        grade_code: normalizeGradeValue(
+          row.grade_code
+        ),
+
+        retest_grade_code: normalizeGradeValue(
+          row.retest_grade_code
+        ),
+
+        credit:
+          safeNum(row.subjects?.credit) || 0,
+
+        subject_type:
+          safeText(row.subjects?.subject_type, '')
       });
     });
   }
 
+  /*
+    คำนวณ GPA สะสมของนักเรียนแต่ละคน
+  */
   for(const [studentId, item] of map.entries()){
-    const summary = buildStudentCourseSummary(item.rows || []);
-    const riskCount = (item.rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
+    const studentRows = item.rows || [];
+
+    const summary =
+      buildStudentCourseSummary(studentRows);
+
+    const riskCount = studentRows.filter(row =>
+      isRiskGrade(
+        getEffectiveGrade(row)
+      )
+    ).length;
 
     map.set(studentId, {
       ...summary,
-      grade_count: (item.rows || []).length,
+      grade_count: studentRows.length,
       risk_count: riskCount
     });
   }
