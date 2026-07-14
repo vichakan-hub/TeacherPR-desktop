@@ -8965,30 +8965,140 @@ function buildRetestRequestPayload(row, requestedGrade){
   };
 }
 
+function closeRetestCancelSubmissionOverlay(){
+  const overlay = el('retestCancelSubmissionOverlay');
+
+  if(overlay){
+    overlay.classList.remove('show');
+  }
+}
+
+function openRetestCancelSubmissionOverlay(row){
+  return new Promise(resolve => {
+    const overlay = el('retestCancelSubmissionOverlay');
+    const textBox = el('retestCancelSubmissionText');
+    const statusBox = el('retestCancelSubmissionStatus');
+    const closeButton = el('retestCancelSubmissionCloseBtn');
+    const confirmButton = el('retestCancelSubmissionConfirmBtn');
+
+    if(
+      !overlay ||
+      !textBox ||
+      !closeButton ||
+      !confirmButton
+    ){
+      console.error('ไม่พบ element ของ Retest Cancel Overlay');
+      resolve(false);
+      return;
+    }
+
+    const studentCode = safeText(row?.student_code, '-');
+    const studentName = safeText(row?.student_name, 'ไม่พบชื่อนักเรียน');
+    const subjectCode = safeText(row?.subject_code, '-');
+    const subjectName = safeText(row?.subject_name, 'ไม่พบชื่อวิชา');
+    const requestedGrade = safeText(
+      row?.requested_retest_grade_code,
+      '-'
+    );
+
+    textBox.textContent =
+      `นักเรียน: ${studentCode} ${studentName}\n` +
+      `รายวิชา: ${subjectCode} ${subjectName}\n` +
+      `ผลแก้ตัวที่ส่ง: ${requestedGrade}\n\n` +
+      `เมื่อยืนยัน รายการจะกลับไปเป็นสถานะ “ยังไม่ส่งผล”`;
+
+    if(statusBox){
+      statusBox.textContent = '';
+      statusBox.className = 'status info';
+    }
+
+    closeButton.disabled = false;
+    confirmButton.disabled = false;
+    confirmButton.textContent = 'ยืนยันยกเลิกการส่ง';
+
+    let finished = false;
+
+    const finish = result => {
+      if(finished) return;
+      finished = true;
+
+      overlay.classList.remove('show');
+
+      closeButton.onclick = null;
+      confirmButton.onclick = null;
+      overlay.onclick = null;
+
+      document.removeEventListener(
+        'keydown',
+        handleEscape
+      );
+
+      resolve(result);
+    };
+
+    const handleEscape = event => {
+      if(event.key === 'Escape'){
+        finish(false);
+      }
+    };
+
+    closeButton.onclick = () => {
+      finish(false);
+    };
+
+    confirmButton.onclick = () => {
+      finish(true);
+    };
+
+    /*
+     * คลิกพื้นที่มืดด้านนอกเพื่อปิด
+     */
+    overlay.onclick = event => {
+      if(event.target === overlay){
+        finish(false);
+      }
+    };
+
+    document.addEventListener(
+      'keydown',
+      handleEscape
+    );
+
+    overlay.classList.add('show');
+  });
+}
+
 async function cancelRetestSubmission(row){
   if(!row?.retest_request_id){
-    throw new Error('ไม่พบรายการผลสอบแก้ตัวที่ต้องการยกเลิก');
+    throw new Error(
+      'ไม่พบรายการผลสอบแก้ตัวที่ต้องการยกเลิก'
+    );
   }
 
   if(row.retest_request_status !== 'pending_approval'){
-    throw new Error('ยกเลิกการส่งได้เฉพาะรายการที่อยู่ระหว่างรออนุมัติ');
+    throw new Error(
+      'ยกเลิกการส่งได้เฉพาะรายการที่อยู่ระหว่างรออนุมัติ'
+    );
   }
 
-  const studentText = safeText(row.student_name, 'นักเรียน');
-  const subjectText = safeText(row.subject_name, 'รายวิชา');
-
-  const confirmed = window.confirm(
-    `ยืนยันยกเลิกการส่งผลสอบแก้ตัว\n\n` +
-    `นักเรียน: ${studentText}\n` +
-    `รายวิชา: ${subjectText}\n\n` +
-    `เมื่อยกเลิกแล้ว รายการจะกลับไปเป็นสถานะ “ยังไม่ส่งผล”`
-  );
+  const confirmed =
+    await openRetestCancelSubmissionOverlay(row);
 
   if(!confirmed){
+    setStatus(
+      'retestStatus',
+      'ยกเลิกการดำเนินการแล้ว',
+      'info'
+    );
+
     return false;
   }
 
-  setStatus('retestStatus', 'กำลังยกเลิกการส่งผลสอบแก้ตัว...', 'info');
+  setStatus(
+    'retestStatus',
+    'กำลังยกเลิกการส่งผลสอบแก้ตัว...',
+    'info'
+  );
 
   const { data, error } = await supabaseClient
     .from('grade_retest_requests')
@@ -9006,9 +9116,14 @@ async function cancelRetestSubmission(row){
     throw error;
   }
 
+  /*
+   * ป้องกันกรณีนายทะเบียนอนุมัติรายการ
+   * ในเวลาเดียวกับที่ครูกดยกเลิก
+   */
   if(!data?.id){
     throw new Error(
-      'ไม่สามารถยกเลิกการส่งได้ รายการอาจได้รับการอนุมัติหรือมีการเปลี่ยนสถานะแล้ว'
+      'ไม่สามารถยกเลิกการส่งได้ ' +
+      'รายการอาจได้รับการอนุมัติหรือมีการเปลี่ยนสถานะแล้ว'
     );
   }
 
