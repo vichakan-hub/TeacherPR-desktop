@@ -7294,7 +7294,49 @@
       </div>
     </div>
   </div>
+  <!-- ===== RETEST CANCEL SUBMISSION OVERLAY ===== -->
+<div id="retestCancelSubmissionOverlay" class="overlay">
+  <div class="overlay-card overlay-stop">
 
+    <div class="overlay-head">
+      <div class="overlay-icon">↩️</div>
+
+      <div>
+        <div class="overlay-title">
+          ยืนยันยกเลิกการส่ง
+        </div>
+
+        <p id="retestCancelSubmissionText" class="overlay-sub">
+          กรุณาตรวจสอบข้อมูลก่อนยืนยัน
+        </p>
+      </div>
+    </div>
+
+    <div id="retestCancelSubmissionStatus" class="status info"></div>
+
+    <div class="overlay-actions">
+      <button
+        id="retestCancelSubmissionCloseBtn"
+        class="btn-secondary"
+        type="button"
+      >
+        กลับ
+      </button>
+
+      <button
+        id="retestCancelSubmissionConfirmBtn"
+        class="btn-danger"
+        type="button"
+      >
+        ยืนยันยกเลิกการส่ง
+      </button>
+    </div>
+
+  </div>
+</div>
+<!-- ===== END RETEST CANCEL SUBMISSION OVERLAY ===== -->
+
+<div id="toastWrap" class="toast-wrap"></div>
   <div id="toastWrap" class="toast-wrap"></div>
   <div id="fpFloatingTooltip" class="fp-floating-tooltip hidden"></div>
 
@@ -8923,6 +8965,72 @@ function buildRetestRequestPayload(row, requestedGrade){
   };
 }
 
+async function cancelRetestSubmission(row){
+  if(!row?.retest_request_id){
+    throw new Error('ไม่พบรายการผลสอบแก้ตัวที่ต้องการยกเลิก');
+  }
+
+  if(row.retest_request_status !== 'pending_approval'){
+    throw new Error('ยกเลิกการส่งได้เฉพาะรายการที่อยู่ระหว่างรออนุมัติ');
+  }
+
+  const studentText = safeText(row.student_name, 'นักเรียน');
+  const subjectText = safeText(row.subject_name, 'รายวิชา');
+
+  const confirmed = window.confirm(
+    `ยืนยันยกเลิกการส่งผลสอบแก้ตัว\n\n` +
+    `นักเรียน: ${studentText}\n` +
+    `รายวิชา: ${subjectText}\n\n` +
+    `เมื่อยกเลิกแล้ว รายการจะกลับไปเป็นสถานะ “ยังไม่ส่งผล”`
+  );
+
+  if(!confirmed){
+    return false;
+  }
+
+  setStatus('retestStatus', 'กำลังยกเลิกการส่งผลสอบแก้ตัว...', 'info');
+
+  const { data, error } = await supabaseClient
+    .from('grade_retest_requests')
+    .update({
+      is_active: false,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', row.retest_request_id)
+    .eq('status', 'pending_approval')
+    .eq('is_active', true)
+    .select('id')
+    .maybeSingle();
+
+  if(error){
+    throw error;
+  }
+
+  if(!data?.id){
+    throw new Error(
+      'ไม่สามารถยกเลิกการส่งได้ รายการอาจได้รับการอนุมัติหรือมีการเปลี่ยนสถานะแล้ว'
+    );
+  }
+
+  state.retestEditingId = null;
+
+  showToast(
+    'ยกเลิกการส่งแล้ว',
+    'รายการกลับเป็นสถานะยังไม่ส่งผลเรียบร้อยแล้ว',
+    'success'
+  );
+
+  await loadRetestRows();
+
+  setStatus(
+    'retestStatus',
+    'ยกเลิกการส่งผลสอบแก้ตัวเรียบร้อยแล้ว',
+    'success'
+  );
+
+  return true;
+}
+
 async function saveRetestRequest(rowKey){
   try{
     const row = findRetestRowByKey(rowKey);
@@ -8935,13 +9043,22 @@ async function saveRetestRequest(rowKey){
       throw new Error('รายการนี้อนุมัติแล้ว ไม่สามารถแก้ไขได้');
     }
 
-    const selectedGrade = getRetestSelectedValue(rowKey);
+const selectedGrade = getRetestSelectedValue(rowKey);
 
-    if(!selectedGrade){
-      throw new Error('กรุณาเลือกผลการเรียนแก้ตัวก่อนกดส่งผล');
-    }
+if(!selectedGrade){
+  throw new Error('กรุณาเลือกผลการเรียนแก้ตัวก่อนกดส่งผล');
+}
 
-    const payload = buildRetestRequestPayload(row, selectedGrade);
+/*
+ * คำสั่งยกเลิกการส่งต้องแยกออกจากค่าเกรด
+ * ไม่ส่งเข้า buildRetestRequestPayload()
+ */
+if(selectedGrade === '__cancel_submission__'){
+  await cancelRetestSubmission(row);
+  return;
+}
+
+const payload = buildRetestRequestPayload(row, selectedGrade);
 
     setStatus('retestStatus', 'กำลังส่งผลสอบแก้ตัว...', 'info');
 
@@ -9039,16 +9156,37 @@ function renderRetestRows(rows){
     let retestGradeHtml = '';
 
 if(isEditing){
-  const defaultSelectedGrade = requestedGrade || (options.length === 1 ? options[0] : '');
+  const defaultSelectedGrade =
+    requestedGrade || (options.length === 1 ? options[0] : '');
+
+  const cancelSubmissionOption =
+    requestStatus === 'pending_approval'
+      ? `
+        <option disabled>────────────</option>
+        <option value="__cancel_submission__">
+          ยกเลิกการส่ง
+        </option>
+      `
+      : '';
 
   retestGradeHtml = `
-    <select class="retest-select" data-retest-select="${escapeHtml(rowKey)}">
+    <select
+      class="retest-select"
+      data-retest-select="${escapeHtml(rowKey)}"
+      data-retest-status="${escapeHtml(requestStatus)}"
+    >
       <option value="">เลือกผลแก้ตัว</option>
+
       ${options.map(opt => `
-        <option value="${escapeHtml(opt)}" ${defaultSelectedGrade === opt ? 'selected' : ''}>
+        <option
+          value="${escapeHtml(opt)}"
+          ${defaultSelectedGrade === opt ? 'selected' : ''}
+        >
           ${escapeHtml(opt)}
         </option>
       `).join('')}
+
+      ${cancelSubmissionOption}
     </select>
   `;
 }else{
@@ -9068,17 +9206,27 @@ if(isEditing){
           ${renderRetestStatusBadge('approved')}
         </div>
       `;
-    }else if(isEditing){
-      actionHtml = `
-        <div class="retest-action-wrap">
-          <button class="btn-success retest-mini-btn" type="button" data-retest-save="${escapeHtml(rowKey)}">
-            ส่งผล
-          </button>
-          <button class="btn-secondary retest-mini-btn" type="button" data-retest-cancel="${escapeHtml(rowKey)}">
-            ยกเลิก
-          </button>
-        </div>
-      `;
+}else if(isEditing){
+  actionHtml = `
+    <div class="retest-action-wrap">
+      <button
+        class="btn-success retest-mini-btn"
+        type="button"
+        data-retest-save="${escapeHtml(rowKey)}"
+        data-retest-action-button="${escapeHtml(rowKey)}"
+      >
+        ส่งผล
+      </button>
+
+      <button
+        class="btn-secondary retest-mini-btn"
+        type="button"
+        data-retest-cancel="${escapeHtml(rowKey)}"
+      >
+        ยกเลิก
+      </button>
+    </div>
+  `;
     }else if(canEdit && requestStatus === 'pending_approval'){
       actionHtml = `
         <div class="retest-action-wrap">
@@ -9142,7 +9290,57 @@ if(isEditing){
   bindRetestRowButtons();
 }
 
+function updateRetestActionButton(selectElement){
+  if(!selectElement) return;
+
+  const rowKey = String(
+    selectElement.dataset.retestSelect || ''
+  );
+
+  const selectedValue = String(
+    selectElement.value || ''
+  );
+
+  const saveButton = Array.from(
+    el('retestTbody').querySelectorAll('[data-retest-action-button]')
+  ).find(button =>
+    String(button.dataset.retestActionButton || '') === rowKey
+  );
+
+  if(!saveButton) return;
+
+  const isCancelSubmission =
+    selectedValue === '__cancel_submission__';
+
+  if(isCancelSubmission){
+    saveButton.textContent = 'ยืนยันยกเลิกการส่ง';
+    saveButton.classList.remove('btn-success');
+    saveButton.classList.add('btn-danger');
+  }else{
+    saveButton.textContent = 'ส่งผล';
+    saveButton.classList.remove('btn-danger');
+    saveButton.classList.add('btn-success');
+  }
+}
+
 function bindRetestRowButtons(){
+  el('retestTbody')
+  .querySelectorAll('[data-retest-select]')
+  .forEach(select => {
+
+    /*
+     * ตรวจค่าทันทีหลังสร้างตาราง
+     */
+    updateRetestActionButton(select);
+
+    /*
+     * เปลี่ยนปุ่มเมื่อเลือกค่าใหม่
+     */
+    select.addEventListener('change', () => {
+      updateRetestActionButton(select);
+    });
+  });
+  
   el('retestTbody').querySelectorAll('[data-retest-edit]').forEach(btn => {
     btn.addEventListener('click', () => {
       const rowKey = String(btn.dataset.retestEdit || '');
