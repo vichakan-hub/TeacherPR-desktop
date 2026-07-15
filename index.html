@@ -7555,10 +7555,11 @@ async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
 const state = {
   currentUser: null,
 
-  importSettings: null,
-  retestSettings: null,
-  adviserSettings: null,
-  gradeReportDefaultPage: 'midtermReport',
+importSettings: null,
+retestSettings: null,
+adviserSettings: null,
+adviserRetestSettings: null,
+gradeReportDefaultPage: 'midtermReport',
 
   groupedOfferings: [],
   selectedTeachingGroup: null,
@@ -8102,6 +8103,7 @@ const TEACHER_SETTING_KEYS = [
   'teacher_import_settings',
   'teacher_retest_settings',
   'teacher_adviser_settings',
+  'teacher_adviser_retest_settings',
   'teacher_free_period_settings',
   'teacher_grade_report_default_page'
 ];
@@ -8135,6 +8137,7 @@ function buildDefaultTeacherSettings(){
     import: { ...base },
     retest: { ...base },
     adviser: { ...base },
+    adviser_retest: { ...base },
     free_period: { ...base }
   };
 }
@@ -8253,29 +8256,50 @@ async function loadTeacherSettings(){
     }
   }
 
-  const settings = {
-    import: normalizeSettingObject(
-      map.teacher_import_settings,
-      defaults.import
-    ),
-    retest: normalizeSettingObject(
-      map.teacher_retest_settings,
-      defaults.retest
-    ),
-    adviser: normalizeSettingObject(
-      map.teacher_adviser_settings || map.teacher_retest_settings,
-      defaults.adviser
-    ),
-    free_period: normalizeSettingObject(
-      map.teacher_free_period_settings,
-      defaults.free_period
-    )
-  };
+const settings = {
+  import: normalizeSettingObject(
+    map.teacher_import_settings,
+    defaults.import
+  ),
 
-  state.importSettings = settings.import;
-  state.retestSettings = settings.retest;
-  state.adviserSettings = settings.adviser;
-  state.freePeriodSettings = settings.free_period;
+  retest: normalizeSettingObject(
+    map.teacher_retest_settings,
+    defaults.retest
+  ),
+
+  adviser: normalizeSettingObject(
+    map.teacher_adviser_settings ||
+    map.teacher_retest_settings,
+    defaults.adviser
+  ),
+
+  adviser_retest: normalizeSettingObject(
+    map.teacher_adviser_retest_settings ||
+    map.teacher_adviser_settings ||
+    map.teacher_retest_settings,
+    defaults.adviser_retest
+  ),
+
+  free_period: normalizeSettingObject(
+    map.teacher_free_period_settings,
+    defaults.free_period
+  )
+};
+
+state.importSettings =
+  settings.import;
+
+state.retestSettings =
+  settings.retest;
+
+state.adviserSettings =
+  settings.adviser;
+
+state.adviserRetestSettings =
+  settings.adviser_retest;
+
+state.freePeriodSettings =
+  settings.free_period;
 
   state.gradeReportDefaultPage = normalizeGradeReportDefaultPage(
   map.teacher_grade_report_default_page
@@ -8404,13 +8428,15 @@ function applyTeacherSettingsToPage(settings){
     allowAllTermText: ''
   });
 
-  applySettingToYearTermControls({
-  setting: settings.adviser,
+applySettingToYearTermControls({
+  setting: settings.adviser_retest,
   yearId: 'adviserRetestYear',
   termId: 'adviserRetestTerm',
   statusId: 'adviserRetestStatus',
+
   lockedMessage: s =>
-    `ล็อคข้อมูลติดตามสอบแก้ตัว ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+    `ล็อคข้อมูลติดตามการสอบแก้ตัว ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+
   allowAllYearText: '',
   allowAllTermText: ''
 });
@@ -16574,18 +16600,10 @@ bindIfExists(
   async () => {
     setActivePage('adviserretest');
 
-    if(!state.adviserSettings){
+    if(!state.adviserRetestSettings){
       await loadImportSettingsFromSheet();
     }
 
-    /*
-     * โหลดทุกปีที่ครูเคยเป็นที่ปรึกษา
-     */
-    await loadAdviserRetestYearOptions();
-
-    /*
-     * จากนั้นโหลดห้องตามปีและเทอมที่เลือก
-     */
     await loadAdviserRetestRooms();
   }
 );
