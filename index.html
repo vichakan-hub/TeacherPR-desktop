@@ -16568,15 +16568,27 @@ bindIfExists('menuAdviserBtn', 'click', async () => {
   await loadAdviserRooms();
 });
 
-  bindIfExists('menuAdviserRetestBtn', 'click', async () => {
-  setActivePage('adviserretest');
+bindIfExists(
+  'menuAdviserRetestBtn',
+  'click',
+  async () => {
+    setActivePage('adviserretest');
 
-  if(!state.adviserSettings){
-    await loadImportSettingsFromSheet();
+    if(!state.adviserSettings){
+      await loadImportSettingsFromSheet();
+    }
+
+    /*
+     * โหลดทุกปีที่ครูเคยเป็นที่ปรึกษา
+     */
+    await loadAdviserRetestYearOptions();
+
+    /*
+     * จากนั้นโหลดห้องตามปีและเทอมที่เลือก
+     */
+    await loadAdviserRetestRooms();
   }
-
-  await loadAdviserRetestRooms();
-});
+);
 
   bindIfExists('menuRetestBtn', 'click', async () => {
     setActivePage('retest');
@@ -17184,6 +17196,121 @@ bindIfExists(
   }
 );
   
+}
+
+  async function loadAdviserRetestYearOptions(){
+  const select = el('adviserRetestYear');
+
+  if(!select){
+    return;
+  }
+
+  try{
+    if(!state.currentUser?.id){
+      select.innerHTML = `
+        <option value="">
+          ไม่พบข้อมูลครู
+        </option>
+      `;
+      return;
+    }
+
+    const oldValue = safeText(
+      select.value,
+      ''
+    );
+
+    const { data, error } = await supabaseClient
+      .from('teacher_advisers')
+      .select('academic_year')
+      .eq(
+        'teacher_id',
+        state.currentUser.id
+      )
+      .order(
+        'academic_year',
+        { ascending: false }
+      );
+
+    if(error){
+      throw error;
+    }
+
+    const years = [
+      ...new Set(
+        (data || [])
+          .map(row =>
+            safeNum(row.academic_year)
+          )
+          .filter(year =>
+            year !== null &&
+            year >= 2500
+          )
+      )
+    ].sort((a, b) => b - a);
+
+    /*
+     * หากไม่พบประวัติ ให้ใช้ปีปัจจุบัน
+     */
+    if(!years.length){
+      years.push(
+        getCurrentAcademicYear()
+      );
+    }
+
+    select.innerHTML = years
+      .map(year => `
+        <option value="${year}">
+          ${year}
+        </option>
+      `)
+      .join('');
+
+    const adviserDefaultYear = safeNum(
+      state.adviserSettings?.academic_year
+    );
+
+    if(
+      oldValue &&
+      years.includes(Number(oldValue))
+    ){
+      select.value = oldValue;
+    }
+    else if(
+      adviserDefaultYear &&
+      years.includes(adviserDefaultYear)
+    ){
+      select.value =
+        String(adviserDefaultYear);
+    }
+    else{
+      select.value =
+        String(years[0]);
+    }
+
+    /*
+     * เมนูติดตามเป็นหน้าดูข้อมูลย้อนหลัง
+     * จึงไม่ควรล็อกปีตาม app_settings
+     */
+    select.disabled = false;
+
+  }catch(error){
+    console.error(
+      'loadAdviserRetestYearOptions ERROR',
+      error
+    );
+
+    const fallbackYear =
+      getCurrentAcademicYear();
+
+    select.innerHTML = `
+      <option value="${fallbackYear}">
+        ${fallbackYear}
+      </option>
+    `;
+
+    select.disabled = false;
+  }
 }
 
     async function loadAdviserRetestRooms(){
