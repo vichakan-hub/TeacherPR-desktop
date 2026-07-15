@@ -5871,24 +5871,397 @@
   }
 }
 
+/* =====================================================
+   TEACHERPR BRAND — SIDEBAR
+   ===================================================== */
+
+.sidebar-brand{
+  align-items:center !important;
+  gap:12px !important;
+}
+
+/* กรอบโลโก้โรงเรียน */
+.sidebar-school-logo-box{
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:3px;
+  border-radius:999px;
+  overflow:hidden;
+
+  background:#ffffff;
+  border:1px solid rgba(37,99,235,.14);
+
+  box-shadow:
+    0 6px 16px rgba(37,99,235,.12),
+    inset 0 0 0 2px rgba(255,255,255,.85);
+}
+
+/* รูปตราโรงเรียน */
+.sidebar-school-logo{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:999px;
+}
+
+/* TeacherPR */
+.sidebar-brand-title.brand-wordmark{
+  display:flex;
+  align-items:baseline;
+  gap:0;
+
+  font-size:20px !important;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.45px;
+
+  overflow:visible;
+  text-overflow:clip;
+}
+
+/* Teacher บน Sidebar พื้นสีอ่อน */
+.sidebar-brand-title .brand-teacher{
+  color:#17263c;
+}
+
+/* ตัว P สีฟ้า */
+.sidebar-brand-title .brand-p{
+  color:#38bdf8;
+}
+
+/* ตัว R สีชมพู */
+.sidebar-brand-title .brand-r{
+  color:#f472b6;
+}
+
+/* ข้อความรอง */
+.sidebar-brand-sub{
+  margin-top:5px !important;
+  color:#6b7a90;
+  font-size:12px !important;
+  font-weight:600;
+  line-height:1.25;
+}
+
+/* เมื่อย่อ Sidebar ให้เหลือเฉพาะตราโรงเรียน */
+.app-shell.sidebar-collapsed
+.sidebar-school-logo-box{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+}
+
+.app-shell.sidebar-collapsed
+.sidebar-brand{
+  justify-content:center;
+}
+
+/* =====================================================
+   TEACHERPR BRAND — LOGIN
+   ===================================================== */
+
+.login-brand-hero{
+  padding:28px 32px;
+  overflow:hidden;
+  position:relative;
+}
+
+/* ลวดลายแสงพื้นหลัง */
+.login-brand-hero::before{
+  content:'';
+  position:absolute;
+  width:320px;
+  height:320px;
+  right:-110px;
+  top:-160px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  pointer-events:none;
+}
+
+.login-brand-hero::after{
+  content:'';
+  position:absolute;
+  width:220px;
+  height:220px;
+  left:42%;
+  bottom:-170px;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+  pointer-events:none;
+}
+
+.login-brand-layout{
+  position:relative;
+  z-index:1;
+  align-items:center;
+}
+
+.login-brand-main{
+  display:flex;
+  align-items:center;
+  gap:22px;
+  min-width:0;
+}
+
+/* วงกลมโลโก้ */
+.login-school-logo-box{
+  width:104px;
+  height:104px;
+  flex:0 0 104px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:7px;
+  border-radius:999px;
+  overflow:hidden;
+
+  background:#ffffff;
+  border:1px solid rgba(255,255,255,.75);
+
+  box-shadow:
+    0 14px 30px rgba(15,23,42,.18),
+    inset 0 0 0 3px rgba(255,255,255,.72);
+}
+
+.login-school-logo{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:999px;
+}
+
+.login-brand-copy{
+  min-width:0;
+}
+
+/* เขียนทับ .hero h1 เดิม */
+.login-brand-hero .login-brand-wordmark{
+  display:flex;
+  align-items:baseline;
+  gap:0;
+
+  margin:0;
+  padding:0;
+
+  font-size:48px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-1.4px;
+
+  color:#ffffff;
+}
+
+/* Teacher สีขาว */
+.login-brand-teacher{
+  color:#ffffff;
+}
+
+/* P สีฟ้า */
+.login-brand-p{
+  color:#38bdf8;
+}
+
+/* R สีชมพู */
+.login-brand-r{
+  color:#f472b6;
+}
+
+/* ชื่อระบบ */
+.login-brand-hero .login-brand-system{
+  margin:13px 0 0;
+
+  color:#ffffff;
+  font-size:20px;
+  font-weight:800;
+  line-height:1.35;
+
+  opacity:1;
+}
+
+/* ชื่อโรงเรียน */
+.login-brand-school{
+  margin-top:5px;
+
+  color:rgba(255,255,255,.90);
+  font-size:15px;
+  font-weight:600;
+  line-height:1.45;
+}
+
+/* กล่องฝ่ายวิชาการ */
+.login-brand-department{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  min-width:250px;
+  padding:16px 18px;
+
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.10);
+  backdrop-filter:blur(8px);
+}
+
+.login-brand-department-icon{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:14px;
+  background:rgba(255,255,255,.16);
+
+  font-size:21px;
+}
+
+.login-brand-department .hero-side-title{
+  font-size:12px;
+  font-weight:700;
+}
+
+.login-brand-department .hero-side-main{
+  margin-top:3px;
+  font-size:18px;
+  font-weight:800;
+}
+
+
+/* จอขนาดกลาง */
+@media (max-width:900px){
+
+  .login-brand-layout{
+    align-items:stretch;
+  }
+
+  .login-brand-main{
+    width:100%;
+  }
+
+  .login-brand-department{
+    width:100%;
+    min-width:0;
+  }
+}
+
+
+/* มือถือ */
+@media (max-width:640px){
+
+  .login-brand-hero{
+    padding:24px 20px;
+  }
+
+  .login-brand-layout{
+    gap:20px;
+  }
+
+  .login-brand-main{
+    flex-direction:column;
+    text-align:center;
+    gap:15px;
+  }
+
+  .login-school-logo-box{
+    width:94px;
+    height:94px;
+    flex-basis:94px;
+  }
+
+  .login-brand-hero .login-brand-wordmark{
+    justify-content:center;
+    font-size:40px;
+    letter-spacing:-1px;
+  }
+
+  .login-brand-hero .login-brand-system{
+    margin-top:10px;
+    font-size:18px;
+  }
+
+  .login-brand-school{
+    font-size:13px;
+  }
+
+  .login-brand-department{
+    justify-content:center;
+    text-align:left;
+  }
+}
+
 </style>
 </head>
 <body>
   <div id="loginView" class="login-screen">
     <div class="login-shell">
-      <section class="hero">
-        <div class="hero-top">
-          <div>
-            <div class="badge-school">🏫 โรงเรียนท่าใหม่“พูลสวัสดิ์ราษฎร์นุกูล”</div>
-            <h1>TeacherPR</h1>
-            <p>ระบบงานวิชาการสำหรับครู</p>
-          </div>
-          <div class="hero-side">
-            <div class="hero-side-title">ฝ่ายวิชาการ</div>
-            <div class="hero-side-main">งานทะเบียน–วัดผล</div>
-          </div>
+<section class="hero login-brand-hero">
+  <div class="hero-top login-brand-layout">
+
+    <div class="login-brand-main">
+
+      <div class="login-school-logo-box">
+        <img
+          class="login-school-logo"
+          src="./assets/school-logo.png"
+          alt="ตราโรงเรียนท่าใหม่ พูลสวัสดิ์ราษฎร์นุกูล"
+          loading="eager"
+        >
+      </div>
+
+      <div class="login-brand-copy">
+
+        <h1
+          class="login-brand-wordmark"
+          aria-label="TeacherPR"
+        >
+          <span class="login-brand-teacher">Teacher</span><span class="login-brand-p">P</span><span class="login-brand-r">R</span>
+        </h1>
+
+        <p class="login-brand-system">
+          ระบบงานวิชาการสำหรับครู
+        </p>
+
+        <div class="login-brand-school">
+          โรงเรียนท่าใหม่ “พูลสวัสดิ์ราษฎร์นุกูล”
         </div>
-      </section>
+
+      </div>
+    </div>
+
+
+    <div class="hero-side login-brand-department">
+
+      <div class="login-brand-department-icon">
+        🏫
+      </div>
+
+      <div>
+        <div class="hero-side-title">
+          ฝ่ายบริหารงานวิชาการ
+        </div>
+
+        <div class="hero-side-main">
+          งานทะเบียน–วัดผล
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
 
       <div class="login-grid">
         <section class="login-card">
@@ -5947,13 +6320,33 @@
   <div id="appShell" class="app-shell">
 
     <aside id="appSidebar" class="app-sidebar">
-      <div class="sidebar-brand">
-        <div class="sidebar-logo">ทม</div>
-        <div class="sidebar-brand-text">
-          <div class="sidebar-brand-title">TeacherPR</div>
-          <div class="sidebar-brand-sub">ระบบงานวิชาการสำหรับครู</div>
-        </div>
-      </div>
+<div class="sidebar-brand">
+
+  <div class="sidebar-school-logo-box">
+    <img
+      class="sidebar-school-logo"
+      src="./assets/school-logo.png"
+      alt="ตราโรงเรียนท่าใหม่ พูลสวัสดิ์ราษฎร์นุกูล"
+      loading="eager"
+    >
+  </div>
+
+  <div class="sidebar-brand-text">
+    <div
+      class="sidebar-brand-title brand-wordmark"
+      aria-label="TeacherPR"
+    >
+      <span class="brand-teacher">
+        Teacher
+      </span><span class="brand-p">P</span><span class="brand-r">R</span>
+    </div>
+
+    <div class="sidebar-brand-sub">
+      ระบบงานวิชาการสำหรับครู
+    </div>
+  </div>
+
+</div>
 
 <button
   id="sidebarUserSettingsBtn"
@@ -14498,6 +14891,9 @@ function fpBuildReservationPrintHtml(rows){
   margin-top:8px;
 }
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.no-print{display:none!important;}}
+
+
+    
   </style>
 </head>
 <body>
