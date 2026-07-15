@@ -6519,7 +6519,7 @@
       <div class="field">
         <span class="label-in-form">รายวิชา</span>
         <select id="gradeStatsSubject" class="std">
-          <option value="">-กรุณาเลือก-</option>
+          <option value="">--กรุณาเลือก--</option>
         </select>
       </div>
 
@@ -19094,7 +19094,7 @@ function renderTeacherGradeStatsSubjectOptions(){
   if(!select) return;
 
   select.innerHTML = `
-    <option value="">-กรุณาเลือก-</option>
+    <option value="">--กรุณาเลือก--</option>
     ${subjects.map(s => {
       const code = safeText(s.subject_code, '');
       const name = safeText(s.subject_name, '-');
