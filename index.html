@@ -3049,6 +3049,87 @@
   text-overflow:ellipsis;
 }
 
+/* ===== Sidebar User Settings ===== */
+.sidebar-user-settings-btn{
+  width:100%;
+  height:auto;
+  min-height:60px;
+  padding:9px 10px !important;
+  font-family:inherit;
+  text-align:left;
+  cursor:pointer;
+  appearance:none;
+  position:relative;
+  transition:
+    background .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease,
+    transform .16s ease;
+}
+
+.sidebar-user-settings-btn:hover{
+  background:#eef4ff;
+  border-color:#b9cff5;
+  box-shadow:0 8px 18px rgba(37,99,235,.10);
+  transform:translateY(-1px);
+}
+
+.sidebar-user-settings-btn:focus-visible{
+  outline:none;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 4px rgba(37,99,235,.14);
+}
+
+.sidebar-user-settings-btn .sidebar-user-text{
+  display:block;
+  flex:1;
+  min-width:0;
+}
+
+.sidebar-user-settings-btn .sidebar-user-name,
+.sidebar-user-settings-btn .sidebar-user-code{
+  display:block;
+}
+
+.sidebar-user-settings-icon{
+  width:32px;
+  height:32px;
+  margin-left:auto;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  background:#e8f1ff;
+  color:#1d4ed8;
+  font-size:17px;
+  transition:
+    transform .18s ease,
+    background .18s ease;
+}
+
+.sidebar-user-settings-btn:hover
+.sidebar-user-settings-icon{
+  background:#dbeafe;
+  transform:rotate(20deg);
+}
+
+/*
+ * เมื่อย่อ Sidebar ให้เหลือเฉพาะรูปครู
+ * ป้องกันรูปเฟืองเบียดพื้นที่
+ */
+.app-shell.sidebar-collapsed
+.sidebar-user-settings-icon{
+  display:none;
+}
+
+.app-shell.sidebar-collapsed
+.sidebar-user-settings-btn{
+  justify-content:center;
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
 .sidebar-nav{
   display:flex;
   flex-direction:column;
@@ -5543,6 +5624,253 @@
   background:#ea580c;
 }
 
+/* =====================================================
+   CHANGE TEACHER PASSWORD
+   ===================================================== */
+
+#changePasswordOverlay{
+  z-index:9998;
+}
+
+.change-password-card{
+  width:min(520px, 100%);
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  padding:24px;
+  border-radius:26px;
+}
+
+.change-password-head{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.change-password-icon{
+  width:52px;
+  height:52px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  background:#e8f1ff;
+  color:#1d4ed8;
+  font-size:25px;
+}
+
+.change-password-heading{
+  min-width:0;
+  flex:1;
+}
+
+.change-password-heading h2{
+  margin:0;
+  color:#17263c;
+  font-size:23px;
+  font-weight:900;
+  line-height:1.25;
+}
+
+.change-password-subtitle{
+  margin-top:5px;
+  color:#6b7a90;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.change-password-close-btn{
+  width:38px;
+  height:38px;
+  padding:0;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  background:#eef3f8;
+  color:#41536c;
+  font-size:25px;
+  line-height:1;
+}
+
+.change-password-close-btn:hover{
+  background:#fff0ef;
+  color:#d92d20;
+}
+
+.change-password-user-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+  padding:13px 15px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+.change-password-user-avatar{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  background:#dbeafe;
+  font-size:22px;
+}
+
+.change-password-user-info{
+  min-width:0;
+}
+
+.change-password-user-name{
+  color:#17263c;
+  font-size:15px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.change-password-user-code{
+  margin-top:2px;
+  color:#6b7a90;
+  font-size:12px;
+  font-weight:700;
+}
+
+.change-password-field{
+  margin-bottom:14px;
+}
+
+.change-password-field label{
+  display:block;
+  margin-bottom:7px;
+  color:#41536c;
+  font-size:14px;
+  font-weight:800;
+}
+
+.change-password-input-wrap{
+  position:relative;
+}
+
+.change-password-input-wrap input{
+  width:100%;
+  height:50px;
+  padding:0 48px 0 46px;
+  border:1px solid #c8d6e4;
+  border-radius:15px;
+  background:#fff;
+  color:#17263c;
+  font-family:inherit;
+  font-size:15px;
+  outline:none;
+}
+
+.change-password-input-wrap input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+.change-password-input-wrap input.invalid{
+  border-color:#d92d20;
+  background:#fff8f8;
+  box-shadow:0 0 0 4px rgba(217,45,32,.08);
+}
+
+.change-password-input-icon{
+  position:absolute;
+  left:15px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  font-size:18px;
+}
+
+.change-password-eye-btn{
+  position:absolute;
+  right:7px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:38px;
+  padding:0;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  font-size:17px;
+}
+
+.change-password-eye-btn:hover{
+  background:#eef4ff;
+}
+
+.change-password-rule-box{
+  margin-top:4px;
+  padding:12px 14px;
+  border:1px solid #ffe0aa;
+  border-radius:15px;
+  background:#fff7ea;
+}
+
+.change-password-rule-title{
+  color:#8a5800;
+  font-size:13px;
+  font-weight:900;
+}
+
+.change-password-rule-text{
+  margin-top:3px;
+  color:#9a6700;
+  font-size:12px;
+  line-height:1.55;
+}
+
+.change-password-status{
+  min-height:24px;
+  margin-top:12px;
+}
+
+.change-password-actions{
+  display:grid;
+  grid-template-columns:140px 1fr;
+  gap:10px;
+  margin-top:16px;
+}
+
+.change-password-actions button{
+  width:100%;
+  height:46px;
+  border-radius:14px;
+  font-weight:800;
+}
+
+.change-password-actions button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+@media (max-width:560px){
+  .change-password-card{
+    padding:18px;
+  }
+
+  .change-password-actions{
+    grid-template-columns:1fr;
+  }
+
+  .change-password-actions button{
+    width:100%;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5627,13 +5955,40 @@
         </div>
       </div>
 
-      <div class="sidebar-user">
-        <div class="sidebar-user-icon">👨‍🏫</div>
-        <div class="sidebar-user-text">
-          <div id="sidebarUserName" class="sidebar-user-name">ครูผู้สอน</div>
-          <div id="sidebarUserCode" class="sidebar-user-code">Teacher</div>
-        </div>
-      </div>
+<button
+  id="sidebarUserSettingsBtn"
+  class="sidebar-user sidebar-user-settings-btn"
+  type="button"
+  title="ตั้งค่าบัญชีและเปลี่ยนรหัสผ่าน"
+  aria-label="ตั้งค่าบัญชีและเปลี่ยนรหัสผ่าน"
+>
+  <span class="sidebar-user-icon">
+    👨‍🏫
+  </span>
+
+  <span class="sidebar-user-text">
+    <span
+      id="sidebarUserName"
+      class="sidebar-user-name"
+    >
+      ครูผู้สอน
+    </span>
+
+    <span
+      id="sidebarUserCode"
+      class="sidebar-user-code"
+    >
+      Teacher
+    </span>
+  </span>
+
+  <span
+    class="sidebar-user-settings-icon"
+    aria-hidden="true"
+  >
+    ⚙️
+  </span>
+</button>
 
       <nav class="sidebar-nav">
   <button id="menuHomeBtn" class="sidebar-link active" type="button" data-side-page="home">
@@ -7519,6 +7874,200 @@
 </div>
       </div>
     </main>
+  </div>
+</div>
+
+  <!-- CHANGE TEACHER PASSWORD OVERLAY -->
+<div
+  id="changePasswordOverlay"
+  class="overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="changePasswordTitle"
+>
+  <div class="overlay-card change-password-card">
+
+    <div class="change-password-head">
+      <div class="change-password-icon">
+        ⚙️
+      </div>
+
+      <div class="change-password-heading">
+        <h2 id="changePasswordTitle">
+          เปลี่ยนรหัสผ่าน
+        </h2>
+
+        <div class="change-password-subtitle">
+          เปลี่ยนรหัสผ่านสำหรับบัญชีครูผู้ใช้งานปัจจุบัน
+        </div>
+      </div>
+
+      <button
+        id="closeChangePasswordBtnTop"
+        class="change-password-close-btn"
+        type="button"
+        aria-label="ปิดหน้าต่าง"
+        title="ปิด"
+      >
+        ×
+      </button>
+    </div>
+
+
+    <div class="change-password-user-card">
+      <div class="change-password-user-avatar">
+        👨‍🏫
+      </div>
+
+      <div class="change-password-user-info">
+        <div
+          id="changePasswordTeacherName"
+          class="change-password-user-name"
+        >
+          ครูผู้สอน
+        </div>
+
+        <div
+          id="changePasswordTeacherCode"
+          class="change-password-user-code"
+        >
+          Teacher
+        </div>
+      </div>
+    </div>
+
+
+    <form
+      id="changePasswordForm"
+      autocomplete="off"
+    >
+
+      <div class="change-password-field">
+        <label for="changePasswordCurrent">
+          รหัสผ่านปัจจุบัน
+        </label>
+
+        <div class="change-password-input-wrap">
+          <span class="change-password-input-icon">
+            🔒
+          </span>
+
+          <input
+            id="changePasswordCurrent"
+            type="password"
+            autocomplete="current-password"
+            placeholder="กรอกรหัสผ่านปัจจุบัน"
+          >
+
+          <button
+            class="change-password-eye-btn"
+            type="button"
+            data-password-toggle-target="changePasswordCurrent"
+            aria-label="แสดงหรือซ่อนรหัสผ่านปัจจุบัน"
+            title="แสดงหรือซ่อนรหัสผ่าน"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+
+      <div class="change-password-field">
+        <label for="changePasswordNew">
+          รหัสผ่านใหม่
+        </label>
+
+        <div class="change-password-input-wrap">
+          <span class="change-password-input-icon">
+            🔑
+          </span>
+
+          <input
+            id="changePasswordNew"
+            type="password"
+            autocomplete="new-password"
+            placeholder="กรอกรหัสผ่านใหม่"
+          >
+
+          <button
+            class="change-password-eye-btn"
+            type="button"
+            data-password-toggle-target="changePasswordNew"
+            aria-label="แสดงหรือซ่อนรหัสผ่านใหม่"
+            title="แสดงหรือซ่อนรหัสผ่าน"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+
+      <div class="change-password-field">
+        <label for="changePasswordConfirm">
+          ยืนยันรหัสผ่านใหม่
+        </label>
+
+        <div class="change-password-input-wrap">
+          <span class="change-password-input-icon">
+            ✅
+          </span>
+
+          <input
+            id="changePasswordConfirm"
+            type="password"
+            autocomplete="new-password"
+            placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
+          >
+
+          <button
+            class="change-password-eye-btn"
+            type="button"
+            data-password-toggle-target="changePasswordConfirm"
+            aria-label="แสดงหรือซ่อนการยืนยันรหัสผ่าน"
+            title="แสดงหรือซ่อนรหัสผ่าน"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+
+      <div class="change-password-rule-box">
+        <div class="change-password-rule-title">
+          เงื่อนไขรหัสผ่าน
+        </div>
+
+        <div class="change-password-rule-text">
+          รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร และต้องไม่ตรงกับรหัสผ่านเดิม
+        </div>
+      </div>
+
+
+      <div
+        id="changePasswordStatus"
+        class="status info change-password-status"
+      ></div>
+
+
+      <div class="change-password-actions">
+        <button
+          id="cancelChangePasswordBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ยกเลิก
+        </button>
+
+        <button
+          id="saveChangePasswordBtn"
+          class="btn-primary"
+          type="submit"
+        >
+          🔐 บันทึกรหัสผ่านใหม่
+        </button>
+      </div>
+
+    </form>
   </div>
 </div>
 
@@ -16756,6 +17305,419 @@ function guardMidtermUnsaved(actionLabel, onProceed){
 
   return false;
 }
+
+    function clearChangePasswordValidation(){
+  [
+    'changePasswordCurrent',
+    'changePasswordNew',
+    'changePasswordConfirm'
+  ].forEach(id => {
+    el(id)?.classList.remove('invalid');
+  });
+}
+
+
+function resetChangePasswordForm(){
+  const form = el('changePasswordForm');
+
+  if(form){
+    form.reset();
+  }
+
+  clearChangePasswordValidation();
+
+  [
+    'changePasswordCurrent',
+    'changePasswordNew',
+    'changePasswordConfirm'
+  ].forEach(id => {
+    const input = el(id);
+
+    if(input){
+      input.type = 'password';
+    }
+  });
+
+  document
+    .querySelectorAll(
+      '#changePasswordOverlay [data-password-toggle-target]'
+    )
+    .forEach(button => {
+      button.textContent = '👁️';
+    });
+
+  setStatus(
+    'changePasswordStatus',
+    '',
+    'info'
+  );
+
+  const saveButton =
+    el('saveChangePasswordBtn');
+
+  if(saveButton){
+    saveButton.disabled = false;
+    saveButton.innerHTML =
+      '🔐 บันทึกรหัสผ่านใหม่';
+  }
+}
+
+
+function openChangePasswordOverlay(){
+  if(!state.currentUser){
+    showToast(
+      'ไม่พบข้อมูลผู้ใช้งาน',
+      'กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
+      'error'
+    );
+
+    return;
+  }
+
+  resetChangePasswordForm();
+
+  if(el('changePasswordTeacherName')){
+    el(
+      'changePasswordTeacherName'
+    ).textContent =
+      safeText(
+        state.currentUser.full_name,
+        'ครูผู้สอน'
+      );
+  }
+
+  if(el('changePasswordTeacherCode')){
+    el(
+      'changePasswordTeacherCode'
+    ).textContent =
+      safeText(
+        state.currentUser.teacher_code,
+        '-'
+      );
+  }
+
+  const overlay =
+    el('changePasswordOverlay');
+
+  overlay?.classList.add('show');
+
+  document.body.style.overflow =
+    'hidden';
+
+  window.setTimeout(() => {
+    el('changePasswordCurrent')?.focus();
+  }, 100);
+}
+
+
+function closeChangePasswordOverlay(){
+  const overlay =
+    el('changePasswordOverlay');
+
+  overlay?.classList.remove('show');
+
+  document.body.style.overflow = '';
+
+  resetChangePasswordForm();
+}
+
+
+function toggleChangePasswordInput(button){
+  const targetId = safeText(
+    button?.dataset?.passwordToggleTarget,
+    ''
+  );
+
+  if(!targetId){
+    return;
+  }
+
+  const input = el(targetId);
+
+  if(!input){
+    return;
+  }
+
+  const isPassword =
+    input.type === 'password';
+
+  input.type = isPassword
+    ? 'text'
+    : 'password';
+
+  button.textContent = isPassword
+    ? '🙈'
+    : '👁️';
+}
+
+
+function validateChangePasswordForm(){
+  clearChangePasswordValidation();
+
+  const currentPassword = String(
+    el('changePasswordCurrent')?.value || ''
+  ).trim();
+
+  const newPassword = String(
+    el('changePasswordNew')?.value || ''
+  ).trim();
+
+  const confirmPassword = String(
+    el('changePasswordConfirm')?.value || ''
+  ).trim();
+
+  if(!currentPassword){
+    el('changePasswordCurrent')
+      ?.classList.add('invalid');
+
+    el('changePasswordCurrent')?.focus();
+
+    throw new Error(
+      'กรุณากรอกรหัสผ่านปัจจุบัน'
+    );
+  }
+
+  if(!newPassword){
+    el('changePasswordNew')
+      ?.classList.add('invalid');
+
+    el('changePasswordNew')?.focus();
+
+    throw new Error(
+      'กรุณากรอกรหัสผ่านใหม่'
+    );
+  }
+
+  if(newPassword.length < 6){
+    el('changePasswordNew')
+      ?.classList.add('invalid');
+
+    el('changePasswordNew')?.focus();
+
+    throw new Error(
+      'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร'
+    );
+  }
+
+  if(newPassword.length > 64){
+    el('changePasswordNew')
+      ?.classList.add('invalid');
+
+    el('changePasswordNew')?.focus();
+
+    throw new Error(
+      'รหัสผ่านใหม่ต้องไม่เกิน 64 ตัวอักษร'
+    );
+  }
+
+  if(newPassword === currentPassword){
+    el('changePasswordNew')
+      ?.classList.add('invalid');
+
+    el('changePasswordNew')?.focus();
+
+    throw new Error(
+      'รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านปัจจุบัน'
+    );
+  }
+
+  if(!confirmPassword){
+    el('changePasswordConfirm')
+      ?.classList.add('invalid');
+
+    el('changePasswordConfirm')?.focus();
+
+    throw new Error(
+      'กรุณายืนยันรหัสผ่านใหม่'
+    );
+  }
+
+  if(newPassword !== confirmPassword){
+    el('changePasswordNew')
+      ?.classList.add('invalid');
+
+    el('changePasswordConfirm')
+      ?.classList.add('invalid');
+
+    el('changePasswordConfirm')?.focus();
+
+    throw new Error(
+      'รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน'
+    );
+  }
+
+  const teacherCode = normalizeTeacherCode(
+    state.currentUser?.teacher_code
+  );
+
+  if(!teacherCode){
+    throw new Error(
+      'ไม่พบรหัสครูผู้ใช้งาน'
+    );
+  }
+
+  return {
+    teacherCode,
+    currentPassword,
+    newPassword
+  };
+}
+
+
+function normalizeChangePasswordResponse(data){
+  const result = Array.isArray(data)
+    ? data[0]
+    : data;
+
+  if(result === true){
+    return {
+      ok: true,
+      message: 'เปลี่ยนรหัสผ่านสำเร็จ'
+    };
+  }
+
+  if(!result){
+    return {
+      ok: false,
+      message: 'ไม่ได้รับผลลัพธ์จากระบบ'
+    };
+  }
+
+  if(
+    result.ok === true ||
+    result.success === true
+  ){
+    return {
+      ok: true,
+      message:
+        result.message ||
+        'เปลี่ยนรหัสผ่านสำเร็จ'
+    };
+  }
+
+  return {
+    ok: false,
+    message:
+      result.message ||
+      result.error ||
+      'เปลี่ยนรหัสผ่านไม่สำเร็จ'
+  };
+}
+
+
+async function submitChangePassword(event){
+  event?.preventDefault();
+
+  const saveButton =
+    el('saveChangePasswordBtn');
+
+  try{
+    const {
+      teacherCode,
+      currentPassword,
+      newPassword
+    } = validateChangePasswordForm();
+
+    if(saveButton){
+      saveButton.disabled = true;
+      saveButton.innerHTML =
+        '⏳ กำลังบันทึก...';
+    }
+
+    setStatus(
+      'changePasswordStatus',
+      'กำลังตรวจสอบรหัสผ่านปัจจุบันและบันทึกรหัสผ่านใหม่...',
+      'info'
+    );
+
+    /*
+     * ฟังก์ชันนี้จะสร้างใน Supabase
+     * ในจุดถัดไป
+     */
+    const { data, error } =
+      await supabaseClient.rpc(
+        'change_teacher_password',
+        {
+          p_teacher_code:
+            teacherCode,
+
+          p_current_password:
+            currentPassword,
+
+          p_new_password:
+            newPassword
+        }
+      );
+
+    if(error){
+      throw error;
+    }
+
+    const result =
+      normalizeChangePasswordResponse(
+        data
+      );
+
+    if(!result.ok){
+      throw new Error(
+        result.message
+      );
+    }
+
+    setStatus(
+      'changePasswordStatus',
+      result.message,
+      'success'
+    );
+
+    showToast(
+      'เปลี่ยนรหัสผ่านสำเร็จ',
+      'กรุณาเข้าสู่ระบบใหม่ด้วยรหัสผ่านใหม่',
+      'success'
+    );
+
+    if(saveButton){
+      saveButton.disabled = true;
+      saveButton.innerHTML =
+        '✅ เปลี่ยนรหัสผ่านแล้ว';
+    }
+
+    /*
+     * ออกจากระบบเพื่อป้องกันการใช้
+     * Session เดิมหลังเปลี่ยนรหัสผ่าน
+     */
+    window.setTimeout(() => {
+      closeChangePasswordOverlay();
+      logout();
+    }, 1300);
+
+  }catch(error){
+    console.error(
+      'submitChangePassword ERROR',
+      error
+    );
+
+    setStatus(
+      'changePasswordStatus',
+      error.message ||
+      'เปลี่ยนรหัสผ่านไม่สำเร็จ',
+      'error'
+    );
+
+    showToast(
+      'เปลี่ยนรหัสผ่านไม่สำเร็จ',
+      error.message ||
+      'เกิดข้อผิดพลาด',
+      'error'
+    );
+
+    if(saveButton){
+      saveButton.disabled = false;
+      saveButton.innerHTML =
+        '🔐 บันทึกรหัสผ่านใหม่';
+    }
+  }
+}
     
 function bindEvents(){
   bindIfExists('togglePasswordBtn', 'click', togglePassword);
@@ -16764,6 +17726,119 @@ function bindEvents(){
   bindIfExists('sidebarLogoutBtn', 'click', logout);
   bindIfExists('sidebarToggleBtn', 'click', toggleSidebar);
   bindIfExists('sidebarBackdrop', 'click', closeMobileSidebar);
+
+  /*
+ * เปิดหน้าต่างจากกล่องชื่อครูและรูปเฟือง
+ */
+bindIfExists(
+  'sidebarUserSettingsBtn',
+  'click',
+  openChangePasswordOverlay
+);
+
+
+/*
+ * ปิดหน้าต่าง
+ */
+bindIfExists(
+  'closeChangePasswordBtnTop',
+  'click',
+  closeChangePasswordOverlay
+);
+
+bindIfExists(
+  'cancelChangePasswordBtn',
+  'click',
+  closeChangePasswordOverlay
+);
+
+
+/*
+ * บันทึกรหัสผ่าน
+ */
+bindIfExists(
+  'changePasswordForm',
+  'submit',
+  submitChangePassword
+);
+
+
+/*
+ * กดพื้นที่มืดด้านนอกเพื่อปิด
+ */
+bindIfExists(
+  'changePasswordOverlay',
+  'click',
+  event => {
+    if(
+      event.target?.id ===
+      'changePasswordOverlay'
+    ){
+      closeChangePasswordOverlay();
+    }
+  }
+);
+
+
+/*
+ * ปุ่มแสดง/ซ่อนรหัสผ่านทั้งสามช่อง
+ */
+document
+  .querySelectorAll(
+    '#changePasswordOverlay [data-password-toggle-target]'
+  )
+  .forEach(button => {
+    button.addEventListener(
+      'click',
+      () => {
+        toggleChangePasswordInput(
+          button
+        );
+      }
+    );
+  });
+
+
+/*
+ * ล้างกรอบสีแดงเมื่อเริ่มแก้ไข
+ */
+[
+  'changePasswordCurrent',
+  'changePasswordNew',
+  'changePasswordConfirm'
+].forEach(id => {
+  el(id)?.addEventListener(
+    'input',
+    event => {
+      event.target.classList.remove(
+        'invalid'
+      );
+
+      setStatus(
+        'changePasswordStatus',
+        '',
+        'info'
+      );
+    }
+  );
+});
+
+
+/*
+ * กด Escape เพื่อปิดหน้าต่าง
+ */
+document.addEventListener(
+  'keydown',
+  event => {
+    if(
+      event.key === 'Escape' &&
+      el('changePasswordOverlay')
+        ?.classList.contains('show')
+    ){
+      closeChangePasswordOverlay();
+    }
+  }
+);
 
   bindIfExists('menuHomeBtn', 'click', () => setActivePage('home'));
 bindIfExists('menuGradeReportBtn', 'click', () => {
