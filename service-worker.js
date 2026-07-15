@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teacherpr-desktop-v1';
+const CACHE_NAME = 'teacherpr-desktop-v2';
 
 const APP_SHELL = [
   './',
