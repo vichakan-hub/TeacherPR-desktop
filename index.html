@@ -1203,6 +1203,68 @@
   border-color:#ffd2cf;
 }
 
+/* ===== Adviser Retest Grade Display ===== */
+#pageAdviserRetest .adviser-retest-grade-wrap{
+  display:grid;
+  justify-items:center;
+  gap:6px;
+}
+
+#pageAdviserRetest .adviser-retest-grade-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:64px;
+  min-height:36px;
+  padding:6px 14px;
+  border-radius:999px;
+  font-family:'Sarabun',sans-serif;
+  font-size:16px;
+  font-weight:900;
+  line-height:1;
+  border:2px solid transparent;
+}
+
+/* ยังไม่แก้ */
+#pageAdviserRetest .adviser-retest-grade-pill.not-submitted{
+  background:#f3f6fa;
+  color:#6b7a90;
+  border-color:#d6e2ee;
+}
+
+/* เกรดที่กำลังรออนุมัติ */
+#pageAdviserRetest .adviser-retest-grade-pill.pending{
+  background:#fff7ea;
+  color:#b26a00;
+  border-color:#f4c66b;
+  box-shadow:0 0 0 3px rgba(178,106,0,.08);
+}
+
+/* เกรดที่อนุมัติแล้ว */
+#pageAdviserRetest .adviser-retest-grade-pill.approved{
+  background:#e9f8ef;
+  color:#0f9d58;
+  border-color:#8fd0a5;
+  box-shadow:0 0 0 3px rgba(15,157,88,.08);
+}
+
+#pageAdviserRetest .adviser-retest-grade-note{
+  max-width:130px;
+  color:#6b7a90;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.35;
+  text-align:center;
+}
+
+#pageAdviserRetest .adviser-retest-grade-note.pending{
+  color:#9a5b00;
+}
+
+#pageAdviserRetest .adviser-retest-grade-note.approved{
+  color:#08783f;
+}
+
 @media (max-width:1100px){
   .retest-toolbar,
   .retest-summary{
@@ -7868,7 +7930,10 @@ const titleMap = {
   midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
   import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
   adviser: ['นักเรียนในที่ปรึกษา', 'ดูข้อมูล ผลการเรียน และภาพรวมเชิงวิเคราะห์ของนักเรียนในที่ปรึกษา'],
-  adviserretest: ['ติดตามสอบแก้ตัว', 'ติดตามนักเรียนในที่ปรึกษาที่ติด 0, ร, มส, มผ และสถานะการแก้ตัว'],
+ adviserretest: [
+  'ติดตามการสอบแก้ตัว',
+  'ติดตามสถานะยังไม่แก้ รออนุมัติ และอนุมัติแล้วของนักเรียนในที่ปรึกษา'
+],
   freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
 };
 
@@ -17004,22 +17069,120 @@ el('gradeStatsSubject')?.addEventListener('change', () => {
   setGradeStatsExportButtonEnabled(false);
 });
 
-  bindIfExists('adviserRetestYear', 'change', async () => {
-  renderAdviserRetestRows([]);
-  await loadAdviserRetestRooms();
-});
+bindIfExists(
+  'adviserRetestYear',
+  'change',
+  async () => {
+    /*
+     * ล้างข้อมูลเดิมก่อนเปลี่ยนปี
+     */
+    renderAdviserRetestRows([]);
 
-bindIfExists('adviserRetestTerm', 'change', async () => {
-  renderAdviserRetestRows([]);
-  await loadAdviserRetestRooms();
-});
+    if(el('adviserRetestRoomSelect')){
+      el('adviserRetestRoomSelect').innerHTML = `
+        <option value="">
+          กำลังโหลดห้องที่ปรึกษา...
+        </option>
+      `;
+    }
 
-bindIfExists('loadAdviserRetestBtn', 'click', loadAdviserRetestRows);
+    await loadAdviserRetestRooms();
+  }
+);
 
-bindIfExists('adviserRetestKeyword', 'input', () => {
-  clearTimeout(window.__adviserRetestSearchTimer);
-  window.__adviserRetestSearchTimer = setTimeout(loadAdviserRetestRows, 250);
-});
+
+bindIfExists(
+  'adviserRetestTerm',
+  'change',
+  async () => {
+    /*
+     * ล้างข้อมูลเดิมก่อนเปลี่ยนภาคเรียน
+     */
+    renderAdviserRetestRows([]);
+
+    if(el('adviserRetestRoomSelect')){
+      el('adviserRetestRoomSelect').innerHTML = `
+        <option value="">
+          กำลังโหลดห้องที่ปรึกษา...
+        </option>
+      `;
+    }
+
+    await loadAdviserRetestRooms();
+  }
+);
+
+
+/*
+ * เลือกห้องแล้วแสดงข้อมูลทันที
+ */
+bindIfExists(
+  'adviserRetestRoomSelect',
+  'change',
+  async () => {
+    const roomKey = safeText(
+      el('adviserRetestRoomSelect')?.value,
+      ''
+    );
+
+    renderAdviserRetestRows([]);
+
+    if(!roomKey){
+      setStatus(
+        'adviserRetestStatus',
+        'กรุณาเลือกห้องที่ปรึกษา',
+        'warn'
+      );
+
+      return;
+    }
+
+    await loadAdviserRetestRows();
+  }
+);
+
+
+/*
+ * ปุ่มแสดงรายการยังใช้ได้ตามเดิม
+ */
+bindIfExists(
+  'loadAdviserRetestBtn',
+  'click',
+  async () => {
+    await loadAdviserRetestRows();
+  }
+);
+
+
+/*
+ * ค้นหาจากรายการของห้องที่เลือก
+ */
+bindIfExists(
+  'adviserRetestKeyword',
+  'input',
+  () => {
+    clearTimeout(
+      window.__adviserRetestSearchTimer
+    );
+
+    const roomKey = safeText(
+      el('adviserRetestRoomSelect')?.value,
+      ''
+    );
+
+    if(!roomKey){
+      return;
+    }
+
+    window.__adviserRetestSearchTimer =
+      setTimeout(
+        async () => {
+          await loadAdviserRetestRows();
+        },
+        350
+      );
+  }
+);
   
 }
 
@@ -17144,6 +17307,66 @@ function renderAdviserRetestRoomOptions(rows){
     badgeClass: 'not-submitted',
     displayGrade: ''
   };
+}
+
+function renderAdviserRetestGradeCell(trackingStatus){
+  const statusKey = safeText(
+    trackingStatus?.key,
+    'not_submitted'
+  );
+
+  const grade = normalizeGradeValue(
+    trackingStatus?.displayGrade
+  );
+
+  /*
+   * รายการที่นายทะเบียนอนุมัติแล้ว
+   */
+  if(statusKey === 'approved'){
+    return `
+      <div class="adviser-retest-grade-wrap">
+        <span class="adviser-retest-grade-pill approved">
+          ${escapeHtml(grade || '-')}
+        </span>
+
+        <span class="adviser-retest-grade-note approved">
+          เกรดที่อนุมัติแล้ว
+        </span>
+      </div>
+    `;
+  }
+
+  /*
+   * รายการที่ครูส่งแล้วและกำลังรออนุมัติ
+   */
+  if(statusKey === 'pending_approval'){
+    return `
+      <div class="adviser-retest-grade-wrap">
+        <span class="adviser-retest-grade-pill pending">
+          ${escapeHtml(grade || '-')}
+        </span>
+
+        <span class="adviser-retest-grade-note pending">
+          เกรดที่ส่งรออนุมัติ
+        </span>
+      </div>
+    `;
+  }
+
+  /*
+   * ยังไม่มีการส่งผลแก้ตัว
+   */
+  return `
+    <div class="adviser-retest-grade-wrap">
+      <span class="adviser-retest-grade-pill not-submitted">
+        -
+      </span>
+
+      <span class="adviser-retest-grade-note">
+        ยังไม่มีผลแก้ตัว
+      </span>
+    </div>
+  `;
 }
 
 function renderAdviserRetestRows(rows){
@@ -17302,19 +17525,11 @@ function renderAdviserRetestRows(rows){
           )}
         </td>
 
-        <td class="text-center">
-          ${
-            displayRetestGrade
-              ? renderStudentGradePill(
-                  displayRetestGrade
-                )
-              : `
-                <span class="student-grade-pill neutral">
-                  -
-                </span>
-              `
-          }
-        </td>
+<td class="text-center">
+  ${renderAdviserRetestGradeCell(
+    trackingStatus
+  )}
+</td>
 
         <td class="text-center">
           <span class="
