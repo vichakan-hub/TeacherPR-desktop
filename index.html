@@ -6058,40 +6058,91 @@
   <section class="card" style="margin-bottom:18px;">
     <div class="preview-topbar">
       <div>
-        <h2>ติดตามการสอบแก้ตัว</h2>
-        <div class="sub" style="margin-bottom:0;">
-          แสดงรายวิชาที่นักเรียนในที่ปรึกษาติด 0, ร, มส, มผ และสถานะการแก้ตัว
-        </div>
+<h2>ติดตามการสอบแก้ตัว</h2>
+<div class="sub" style="margin-bottom:0;">
+  แสดงประวัติรายวิชาที่นักเรียนในที่ปรึกษาเคยติด
+  0, ร, มส และ มผ ทุกปีการศึกษา
+</div>
       </div>
     </div>
 
-    <div class="adviser-toolbar">
-      <div class="field">
-        <span class="label-in-form">ปีการศึกษา</span>
-        <select id="adviserRetestYear" class="std">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
+  <div class="adviser-toolbar">
 
-      <div class="field">
-        <span class="label-in-form">ภาคเรียน</span>
-        <select id="adviserRetestTerm" class="std">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="adviserRetestYear"
+    >
+      ปีที่เป็นครูที่ปรึกษา
+    </label>
 
-      <div class="field">
-        <span class="label-in-form">ห้องที่ปรึกษา</span>
-        <select id="adviserRetestRoomSelect" class="std">
-          <option value="">โปรดเลือกห้อง</option>
-        </select>
-      </div>
+    <select
+      id="adviserRetestYear"
+      class="std"
+    >
+      <option value="">
+        กำลังโหลด...
+      </option>
+    </select>
+  </div>
 
-      <div class="field">
-        <span class="label-in-form">ค้นหา</span>
-        <input id="adviserRetestKeyword" class="std" type="text" placeholder="เลขประจำตัว / ชื่อ-สกุล / รายวิชา">
-      </div>
-    </div>
+
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="adviserRetestTerm"
+    >
+      ภาคเรียนที่เป็นครูที่ปรึกษา
+    </label>
+
+    <select
+      id="adviserRetestTerm"
+      class="std"
+    >
+      <option value="">
+        กำลังโหลด...
+      </option>
+    </select>
+  </div>
+
+
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="adviserRetestRoomSelect"
+    >
+      ห้องที่ปรึกษา
+    </label>
+
+    <select
+      id="adviserRetestRoomSelect"
+      class="std"
+    >
+      <option value="">
+        กรุณาเลือกห้องที่ปรึกษา
+      </option>
+    </select>
+  </div>
+
+
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="adviserRetestKeyword"
+    >
+      ค้นหา
+    </label>
+
+    <input
+      id="adviserRetestKeyword"
+      class="std"
+      type="search"
+      autocomplete="off"
+      placeholder="เลขประจำตัว / ชื่อ / วิชา / ครูผู้สอน / สถานะ"
+    >
+  </div>
+
+</div>
 
     <div class="actions" style="margin-bottom:12px;">
       <button id="loadAdviserRetestBtn" class="btn-primary" type="button">
@@ -6164,7 +6215,18 @@
             <th style="width:80px;" class="text-center">เลขที่</th>
             <th style="width:180px;">ชื่อ-สกุล</th>
             <th>รายวิชา</th>
-            <th style="width:110px;" class="text-center">ชั้น/เทอม</th>
+            <th
+  style="width:150px;"
+  class="text-center"
+>
+  <div>
+    ชั้น/ห้อง
+  </div>
+
+  <div class="small">
+    ช่วงที่ติด
+  </div>
+</th>
             <th style="width:110px;" class="text-center">เกรดเดิม</th>
             <th style="width:130px;" class="text-center">ผลแก้ตัว</th>
             <th style="width:130px;" class="text-center">สถานะ</th>
@@ -17644,25 +17706,35 @@ function renderAdviserRetestRows(rows){
           </div>
         </td>
 
-        <td class="text-center">
-          ${escapeHtml(
-            safeText(row.class_level, '-')
-          )}/${escapeHtml(
-            safeText(row.room, '-')
-          )}
+<td class="text-center">
+  <div style="
+    font-weight:800;
+    color:#17263c;
+    white-space:nowrap;
+  ">
+    ${escapeHtml(
+      safeText(row.class_level, '-')
+    )}/${escapeHtml(
+      safeText(row.room, '-')
+    )}
+  </div>
 
-          <br>
+  <div
+    class="small"
+    style="
+      margin-top:4px;
+      white-space:nowrap;
+    "
+  >
+    เทอม ${escapeHtml(
+      String(row.term || '-')
+    )}
 
-          <span class="small">
-            เทอม
-            ${escapeHtml(
-              String(row.term || '-')
-            )}/
-            ${escapeHtml(
-              String(row.academic_year || '-')
-            )}
-          </span>
-        </td>
+    ปี ${escapeHtml(
+      String(row.academic_year || '-')
+    )}
+  </div>
+</td>
 
         <td class="text-center">
           ${renderStudentGradePill(
@@ -17796,6 +17868,300 @@ function renderAdviserRetestRows(rows){
   return requestMap;
 }
 
+async function fetchAdviserRetestStudents(selectedRoom){
+  if(!selectedRoom){
+    return [];
+  }
+
+  const targetYear = safeNum(
+    selectedRoom.academic_year
+  );
+
+  const targetClass = safeText(
+    selectedRoom.class_level,
+    ''
+  );
+
+  const targetRoom = safeText(
+    selectedRoom.room,
+    ''
+  );
+
+  if(
+    targetYear === null ||
+    !targetClass ||
+    !targetRoom
+  ){
+    throw new Error(
+      'ข้อมูลปี ชั้น หรือห้องที่ปรึกษาไม่ครบ'
+    );
+  }
+
+  /*
+   * หาเงื่อนไขรุ่นนักเรียนจากชั้นปัจจุบัน
+   *
+   * ตัวอย่าง:
+   * ปี 2569 อยู่ ม.5
+   * หมายถึงเข้า ม.4 ปี 2568
+   */
+  const cohortMap = {
+    'ม.1': {
+      entryAcademicYear: targetYear,
+      entryLevel: 'ม.1'
+    },
+
+    'ม.2': {
+      entryAcademicYear: targetYear - 1,
+      entryLevel: 'ม.1'
+    },
+
+    'ม.3': {
+      entryAcademicYear: targetYear - 2,
+      entryLevel: 'ม.1'
+    },
+
+    'ม.4': {
+      entryAcademicYear: targetYear,
+      entryLevel: 'ม.4'
+    },
+
+    'ม.5': {
+      entryAcademicYear: targetYear - 1,
+      entryLevel: 'ม.4'
+    },
+
+    'ม.6': {
+      entryAcademicYear: targetYear - 2,
+      entryLevel: 'ม.4'
+    }
+  };
+
+  const cohort = cohortMap[targetClass];
+
+  if(!cohort){
+    throw new Error(
+      `ไม่รองรับระดับชั้น ${targetClass}`
+    );
+  }
+
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select(`
+      id,
+      sid,
+      raw_full_name,
+      current_room,
+      current_no,
+      entry_academic_year,
+      entry_level,
+      is_active
+    `)
+    .eq('is_active', true)
+    .eq('current_room', targetRoom)
+    .eq(
+      'entry_academic_year',
+      cohort.entryAcademicYear
+    )
+    .eq(
+      'entry_level',
+      cohort.entryLevel
+    )
+    .order(
+      'current_no',
+      { ascending: true }
+    )
+    .order(
+      'raw_full_name',
+      { ascending: true }
+    );
+
+  if(error){
+    throw error;
+  }
+
+  return (data || []).map(student => ({
+    student_id: student.id,
+
+    student_code: safeText(
+      student.sid,
+      ''
+    ),
+
+    student_name: safeText(
+      student.raw_full_name,
+      ''
+    ),
+
+    current_no: safeText(
+      student.current_no,
+      ''
+    ),
+
+    current_class_level:
+      targetClass,
+
+    current_room:
+      targetRoom,
+
+    adviser_academic_year:
+      targetYear,
+
+    adviser_term:
+      safeNum(selectedRoom.term)
+  }));
+}
+
+function normalizeAdviserRetestStudentCode(value){
+  return String(value ?? '')
+    .trim()
+    .replace(/\.0$/, '');
+}
+
+
+async function fetchAdviserRetestGradeHistory(adviserStudents){
+  const students = Array.isArray(adviserStudents)
+    ? adviserStudents
+    : [];
+
+  const studentIds = [
+    ...new Set(
+      students
+        .map(student =>
+          safeText(student.student_id, '')
+        )
+        .filter(Boolean)
+    )
+  ];
+
+  const studentCodes = [
+    ...new Set(
+      students
+        .map(student =>
+          normalizeAdviserRetestStudentCode(
+            student.student_code
+          )
+        )
+        .filter(Boolean)
+    )
+  ];
+
+  const gradeRowMap = new Map();
+
+  const selectColumns = `
+    id,
+    student_id,
+    student_code,
+    student_name,
+    student_no,
+    teacher_id,
+    academic_year,
+    term,
+    class_level,
+    room,
+    subject_code,
+    subject_name,
+    grade_code,
+    retest_grade_code,
+    is_active,
+
+    subjects:subjects!fk_grade_results_subject (
+      subject_code,
+      subject_name,
+      credit,
+      subject_type
+    ),
+
+    teachers:teachers!fk_grade_results_teacher (
+      teacher_code,
+      full_name
+    )
+  `;
+
+  /*
+   * โหลดข้อมูลทีละชุดและนำมารวมใน Map
+   * ใช้ grade_results.id ป้องกันข้อมูลซ้ำ
+   */
+  async function collectRowsByField(
+    fieldName,
+    values,
+    chunkSize = 25
+  ){
+    if(!values.length){
+      return;
+    }
+
+    for(
+      let index = 0;
+      index < values.length;
+      index += chunkSize
+    ){
+      const valueChunk = values.slice(
+        index,
+        index + chunkSize
+      );
+
+      const chunkRows = await fetchAllPages(() => {
+        return supabaseClient
+          .from('grade_results')
+          .select(selectColumns)
+          .in(fieldName, valueChunk)
+          .eq('is_active', true)
+          .in(
+            'grade_code',
+            ['0', 'ร', 'มส', 'มผ']
+          )
+          .order(
+            'academic_year',
+            { ascending: false }
+          )
+          .order(
+            'term',
+            { ascending: false }
+          )
+          .order(
+            'id',
+            { ascending: true }
+          );
+      }, 1000);
+
+      (chunkRows || []).forEach(row => {
+        if(!row?.id){
+          return;
+        }
+
+        gradeRowMap.set(
+          String(row.id),
+          row
+        );
+      });
+    }
+  }
+
+  /*
+   * รอบที่ 1:
+   * ค้นจาก student_id สำหรับข้อมูลปัจจุบัน
+   */
+  await collectRowsByField(
+    'student_id',
+    studentIds
+  );
+
+  /*
+   * รอบที่ 2:
+   * ค้นจาก student_code สำหรับข้อมูลเก่า
+   * ที่ student_id อาจยังเป็น null
+   */
+  await collectRowsByField(
+    'student_code',
+    studentCodes
+  );
+
+  return [
+    ...gradeRowMap.values()
+  ];
+}
+
+
 async function loadAdviserRetestRows(){
   try{
     const roomKey = safeText(
@@ -17822,95 +18188,116 @@ async function loadAdviserRetestRows(){
       room
     ] = roomKey.split('|');
 
-    const keyword = safeText(
-      el('adviserRetestKeyword')?.value,
-      ''
-    ).toLowerCase();
+    const selectedRoom = {
+      academic_year:
+        safeNum(academicYear),
+
+      term:
+        safeNum(term),
+
+      class_level:
+        safeText(classLevel, ''),
+
+      room:
+        safeText(room, '')
+    };
 
     setStatus(
       'adviserRetestStatus',
-      'กำลังโหลดรายการติดตามการสอบแก้ตัว...',
+      'กำลังค้นหารายชื่อนักเรียนในที่ปรึกษา...',
       'info'
     );
 
     /*
-     * โหลดผลการเรียนที่เกรดเดิมติด
-     * โดยไม่กรอง teacher_id
-     * เพราะครูที่ปรึกษาต้องเห็นทุกวิชา
+     * ปี/เทอม/ชั้น/ห้อง ใช้เฉพาะระบุ
+     * ว่าครูกำลังดูแลนักเรียนกลุ่มใด
      */
-    const gradeRows = await fetchAllPages(() => {
-      return supabaseClient
-        .from('grade_results')
-        .select(`
-          id,
-          student_id,
-          student_code,
-          student_name,
-          student_no,
-          academic_year,
-          term,
-          class_level,
-          room,
-          grade_code,
-          retest_grade_code,
-          is_active,
+    const adviserStudents =
+      await fetchAdviserRetestStudents(
+        selectedRoom
+      );
 
-          subjects:subjects!fk_grade_results_subject (
-            subject_code,
-            subject_name,
-            credit,
-            subject_type
-          ),
+    if(!adviserStudents.length){
+      renderAdviserRetestRows([]);
 
-          teachers:teachers!fk_grade_results_teacher (
-            teacher_code,
-            full_name
-          )
-        `)
-        .eq(
-          'academic_year',
-          safeNum(academicYear)
-        )
-        .eq(
-          'term',
-          safeNum(term)
-        )
-        .eq(
-          'class_level',
-          classLevel
-        )
-        .eq(
-          'room',
-          room
-        )
-        .eq(
-          'is_active',
-          true
-        )
-        .in(
-          'grade_code',
-          ['0', 'ร', 'มส', 'มผ']
-        )
-        .order(
-          'student_no',
-          { ascending: true }
-        )
-        .order(
-          'student_code',
-          { ascending: true }
-        )
-        .order(
-          'id',
-          { ascending: true }
-        );
-    }, 1000);
+      setStatus(
+        'adviserRetestStatus',
+        'ไม่พบนักเรียนในห้องที่ปรึกษาที่เลือก',
+        'warn'
+      );
+
+      return;
+    }
 
     /*
-     * โหลดคำขอรออนุมัติด้วย grade_result_id
+     * สร้าง Map นักเรียน 2 แบบ
+     *
+     * 1. ค้นด้วย student_id
+     * 2. ค้นสำรองด้วย student_code
      */
-    const gradeResultIds = (
-      gradeRows || []
-    )
+    const adviserStudentById = new Map();
+    const adviserStudentByCode = new Map();
+
+    adviserStudents.forEach(student => {
+      const studentId = safeText(
+        student.student_id,
+        ''
+      );
+
+      const studentCode =
+        normalizeAdviserRetestStudentCode(
+          student.student_code
+        );
+
+      if(studentId){
+        adviserStudentById.set(
+          studentId,
+          student
+        );
+      }
+
+      if(studentCode){
+        adviserStudentByCode.set(
+          studentCode,
+          student
+        );
+      }
+    });
+
+    if(
+      !adviserStudentById.size &&
+      !adviserStudentByCode.size
+    ){
+      renderAdviserRetestRows([]);
+
+      setStatus(
+        'adviserRetestStatus',
+        'ไม่พบรหัสนักเรียนสำหรับค้นหาประวัติผลการเรียน',
+        'warn'
+      );
+
+      return;
+    }
+
+    setStatus(
+      'adviserRetestStatus',
+      `กำลังค้นหาประวัติเกรดที่ติดของนักเรียน ${adviserStudents.length} คน...`,
+      'info'
+    );
+
+    /*
+     * โหลดทุกปีและทุกภาคเรียน
+     * ด้วยทั้ง student_id และ student_code
+     */
+    const gradeRows =
+      await fetchAdviserRetestGradeHistory(
+        adviserStudents
+      );
+
+    /*
+     * โหลดคำขอสอบแก้ตัวที่กำลังรออนุมัติ
+     */
+    const gradeResultIds = gradeRows
       .map(row => row.id)
       .filter(Boolean);
 
@@ -17920,29 +18307,72 @@ async function loadAdviserRetestRows(){
       );
 
     /*
-     * รวมข้อมูลสองตาราง
+     * รวมข้อมูลนักเรียนปัจจุบัน
+     * ประวัติเกรด และคำขอแก้ตัว
      */
-    let rows = (gradeRows || []).map(row => {
+    let rows = gradeRows.map(row => {
+      const rowStudentId = safeText(
+        row.student_id,
+        ''
+      );
+
+      const rowStudentCode =
+        normalizeAdviserRetestStudentCode(
+          row.student_code
+        );
+
+      const adviserStudent =
+        adviserStudentById.get(
+          rowStudentId
+        ) ||
+        adviserStudentByCode.get(
+          rowStudentCode
+        );
+
       const request = requestMap.get(
         String(row.id)
       );
 
       return {
-        id: row.id,
-        grade_result_id: row.id,
+        id:
+          row.id,
+
+        grade_result_id:
+          row.id,
 
         student_id:
-          row.student_id,
+          adviserStudent?.student_id ||
+          row.student_id ||
+          null,
 
+        /*
+         * ใช้ข้อมูลปัจจุบันจาก students เป็นหลัก
+         */
         student_code:
-          safeText(row.student_code, ''),
+          safeText(
+            adviserStudent?.student_code ||
+            row.student_code,
+            ''
+          ),
 
         student_name:
-          safeText(row.student_name, ''),
+          safeText(
+            adviserStudent?.student_name ||
+            row.student_name,
+            ''
+          ),
 
         student_no:
-          safeText(row.student_no, ''),
+          safeText(
+            adviserStudent?.current_no ||
+            row.student_no,
+            ''
+          ),
 
+        /*
+         * เป็นชั้น ห้อง เทอม และปี
+         * ในช่วงที่นักเรียนติดเกรดจริง
+         */
         academic_year:
           row.academic_year,
 
@@ -17960,9 +18390,6 @@ async function loadAdviserRetestRows(){
             row.grade_code
           ),
 
-        /*
-         * มีค่าเมื่ออนุมัติแล้ว
-         */
         retest_grade_code:
           normalizeGradeValue(
             row.retest_grade_code
@@ -17970,13 +18397,15 @@ async function loadAdviserRetestRows(){
 
         subject_code:
           safeText(
-            row.subjects?.subject_code,
+            row.subjects?.subject_code ||
+            row.subject_code,
             ''
           ),
 
         subject_name:
           safeText(
-            row.subjects?.subject_name,
+            row.subjects?.subject_name ||
+            row.subject_name,
             ''
           ),
 
@@ -18003,9 +18432,6 @@ async function loadAdviserRetestRows(){
             ''
           ),
 
-        /*
-         * ข้อมูลจาก grade_retest_requests
-         */
         retest_request_id:
           request?.id || null,
 
@@ -18029,8 +18455,14 @@ async function loadAdviserRetestRows(){
     });
 
     /*
-     * กรองคำค้นหาหลังรวมข้อมูลแล้ว
+     * กรองคำค้นหา
+     * ช่องค้นหาจะเพิ่มในจุดถัดไป
      */
+    const keyword = safeText(
+      el('adviserRetestKeyword')?.value,
+      ''
+    ).toLowerCase();
+
     if(keyword){
       rows = rows.filter(row => {
         const trackingStatus =
@@ -18041,8 +18473,12 @@ async function loadAdviserRetestRows(){
           row.student_name,
           row.subject_code,
           row.subject_name,
-          row.teacher_name,
           row.teacher_code,
+          row.teacher_name,
+          row.academic_year,
+          row.term,
+          row.class_level,
+          row.room,
           row.grade_code,
           row.retest_grade_code,
           row.requested_retest_grade_code,
@@ -18055,11 +18491,87 @@ async function loadAdviserRetestRows(){
       });
     }
 
+    /*
+     * เรียงรายการตามความเร่งด่วน
+     */
+    const statusPriority = {
+      not_submitted: 1,
+      pending_approval: 2,
+      approved: 3
+    };
+
+    rows.sort((a, b) => {
+      const statusA =
+        getAdviserRetestTrackingStatus(a);
+
+      const statusB =
+        getAdviserRetestTrackingStatus(b);
+
+      const priorityDiff =
+        (
+          statusPriority[statusA.key] ?? 99
+        ) -
+        (
+          statusPriority[statusB.key] ?? 99
+        );
+
+      if(priorityDiff !== 0){
+        return priorityDiff;
+      }
+
+      const studentNoDiff =
+        (
+          safeNum(a.student_no) ?? 9999
+        ) -
+        (
+          safeNum(b.student_no) ?? 9999
+        );
+
+      if(studentNoDiff !== 0){
+        return studentNoDiff;
+      }
+
+      const yearDiff =
+        (
+          safeNum(b.academic_year) ?? 0
+        ) -
+        (
+          safeNum(a.academic_year) ?? 0
+        );
+
+      if(yearDiff !== 0){
+        return yearDiff;
+      }
+
+      const termDiff =
+        (
+          safeNum(b.term) ?? 0
+        ) -
+        (
+          safeNum(a.term) ?? 0
+        );
+
+      if(termDiff !== 0){
+        return termDiff;
+      }
+
+      return safeText(
+        a.subject_code,
+        ''
+      ).localeCompare(
+        safeText(
+          b.subject_code,
+          ''
+        ),
+        'th'
+      );
+    });
+
     renderAdviserRetestRows(rows);
 
     setStatus(
       'adviserRetestStatus',
-      `พบรายการติดตามการสอบแก้ตัว ${rows.length} รายการ`,
+      `นักเรียนในที่ปรึกษา ${adviserStudents.length} คน พบประวัติเกรดที่ติดทั้งหมด ${rows.length} รายการ`,
       rows.length ? 'success' : 'warn'
     );
 
@@ -18074,7 +18586,7 @@ async function loadAdviserRetestRows(){
     setStatus(
       'adviserRetestStatus',
       error.message ||
-      'โหลดรายการติดตามการสอบแก้ตัวไม่สำเร็จ',
+      'โหลดประวัติการสอบแก้ตัวไม่สำเร็จ',
       'error'
     );
   }
