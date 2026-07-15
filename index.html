@@ -1082,6 +1082,136 @@
   color:#17324d;
 }
 
+/* ===== Adviser Retest Filter Cards ===== */
+#pageAdviserRetest .adviser-retest-filter-card{
+  width:100%;
+  height:auto;
+  min-height:86px;
+  padding:14px 16px;
+  text-align:left;
+  font-family:inherit;
+  cursor:pointer;
+  position:relative;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+#pageAdviserRetest .adviser-retest-filter-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 22px rgba(15,23,42,.10);
+}
+
+#pageAdviserRetest .adviser-retest-filter-card:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.16),
+    0 10px 22px rgba(15,23,42,.10);
+}
+
+/* สัญลักษณ์มุมขวาเมื่อถูกเลือก */
+#pageAdviserRetest .adviser-retest-filter-card.active::after{
+  content:'✓';
+  position:absolute;
+  top:12px;
+  right:14px;
+  width:25px;
+  height:25px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+}
+
+/* ทั้งหมด */
+#pageAdviserRetest .adviser-retest-filter-card.all.active{
+  background:#eef4ff;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+
+#pageAdviserRetest .adviser-retest-filter-card.all.active::after{
+  background:#2563eb;
+}
+
+#pageAdviserRetest .adviser-retest-filter-card.all.active
+.retest-summary-label,
+#pageAdviserRetest .adviser-retest-filter-card.all.active
+.retest-summary-value{
+  color:#1d4ed8;
+}
+
+/* ยังไม่แก้ */
+#pageAdviserRetest
+.adviser-retest-filter-card.not-submitted.active{
+  background:#fff0ef;
+  border-color:#fca5a5;
+  box-shadow:0 0 0 3px rgba(217,45,32,.10);
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.not-submitted.active::after{
+  background:#d92d20;
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.not-submitted.active
+.retest-summary-label,
+#pageAdviserRetest
+.adviser-retest-filter-card.not-submitted.active
+.retest-summary-value{
+  color:#b42318;
+}
+
+/* รออนุมัติ */
+#pageAdviserRetest
+.adviser-retest-filter-card.pending.active{
+  background:#fff7ea;
+  border-color:#f4c66b;
+  box-shadow:0 0 0 3px rgba(178,106,0,.10);
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.pending.active::after{
+  background:#b26a00;
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.pending.active
+.retest-summary-label,
+#pageAdviserRetest
+.adviser-retest-filter-card.pending.active
+.retest-summary-value{
+  color:#9a5b00;
+}
+
+/* อนุมัติแล้ว */
+#pageAdviserRetest
+.adviser-retest-filter-card.approved.active{
+  background:#e9f8ef;
+  border-color:#86d49f;
+  box-shadow:0 0 0 3px rgba(15,157,88,.10);
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.approved.active::after{
+  background:#0f9d58;
+}
+
+#pageAdviserRetest
+.adviser-retest-filter-card.approved.active
+.retest-summary-label,
+#pageAdviserRetest
+.adviser-retest-filter-card.approved.active
+.retest-summary-value{
+  color:#08783f;
+}
+
 .retest-table{
   width:100%;
   min-width:1080px;
@@ -6150,8 +6280,15 @@
       </button>
     </div>
 
-    <div class="retest-summary">
-  <div class="retest-summary-card">
+<div class="retest-summary adviser-retest-filter-summary">
+
+  <button
+    id="adviserRetestFilterAllBtn"
+    class="retest-summary-card adviser-retest-filter-card all active"
+    type="button"
+    data-adviser-retest-filter="all"
+    aria-pressed="true"
+  >
     <div class="retest-summary-label">
       รายการทั้งหมด
     </div>
@@ -6162,9 +6299,16 @@
     >
       0
     </div>
-  </div>
+  </button>
 
-  <div class="retest-summary-card">
+
+  <button
+    id="adviserRetestFilterNotSubmittedBtn"
+    class="retest-summary-card adviser-retest-filter-card not-submitted"
+    type="button"
+    data-adviser-retest-filter="not_submitted"
+    aria-pressed="false"
+  >
     <div class="retest-summary-label">
       ยังไม่แก้
     </div>
@@ -6175,9 +6319,16 @@
     >
       0
     </div>
-  </div>
+  </button>
 
-  <div class="retest-summary-card">
+
+  <button
+    id="adviserRetestFilterPendingBtn"
+    class="retest-summary-card adviser-retest-filter-card pending"
+    type="button"
+    data-adviser-retest-filter="pending_approval"
+    aria-pressed="false"
+  >
     <div class="retest-summary-label">
       รออนุมัติ
     </div>
@@ -6188,9 +6339,16 @@
     >
       0
     </div>
-  </div>
+  </button>
 
-  <div class="retest-summary-card">
+
+  <button
+    id="adviserRetestFilterApprovedBtn"
+    class="retest-summary-card adviser-retest-filter-card approved"
+    type="button"
+    data-adviser-retest-filter="approved"
+    aria-pressed="false"
+  >
     <div class="retest-summary-label">
       อนุมัติแล้ว
     </div>
@@ -6201,7 +6359,8 @@
     >
       0
     </div>
-  </div>
+  </button>
+
 </div>
 
     <div id="adviserRetestStatus" class="status info">
@@ -7616,6 +7775,9 @@ async function loginWithTeacherRpc(teacherCodeRaw, passwordRaw){
 
 const state = {
   currentUser: null,
+
+  adviserRetestRows: [],
+adviserRetestActiveFilter: 'all',
 
 importSettings: null,
 retestSettings: null,
@@ -17174,23 +17336,23 @@ el('gradeStatsSubject')?.addEventListener('change', () => {
   setGradeStatsExportButtonEnabled(false);
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
 bindIfExists(
   'adviserRetestYear',
   'change',
   async () => {
-    /*
-     * ล้างข้อมูลเดิมก่อนเปลี่ยนปี
-     */
-    renderAdviserRetestRows([]);
-
-    if(el('adviserRetestRoomSelect')){
-      el('adviserRetestRoomSelect').innerHTML = `
-        <option value="">
-          กำลังโหลดห้องที่ปรึกษา...
-        </option>
-      `;
-    }
-
+    resetAdviserRetestFilter();
     await loadAdviserRetestRooms();
   }
 );
@@ -17200,37 +17362,22 @@ bindIfExists(
   'adviserRetestTerm',
   'change',
   async () => {
-    /*
-     * ล้างข้อมูลเดิมก่อนเปลี่ยนภาคเรียน
-     */
-    renderAdviserRetestRows([]);
-
-    if(el('adviserRetestRoomSelect')){
-      el('adviserRetestRoomSelect').innerHTML = `
-        <option value="">
-          กำลังโหลดห้องที่ปรึกษา...
-        </option>
-      `;
-    }
-
+    resetAdviserRetestFilter();
     await loadAdviserRetestRooms();
   }
 );
 
 
-/*
- * เลือกห้องแล้วแสดงข้อมูลทันที
- */
 bindIfExists(
   'adviserRetestRoomSelect',
   'change',
   async () => {
+    resetAdviserRetestFilter();
+
     const roomKey = safeText(
       el('adviserRetestRoomSelect')?.value,
       ''
     );
-
-    renderAdviserRetestRows([]);
 
     if(!roomKey){
       setStatus(
@@ -17247,20 +17394,21 @@ bindIfExists(
 );
 
 
-/*
- * ปุ่มแสดงรายการยังใช้ได้ตามเดิม
- */
 bindIfExists(
   'loadAdviserRetestBtn',
   'click',
   async () => {
+    state.adviserRetestActiveFilter =
+      'all';
+
     await loadAdviserRetestRows();
   }
 );
 
 
 /*
- * ค้นหาจากรายการของห้องที่เลือก
+ * ค้นหาจากข้อมูลที่โหลดแล้ว
+ * ไม่เรียก Supabase ใหม่
  */
 bindIfExists(
   'adviserRetestKeyword',
@@ -17270,24 +17418,38 @@ bindIfExists(
       window.__adviserRetestSearchTimer
     );
 
-    const roomKey = safeText(
-      el('adviserRetestRoomSelect')?.value,
-      ''
-    );
-
-    if(!roomKey){
-      return;
-    }
-
     window.__adviserRetestSearchTimer =
       setTimeout(
-        async () => {
-          await loadAdviserRetestRows();
+        () => {
+          applyAdviserRetestFiltersAndRender();
         },
-        350
+        180
       );
   }
 );
+
+
+/*
+ * ปุ่ม KPI ทั้ง 4 ปุ่ม
+ */
+document
+  .querySelectorAll(
+    '#pageAdviserRetest [data-adviser-retest-filter]'
+  )
+  .forEach(button => {
+    button.addEventListener(
+      'click',
+      () => {
+        setAdviserRetestFilter(
+          safeText(
+            button.dataset
+              .adviserRetestFilter,
+            'all'
+          )
+        );
+      }
+    );
+  });
   
 }
 
@@ -17505,6 +17667,279 @@ function renderAdviserRetestGradeCell(trackingStatus){
       </span>
     </div>
   `;
+}
+
+function getAdviserRetestFilterLabel(filterKey){
+  const labels = {
+    all: 'ทั้งหมด',
+    not_submitted: 'ยังไม่แก้',
+    pending_approval: 'รออนุมัติ',
+    approved: 'อนุมัติแล้ว'
+  };
+
+  return labels[filterKey] || labels.all;
+}
+
+
+function updateAdviserRetestSummary(rows){
+  const list = Array.isArray(rows)
+    ? rows
+    : [];
+
+  const evaluatedRows = list.map(row => ({
+    row,
+    trackingStatus:
+      getAdviserRetestTrackingStatus(row)
+  }));
+
+  const totalCount =
+    evaluatedRows.length;
+
+  const notSubmittedCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'not_submitted'
+    ).length;
+
+  const pendingApprovalCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'pending_approval'
+    ).length;
+
+  const approvedCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'approved'
+    ).length;
+
+  if(el('adviserRetestTotalCount')){
+    el('adviserRetestTotalCount').textContent =
+      String(totalCount);
+  }
+
+  if(el('adviserRetestNotSubmittedCount')){
+    el(
+      'adviserRetestNotSubmittedCount'
+    ).textContent =
+      String(notSubmittedCount);
+  }
+
+  if(el('adviserRetestPendingApprovalCount')){
+    el(
+      'adviserRetestPendingApprovalCount'
+    ).textContent =
+      String(pendingApprovalCount);
+  }
+
+  if(el('adviserRetestApprovedCount')){
+    el(
+      'adviserRetestApprovedCount'
+    ).textContent =
+      String(approvedCount);
+  }
+}
+
+
+function updateAdviserRetestFilterButtons(){
+  const activeFilter =
+    safeText(
+      state.adviserRetestActiveFilter,
+      'all'
+    );
+
+  document
+    .querySelectorAll(
+      '#pageAdviserRetest [data-adviser-retest-filter]'
+    )
+    .forEach(button => {
+      const buttonFilter = safeText(
+        button.dataset.adviserRetestFilter,
+        'all'
+      );
+
+      const isActive =
+        buttonFilter === activeFilter;
+
+      button.classList.toggle(
+        'active',
+        isActive
+      );
+
+      button.setAttribute(
+        'aria-pressed',
+        isActive ? 'true' : 'false'
+      );
+    });
+}
+
+
+function getAdviserRetestKeywordFilteredRows(rows){
+  const keyword = safeText(
+    el('adviserRetestKeyword')?.value,
+    ''
+  )
+    .trim()
+    .toLowerCase();
+
+  if(!keyword){
+    return [...rows];
+  }
+
+  return rows.filter(row => {
+    const trackingStatus =
+      getAdviserRetestTrackingStatus(row);
+
+    const haystack = [
+      row.student_code,
+      row.student_name,
+      row.subject_code,
+      row.subject_name,
+      row.teacher_code,
+      row.teacher_name,
+      row.academic_year,
+      row.term,
+      row.class_level,
+      row.room,
+      row.grade_code,
+      row.retest_grade_code,
+      row.requested_retest_grade_code,
+      trackingStatus.label
+    ]
+      .map(value =>
+        safeText(value, '')
+      )
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(keyword);
+  });
+}
+
+
+function applyAdviserRetestFiltersAndRender(){
+  const allRows = Array.isArray(
+    state.adviserRetestRows
+  )
+    ? state.adviserRetestRows
+    : [];
+
+  const activeFilter =
+    safeText(
+      state.adviserRetestActiveFilter,
+      'all'
+    );
+
+  /*
+   * กรองคำค้นหาจากข้อมูลที่โหลดแล้ว
+   */
+  let visibleRows =
+    getAdviserRetestKeywordFilteredRows(
+      allRows
+    );
+
+  /*
+   * กรองตามปุ่มสถานะ
+   */
+  if(activeFilter !== 'all'){
+    visibleRows = visibleRows.filter(row => {
+      const trackingStatus =
+        getAdviserRetestTrackingStatus(row);
+
+      return trackingStatus.key ===
+        activeFilter;
+    });
+  }
+
+  /*
+   * renderAdviserRetestRows จะอัปเดต KPI
+   * จาก visibleRows ชั่วคราว
+   */
+  renderAdviserRetestRows(
+    visibleRows
+  );
+
+  /*
+   * เขียน KPI ทับด้วยยอดรวมจริงทั้งหมด
+   * เพื่อให้จำนวนไม่เปลี่ยนเมื่อกดกรอง
+   */
+  updateAdviserRetestSummary(
+    allRows
+  );
+
+  updateAdviserRetestFilterButtons();
+
+  const filterLabel =
+    getAdviserRetestFilterLabel(
+      activeFilter
+    );
+
+  const keyword = safeText(
+    el('adviserRetestKeyword')?.value,
+    ''
+  ).trim();
+
+  if(!allRows.length){
+    setStatus(
+      'adviserRetestStatus',
+      'ไม่พบประวัติเกรดที่ต้องติดตามของนักเรียนในที่ปรึกษา',
+      'warn'
+    );
+
+    return;
+  }
+
+  const searchText = keyword
+    ? ` จากคำค้นหา “${keyword}”`
+    : '';
+
+  if(activeFilter === 'all'){
+    setStatus(
+      'adviserRetestStatus',
+      `แสดงรายการทั้งหมด ${visibleRows.length} จาก ${allRows.length} รายการ${searchText}`,
+      'success'
+    );
+
+    return;
+  }
+
+  setStatus(
+    'adviserRetestStatus',
+    `แสดงสถานะ “${filterLabel}” ${visibleRows.length} จากทั้งหมด ${allRows.length} รายการ${searchText}`,
+    visibleRows.length
+      ? 'success'
+      : 'warn'
+  );
+}
+
+
+function setAdviserRetestFilter(filterKey){
+  const validFilters = [
+    'all',
+    'not_submitted',
+    'pending_approval',
+    'approved'
+  ];
+
+  const selectedFilter =
+    validFilters.includes(filterKey)
+      ? filterKey
+      : 'all';
+
+  state.adviserRetestActiveFilter =
+    selectedFilter;
+
+  applyAdviserRetestFiltersAndRender();
+}
+
+
+function resetAdviserRetestFilter(){
+  state.adviserRetestRows = [];
+  state.adviserRetestActiveFilter = 'all';
+
+  renderAdviserRetestRows([]);
+  updateAdviserRetestSummary([]);
+  updateAdviserRetestFilterButtons();
 }
 
 function renderAdviserRetestRows(rows){
@@ -18385,42 +18820,7 @@ async function loadAdviserRetestRows(){
       };
     });
 
-    /*
-     * กรองคำค้นหา
-     * ช่องค้นหาจะเพิ่มในจุดถัดไป
-     */
-    const keyword = safeText(
-      el('adviserRetestKeyword')?.value,
-      ''
-    ).toLowerCase();
 
-    if(keyword){
-      rows = rows.filter(row => {
-        const trackingStatus =
-          getAdviserRetestTrackingStatus(row);
-
-        const haystack = [
-          row.student_code,
-          row.student_name,
-          row.subject_code,
-          row.subject_name,
-          row.teacher_code,
-          row.teacher_name,
-          row.academic_year,
-          row.term,
-          row.class_level,
-          row.room,
-          row.grade_code,
-          row.retest_grade_code,
-          row.requested_retest_grade_code,
-          trackingStatus.label
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        return haystack.includes(keyword);
-      });
-    }
 
     /*
      * เรียงรายการตามความเร่งด่วน
@@ -18500,11 +18900,18 @@ async function loadAdviserRetestRows(){
 
     renderAdviserRetestRows(rows);
 
-    setStatus(
-      'adviserRetestStatus',
-      `นักเรียนในที่ปรึกษา ${adviserStudents.length} คน พบประวัติเกรดที่ติดทั้งหมด ${rows.length} รายการ`,
-      rows.length ? 'success' : 'warn'
-    );
+/*
+ * เก็บข้อมูลทั้งหมดไว้เป็นข้อมูลต้นฉบับ
+ * ปุ่มกรองและช่องค้นหาจะใช้ข้อมูลชุดนี้
+ */
+state.adviserRetestRows = rows;
+
+/*
+ * โหลดห้องใหม่ให้กลับมาที่ปุ่มทั้งหมด
+ */
+state.adviserRetestActiveFilter = 'all';
+
+applyAdviserRetestFiltersAndRender();
 
   }catch(error){
     console.error(
