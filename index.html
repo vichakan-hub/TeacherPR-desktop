@@ -1197,6 +1197,12 @@
   border-color:#ffd2cf;
 }
 
+.retest-status-badge.not-submitted{
+  background:#fff0ef;
+  color:#d92d20;
+  border-color:#ffd2cf;
+}
+
 @media (max-width:1100px){
   .retest-toolbar,
   .retest-summary{
@@ -5989,7 +5995,7 @@
   <section class="card" style="margin-bottom:18px;">
     <div class="preview-topbar">
       <div>
-        <h2>ติดตามสอบแก้ตัว</h2>
+        <h2>ติดตามการสอบแก้ตัว</h2>
         <div class="sub" style="margin-bottom:0;">
           แสดงรายวิชาที่นักเรียนในที่ปรึกษาติด 0, ร, มส, มผ และสถานะการแก้ตัว
         </div>
@@ -6031,26 +6037,58 @@
     </div>
 
     <div class="retest-summary">
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">รายการทั้งหมด</div>
-        <div id="adviserRetestTotalCount" class="retest-summary-value">0</div>
-      </div>
-
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">ยังไม่แก้</div>
-        <div id="adviserRetestPendingCount" class="retest-summary-value">0</div>
-      </div>
-
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">แก้แล้ว</div>
-        <div id="adviserRetestDoneCount" class="retest-summary-value">0</div>
-      </div>
-
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">นักเรียนที่เกี่ยวข้อง</div>
-        <div id="adviserRetestStudentCount" class="retest-summary-value">0</div>
-      </div>
+  <div class="retest-summary-card">
+    <div class="retest-summary-label">
+      รายการทั้งหมด
     </div>
+
+    <div
+      id="adviserRetestTotalCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </div>
+
+  <div class="retest-summary-card">
+    <div class="retest-summary-label">
+      ยังไม่แก้
+    </div>
+
+    <div
+      id="adviserRetestNotSubmittedCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </div>
+
+  <div class="retest-summary-card">
+    <div class="retest-summary-label">
+      รออนุมัติ
+    </div>
+
+    <div
+      id="adviserRetestPendingApprovalCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </div>
+
+  <div class="retest-summary-card">
+    <div class="retest-summary-label">
+      อนุมัติแล้ว
+    </div>
+
+    <div
+      id="adviserRetestApprovedCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </div>
+</div>
 
     <div id="adviserRetestStatus" class="status info">
       กรุณาเลือกห้องที่ปรึกษาแล้วกดแสดงรายการ
@@ -17054,161 +17092,603 @@ function renderAdviserRetestRoomOptions(rows){
   }
 }
 
-    function renderAdviserRetestRows(rows){
+    function getAdviserRetestTrackingStatus(row){
+  /*
+   * อันดับ 1:
+   * ถ้า grade_results มีเกรดแก้ตัวแล้ว
+   * ถือว่านายทะเบียนอนุมัติเรียบร้อย
+   */
+  const approvedGrade = normalizeGradeValue(
+    row?.retest_grade_code
+  );
+
+  if(approvedGrade){
+    return {
+      key: 'approved',
+      label: 'อนุมัติแล้ว',
+      badgeClass: 'approved',
+      displayGrade: approvedGrade
+    };
+  }
+
+  /*
+   * อันดับ 2:
+   * ถ้ามีคำขอที่กำลังรออนุมัติ
+   */
+  const requestStatus = safeText(
+    row?.retest_request_status,
+    ''
+  ).toLowerCase();
+
+  const requestedGrade = normalizeGradeValue(
+    row?.requested_retest_grade_code
+  );
+
+  if(requestStatus === 'pending_approval'){
+    return {
+      key: 'pending_approval',
+      label: 'รออนุมัติ',
+      badgeClass: 'pending',
+      displayGrade: requestedGrade
+    };
+  }
+
+  /*
+   * อันดับ 3:
+   * ยังไม่มีผลแก้ตัว และไม่มีคำขอรออนุมัติ
+   */
+  return {
+    key: 'not_submitted',
+    label: 'ยังไม่แก้',
+    badgeClass: 'not-submitted',
+    displayGrade: ''
+  };
+}
+
+function renderAdviserRetestRows(rows){
   const tbody = el('adviserRetestTbody');
-  if(!tbody) return;
 
-  const list = Array.isArray(rows) ? rows : [];
-
-  const total = list.length;
-  const done = list.filter(isRiskTrackingDone).length;
-  const pending = list.filter(isRiskTrackingPending).length;
-  const studentCount = new Set(list.map(row => String(row.student_id || '')).filter(Boolean)).size;
-
-  if(el('adviserRetestTotalCount')) el('adviserRetestTotalCount').textContent = total;
-  if(el('adviserRetestPendingCount')) el('adviserRetestPendingCount').textContent = pending;
-  if(el('adviserRetestDoneCount')) el('adviserRetestDoneCount').textContent = done;
-  if(el('adviserRetestStudentCount')) el('adviserRetestStudentCount').textContent = studentCount;
-
-  if(!list.length){
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="empty-state">ไม่พบรายการติดตามสอบแก้ตัว</td>
-      </tr>
-    `;
+  if(!tbody){
     return;
   }
 
-  tbody.innerHTML = list.map(row => {
-    const originalGrade = normalizeGradeValue(row.grade_code);
-    const retestGrade = normalizeGradeValue(row.retest_grade_code);
-    const isDone = isRiskTrackingDone(row);
+  const list = Array.isArray(rows)
+    ? rows
+    : [];
+
+  /*
+   * ประเมินสถานะของแต่ละรายการก่อน
+   */
+  const evaluatedRows = list.map(row => ({
+    row,
+    trackingStatus:
+      getAdviserRetestTrackingStatus(row)
+  }));
+
+  const totalCount =
+    evaluatedRows.length;
+
+  const notSubmittedCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'not_submitted'
+    ).length;
+
+  const pendingApprovalCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'pending_approval'
+    ).length;
+
+  const approvedCount =
+    evaluatedRows.filter(item =>
+      item.trackingStatus.key ===
+      'approved'
+    ).length;
+
+  /*
+   * อัปเดต KPI ชุดใหม่
+   */
+  if(el('adviserRetestTotalCount')){
+    el('adviserRetestTotalCount').textContent =
+      totalCount;
+  }
+
+  if(el('adviserRetestNotSubmittedCount')){
+    el(
+      'adviserRetestNotSubmittedCount'
+    ).textContent = notSubmittedCount;
+  }
+
+  if(el('adviserRetestPendingApprovalCount')){
+    el(
+      'adviserRetestPendingApprovalCount'
+    ).textContent = pendingApprovalCount;
+  }
+
+  if(el('adviserRetestApprovedCount')){
+    el(
+      'adviserRetestApprovedCount'
+    ).textContent = approvedCount;
+  }
+
+  if(!evaluatedRows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="empty-state">
+          ไม่พบรายการติดตามการสอบแก้ตัว
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML = evaluatedRows.map(item => {
+    const row = item.row;
+    const trackingStatus =
+      item.trackingStatus;
+
+    const originalGrade =
+      normalizeGradeValue(
+        row.grade_code
+      );
+
+    const displayRetestGrade =
+      normalizeGradeValue(
+        trackingStatus.displayGrade
+      );
 
     return `
       <tr>
-        <td class="text-center">${escapeHtml(safeText(row.student_no, '-'))}</td>
-
-        <td>
-          <div class="retest-student-main">${escapeHtml(safeText(row.student_name, '-'))}</div>
-          <div class="retest-student-sub">${escapeHtml(safeText(row.student_code, '-'))}</div>
+        <td class="text-center">
+          ${escapeHtml(
+            safeText(row.student_no, '-')
+          )}
         </td>
 
         <td>
-          <div class="retest-subject-main">${escapeHtml(safeText(row.subject_name, '-'))}</div>
-          <div class="retest-subject-sub">${escapeHtml(safeText(row.subject_code, '-'))}</div>
+          <div class="retest-student-main">
+            ${escapeHtml(
+              safeText(row.student_name, '-')
+            )}
+          </div>
+
+          <div class="retest-student-sub">
+            ${escapeHtml(
+              safeText(row.student_code, '-')
+            )}
+          </div>
+        </td>
+
+        <td>
+          <div class="retest-subject-main">
+            ${escapeHtml(
+              safeText(row.subject_name, '-')
+            )}
+          </div>
+
+          <div class="retest-subject-sub">
+            ${escapeHtml(
+              safeText(row.subject_code, '-')
+            )}
+          </div>
         </td>
 
         <td class="text-center">
-          ${escapeHtml(safeText(row.class_level, '-'))}<br>
-          <span class="small">ท.${escapeHtml(String(row.term || '-'))}/${escapeHtml(String(row.academic_year || '-'))}</span>
+          ${escapeHtml(
+            safeText(row.class_level, '-')
+          )}/${escapeHtml(
+            safeText(row.room, '-')
+          )}
+
+          <br>
+
+          <span class="small">
+            เทอม
+            ${escapeHtml(
+              String(row.term || '-')
+            )}/
+            ${escapeHtml(
+              String(row.academic_year || '-')
+            )}
+          </span>
         </td>
 
-        <td class="text-center">${renderStudentGradePill(originalGrade)}</td>
+        <td class="text-center">
+          ${renderStudentGradePill(
+            originalGrade
+          )}
+        </td>
 
         <td class="text-center">
           ${
-            retestGrade
-              ? renderStudentGradePill(retestGrade)
-              : `<span class="student-grade-pill neutral">-</span>`
+            displayRetestGrade
+              ? renderStudentGradePill(
+                  displayRetestGrade
+                )
+              : `
+                <span class="student-grade-pill neutral">
+                  -
+                </span>
+              `
           }
         </td>
 
         <td class="text-center">
-          <span class="risk-subject-status ${isDone ? 'done' : 'pending'}">
-            ${isDone ? 'แก้แล้ว' : 'ยังไม่แก้'}
+          <span class="
+            retest-status-badge
+            ${trackingStatus.badgeClass}
+          ">
+            ${escapeHtml(
+              trackingStatus.label
+            )}
           </span>
         </td>
 
         <td>
-          <div class="retest-subject-main">${escapeHtml(safeText(row.teacher_name, '-'))}</div>
-          <div class="retest-subject-sub">${escapeHtml(safeText(row.teacher_code, ''))}</div>
+          <div class="retest-subject-main">
+            ${escapeHtml(
+              safeText(row.teacher_name, '-')
+            )}
+          </div>
+
+          <div class="retest-subject-sub">
+            ${escapeHtml(
+              safeText(row.teacher_code, '')
+            )}
+          </div>
         </td>
       </tr>
     `;
   }).join('');
 }
 
-    async function loadAdviserRetestRows(){
+    async function fetchAdviserRetestRequestMap(gradeResultIds){
+  const ids = [
+    ...new Set(
+      (gradeResultIds || [])
+        .filter(Boolean)
+        .map(id => String(id))
+    )
+  ];
+
+  const requestMap = new Map();
+
+  if(!ids.length){
+    return requestMap;
+  }
+
+  const chunkSize = 80;
+
+  for(let index = 0; index < ids.length; index += chunkSize){
+    const idChunk = ids.slice(
+      index,
+      index + chunkSize
+    );
+
+    const requestRows = await fetchAllPages(() => {
+      return supabaseClient
+        .from('grade_retest_requests')
+        .select(`
+          id,
+          grade_result_id,
+          requested_retest_grade_code,
+          status,
+          submitted_at,
+          updated_at,
+          is_active
+        `)
+        .in('grade_result_id', idChunk)
+        .eq('status', 'pending_approval')
+        .eq('is_active', true)
+        .order('updated_at', {
+          ascending: false
+        });
+    }, 1000);
+
+    (requestRows || []).forEach(request => {
+      const gradeResultId = String(
+        request.grade_result_id || ''
+      );
+
+      if(!gradeResultId){
+        return;
+      }
+
+      const oldRequest =
+        requestMap.get(gradeResultId);
+
+      if(!oldRequest){
+        requestMap.set(
+          gradeResultId,
+          request
+        );
+
+        return;
+      }
+
+      const oldTime = new Date(
+        oldRequest.updated_at ||
+        oldRequest.submitted_at ||
+        0
+      ).getTime();
+
+      const newTime = new Date(
+        request.updated_at ||
+        request.submitted_at ||
+        0
+      ).getTime();
+
+      /*
+       * ถ้ามีหลายรายการ ให้เลือกรายการล่าสุด
+       */
+      if(newTime >= oldTime){
+        requestMap.set(
+          gradeResultId,
+          request
+        );
+      }
+    });
+  }
+
+  return requestMap;
+}
+
+async function loadAdviserRetestRows(){
   try{
-    const roomKey = safeText(el('adviserRetestRoomSelect')?.value, '');
+    const roomKey = safeText(
+      el('adviserRetestRoomSelect')?.value,
+      ''
+    );
+
     if(!roomKey){
       renderAdviserRetestRows([]);
-      setStatus('adviserRetestStatus', 'กรุณาเลือกห้องที่ปรึกษา', 'warn');
+
+      setStatus(
+        'adviserRetestStatus',
+        'กรุณาเลือกห้องที่ปรึกษา',
+        'warn'
+      );
+
       return;
     }
 
-    const [academicYear, term, classLevel, room] = roomKey.split('|');
+    const [
+      academicYear,
+      term,
+      classLevel,
+      room
+    ] = roomKey.split('|');
 
-    const keyword = safeText(el('adviserRetestKeyword')?.value, '').toLowerCase();
+    const keyword = safeText(
+      el('adviserRetestKeyword')?.value,
+      ''
+    ).toLowerCase();
 
-    setStatus('adviserRetestStatus', 'กำลังโหลดรายการติดตามสอบแก้ตัว...', 'info');
+    setStatus(
+      'adviserRetestStatus',
+      'กำลังโหลดรายการติดตามการสอบแก้ตัว...',
+      'info'
+    );
 
-    const { data, error } = await supabaseClient
-      .from('grade_results')
-      .select(`
-        id,
-        student_id,
-        student_code,
-        student_name,
-        student_no,
-        academic_year,
-        term,
-        class_level,
-        room,
-        grade_code,
-        retest_grade_code,
-        is_active,
-        subjects:subjects!fk_grade_results_subject (
-          subject_code,
-          subject_name,
-          credit,
-          subject_type
-        ),
-        teachers:teachers!fk_grade_results_teacher (
-          teacher_code,
-          full_name
+    /*
+     * โหลดผลการเรียนที่เกรดเดิมติด
+     * โดยไม่กรอง teacher_id
+     * เพราะครูที่ปรึกษาต้องเห็นทุกวิชา
+     */
+    const gradeRows = await fetchAllPages(() => {
+      return supabaseClient
+        .from('grade_results')
+        .select(`
+          id,
+          student_id,
+          student_code,
+          student_name,
+          student_no,
+          academic_year,
+          term,
+          class_level,
+          room,
+          grade_code,
+          retest_grade_code,
+          is_active,
+
+          subjects:subjects!fk_grade_results_subject (
+            subject_code,
+            subject_name,
+            credit,
+            subject_type
+          ),
+
+          teachers:teachers!fk_grade_results_teacher (
+            teacher_code,
+            full_name
+          )
+        `)
+        .eq(
+          'academic_year',
+          safeNum(academicYear)
         )
-      `)
-      .eq('academic_year', safeNum(academicYear))
-      .eq('term', safeNum(term))
-      .eq('class_level', classLevel)
-      .eq('room', room)
-      .eq('is_active', true)
-      .in('grade_code', ['0', 'ร', 'มส', 'มผ'])
-      .order('student_no', { ascending:true });
+        .eq(
+          'term',
+          safeNum(term)
+        )
+        .eq(
+          'class_level',
+          classLevel
+        )
+        .eq(
+          'room',
+          room
+        )
+        .eq(
+          'is_active',
+          true
+        )
+        .in(
+          'grade_code',
+          ['0', 'ร', 'มส', 'มผ']
+        )
+        .order(
+          'student_no',
+          { ascending: true }
+        )
+        .order(
+          'student_code',
+          { ascending: true }
+        )
+        .order(
+          'id',
+          { ascending: true }
+        );
+    }, 1000);
 
-    if(error) throw error;
+    /*
+     * โหลดคำขอรออนุมัติด้วย grade_result_id
+     */
+    const gradeResultIds = (
+      gradeRows || []
+    )
+      .map(row => row.id)
+      .filter(Boolean);
 
-    let rows = (data || []).map(row => ({
-      id: row.id,
-      student_id: row.student_id,
-      student_code: safeText(row.student_code, ''),
-      student_name: safeText(row.student_name, ''),
-      student_no: safeText(row.student_no, ''),
-      academic_year: row.academic_year,
-      term: row.term,
-      class_level: row.class_level,
-      room: row.room,
-      grade_code: normalizeGradeValue(row.grade_code),
-      retest_grade_code: normalizeGradeValue(row.retest_grade_code),
-      subject_code: safeText(row.subjects?.subject_code, ''),
-      subject_name: safeText(row.subjects?.subject_name, ''),
-      credit: safeNum(row.subjects?.credit) ?? 0,
-      subject_type: safeText(row.subjects?.subject_type, ''),
-      teacher_code: safeText(row.teachers?.teacher_code, ''),
-      teacher_name: safeText(row.teachers?.full_name, '')
-    }));
+    const requestMap =
+      await fetchAdviserRetestRequestMap(
+        gradeResultIds
+      );
 
+    /*
+     * รวมข้อมูลสองตาราง
+     */
+    let rows = (gradeRows || []).map(row => {
+      const request = requestMap.get(
+        String(row.id)
+      );
+
+      return {
+        id: row.id,
+        grade_result_id: row.id,
+
+        student_id:
+          row.student_id,
+
+        student_code:
+          safeText(row.student_code, ''),
+
+        student_name:
+          safeText(row.student_name, ''),
+
+        student_no:
+          safeText(row.student_no, ''),
+
+        academic_year:
+          row.academic_year,
+
+        term:
+          row.term,
+
+        class_level:
+          row.class_level,
+
+        room:
+          row.room,
+
+        grade_code:
+          normalizeGradeValue(
+            row.grade_code
+          ),
+
+        /*
+         * มีค่าเมื่ออนุมัติแล้ว
+         */
+        retest_grade_code:
+          normalizeGradeValue(
+            row.retest_grade_code
+          ),
+
+        subject_code:
+          safeText(
+            row.subjects?.subject_code,
+            ''
+          ),
+
+        subject_name:
+          safeText(
+            row.subjects?.subject_name,
+            ''
+          ),
+
+        credit:
+          safeNum(
+            row.subjects?.credit
+          ) ?? 0,
+
+        subject_type:
+          safeText(
+            row.subjects?.subject_type,
+            ''
+          ),
+
+        teacher_code:
+          safeText(
+            row.teachers?.teacher_code,
+            ''
+          ),
+
+        teacher_name:
+          safeText(
+            row.teachers?.full_name,
+            ''
+          ),
+
+        /*
+         * ข้อมูลจาก grade_retest_requests
+         */
+        retest_request_id:
+          request?.id || null,
+
+        requested_retest_grade_code:
+          normalizeGradeValue(
+            request?.requested_retest_grade_code
+          ),
+
+        retest_request_status:
+          safeText(
+            request?.status,
+            ''
+          ),
+
+        retest_request_submitted_at:
+          request?.submitted_at || null,
+
+        retest_request_updated_at:
+          request?.updated_at || null
+      };
+    });
+
+    /*
+     * กรองคำค้นหาหลังรวมข้อมูลแล้ว
+     */
     if(keyword){
       rows = rows.filter(row => {
+        const trackingStatus =
+          getAdviserRetestTrackingStatus(row);
+
         const haystack = [
           row.student_code,
           row.student_name,
           row.subject_code,
           row.subject_name,
           row.teacher_name,
-          row.teacher_code
-        ].join(' ').toLowerCase();
+          row.teacher_code,
+          row.grade_code,
+          row.retest_grade_code,
+          row.requested_retest_grade_code,
+          trackingStatus.label
+        ]
+          .join(' ')
+          .toLowerCase();
 
         return haystack.includes(keyword);
       });
@@ -17218,13 +17698,24 @@ function renderAdviserRetestRoomOptions(rows){
 
     setStatus(
       'adviserRetestStatus',
-      `พบรายการติดตามสอบแก้ตัว ${rows.length} รายการ`,
+      `พบรายการติดตามการสอบแก้ตัว ${rows.length} รายการ`,
       rows.length ? 'success' : 'warn'
     );
-  }catch(err){
-    console.error('loadAdviserRetestRows ERROR', err);
+
+  }catch(error){
+    console.error(
+      'loadAdviserRetestRows ERROR',
+      error
+    );
+
     renderAdviserRetestRows([]);
-    setStatus('adviserRetestStatus', err.message || 'โหลดรายการติดตามสอบแก้ตัวไม่สำเร็จ', 'error');
+
+    setStatus(
+      'adviserRetestStatus',
+      error.message ||
+      'โหลดรายการติดตามการสอบแก้ตัวไม่สำเร็จ',
+      'error'
+    );
   }
 }
 
