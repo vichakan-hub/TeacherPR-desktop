@@ -11338,18 +11338,34 @@ function bindRetestRowButtons(){
     });
   });
   
-  el('retestTbody').querySelectorAll('[data-retest-edit]').forEach(btn => {
+el('retestTbody')
+  .querySelectorAll('[data-retest-edit]')
+  .forEach(btn => {
     btn.addEventListener('click', () => {
-      const rowKey = String(btn.dataset.retestEdit || '');
+      const rowKey = String(
+        btn.dataset.retestEdit || ''
+      );
+
       state.retestEditingId = rowKey;
-      renderRetestRows(state.retestRows);
+
+      /*
+       * Render เฉพาะข้อมูลตาม KPI ที่กำลังเลือก
+       */
+      applyRetestFilter();
     });
   });
 
-  el('retestTbody').querySelectorAll('[data-retest-cancel]').forEach(btn => {
+
+el('retestTbody')
+  .querySelectorAll('[data-retest-cancel]')
+  .forEach(btn => {
     btn.addEventListener('click', () => {
       state.retestEditingId = null;
-      renderRetestRows(state.retestRows);
+
+      /*
+       * ยกเลิกโหมดแก้ไขโดยไม่ทำให้ตัวกรองหาย
+       */
+      applyRetestFilter();
     });
   });
 
@@ -11516,21 +11532,22 @@ async function loadRetestRows(){
     state.retestRows = mergeRetestRowsWithRequests(baseRows, requestMap);
     state.retestEditingId = null;
 
-    renderRetestRows(state.retestRows);
+if(state.retestRows.length){
+  /*
+   * ใช้ตัวกรอง KPI ที่กำลังเลือกอยู่
+   */
+  applyRetestFilter();
+}else{
+  updateRetestFilterButtons();
 
-    if(state.retestRows.length){
-      setStatus(
-        'retestStatus',
-        `พบรายการสอบแก้ตัว ${state.retestRows.length} รายการ`,
-        'success'
-      );
-    }else{
-      setStatus(
-        'retestStatus',
-        'ไม่พบรายการนักเรียนที่ติด 0, ร, มส, มผ ตามเงื่อนไขที่เลือก',
-        'warn'
-      );
-    }
+  renderRetestRows([]);
+
+  setStatus(
+    'retestStatus',
+    'ไม่พบรายการนักเรียนที่ติด 0, ร, มส, มผ ตามเงื่อนไขที่เลือก',
+    'warn'
+  );
+}
   }catch(err){
     console.error('loadRetestRows ERROR', err);
     state.retestRows = [];
@@ -11551,6 +11568,9 @@ function resetRetestSummary(){
 function resetRetestPage(){
   state.retestRows = [];
   state.retestEditingId = null;
+  state.retestActiveFilter = 'all';
+
+  updateRetestFilterButtons();
 
   resetRetestSummary();
 
@@ -19128,7 +19148,53 @@ bindIfExists('teacherStudentGradeOverlay', 'click', (e) => {
 });
 
 
-  bindIfExists('loadRetestBtn', 'click', loadRetestRows);
+  bindIfExists(
+  'loadRetestBtn',
+  'click',
+  async () => {
+    /*
+     * เมื่อกดโหลดข้อมูลใหม่
+     * ให้กลับมาแสดงรายการทั้งหมดเสมอ
+     */
+    state.retestActiveFilter = 'all';
+
+    updateRetestFilterButtons();
+
+    await loadRetestRows();
+  }
+);
+
+/*
+ * ปุ่ม KPI กรองรายการสอบแก้ตัว
+ * กรองจากข้อมูลใน state.retestRows
+ * ไม่เรียก Supabase ซ้ำ
+ */
+document
+  .querySelectorAll(
+    '#pageRetest [data-retest-filter]'
+  )
+  .forEach(button => {
+    button.addEventListener(
+      'click',
+      () => {
+        const selectedFilter = safeText(
+          button.dataset.retestFilter,
+          'all'
+        );
+
+        state.retestActiveFilter =
+          selectedFilter;
+
+        /*
+         * ปิดโหมดแก้ไขก่อนเปลี่ยนตัวกรอง
+         * ป้องกันแถวแก้ไขค้างอยู่
+         */
+        state.retestEditingId = null;
+
+        applyRetestFilter();
+      }
+    );
+  });
 
   bindIfExists('retestStudentCodeKeyword', 'keydown', (e) => {
     if(e.key === 'Enter'){
