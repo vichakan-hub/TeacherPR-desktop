@@ -9744,7 +9744,14 @@ function applySettingToYearTermControls(config){
     statusId,
     lockedMessage,
     allowAllYearText = 'ทั้งหมด',
-    allowAllTermText = 'ทั้งหมด'
+    allowAllTermText = 'ทั้งหมด',
+
+    /*
+     * ใช้กำหนดว่าหน้าใดต้องการให้
+     * ค่าเริ่มต้นเป็น "ทั้งหมด"
+     */
+    defaultAllYear = false,
+    defaultAllTerm = false
   } = config;
 
   if(!setting) return;
@@ -9752,18 +9759,38 @@ function applySettingToYearTermControls(config){
   const yearEl = el(yearId);
   const termEl = el(termId);
 
-  const yearOptions = Array.isArray(setting.year_options) && setting.year_options.length
-    ? setting.year_options
-    : [setting.academic_year];
+  const yearOptions =
+    Array.isArray(setting.year_options) &&
+    setting.year_options.length
+      ? setting.year_options
+      : [setting.academic_year];
 
-  const termOptions = Array.isArray(setting.term_options) && setting.term_options.length
-    ? setting.term_options
-    : [1, 2];
+  const termOptions =
+    Array.isArray(setting.term_options) &&
+    setting.term_options.length
+      ? setting.term_options
+      : [1, 2];
+
+  /*
+   * หากไม่ได้ล็อก และหน้านี้กำหนดให้เริ่มที่ทั้งหมด
+   * ให้เลือก option value=""
+   *
+   * หากล็อกอยู่ ต้องใช้ปี/เทอมจาก app_settings
+   */
+  const selectedYear =
+    !setting.lock && defaultAllYear
+      ? ''
+      : setting.academic_year;
+
+  const selectedTerm =
+    !setting.lock && defaultAllTerm
+      ? ''
+      : setting.term;
 
   renderYearTermControl(
     yearEl,
     yearOptions,
-    setting.academic_year,
+    selectedYear,
     setting.lock,
     allowAllYearText
   );
@@ -9771,13 +9798,21 @@ function applySettingToYearTermControls(config){
   renderYearTermControl(
     termEl,
     termOptions,
-    setting.term,
+    selectedTerm,
     setting.lock,
     allowAllTermText
   );
 
-  if(setting.lock && statusId && lockedMessage){
-    setStatus(statusId, lockedMessage(setting), 'info');
+  if(
+    setting.lock &&
+    statusId &&
+    lockedMessage
+  ){
+    setStatus(
+      statusId,
+      lockedMessage(setting),
+      'info'
+    );
   }
 }
 
