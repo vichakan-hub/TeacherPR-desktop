@@ -1082,6 +1082,168 @@
   color:#17324d;
 }
 
+/* =====================================================
+   TEACHER RETEST KPI FILTER CARDS
+   ===================================================== */
+
+#pageRetest .teacher-retest-filter-card{
+  width:100%;
+  height:auto;
+  min-height:86px;
+  padding:14px 16px;
+
+  position:relative;
+  text-align:left;
+  font-family:inherit;
+  cursor:pointer;
+
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+#pageRetest .teacher-retest-filter-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 22px rgba(15,23,42,.10);
+}
+
+#pageRetest .teacher-retest-filter-card:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.16),
+    0 10px 22px rgba(15,23,42,.10);
+}
+
+
+/* เครื่องหมายถูกเมื่อกำลังเลือก */
+#pageRetest .teacher-retest-filter-card.active::after{
+  content:'✓';
+
+  position:absolute;
+  top:12px;
+  right:14px;
+
+  width:25px;
+  height:25px;
+  border-radius:999px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+}
+
+
+/* =========================
+   รายการทั้งหมด
+   ========================= */
+
+#pageRetest .teacher-retest-filter-card.all.active{
+  background:#eef4ff;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+
+#pageRetest .teacher-retest-filter-card.all.active::after{
+  background:#2563eb;
+}
+
+#pageRetest
+.teacher-retest-filter-card.all.active
+.retest-summary-label,
+
+#pageRetest
+.teacher-retest-filter-card.all.active
+.retest-summary-value{
+  color:#1d4ed8;
+}
+
+
+/* =========================
+   ยังไม่ส่งผล
+   ========================= */
+
+#pageRetest
+.teacher-retest-filter-card.not-submitted.active{
+  background:#fff0ef;
+  border-color:#fca5a5;
+  box-shadow:0 0 0 3px rgba(217,45,32,.10);
+}
+
+#pageRetest
+.teacher-retest-filter-card.not-submitted.active::after{
+  background:#d92d20;
+}
+
+#pageRetest
+.teacher-retest-filter-card.not-submitted.active
+.retest-summary-label,
+
+#pageRetest
+.teacher-retest-filter-card.not-submitted.active
+.retest-summary-value{
+  color:#b42318;
+}
+
+
+/* =========================
+   รออนุมัติ
+   ========================= */
+
+#pageRetest
+.teacher-retest-filter-card.pending.active{
+  background:#fff7ea;
+  border-color:#f4c66b;
+  box-shadow:0 0 0 3px rgba(178,106,0,.10);
+}
+
+#pageRetest
+.teacher-retest-filter-card.pending.active::after{
+  background:#b26a00;
+}
+
+#pageRetest
+.teacher-retest-filter-card.pending.active
+.retest-summary-label,
+
+#pageRetest
+.teacher-retest-filter-card.pending.active
+.retest-summary-value{
+  color:#9a5b00;
+}
+
+
+/* =========================
+   อนุมัติแล้ว
+   ========================= */
+
+#pageRetest
+.teacher-retest-filter-card.approved.active{
+  background:#e9f8ef;
+  border-color:#86d49f;
+  box-shadow:0 0 0 3px rgba(15,157,88,.10);
+}
+
+#pageRetest
+.teacher-retest-filter-card.approved.active::after{
+  background:#0f9d58;
+}
+
+#pageRetest
+.teacher-retest-filter-card.approved.active
+.retest-summary-label,
+
+#pageRetest
+.teacher-retest-filter-card.approved.active
+.retest-summary-value{
+  color:#08783f;
+}
+
 /* ===== Adviser Retest Filter Cards ===== */
 #pageAdviserRetest .adviser-retest-filter-card{
   width:100%;
@@ -7469,27 +7631,88 @@
       </div>
     </div>
 
-    <div class="retest-summary">
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">รายการทั้งหมด</div>
-        <div id="retestTotalCount" class="retest-summary-value">0</div>
-      </div>
+<div class="retest-summary teacher-retest-filter-summary">
 
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">ยังไม่ส่งผล</div>
-        <div id="retestNotSubmittedCount" class="retest-summary-value">0</div>
-      </div>
-
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">รออนุมัติ</div>
-        <div id="retestPendingCount" class="retest-summary-value">0</div>
-      </div>
-
-      <div class="retest-summary-card">
-        <div class="retest-summary-label">อนุมัติแล้ว</div>
-        <div id="retestApprovedCount" class="retest-summary-value">0</div>
-      </div>
+  <button
+    id="retestFilterAllBtn"
+    class="retest-summary-card teacher-retest-filter-card all active"
+    type="button"
+    data-retest-filter="all"
+    aria-pressed="true"
+  >
+    <div class="retest-summary-label">
+      รายการทั้งหมด
     </div>
+
+    <div
+      id="retestTotalCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </button>
+
+
+  <button
+    id="retestFilterNotSubmittedBtn"
+    class="retest-summary-card teacher-retest-filter-card not-submitted"
+    type="button"
+    data-retest-filter="not_submitted"
+    aria-pressed="false"
+  >
+    <div class="retest-summary-label">
+      ยังไม่ส่งผล
+    </div>
+
+    <div
+      id="retestNotSubmittedCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </button>
+
+
+  <button
+    id="retestFilterPendingBtn"
+    class="retest-summary-card teacher-retest-filter-card pending"
+    type="button"
+    data-retest-filter="pending_approval"
+    aria-pressed="false"
+  >
+    <div class="retest-summary-label">
+      รออนุมัติ
+    </div>
+
+    <div
+      id="retestPendingCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </button>
+
+
+  <button
+    id="retestFilterApprovedBtn"
+    class="retest-summary-card teacher-retest-filter-card approved"
+    type="button"
+    data-retest-filter="approved"
+    aria-pressed="false"
+  >
+    <div class="retest-summary-label">
+      อนุมัติแล้ว
+    </div>
+
+    <div
+      id="retestApprovedCount"
+      class="retest-summary-value"
+    >
+      0
+    </div>
+  </button>
+
+</div>
 
     <div id="retestStatus" class="status info">
       กรุณาเลือกปีการศึกษา/ภาคเรียน หรือค้นหาเลขประจำตัวนักเรียนก่อนแสดงรายการ
@@ -8739,6 +8962,7 @@ gradeReportDefaultPage: 'midtermReport',
 
   retestRows: [],
   retestEditingId: null,
+  retestActiveFilter: 'all',
 
   currentStudentProfile: null,
   currentStudentGrades: [],
@@ -10595,6 +10819,129 @@ const payload = buildRetestRequestPayload(row, selectedGrade);
   }
 }
 
+function getRetestFilterLabel(filterKey){
+  const labels = {
+    all: 'รายการทั้งหมด',
+    not_submitted: 'ยังไม่ส่งผล',
+    pending_approval: 'รออนุมัติ',
+    approved: 'อนุมัติแล้ว'
+  };
+
+  return labels[filterKey] || labels.all;
+}
+
+
+function getRetestFilteredRows(rows){
+  const list = Array.isArray(rows)
+    ? rows
+    : [];
+
+  const activeFilter = safeText(
+    state.retestActiveFilter,
+    'all'
+  );
+
+  if(activeFilter === 'all'){
+    return [...list];
+  }
+
+  return list.filter(row => {
+    const displayState = getRetestDisplayState(row);
+    const status = displayState.status;
+
+    if(activeFilter === 'approved'){
+      return status === 'approved';
+    }
+
+    if(activeFilter === 'pending_approval'){
+      return status === 'pending_approval';
+    }
+
+    if(activeFilter === 'not_submitted'){
+      /*
+       * ไม่มีสถานะ หรือถูกปฏิเสธ
+       * ถือว่ายังต้องส่งผลใหม่
+       */
+      return !status || status === 'rejected';
+    }
+
+    return true;
+  });
+}
+
+
+function updateRetestFilterButtons(){
+  const activeFilter = safeText(
+    state.retestActiveFilter,
+    'all'
+  );
+
+  document
+    .querySelectorAll(
+      '#pageRetest [data-retest-filter]'
+    )
+    .forEach(button => {
+      const buttonFilter = safeText(
+        button.dataset.retestFilter,
+        'all'
+      );
+
+      const isActive =
+        buttonFilter === activeFilter;
+
+      button.classList.toggle(
+        'active',
+        isActive
+      );
+
+      button.setAttribute(
+        'aria-pressed',
+        isActive ? 'true' : 'false'
+      );
+    });
+}
+
+
+function applyRetestFilter(){
+  updateRetestFilterButtons();
+
+  const allRows = Array.isArray(state.retestRows)
+    ? state.retestRows
+    : [];
+
+  const filteredRows =
+    getRetestFilteredRows(allRows);
+
+  renderRetestRows(filteredRows);
+
+  const filterLabel = getRetestFilterLabel(
+    state.retestActiveFilter
+  );
+
+  if(!allRows.length){
+    setStatus(
+      'retestStatus',
+      'ยังไม่มีข้อมูลรายการสอบแก้ตัว',
+      'info'
+    );
+    return;
+  }
+
+  if(filteredRows.length){
+    setStatus(
+      'retestStatus',
+      `แสดง ${filterLabel} ${filteredRows.length} รายการ จากทั้งหมด ${allRows.length} รายการ`,
+      'success'
+    );
+  }else{
+    setStatus(
+      'retestStatus',
+      `ไม่พบรายการในสถานะ ${filterLabel}`,
+      'warn'
+    );
+  }
+}
+
 function updateRetestSummary(rows){
   const summary = {
     total: 0,
@@ -10651,6 +10998,8 @@ function renderRetestRows(rows){
 
   if(!tbody) return;
 
+  updateRetestSummary(state.retestRows);
+
   if(!rows || !rows.length){
     tbody.innerHTML = `
       <tr>
@@ -10660,11 +11009,11 @@ function renderRetestRows(rows){
       </tr>
     `;
 
-    updateRetestSummary([]);
+    
     return;
   }
 
-  updateRetestSummary(rows);
+  
 
   tbody.innerHTML = rows.map(row => {
     const rowKey = getRetestRowKey(row);
