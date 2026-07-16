@@ -9829,17 +9829,26 @@ function applyTeacherSettingsToPage(settings){
     allowAllTermText: 'ทั้งหมด'
   });
 
-  // ส่งผลสอบแก้ตัว: Desktop + Mobile
-  applySettingToYearTermControls({
-    setting: settings.retest,
-    yearId: 'retestYear',
-    termId: 'retestTerm',
-    statusId: 'retestStatus',
-    lockedMessage: s =>
-      `ล็อคการส่งผลสอบแก้ตัว ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
-    allowAllYearText: 'ทั้งหมด',
-    allowAllTermText: 'ทั้งหมด'
-  });
+
+// ส่งผลสอบแก้ตัว: Desktop + Mobile
+applySettingToYearTermControls({
+  setting: settings.retest,
+  yearId: 'retestYear',
+  termId: 'retestTerm',
+  statusId: 'retestStatus',
+
+  lockedMessage: s =>
+    `ล็อคการส่งผลสอบแก้ตัว ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+
+  allowAllYearText: 'ทั้งหมด',
+  allowAllTermText: 'ทั้งหมด',
+
+  /*
+   * ค่าเริ่มต้นของหน้าส่งผลสอบแก้ตัว
+   */
+  defaultAllYear: true,
+  defaultAllTerm: true
+});
 
   // นักเรียนในที่ปรึกษา: Desktop + Mobile
   applySettingToYearTermControls({
