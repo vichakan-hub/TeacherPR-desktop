@@ -10149,6 +10149,68 @@ function getRetestOptionsByOriginalGrade(originalGrade){
   return [];
 }
 
+/*
+ * หาสถานะสอบแก้ตัวที่ใช้แสดงจริง
+ *
+ * ลำดับความสำคัญ:
+ * 1. grade_results.retest_grade_code มีค่า = อนุมัติแล้ว
+ * 2. grade_retest_requests เป็น pending_approval = รออนุมัติ
+ * 3. ถูกปฏิเสธ = ไม่อนุมัติ
+ * 4. ไม่มีข้อมูล = ยังไม่ส่งผล
+ */
+function getRetestDisplayState(row){
+  const approvedGrade = normalizeGradeValue(
+    row?.retest_grade_code
+  );
+
+  /*
+   * ให้ grade_results เป็นข้อมูลหลัก
+   * หากมีเกรดแก้ตัว แปลว่านายทะเบียนอนุมัติแล้ว
+   */
+  if(approvedGrade){
+    return {
+      status: 'approved',
+      grade: approvedGrade,
+      isApproved: true,
+      canEdit: false
+    };
+  }
+
+  const requestStatus = safeText(
+    row?.retest_request_status,
+    ''
+  ).toLowerCase();
+
+  const requestedGrade = normalizeGradeValue(
+    row?.requested_retest_grade_code
+  );
+
+  if(requestStatus === 'pending_approval'){
+    return {
+      status: 'pending_approval',
+      grade: requestedGrade,
+      isApproved: false,
+      canEdit: true
+    };
+  }
+
+  if(requestStatus === 'rejected'){
+    return {
+      status: 'rejected',
+      grade: requestedGrade,
+      isApproved: false,
+      canEdit: true
+    };
+  }
+
+  return {
+    status: '',
+    grade: '',
+    isApproved: false,
+    canEdit: true
+  };
+}
+
 function getRetestStatusText(status){
   const s = safeText(status, '');
 
@@ -10534,21 +10596,62 @@ const payload = buildRetestRequestPayload(row, selectedGrade);
 }
 
 function updateRetestSummary(rows){
-  const total = rows.length;
-  const pending = rows.filter(r => r.retest_request_status === 'pending_approval').length;
-  const approved = rows.filter(r => r.retest_request_status === 'approved').length;
-  const notSubmitted = rows.filter(r => !r.retest_request_status || r.retest_request_status === 'rejected').length;
+  const summary = {
+    total: 0,
+    notSubmitted: 0,
+    pending: 0,
+    approved: 0
+  };
 
-  el('retestTotalCount').textContent = String(total);
-  el('retestNotSubmittedCount').textContent = String(notSubmitted);
-  el('retestPendingCount').textContent = String(pending);
-  el('retestApprovedCount').textContent = String(approved);
+  (rows || []).forEach(row => {
+    const displayState = getRetestDisplayState(row);
+
+    summary.total += 1;
+
+    if(displayState.status === 'approved'){
+      summary.approved += 1;
+      return;
+    }
+
+    if(displayState.status === 'pending_approval'){
+      summary.pending += 1;
+      return;
+    }
+
+    /*
+     * rejected และรายการที่ไม่มีสถานะ
+     * ให้นับเป็นรายการที่ครูยังต้องส่งผลใหม่
+     */
+    summary.notSubmitted += 1;
+  });
+
+  if(el('retestTotalCount')){
+    el('retestTotalCount').textContent =
+      String(summary.total);
+  }
+
+  if(el('retestNotSubmittedCount')){
+    el('retestNotSubmittedCount').textContent =
+      String(summary.notSubmitted);
+  }
+
+  if(el('retestPendingCount')){
+    el('retestPendingCount').textContent =
+      String(summary.pending);
+  }
+
+  if(el('retestApprovedCount')){
+    el('retestApprovedCount').textContent =
+      String(summary.approved);
+  }
 }
 
 function renderRetestRows(rows){
   const tbody = el('retestTbody');
 
-  if(!rows.length){
+  if(!tbody) return;
+
+  if(!rows || !rows.length){
     tbody.innerHTML = `
       <tr>
         <td colspan="7" class="empty-state">
@@ -10556,6 +10659,7 @@ function renderRetestRows(rows){
         </td>
       </tr>
     `;
+
     updateRetestSummary([]);
     return;
   }
@@ -10564,108 +10668,200 @@ function renderRetestRows(rows){
 
   tbody.innerHTML = rows.map(row => {
     const rowKey = getRetestRowKey(row);
-    const isEditing = state.retestEditingId === rowKey;
     const originalGrade = normalizeGradeValue(row.grade_code);
-    const requestStatus = safeText(row.retest_request_status, '');
-    const requestedGrade = normalizeGradeValue(row.requested_retest_grade_code);
 
-    const canEdit = isRetestEditableStatus(requestStatus);
-    const options = getRetestOptionsByOriginalGrade(originalGrade);
+    /*
+     * สถานะจาก grade_retest_requests
+     * ใช้สำหรับกรณีรออนุมัติ/ถูกปฏิเสธ
+     */
+    const requestStatus = safeText(
+      row.retest_request_status,
+      ''
+    ).toLowerCase();
+
+    /*
+     * สถานะจริงที่ใช้แสดงผล
+     * ฟังก์ชันนี้จะตรวจ grade_results.retest_grade_code ก่อน
+     */
+    const displayState = getRetestDisplayState(row);
+
+    const displayStatus = displayState.status;
+    const displayGrade = normalizeGradeValue(
+      displayState.grade
+    );
+
+    /*
+     * รายการอนุมัติแล้วจะไม่สามารถเข้าสู่โหมดแก้ไข
+     */
+    const isEditing =
+      displayState.canEdit &&
+      state.retestEditingId === rowKey;
+
+    const options = getRetestOptionsByOriginalGrade(
+      originalGrade
+    );
 
     let retestGradeHtml = '';
 
-if(isEditing){
-  const defaultSelectedGrade =
-    requestedGrade || (options.length === 1 ? options[0] : '');
+    /*
+     * โหมดแก้ไข/ส่งผลสอบแก้ตัว
+     */
+    if(isEditing){
+      const defaultSelectedGrade =
+        displayGrade ||
+        (options.length === 1 ? options[0] : '');
 
-  const cancelSubmissionOption =
-    requestStatus === 'pending_approval'
-      ? `
+      /*
+       * แสดงตัวเลือกยกเลิกการส่ง
+       * เฉพาะรายการที่กำลังรออนุมัติ
+       */
+      const cancelSubmissionOption =
+        requestStatus === 'pending_approval'
+          ? `
+            <option value="__cancel_submission__">
+              ยกเลิกการส่ง
+            </option>
+          `
+          : '';
 
-        <option value="__cancel_submission__">
-          ยกเลิกการส่ง
-        </option>
-      `
-      : '';
-
-  retestGradeHtml = `
-    <select
-      class="retest-select"
-      data-retest-select="${escapeHtml(rowKey)}"
-      data-retest-status="${escapeHtml(requestStatus)}"
-    >
-      <option value="">เลือกผลแก้ตัว</option>
-
-      ${options.map(opt => `
-        <option
-          value="${escapeHtml(opt)}"
-          ${defaultSelectedGrade === opt ? 'selected' : ''}
-        >
-          ${escapeHtml(opt)}
-        </option>
-      `).join('')}
-
-      ${cancelSubmissionOption}
-    </select>
-  `;
-}else{
       retestGradeHtml = `
-        <div style="display:grid;gap:7px;justify-items:center;">
-          <div>${requestedGrade ? renderStudentGradePill(requestedGrade) : '-'}</div>
-          ${renderRetestStatusBadge(requestStatus)}
+        <select
+          class="retest-select"
+          data-retest-select="${escapeHtml(rowKey)}"
+          data-retest-status="${escapeHtml(requestStatus)}"
+        >
+          <option value="">
+            เลือกผลแก้ตัว
+          </option>
+
+          ${options.map(option => `
+            <option
+              value="${escapeHtml(option)}"
+              ${defaultSelectedGrade === option ? 'selected' : ''}
+            >
+              ${escapeHtml(option)}
+            </option>
+          `).join('')}
+
+          ${cancelSubmissionOption}
+        </select>
+      `;
+    }else{
+      /*
+       * โหมดแสดงผล
+       *
+       * อนุมัติแล้ว:
+       * ใช้ grade_results.retest_grade_code
+       *
+       * รออนุมัติ:
+       * ใช้ grade_retest_requests.requested_retest_grade_code
+       */
+      retestGradeHtml = `
+        <div
+          style="
+            display:grid;
+            gap:7px;
+            justify-items:center;
+          "
+        >
+          <div>
+            ${
+              displayGrade
+                ? renderStudentGradePill(displayGrade)
+                : '-'
+            }
+          </div>
+
+          ${renderRetestStatusBadge(displayStatus)}
         </div>
       `;
     }
 
     let actionHtml = '';
 
-    if(requestStatus === 'approved'){
+    /*
+     * อนุมัติแล้ว:
+     * ล็อกไม่ให้ครูแก้ไขหรือส่งซ้ำ
+     */
+    if(displayState.isApproved){
       actionHtml = `
         <div class="retest-action-wrap">
           ${renderRetestStatusBadge('approved')}
         </div>
       `;
-}else if(isEditing){
-  actionHtml = `
-    <div class="retest-action-wrap">
-      <button
-        class="btn-success retest-mini-btn"
-        type="button"
-        data-retest-save="${escapeHtml(rowKey)}"
-        data-retest-action-button="${escapeHtml(rowKey)}"
-      >
-        ส่งผล
-      </button>
+    }
 
-      <button
-        class="btn-secondary retest-mini-btn"
-        type="button"
-        data-retest-cancel="${escapeHtml(rowKey)}"
-      >
-        ยกเลิก
-      </button>
-    </div>
-  `;
-    }else if(canEdit && requestStatus === 'pending_approval'){
+    /*
+     * กำลังแก้ไข
+     */
+    else if(isEditing){
       actionHtml = `
         <div class="retest-action-wrap">
-          <button class="btn-primary retest-mini-btn" type="button" data-retest-edit="${escapeHtml(rowKey)}">
+          <button
+            class="btn-success retest-mini-btn"
+            type="button"
+            data-retest-save="${escapeHtml(rowKey)}"
+            data-retest-action-button="${escapeHtml(rowKey)}"
+          >
+            ส่งผล
+          </button>
+
+          <button
+            class="btn-secondary retest-mini-btn"
+            type="button"
+            data-retest-cancel="${escapeHtml(rowKey)}"
+          >
+            ยกเลิก
+          </button>
+        </div>
+      `;
+    }
+
+    /*
+     * ส่งผลแล้วแต่ยังรออนุมัติ
+     */
+    else if(displayStatus === 'pending_approval'){
+      actionHtml = `
+        <div class="retest-action-wrap">
+          <button
+            class="btn-primary retest-mini-btn"
+            type="button"
+            data-retest-edit="${escapeHtml(rowKey)}"
+          >
             แก้ไขผล
           </button>
         </div>
       `;
-    }else if(canEdit && requestStatus === 'rejected'){
+    }
+
+    /*
+     * นายทะเบียนไม่อนุมัติ
+     */
+    else if(displayStatus === 'rejected'){
       actionHtml = `
         <div class="retest-action-wrap">
-          <button class="btn-primary retest-mini-btn" type="button" data-retest-edit="${escapeHtml(rowKey)}">
+          <button
+            class="btn-primary retest-mini-btn"
+            type="button"
+            data-retest-edit="${escapeHtml(rowKey)}"
+          >
             ส่งใหม่
           </button>
         </div>
       `;
-    }else{
+    }
+
+    /*
+     * ยังไม่เคยส่งผลสอบแก้ตัว
+     */
+    else{
       actionHtml = `
         <div class="retest-action-wrap">
-          <button class="btn-primary retest-mini-btn" type="button" data-retest-edit="${escapeHtml(rowKey)}">
+          <button
+            class="btn-primary retest-mini-btn"
+            type="button"
+            data-retest-edit="${escapeHtml(rowKey)}"
+          >
             สอบแก้ตัว
           </button>
         </div>
@@ -10674,26 +10870,59 @@ if(isEditing){
 
     return `
       <tr>
-        <td class="text-center mono">${escapeHtml(safeText(row.student_code, '-'))}</td>
+        <td class="text-center mono">
+          ${escapeHtml(
+            safeText(row.student_code, '-')
+          )}
+        </td>
 
         <td>
-          <div class="retest-student-main">${escapeHtml(safeText(row.student_name, '-'))}</div>
+          <div class="retest-student-main">
+            ${escapeHtml(
+              safeText(row.student_name, '-')
+            )}
+          </div>
+
           <div class="retest-student-sub">
-            ชั้น ${escapeHtml(safeText(row.class_level, '-'))}/${escapeHtml(safeText(row.room, '-'))}
+            ชั้น
+            ${escapeHtml(
+              safeText(row.class_level, '-')
+            )}
+            /
+            ${escapeHtml(
+              safeText(row.room, '-')
+            )}
           </div>
         </td>
 
-        <td class="text-center mono">${escapeHtml(safeText(row.subject_code, '-'))}</td>
+        <td class="text-center mono">
+          ${escapeHtml(
+            safeText(row.subject_code, '-')
+          )}
+        </td>
 
         <td>
-          <div class="retest-subject-main">${escapeHtml(safeText(row.subject_name, '-'))}</div>
+          <div class="retest-subject-main">
+            ${escapeHtml(
+              safeText(row.subject_name, '-')
+            )}
+          </div>
+
           <div class="retest-subject-sub">
-            ปี ${escapeHtml(safeText(row.academic_year, '-'))}
-            / เทอม ${escapeHtml(safeText(row.term, '-'))}
+            ปี
+            ${escapeHtml(
+              safeText(row.academic_year, '-')
+            )}
+            / เทอม
+            ${escapeHtml(
+              safeText(row.term, '-')
+            )}
           </div>
         </td>
 
-        <td class="text-center">${renderStudentGradePill(originalGrade)}</td>
+        <td class="text-center">
+          ${renderStudentGradePill(originalGrade)}
+        </td>
 
         <td class="text-center">
           ${retestGradeHtml}
