@@ -11141,13 +11141,7 @@ function mergeRetestRowsWithRequests(baseRows, requestMap){
   });
 }
 
-function hasRetestSearchCriteria(){
-  const year = safeText(el('retestYear')?.value, '');
-  const term = safeText(el('retestTerm')?.value, '');
-  const studentCode = safeText(el('retestStudentCodeKeyword')?.value, '');
 
-  return !!(year || term || studentCode);
-}
 
 async function loadRetestRows(){
   try{
@@ -11155,17 +11149,7 @@ async function loadRetestRows(){
       throw new Error('ไม่พบข้อมูลครูผู้เข้าสู่ระบบ');
     }
 
-    if(!hasRetestSearchCriteria()){
-      state.retestRows = [];
-      state.retestEditingId = null;
-      renderRetestRows([]);
-      setStatus(
-        'retestStatus',
-        'กรุณาเลือกปีการศึกษา/ภาคเรียน หรือค้นหาเลขประจำตัวนักเรียนก่อนแสดงรายการ',
-        'warn'
-      );
-      return;
-    }
+
 
     const yearText = safeText(el('retestYear').value, '');
     const termText = safeText(el('retestTerm').value, '');
