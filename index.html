@@ -22452,40 +22452,60 @@ function applyAdviserRetestFiltersAndRender(){
     );
 
   /*
-   * กรองคำค้นหาจากข้อมูลที่โหลดแล้ว
+   * ขั้นที่ 1
+   * กรองตามข้อความค้นหาก่อน
+   *
+   * ข้อมูลชุดนี้จะใช้คำนวณ KPI ทั้ง 4 ช่อง
+   * เช่น เมื่อค้นหารหัสนักเรียน 24782
+   * KPI จะแสดงเฉพาะรายการของนักเรียน 24782
    */
-  let visibleRows =
+  const keywordFilteredRows =
     getAdviserRetestKeywordFilteredRows(
       allRows
     );
 
   /*
-   * กรองตามปุ่มสถานะ
+   * ขั้นที่ 2
+   * นำข้อมูลที่ผ่านคำค้นหาแล้ว
+   * มากรองต่อด้วยปุ่มสถานะ
    */
-  if(activeFilter !== 'all'){
-    visibleRows = visibleRows.filter(row => {
-      const trackingStatus =
-        getAdviserRetestTrackingStatus(row);
+  let visibleRows = [
+    ...keywordFilteredRows
+  ];
 
-      return trackingStatus.key ===
-        activeFilter;
-    });
+  if(activeFilter !== 'all'){
+    visibleRows =
+      keywordFilteredRows.filter(row => {
+        const trackingStatus =
+          getAdviserRetestTrackingStatus(
+            row
+          );
+
+        return (
+          trackingStatus.key ===
+          activeFilter
+        );
+      });
   }
 
   /*
-   * renderAdviserRetestRows จะอัปเดต KPI
-   * จาก visibleRows ชั่วคราว
+   * ตารางแสดงตามคำค้นหา
+   * และตามปุ่มสถานะที่เลือก
    */
   renderAdviserRetestRows(
     visibleRows
   );
 
   /*
-   * เขียน KPI ทับด้วยยอดรวมจริงทั้งหมด
-   * เพื่อให้จำนวนไม่เปลี่ยนเมื่อกดกรอง
+   * KPI คำนวณจากข้อมูลที่ผ่านคำค้นหาแล้ว
+   *
+   * แต่ไม่คำนวณจากปุ่มสถานะ
+   * เพื่อให้ KPI ทั้ง 4 ช่องยังบอกจำนวน
+   * ทั้งหมด / ยังไม่แก้ / รออนุมัติ / อนุมัติแล้ว
+   * ของนักเรียนที่ค้นหา
    */
   updateAdviserRetestSummary(
-    allRows
+    keywordFilteredRows
   );
 
   updateAdviserRetestFilterButtons();
@@ -22495,11 +22515,15 @@ function applyAdviserRetestFiltersAndRender(){
       activeFilter
     );
 
-  const keyword = safeText(
-    el('adviserRetestKeyword')?.value,
-    ''
-  ).trim();
+  const keyword =
+    safeText(
+      el('adviserRetestKeyword')?.value,
+      ''
+    ).trim();
 
+  /*
+   * ไม่มีข้อมูลต้นฉบับเลย
+   */
   if(!allRows.length){
     setStatus(
       'adviserRetestStatus',
@@ -22510,23 +22534,51 @@ function applyAdviserRetestFiltersAndRender(){
     return;
   }
 
-  const searchText = keyword
-    ? ` จากคำค้นหา “${keyword}”`
-    : '';
+  /*
+   * มีข้อมูล แต่ไม่ตรงกับคำค้นหา
+   */
+  if(
+    keyword &&
+    !keywordFilteredRows.length
+  ){
+    setStatus(
+      'adviserRetestStatus',
+      `ไม่พบรายการที่ตรงกับคำค้นหา “${keyword}”`,
+      'warn'
+    );
 
+    return;
+  }
+
+  const searchText =
+    keyword
+      ? ` จากคำค้นหา “${keyword}”`
+      : '';
+
+  /*
+   * ปุ่มรายการทั้งหมด
+   */
   if(activeFilter === 'all'){
     setStatus(
       'adviserRetestStatus',
-      `แสดงรายการทั้งหมด ${visibleRows.length} จาก ${allRows.length} รายการ${searchText}`,
+      keyword
+        ? `พบ ${keywordFilteredRows.length} รายการ${searchText}`
+        : `แสดงรายการทั้งหมด ${allRows.length} รายการ`,
       'success'
     );
 
     return;
   }
 
+  /*
+   * ปุ่มยังไม่แก้ / รออนุมัติ / อนุมัติแล้ว
+   */
   setStatus(
     'adviserRetestStatus',
-    `แสดงสถานะ “${filterLabel}” ${visibleRows.length} จากทั้งหมด ${allRows.length} รายการ${searchText}`,
+    `แสดงสถานะ “${filterLabel}” ` +
+    `${visibleRows.length} จาก ` +
+    `${keywordFilteredRows.length} รายการ` +
+    `${searchText}`,
     visibleRows.length
       ? 'success'
       : 'warn'
