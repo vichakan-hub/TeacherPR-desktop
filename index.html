@@ -6364,6 +6364,335 @@
   }
 }
 
+    /* =====================================================
+   ADVISER MIDTERM RISK PAGE
+   ===================================================== */
+
+.btn-adviser-risk{
+  min-height:44px;
+  height:auto;
+  padding:9px 18px;
+  border:1px solid #f4c66b;
+  border-radius:15px;
+  background:#fff7ea;
+  color:#9a5b00;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.4;
+  cursor:pointer;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
+}
+
+.btn-adviser-risk:hover{
+  transform:translateY(-1px);
+  background:#ffedc8;
+  box-shadow:0 8px 18px rgba(178,106,0,.14);
+}
+
+.btn-adviser-risk:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(178,106,0,.16);
+}
+
+
+/* ตัวกรองด้านบน */
+.adviser-midterm-risk-toolbar{
+  display:grid;
+  grid-template-columns:
+    minmax(150px, .75fr)
+    minmax(130px, .65fr)
+    minmax(190px, 1fr)
+    minmax(280px, 1.5fr);
+  gap:10px 12px;
+  margin:18px 0 14px;
+}
+
+
+/* กล่องอธิบายเกณฑ์ */
+.adviser-risk-criteria{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.adviser-risk-criteria-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:78px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid transparent;
+}
+
+.adviser-risk-criteria-item.score{
+  background:#fff7ea;
+  border-color:#ffe0aa;
+}
+
+.adviser-risk-criteria-item.attendance{
+  background:#f5f3ff;
+  border-color:#ddd6fe;
+}
+
+.adviser-risk-criteria-icon{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:rgba(255,255,255,.76);
+  font-size:22px;
+}
+
+.adviser-risk-criteria-title{
+  color:#17263c;
+  font-size:14px;
+  font-weight:900;
+}
+
+.adviser-risk-criteria-text{
+  margin-top:3px;
+  color:#6b7a90;
+  font-size:13px;
+  font-weight:700;
+}
+
+
+/* ข้อมูลนักเรียนที่เลือก */
+.adviser-risk-student-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:14px;
+  padding:16px 18px;
+  border:1px solid #cfe0ff;
+  border-radius:20px;
+  background:#eef4ff;
+}
+
+.adviser-risk-student-label{
+  color:#64748b;
+  font-size:12px;
+  font-weight:800;
+}
+
+.adviser-risk-student-name{
+  margin-top:4px;
+  color:#17324d;
+  font-size:19px;
+  font-weight:900;
+}
+
+.adviser-risk-student-meta{
+  margin-top:3px;
+  color:#64748b;
+  font-size:13px;
+  font-weight:700;
+}
+
+.adviser-risk-student-count{
+  min-width:130px;
+  padding:12px 16px;
+  border:1px solid #ffd2cf;
+  border-radius:17px;
+  background:#fff;
+  text-align:center;
+}
+
+.adviser-risk-student-count-label{
+  color:#6b7a90;
+  font-size:12px;
+  font-weight:800;
+}
+
+.adviser-risk-student-count-value{
+  margin-top:4px;
+  color:#d92d20;
+  font-size:28px;
+  font-weight:900;
+  line-height:1;
+}
+
+
+/* ตาราง */
+.adviser-midterm-risk-table{
+  width:100%;
+  min-width:980px;
+  border-collapse:collapse;
+}
+
+.adviser-midterm-risk-table th,
+.adviser-midterm-risk-table td{
+  padding:14px 12px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+  font-size:14px;
+}
+
+.adviser-midterm-risk-table th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:#f8fbff;
+  color:#41536c;
+  font-weight:900;
+}
+
+
+/* ค่าเปอร์เซ็นต์ */
+.adviser-risk-percent{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:78px;
+  min-height:34px;
+  padding:5px 10px;
+  border:1px solid #d8e4ef;
+  border-radius:999px;
+  background:#f8fbff;
+  color:#17324d;
+  font-family:'Sarabun',sans-serif;
+  font-size:15px;
+  font-weight:900;
+}
+
+.adviser-risk-percent.low-score{
+  background:#fff7ea;
+  color:#b45309;
+  border-color:#f4c66b;
+}
+
+.adviser-risk-percent.low-attendance{
+  background:#f5f3ff;
+  color:#7c3aed;
+  border-color:#c4b5fd;
+}
+
+
+/* ป้ายสถานะ */
+.adviser-midterm-risk-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid transparent;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.4;
+  text-align:center;
+  white-space:normal;
+}
+
+.adviser-midterm-risk-status.score{
+  background:#fff7ea;
+  color:#b45309;
+  border-color:#f4c66b;
+}
+
+.adviser-midterm-risk-status.attendance{
+  background:#f5f3ff;
+  color:#7c3aed;
+  border-color:#c4b5fd;
+}
+
+.adviser-midterm-risk-status.both{
+  background:#fff0ef;
+  color:#d92d20;
+  border-color:#fca5a5;
+}
+
+
+@media (max-width:1100px){
+  .adviser-midterm-risk-toolbar{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+
+@media (max-width:720px){
+  .adviser-midterm-risk-toolbar,
+  .adviser-risk-criteria{
+    grid-template-columns:1fr;
+  }
+
+  .adviser-risk-student-box{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .adviser-risk-student-count{
+    width:100%;
+  }
+
+  .btn-adviser-risk{
+    width:100%;
+  }
+}
+
+    /* =====================================================
+   ADVISER RISK TABLE ROW
+   ===================================================== */
+
+.adviser-risk-subject-name{
+  color:#17263c;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.5;
+}
+
+.adviser-risk-teacher-name{
+  color:#17263c;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.45;
+}
+
+/* เสี่ยงด้านคะแนน */
+.adviser-midterm-risk-table
+.adviser-risk-row-score td{
+  background:#fffdf8;
+}
+
+/* เสี่ยงด้านเวลาเรียน */
+.adviser-midterm-risk-table
+.adviser-risk-row-attendance td{
+  background:#fcfaff;
+}
+
+/* เสี่ยงทั้งคะแนนและเวลาเรียน */
+.adviser-midterm-risk-table
+.adviser-risk-row-both td{
+  background:#fff8f8;
+}
+
+/* เน้นช่องที่ต่ำกว่าเกณฑ์ */
+.adviser-midterm-risk-table
+.adviser-risk-row-both
+.adviser-risk-percent{
+  box-shadow:0 0 0 2px rgba(217,45,32,.06);
+}
+
+@media (max-width:720px){
+  .adviser-risk-subject-name{
+    min-width:190px;
+  }
+
+  .adviser-risk-teacher-name{
+    min-width:150px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -7040,9 +7369,23 @@
             </div>
           </div>
 
-          <div class="actions" style="margin-bottom:12px;">
-            <button id="loadAdviserStudentsBtn" class="btn-primary" type="button">โหลดรายชื่อนักเรียน</button>
-          </div>
+<div class="actions" style="margin-bottom:12px;">
+  <button
+    id="loadAdviserStudentsBtn"
+    class="btn-primary"
+    type="button"
+  >
+    โหลดรายชื่อนักเรียน
+  </button>
+
+  <button
+    id="openAdviserMidtermRiskBtn"
+    class="btn-adviser-risk"
+    type="button"
+  >
+    ⚠️ นักเรียนที่เสี่ยงติด 0, ร, มส และ มผ
+  </button>
+</div>
 
           <div class="adviser-summary">
             <div class="adviser-summary-card">
@@ -7092,6 +7435,261 @@
           </div>
         </section>
       </div>
+
+        <!-- PAGE ADVISER MIDTERM RISK : ความเสี่ยงจากรายงานกลางภาค -->
+<div id="pageAdviserMidtermRisk" class="hidden">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="preview-topbar">
+
+      <div>
+        <h2>นักเรียนที่เสี่ยงติด 0, ร, มส และ มผ</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          วิเคราะห์จากเปอร์เซ็นต์คะแนนและเปอร์เซ็นต์เวลาเรียน
+          ที่ครูผู้สอนรายงานไว้ในผลกลางภาค
+        </div>
+      </div>
+
+      <div class="actions" style="margin:0;">
+        <button
+          id="backToAdviserBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ← กลับหน้ารายชื่อนักเรียน
+        </button>
+      </div>
+
+    </div>
+
+
+    <div class="adviser-midterm-risk-toolbar">
+
+      <div class="field">
+        <label
+          class="label-in-form"
+          for="adviserRiskYear"
+        >
+          ปีการศึกษา
+        </label>
+
+        <select
+          id="adviserRiskYear"
+          class="std"
+        >
+          <option value="">
+            กำลังโหลด...
+          </option>
+        </select>
+      </div>
+
+
+      <div class="field">
+        <label
+          class="label-in-form"
+          for="adviserRiskTerm"
+        >
+          ภาคเรียน
+        </label>
+
+        <select
+          id="adviserRiskTerm"
+          class="std"
+        >
+          <option value="">
+            กำลังโหลด...
+          </option>
+        </select>
+      </div>
+
+
+      <div class="field">
+        <label
+          class="label-in-form"
+          for="adviserRiskRoomSelect"
+        >
+          ห้องที่ปรึกษา
+        </label>
+
+        <select
+          id="adviserRiskRoomSelect"
+          class="std"
+        >
+          <option value="">
+            กรุณาเลือกห้องที่ปรึกษา
+          </option>
+        </select>
+      </div>
+
+
+      <div class="field">
+        <label
+          class="label-in-form"
+          for="adviserRiskStudentSelect"
+        >
+          นักเรียนที่มีความเสี่ยง
+        </label>
+
+        <select
+          id="adviserRiskStudentSelect"
+          class="std"
+          disabled
+        >
+          <option value="">
+            กรุณาเลือกห้องที่ปรึกษาก่อน
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+
+    <div class="adviser-risk-criteria">
+
+      <div class="adviser-risk-criteria-item score">
+        <span class="adviser-risk-criteria-icon">📉</span>
+
+        <div>
+          <div class="adviser-risk-criteria-title">
+            ความเสี่ยงด้านคะแนน
+          </div>
+
+          <div class="adviser-risk-criteria-text">
+            เปอร์เซ็นต์คะแนนต่ำกว่า 50%
+          </div>
+        </div>
+      </div>
+
+
+      <div class="adviser-risk-criteria-item attendance">
+        <span class="adviser-risk-criteria-icon">⏱️</span>
+
+        <div>
+          <div class="adviser-risk-criteria-title">
+            ความเสี่ยงด้านเวลาเรียน
+          </div>
+
+          <div class="adviser-risk-criteria-text">
+            เปอร์เซ็นต์เวลาเรียนต่ำกว่า 80%
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div
+      id="adviserRiskSelectedStudentBox"
+      class="adviser-risk-student-box hidden"
+    >
+      <div>
+        <div class="adviser-risk-student-label">
+          นักเรียนที่เลือก
+        </div>
+
+        <div
+          id="adviserRiskSelectedStudentName"
+          class="adviser-risk-student-name"
+        >
+          -
+        </div>
+
+        <div
+          id="adviserRiskSelectedStudentMeta"
+          class="adviser-risk-student-meta"
+        >
+          -
+        </div>
+      </div>
+
+      <div class="adviser-risk-student-count">
+        <div class="adviser-risk-student-count-label">
+          วิชาที่มีความเสี่ยง
+        </div>
+
+        <div
+          id="adviserRiskSubjectCount"
+          class="adviser-risk-student-count-value"
+        >
+          0
+        </div>
+      </div>
+    </div>
+
+
+    <div
+      id="adviserRiskStatus"
+      class="status info"
+    >
+      ระบบจะแสดงเฉพาะนักเรียนที่มีคะแนนต่ำกว่า 50%
+      หรือมีเวลาเรียนต่ำกว่า 80%
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table class="adviser-midterm-risk-table">
+
+        <thead>
+          <tr>
+            <th
+              style="width:130px;"
+              class="text-center"
+            >
+              รหัสวิชา
+            </th>
+
+            <th>
+              ชื่อวิชา
+            </th>
+
+            <th style="width:220px;">
+              ครูผู้สอน
+            </th>
+
+            <th
+              style="width:130px;"
+              class="text-center"
+            >
+              %คะแนน
+            </th>
+
+            <th
+              style="width:140px;"
+              class="text-center"
+            >
+              %เวลาเรียน
+            </th>
+
+            <th
+              style="width:280px;"
+              class="text-center"
+            >
+              สถานะความเสี่ยง
+            </th>
+          </tr>
+        </thead>
+
+        <tbody id="adviserRiskTbody">
+          <tr>
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+              กรุณาเลือกห้องที่ปรึกษาและนักเรียน
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>
 
         <!-- PAGE ADVISER RETEST : ติดตามสอบแก้ตัว -->
 <div id="pageAdviserRetest" class="hidden">
@@ -8956,9 +9554,27 @@ gradeReportDefaultPage: 'midtermReport',
   previewMeta: null,
   previewFilter: 'all',
 
-  adviserRooms: [],
-  adviserStudents: [],
-  selectedAdviserRoomKey: '',
+adviserRooms: [],
+adviserStudents: [],
+selectedAdviserRoomKey: '',
+
+/*
+ * หน้าความเสี่ยงจากรายงานกลางภาค
+ * แยกจากหน้าดูเกรดนักเรียนในที่ปรึกษา
+ */
+adviserRiskRooms: [],
+selectedAdviserRiskRoomKey: '',
+
+adviserRiskRows: [],
+adviserRiskStudents: [],
+
+/*
+ * เลขประจำตัวนักเรียนที่กำลังเลือก
+ * ใน Dropdown หน้าความเสี่ยง
+ */
+selectedAdviserRiskStudentCode: '',
+
+  
 
   retestRows: [],
   retestEditingId: null,
@@ -9174,10 +9790,12 @@ function setActivePage(page){
   ){
     return false;
   }
+
   const isHome = page === 'home';
   const isMidtermReport = page === 'midtermReport';
   const isImport = page === 'import';
   const isAdviser = page === 'adviser';
+  const isAdviserRisk = page === 'adviserrisk';
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
   const isGradeStats = page === 'gradestats';
@@ -9188,15 +9806,35 @@ function setActivePage(page){
     closeAllSidebarGroups();
   }
 
-  el('pageHome').classList.toggle('hidden', !isHome);
-  el('pageMidtermReport')?.classList.toggle('hidden', !isMidtermReport);
-  el('pageImport').classList.toggle('hidden', !isImport);
-  el('pageAdviser').classList.toggle('hidden', !isAdviser);
-  el('pageAdviserRetest')?.classList.toggle('hidden', !isAdviserRetest);
-  el('pageRetest').classList.toggle('hidden', !isRetest);
-  el('pageFreePeriod')?.classList.toggle('hidden', !isFreePeriod);
-  el('pageGradeStats')?.classList.toggle('hidden', !isGradeStats);
-  el('pageTeacherStudent')?.classList.toggle('hidden', !isTeacherStudent);
+  el('pageHome')
+    ?.classList.toggle('hidden', !isHome);
+
+  el('pageMidtermReport')
+    ?.classList.toggle('hidden', !isMidtermReport);
+
+  el('pageImport')
+    ?.classList.toggle('hidden', !isImport);
+
+  el('pageAdviser')
+    ?.classList.toggle('hidden', !isAdviser);
+
+  el('pageAdviserMidtermRisk')
+    ?.classList.toggle('hidden', !isAdviserRisk);
+
+  el('pageAdviserRetest')
+    ?.classList.toggle('hidden', !isAdviserRetest);
+
+  el('pageRetest')
+    ?.classList.toggle('hidden', !isRetest);
+
+  el('pageFreePeriod')
+    ?.classList.toggle('hidden', !isFreePeriod);
+
+  el('pageGradeStats')
+    ?.classList.toggle('hidden', !isGradeStats);
+
+  el('pageTeacherStudent')
+    ?.classList.toggle('hidden', !isTeacherStudent);
 
   setSidebarActiveMain(page);
   updateAppTopbarTitle(page);
@@ -9211,11 +9849,12 @@ function setActivePage(page){
   }
 
   if(isMidtermReport){
-  applyMidtermSettings();
-  loadMidtermTeachingList();
-}
+    applyMidtermSettings();
+    loadMidtermTeachingList();
+  }
 
   closeMobileSidebar();
+
   return true;
 }
 
@@ -9265,6 +9904,13 @@ const map = {
   home: 'menuHomeBtn',
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
+
+  /*
+   * หน้าความเสี่ยงเป็นเมนูย่อยของ
+   * นักเรียนในที่ปรึกษา
+   */
+  adviserrisk: 'menuAdviserBtn',
+
   adviserretest: 'menuAdviserRetestBtn',
   gradestats: 'menuGradeStatsBtn',
   teacherstudent: 'menuTeacherStudentBtn'
@@ -9321,6 +9967,10 @@ const titleMap = {
   midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
   import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
   adviser: ['นักเรียนในที่ปรึกษา', 'ดูข้อมูล ผลการเรียน และภาพรวมเชิงวิเคราะห์ของนักเรียนในที่ปรึกษา'],
+  adviserrisk: [
+  'นักเรียนที่เสี่ยงติด 0, ร, มส และ มผ',
+  'วิเคราะห์ความเสี่ยงจากคะแนนและเวลาเรียนที่ครูผู้สอนรายงานกลางภาค'
+],
  adviserretest: [
   'ติดตามการสอบแก้ตัว',
   'ติดตามสถานะยังไม่แก้ รออนุมัติ และอนุมัติแล้วของนักเรียนในที่ปรึกษา'
@@ -9862,6 +10512,23 @@ applySettingToYearTermControls({
     allowAllTermText: ''
   });
 
+  /*
+ * หน้าความเสี่ยงกลางภาค
+ * ใช้ App Setting ชุดเดียวกับหน้าดูเกรดนักเรียนในที่ปรึกษา
+ */
+applySettingToYearTermControls({
+  setting: settings.adviser,
+  yearId: 'adviserRiskYear',
+  termId: 'adviserRiskTerm',
+  statusId: 'adviserRiskStatus',
+
+  lockedMessage: s =>
+    `ล็อคข้อมูลความเสี่ยงนักเรียน ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+
+  allowAllYearText: '',
+  allowAllTermText: ''
+});
+
 applySettingToYearTermControls({
   setting: settings.adviser_retest,
   yearId: 'adviserRetestYear',
@@ -9936,6 +10603,72 @@ function applyFreePeriodSettingsToDropdowns(settings){
     adviser: state.adviserSettings || buildDefaultOneSetting(),
     free_period: settings
   });
+}
+
+function applyAdviserRiskSettingsToDropdowns(){
+  const setting =
+    state.adviserSettings ||
+    buildDefaultOneSetting();
+
+  applySettingToYearTermControls({
+    setting,
+    yearId: 'adviserRiskYear',
+    termId: 'adviserRiskTerm',
+    statusId: 'adviserRiskStatus',
+
+    lockedMessage: s =>
+      `ล็อคข้อมูลความเสี่ยงนักเรียน ปีการศึกษา ${s.academic_year} ภาคเรียนที่ ${s.term}`,
+
+    allowAllYearText: '',
+    allowAllTermText: ''
+  });
+}
+
+
+/*
+ * เมื่อเข้าจากหน้ารายชื่อนักเรียน
+ * ให้ใช้ปีและภาคเรียนที่กำลังเลือกอยู่ก่อน
+ *
+ * ใช้ในกรณี App Setting ไม่ได้ล็อก
+ */
+function syncAdviserSelectionToRiskPage(){
+  const sourceYear =
+    safeText(
+      el('adviserYear')?.value,
+      ''
+    );
+
+  const sourceTerm =
+    safeText(
+      el('adviserTerm')?.value,
+      ''
+    );
+
+  const targetYear =
+    el('adviserRiskYear');
+
+  const targetTerm =
+    el('adviserRiskTerm');
+
+
+  if(
+    targetYear &&
+    sourceYear &&
+    Array.from(targetYear.options)
+      .some(option => option.value === sourceYear)
+  ){
+    targetYear.value = sourceYear;
+  }
+
+
+  if(
+    targetTerm &&
+    sourceTerm &&
+    Array.from(targetTerm.options)
+      .some(option => option.value === sourceTerm)
+  ){
+    targetTerm.value = sourceTerm;
+  }
 }
 
 function initDefaultFilters(){
@@ -10135,6 +10868,1428 @@ state.teacherStudentCompareRows = [];
     function getSelectedAdviserRoom(){
       return state.adviserRooms.find(r => getAdviserRoomKey(r) === state.selectedAdviserRoomKey) || null;
     }
+
+    /*
+ * คืนค่าห้องที่เลือกในหน้าความเสี่ยงกลางภาค
+ */
+function getSelectedAdviserRiskRoom(){
+  return (
+    state.adviserRiskRooms || []
+  ).find(
+    room =>
+      getAdviserRoomKey(room) ===
+      state.selectedAdviserRiskRoomKey
+  ) || null;
+}
+
+function resetAdviserRiskStudentView(message = 'กรุณาเลือกห้องที่ปรึกษา'){
+  state.adviserRiskRows = [];
+  state.adviserRiskStudents = [];
+  state.selectedAdviserRiskStudentCode = '';
+
+  const studentSelect =
+    el('adviserRiskStudentSelect');
+
+  if(studentSelect){
+    studentSelect.disabled = true;
+    studentSelect.innerHTML = `
+      <option value="">
+        ${escapeHtml(message)}
+      </option>
+    `;
+  }
+
+  el('adviserRiskSelectedStudentBox')
+    ?.classList.add('hidden');
+
+  if(el('adviserRiskSelectedStudentName')){
+    el('adviserRiskSelectedStudentName')
+      .textContent = '-';
+  }
+
+  if(el('adviserRiskSelectedStudentMeta')){
+    el('adviserRiskSelectedStudentMeta')
+      .textContent = '-';
+  }
+
+  if(el('adviserRiskSubjectCount')){
+    el('adviserRiskSubjectCount')
+      .textContent = '0';
+  }
+
+  const tbody = el('adviserRiskTbody');
+
+  if(tbody){
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          class="empty-state"
+        >
+          ${escapeHtml(message)}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function adviserRiskToNullableNumber(value){
+  if(
+    value === null ||
+    value === undefined ||
+    String(value).trim() === ''
+  ){
+    return null;
+  }
+
+  const number = Number(value);
+
+  return Number.isFinite(number)
+    ? number
+    : null;
+}
+
+function evaluateAdviserMidtermRiskRow(
+  report,
+  student
+){
+  const scorePercent =
+    adviserRiskToNullableNumber(
+      report.score_percent
+    );
+
+  const attendancePercent =
+    adviserRiskToNullableNumber(
+      report.attendance_percent
+    );
+
+  const hasScoreRisk =
+    scorePercent !== null &&
+    scorePercent < 50;
+
+  const hasAttendanceRisk =
+    attendancePercent !== null &&
+    attendancePercent < 80;
+
+  /*
+   * ไม่เข้าเกณฑ์ความเสี่ยง
+   */
+  if(
+    !hasScoreRisk &&
+    !hasAttendanceRisk
+  ){
+    return null;
+  }
+
+  let riskType = '';
+  let riskLabel = '';
+
+  if(
+    hasScoreRisk &&
+    hasAttendanceRisk
+  ){
+    riskType = 'both';
+    riskLabel =
+      'คะแนน<50% และ เวลาเรียน<80%';
+
+  }else if(hasScoreRisk){
+    riskType = 'score';
+    riskLabel = 'คะแนน<50%';
+
+  }else{
+    riskType = 'attendance';
+    riskLabel = 'เวลาเรียน<80%';
+  }
+
+  return {
+    ...report,
+
+    /*
+     * ใช้ข้อมูลนักเรียนจาก students เป็นหลัก
+     * เพื่อให้เลขที่และชื่อเป็นข้อมูลปัจจุบัน
+     */
+    student_id:
+      student?.id ||
+      report.student_id ||
+      null,
+
+    student_code:
+      safeText(
+        student?.sid ||
+        report.student_code,
+        ''
+      ),
+
+    student_name:
+      safeText(
+        student?.raw_full_name ||
+        report.student_name,
+        '-'
+      ),
+
+    student_no:
+      safeNum(
+        student?.current_no ??
+        report.student_no
+      ),
+
+    score_percent_value:
+      scorePercent,
+
+    attendance_percent_value:
+      attendancePercent,
+
+    has_score_risk:
+      hasScoreRisk,
+
+    has_attendance_risk:
+      hasAttendanceRisk,
+
+    risk_type:
+      riskType,
+
+    risk_label:
+      riskLabel
+  };
+}
+
+async function fetchAdviserRiskStudentsForRoom(
+  selectedRoom
+){
+  if(!selectedRoom){
+    return [];
+  }
+
+  const academicYear =
+    safeNum(
+      selectedRoom.academic_year
+    );
+
+  const classLevel =
+    safeText(
+      selectedRoom.class_level,
+      ''
+    );
+
+  const room =
+    safeText(
+      selectedRoom.room,
+      ''
+    );
+
+  /*
+   * ใช้กติกาปีเข้าเดียวกับ
+   * หน้ารายชื่อนักเรียนและหน้ารายงานกลางภาค
+   */
+  const entryFilter =
+    teacherStudentGetEntryFilterByClassLevel(
+      classLevel,
+      academicYear
+    );
+
+  let query =
+    supabaseClient
+      .from('students')
+      .select(`
+        id,
+        sid,
+        raw_full_name,
+        current_room,
+        current_no,
+        entry_academic_year,
+        entry_level,
+        is_active
+      `)
+      .eq('is_active', true)
+      .eq('current_room', room)
+      .order(
+        'current_no',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'raw_full_name',
+        {
+          ascending: true
+        }
+      );
+
+  if(entryFilter){
+    query = query
+      .eq(
+        'entry_academic_year',
+        entryFilter.entry_academic_year
+      )
+      .eq(
+        'entry_level',
+        entryFilter.entry_level
+      );
+  }
+
+  const {
+    data,
+    error
+  } = await query;
+
+  if(error){
+    throw error;
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+async function fetchAdviserMidtermReportsForRoom(
+  selectedRoom
+){
+  if(!selectedRoom){
+    return [];
+  }
+
+  const academicYear =
+    safeNum(
+      selectedRoom.academic_year
+    );
+
+  const term =
+    safeNum(
+      selectedRoom.term
+    );
+
+  const classLevel =
+    safeText(
+      selectedRoom.class_level,
+      ''
+    );
+
+  const room =
+    safeText(
+      selectedRoom.room,
+      ''
+    );
+
+  /*
+   * ใช้ fetchAllPages เพื่อป้องกันข้อมูลเกิน
+   * limit เริ่มต้นของ Supabase
+   *
+   * เช่น นักเรียน 40 คน × 25 วิชา
+   * อาจมีข้อมูลถึง 1,000 รายการ
+   */
+  const rows =
+    await fetchAllPages(
+      () => {
+        return supabaseClient
+          .from('midterm_reports')
+          .select(`
+            id,
+            academic_year,
+            term,
+            class_level,
+            room,
+
+            subject_id,
+            subject_code,
+            subject_name,
+
+            teacher_id,
+            teacher_code,
+            teacher_name,
+
+            student_id,
+            student_code,
+            student_no,
+            student_name,
+
+            score_percent,
+            attendance_percent,
+
+            keep_max,
+            midterm_max,
+            attendance_max,
+
+            updated_at
+          `)
+          .eq(
+            'academic_year',
+            academicYear
+          )
+          .eq(
+            'term',
+            term
+          )
+          .eq(
+            'class_level',
+            classLevel
+          )
+          .eq(
+            'room',
+            room
+          )
+          .order(
+            'student_code',
+            {
+              ascending: true
+            }
+          )
+          .order(
+            'subject_code',
+            {
+              ascending: true
+            }
+          )
+          .order(
+            'teacher_code',
+            {
+              ascending: true
+            }
+          );
+      },
+      1000
+    );
+
+  return Array.isArray(rows)
+    ? rows
+    : [];
+}
+
+function buildAdviserRiskStudentGroups(
+  riskRows
+){
+  const studentMap =
+    new Map();
+
+  (riskRows || []).forEach(row => {
+    const studentCode =
+      safeText(
+        row.student_code,
+        ''
+      ).trim();
+
+    if(!studentCode){
+      return;
+    }
+
+    if(!studentMap.has(studentCode)){
+      studentMap.set(
+        studentCode,
+        {
+          student_id:
+            row.student_id ||
+            null,
+
+          student_code:
+            studentCode,
+
+          student_name:
+            safeText(
+              row.student_name,
+              '-'
+            ),
+
+          student_no:
+            safeNum(
+              row.student_no
+            ),
+
+          risk_rows: []
+        }
+      );
+    }
+
+    studentMap
+      .get(studentCode)
+      .risk_rows
+      .push(row);
+  });
+
+  const students =
+    Array.from(
+      studentMap.values()
+    );
+
+  students.forEach(student => {
+    student.risk_rows.sort(
+      (a, b) => {
+        const subjectCompare =
+          safeText(
+            a.subject_code,
+            ''
+          ).localeCompare(
+            safeText(
+              b.subject_code,
+              ''
+            ),
+            'th'
+          );
+
+        if(subjectCompare !== 0){
+          return subjectCompare;
+        }
+
+        return safeText(
+          a.teacher_name,
+          ''
+        ).localeCompare(
+          safeText(
+            b.teacher_name,
+            ''
+          ),
+          'th'
+        );
+      }
+    );
+
+    /*
+     * นับจำนวนวิชาแบบไม่ซ้ำ
+     * หากวิชาเดียวกันมีครูร่วมสอนหลายคน
+     */
+    student.risk_subject_count =
+      new Set(
+        student.risk_rows.map(row =>
+          safeText(
+            row.subject_code,
+            ''
+          )
+        )
+      ).size;
+  });
+
+  students.sort(
+    (a, b) => {
+      const noA =
+        safeNum(a.student_no);
+
+      const noB =
+        safeNum(b.student_no);
+
+      if(
+        noA !== null &&
+        noB !== null &&
+        noA !== noB
+      ){
+        return noA - noB;
+      }
+
+      if(
+        noA !== null &&
+        noB === null
+      ){
+        return -1;
+      }
+
+      if(
+        noA === null &&
+        noB !== null
+      ){
+        return 1;
+      }
+
+      return safeText(
+        a.student_name,
+        ''
+      ).localeCompare(
+        safeText(
+          b.student_name,
+          ''
+        ),
+        'th'
+      );
+    }
+  );
+
+  return students;
+}
+
+function renderAdviserRiskStudentOptions(){
+  const select =
+    el('adviserRiskStudentSelect');
+
+  if(!select){
+    return;
+  }
+
+  const students =
+    state.adviserRiskStudents || [];
+
+  if(!students.length){
+    select.disabled = true;
+
+    select.innerHTML = `
+      <option value="">
+        ไม่พบนักเรียนที่มีความเสี่ยง
+      </option>
+    `;
+
+    state.selectedAdviserRiskStudentCode = '';
+
+    return;
+  }
+
+  select.disabled = false;
+
+  select.innerHTML = `
+    <option value="">
+      กรุณาเลือกนักเรียนที่มีความเสี่ยง
+    </option>
+
+    ${students.map(student => {
+      const studentNo =
+        safeText(
+          student.student_no,
+          '-'
+        );
+
+      const label =
+        `เลขที่ ${studentNo} ` +
+        `${safeText(
+          student.student_name,
+          '-'
+        )} — เสี่ยง ` +
+        `${student.risk_subject_count} วิชา`;
+
+      return `
+        <option
+          value="${escapeHtml(
+            student.student_code
+          )}"
+        >
+          ${escapeHtml(label)}
+        </option>
+      `;
+    }).join('')}
+  `;
+
+  /*
+   * หลังโหลดข้อมูลใหม่
+   * ยังไม่เลือกนักเรียนให้อัตโนมัติ
+   * เพื่อให้ครูเป็นผู้เลือกดู
+   */
+  state.selectedAdviserRiskStudentCode = '';
+  select.value = '';
+}
+
+function clearAdviserRiskSelectedStudentView(
+  message = 'กรุณาเลือกนักเรียนที่มีความเสี่ยง'
+){
+  state.selectedAdviserRiskStudentCode = '';
+
+  el('adviserRiskSelectedStudentBox')
+    ?.classList.add('hidden');
+
+  if(el('adviserRiskSelectedStudentName')){
+    el(
+      'adviserRiskSelectedStudentName'
+    ).textContent = '-';
+  }
+
+  if(el('adviserRiskSelectedStudentMeta')){
+    el(
+      'adviserRiskSelectedStudentMeta'
+    ).textContent = '-';
+  }
+
+  if(el('adviserRiskSubjectCount')){
+    el(
+      'adviserRiskSubjectCount'
+    ).textContent = '0';
+  }
+
+  const tbody =
+    el('adviserRiskTbody');
+
+  if(tbody){
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          class="empty-state"
+        >
+          ${escapeHtml(message)}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+/*
+ * ค้นหานักเรียนที่กำลังเลือก
+ * จากรายการนักเรียนเสี่ยงที่โหลดไว้แล้ว
+ */
+function getSelectedAdviserRiskStudent(){
+  const studentCode =
+    safeText(
+      state.selectedAdviserRiskStudentCode ||
+      el('adviserRiskStudentSelect')?.value,
+      ''
+    );
+
+  if(!studentCode){
+    return null;
+  }
+
+  return (
+    state.adviserRiskStudents || []
+  ).find(
+    student =>
+      safeText(
+        student.student_code,
+        ''
+      ) === studentCode
+  ) || null;
+}
+
+function formatAdviserRiskPercent(value){
+  const number =
+    adviserRiskToNullableNumber(
+      value
+    );
+
+  if(number === null){
+    return '-';
+  }
+
+  return `${number.toFixed(2)}%`;
+}
+
+function renderAdviserRiskSelectedStudent(){
+  const studentCode =
+    safeText(
+      el('adviserRiskStudentSelect')?.value,
+      ''
+    );
+
+  state.selectedAdviserRiskStudentCode =
+    studentCode;
+
+  /*
+   * ยังไม่ได้เลือกนักเรียน
+   */
+  if(!studentCode){
+    clearAdviserRiskSelectedStudentView(
+      'กรุณาเลือกนักเรียนที่มีความเสี่ยงจาก Dropdown ด้านบน'
+    );
+
+    setStatus(
+      'adviserRiskStatus',
+      state.adviserRiskStudents?.length
+        ? `พบนักเรียนที่มีความเสี่ยง ${state.adviserRiskStudents.length} คน กรุณาเลือกนักเรียน`
+        : 'ไม่พบนักเรียนที่มีความเสี่ยง',
+      state.adviserRiskStudents?.length
+        ? 'info'
+        : 'success'
+    );
+
+    return;
+  }
+
+  const student =
+    getSelectedAdviserRiskStudent();
+
+  if(!student){
+    clearAdviserRiskSelectedStudentView(
+      'ไม่พบข้อมูลนักเรียนที่เลือก'
+    );
+
+    setStatus(
+      'adviserRiskStatus',
+      'ไม่พบข้อมูลนักเรียนที่เลือก กรุณาโหลดข้อมูลใหม่',
+      'error'
+    );
+
+    return;
+  }
+
+  const selectedRoom =
+    getSelectedAdviserRiskRoom();
+
+  const riskRows =
+    Array.isArray(student.risk_rows)
+      ? [...student.risk_rows]
+      : [];
+
+  /*
+   * เรียงตามรหัสวิชา แล้วตามชื่อครู
+   */
+  riskRows.sort((a, b) => {
+    const subjectCompare =
+      safeText(
+        a.subject_code,
+        ''
+      ).localeCompare(
+        safeText(
+          b.subject_code,
+          ''
+        ),
+        'th'
+      );
+
+    if(subjectCompare !== 0){
+      return subjectCompare;
+    }
+
+    return safeText(
+      a.teacher_name,
+      ''
+    ).localeCompare(
+      safeText(
+        b.teacher_name,
+        ''
+      ),
+      'th'
+    );
+  });
+
+  /*
+   * แสดงกล่องข้อมูลนักเรียน
+   */
+  const studentBox =
+    el('adviserRiskSelectedStudentBox');
+
+  if(studentBox){
+    studentBox.classList.remove(
+      'hidden'
+    );
+  }
+
+  if(el('adviserRiskSelectedStudentName')){
+    el(
+      'adviserRiskSelectedStudentName'
+    ).textContent =
+      safeText(
+        student.student_name,
+        '-'
+      );
+  }
+
+  const studentNo =
+    student.student_no === null ||
+    student.student_no === undefined
+      ? '-'
+      : student.student_no;
+
+  const classRoom =
+    selectedRoom
+      ? `${safeText(
+          selectedRoom.class_level,
+          '-'
+        )}/${safeText(
+          selectedRoom.room,
+          '-'
+        )}`
+      : '-';
+
+  const academicYear =
+    safeText(
+      selectedRoom?.academic_year,
+      el('adviserRiskYear')?.value || '-'
+    );
+
+  const term =
+    safeText(
+      selectedRoom?.term,
+      el('adviserRiskTerm')?.value || '-'
+    );
+
+  if(el('adviserRiskSelectedStudentMeta')){
+    el(
+      'adviserRiskSelectedStudentMeta'
+    ).textContent =
+      `เลขที่ ${studentNo}` +
+      ` | เลขประจำตัว ${safeText(
+        student.student_code,
+        '-'
+      )}` +
+      ` | ห้อง ${classRoom}` +
+      ` | ปีการศึกษา ${academicYear}` +
+      ` ภาคเรียนที่ ${term}`;
+  }
+
+  /*
+   * นับจำนวนวิชาแบบไม่ซ้ำ
+   */
+  const uniqueSubjectCount =
+    new Set(
+      riskRows.map(row =>
+        safeText(
+          row.subject_code,
+          ''
+        )
+      ).filter(Boolean)
+    ).size;
+
+  if(el('adviserRiskSubjectCount')){
+    el(
+      'adviserRiskSubjectCount'
+    ).textContent =
+      String(uniqueSubjectCount);
+  }
+
+  const tbody =
+    el('adviserRiskTbody');
+
+  if(!tbody){
+    return;
+  }
+
+  if(!riskRows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          class="empty-state"
+        >
+          ไม่พบรายวิชาที่มีความเสี่ยงของนักเรียนคนนี้
+        </td>
+      </tr>
+    `;
+
+    setStatus(
+      'adviserRiskStatus',
+      'ไม่พบรายวิชาที่มีความเสี่ยงของนักเรียนคนนี้',
+      'warn'
+    );
+
+    return;
+  }
+
+  tbody.innerHTML =
+    riskRows.map(row => {
+      const riskType =
+        ['score', 'attendance', 'both']
+          .includes(row.risk_type)
+          ? row.risk_type
+          : '';
+
+      const rowClass =
+        riskType === 'both'
+          ? 'adviser-risk-row-both'
+          : riskType === 'score'
+            ? 'adviser-risk-row-score'
+            : 'adviser-risk-row-attendance';
+
+      const scoreClass =
+        row.has_score_risk
+          ? 'low-score'
+          : '';
+
+      const attendanceClass =
+        row.has_attendance_risk
+          ? 'low-attendance'
+          : '';
+
+      const teacherName =
+        safeText(
+          row.teacher_name,
+          '-'
+        );
+
+      const teacherCode =
+        safeText(
+          row.teacher_code,
+          ''
+        );
+
+      const teacherCodeHtml =
+        teacherCode
+          ? `
+            <div class="small">
+              ${escapeHtml(teacherCode)}
+            </div>
+          `
+          : '';
+
+      return `
+        <tr class="${rowClass}">
+
+          <td class="text-center">
+            <span class="mono">
+              ${escapeHtml(
+                safeText(
+                  row.subject_code,
+                  '-'
+                )
+              )}
+            </span>
+          </td>
+
+          <td>
+            <div class="adviser-risk-subject-name">
+              ${escapeHtml(
+                safeText(
+                  row.subject_name,
+                  '-'
+                )
+              )}
+            </div>
+          </td>
+
+          <td>
+            <div class="adviser-risk-teacher-name">
+              ${escapeHtml(
+                teacherName
+              )}
+            </div>
+
+            ${teacherCodeHtml}
+          </td>
+
+          <td class="text-center">
+            <span
+              class="adviser-risk-percent ${scoreClass}"
+            >
+              ${escapeHtml(
+                formatAdviserRiskPercent(
+                  row.score_percent_value
+                )
+              )}
+            </span>
+          </td>
+
+          <td class="text-center">
+            <span
+              class="adviser-risk-percent ${attendanceClass}"
+            >
+              ${escapeHtml(
+                formatAdviserRiskPercent(
+                  row.attendance_percent_value
+                )
+              )}
+            </span>
+          </td>
+
+          <td class="text-center">
+            <span
+              class="adviser-midterm-risk-status ${riskType}"
+            >
+              ${escapeHtml(
+                safeText(
+                  row.risk_label,
+                  '-'
+                )
+              )}
+            </span>
+          </td>
+
+        </tr>
+      `;
+    }).join('');
+
+  setStatus(
+    'adviserRiskStatus',
+    `แสดงรายวิชาที่มีความเสี่ยงของ ${safeText(
+      student.student_name,
+      '-'
+    )} จำนวน ${uniqueSubjectCount} วิชา`,
+    'success'
+  );
+}
+
+async function loadAdviserRiskStudents(){
+  try{
+    const roomKey =
+      safeText(
+        el('adviserRiskRoomSelect')
+          ?.value,
+        ''
+      );
+
+    state.selectedAdviserRiskRoomKey =
+      roomKey;
+
+    if(!roomKey){
+      resetAdviserRiskStudentView(
+        'กรุณาเลือกห้องที่ปรึกษา'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        'กรุณาเลือกห้องที่ปรึกษา',
+        'warn'
+      );
+
+      return;
+    }
+
+    const selectedRoom =
+      getSelectedAdviserRiskRoom();
+
+    if(!selectedRoom){
+      resetAdviserRiskStudentView(
+        'ไม่พบข้อมูลห้องที่เลือก'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        'ไม่พบข้อมูลห้องที่เลือก',
+        'error'
+      );
+
+      return;
+    }
+
+    setStatus(
+      'adviserRiskStatus',
+      'กำลังโหลดรายชื่อนักเรียนและข้อมูลกลางภาค...',
+      'info'
+    );
+
+    resetAdviserRiskStudentView(
+      'กำลังวิเคราะห์ข้อมูลความเสี่ยง...'
+    );
+
+    /*
+     * โหลดนักเรียนและรายงานกลางภาคพร้อมกัน
+     */
+    const [
+      students,
+      reports
+    ] = await Promise.all([
+      fetchAdviserRiskStudentsForRoom(
+        selectedRoom
+      ),
+
+      fetchAdviserMidtermReportsForRoom(
+        selectedRoom
+      )
+    ]);
+
+    if(!students.length){
+      state.adviserRiskRows = [];
+      state.adviserRiskStudents = [];
+
+      renderAdviserRiskStudentOptions();
+
+      clearAdviserRiskSelectedStudentView(
+        'ไม่พบนักเรียนในห้องที่ปรึกษานี้'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        'ไม่พบนักเรียนในห้องที่ปรึกษานี้',
+        'warn'
+      );
+
+      return;
+    }
+
+    /*
+     * ใช้เลขประจำตัวนักเรียนเป็นตัวจับคู่หลัก
+     */
+    const studentByCode =
+      new Map(
+        students
+          .map(student => {
+            const studentCode =
+              safeText(
+                student.sid,
+                ''
+              ).trim();
+
+            return [
+              studentCode,
+              student
+            ];
+          })
+          .filter(
+            ([studentCode]) =>
+              !!studentCode
+          )
+      );
+
+    const riskRows = [];
+
+    (reports || []).forEach(report => {
+      const studentCode =
+        safeText(
+          report.student_code,
+          ''
+        ).trim();
+
+      const student =
+        studentByCode.get(
+          studentCode
+        );
+
+      /*
+       * ไม่นำรายงานของนักเรียนที่ไม่ได้อยู่
+       * ในห้องที่ปรึกษาปัจจุบันมาแสดง
+       */
+      if(!student){
+        return;
+      }
+
+      const riskRow =
+        evaluateAdviserMidtermRiskRow(
+          report,
+          student
+        );
+
+      if(riskRow){
+        riskRows.push(
+          riskRow
+        );
+      }
+    });
+
+    riskRows.sort(
+      (a, b) => {
+        const noA =
+          safeNum(a.student_no) ??
+          99999;
+
+        const noB =
+          safeNum(b.student_no) ??
+          99999;
+
+        if(noA !== noB){
+          return noA - noB;
+        }
+
+        const studentCompare =
+          safeText(
+            a.student_name,
+            ''
+          ).localeCompare(
+            safeText(
+              b.student_name,
+              ''
+            ),
+            'th'
+          );
+
+        if(studentCompare !== 0){
+          return studentCompare;
+        }
+
+        return safeText(
+          a.subject_code,
+          ''
+        ).localeCompare(
+          safeText(
+            b.subject_code,
+            ''
+          ),
+          'th'
+        );
+      }
+    );
+
+    state.adviserRiskRows =
+      riskRows;
+
+    state.adviserRiskStudents =
+      buildAdviserRiskStudentGroups(
+        riskRows
+      );
+
+    renderAdviserRiskStudentOptions();
+
+    clearAdviserRiskSelectedStudentView(
+      state.adviserRiskStudents.length
+        ? 'กรุณาเลือกนักเรียนที่มีความเสี่ยงจาก Dropdown ด้านบน'
+        : 'ไม่พบนักเรียนที่มีความเสี่ยงในห้องนี้'
+    );
+
+    const classRoom =
+      `${safeText(
+        selectedRoom.class_level,
+        '-'
+      )}/${safeText(
+        selectedRoom.room,
+        '-'
+      )}`;
+
+    if(!reports.length){
+      setStatus(
+        'adviserRiskStatus',
+        `ยังไม่มีครูผู้สอนรายงานคะแนนกลางภาคของห้อง ${classRoom}`,
+        'warn'
+      );
+
+      return;
+    }
+
+    if(!state.adviserRiskStudents.length){
+      setStatus(
+        'adviserRiskStatus',
+        `ตรวจสอบรายงานกลางภาคแล้ว ไม่พบนักเรียนที่มีความเสี่ยงในห้อง ${classRoom}`,
+        'success'
+      );
+
+      return;
+    }
+
+    const totalRiskSubjects =
+      state.adviserRiskStudents.reduce(
+        (
+          total,
+          student
+        ) => {
+          return total +
+            Number(
+              student.risk_subject_count ||
+              0
+            );
+        },
+        0
+      );
+
+    setStatus(
+      'adviserRiskStatus',
+      `พบนักเรียนที่มีความเสี่ยง ${state.adviserRiskStudents.length} คน รวม ${totalRiskSubjects} รายวิชา`,
+      'success'
+    );
+
+  }catch(error){
+    console.error(
+      'loadAdviserRiskStudents ERROR',
+      error
+    );
+
+    state.adviserRiskRows = [];
+    state.adviserRiskStudents = [];
+    state.selectedAdviserRiskStudentCode = '';
+
+    renderAdviserRiskStudentOptions();
+
+    clearAdviserRiskSelectedStudentView(
+      'โหลดข้อมูลความเสี่ยงไม่สำเร็จ'
+    );
+
+    setStatus(
+      'adviserRiskStatus',
+      error.message ||
+      'โหลดข้อมูลความเสี่ยงไม่สำเร็จ',
+      'error'
+    );
+  }
+}
+
+function renderAdviserRiskRoomOptions(
+  rows,
+  preferredRoomKey = ''
+){
+  const select =
+    el('adviserRiskRoomSelect');
+
+  if(!select){
+    return;
+  }
+
+  const roomRows =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+  if(!roomRows.length){
+    select.innerHTML = `
+      <option value="">
+        ไม่พบห้องที่ปรึกษา
+      </option>
+    `;
+
+    select.value = '';
+
+    state.selectedAdviserRiskRoomKey = '';
+
+    resetAdviserRiskStudentView(
+      'ไม่พบห้องที่ปรึกษาในปีและภาคเรียนที่เลือก'
+    );
+
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">
+      กรุณาเลือกห้องที่ปรึกษา
+    </option>
+
+    ${roomRows.map(row => {
+      const key =
+        getAdviserRoomKey(row);
+
+      const roleText =
+        safeText(
+          row.adviser_role,
+          ''
+        );
+
+      const classLevel =
+        safeText(
+          row.class_level,
+          '-'
+        );
+
+      const room =
+        safeText(
+          row.room,
+          '-'
+        );
+
+      const label =
+        `${classLevel}/${room}` +
+        (
+          roleText
+            ? ` (${roleText})`
+            : ''
+        );
+
+      return `
+        <option
+          value="${escapeHtml(key)}"
+        >
+          ${escapeHtml(label)}
+        </option>
+      `;
+    }).join('')}
+  `;
+
+  /*
+   * ลำดับการเลือกอัตโนมัติ
+   *
+   * 1. ห้องที่ส่งมาจากหน้าดูเกรด
+   * 2. ห้องเดิมที่เลือกในหน้าความเสี่ยง
+   * 3. ถ้ามีห้องเดียว เลือกห้องนั้น
+   */
+  const availableKeys =
+    new Set(
+      roomRows.map(
+        row =>
+          getAdviserRoomKey(row)
+      )
+    );
+
+  let nextKey = '';
+
+  if(
+    preferredRoomKey &&
+    availableKeys.has(preferredRoomKey)
+  ){
+    nextKey = preferredRoomKey;
+
+  }else if(
+    state.selectedAdviserRiskRoomKey &&
+    availableKeys.has(
+      state.selectedAdviserRiskRoomKey
+    )
+  ){
+    nextKey =
+      state.selectedAdviserRiskRoomKey;
+
+  }else if(roomRows.length === 1){
+    nextKey =
+      getAdviserRoomKey(
+        roomRows[0]
+      );
+  }
+
+  state.selectedAdviserRiskRoomKey =
+    nextKey;
+
+  select.value = nextKey;
+}
 
 const LOWER_TERM_LABELS = [
   { class_level: 'ม.1', term: 1, label: 'ม.1 เทอม 1' },
@@ -12785,6 +14940,170 @@ if(el('studentDetailOverviewCompareTbody')){
         select.value = state.selectedAdviserRoomKey;
       }
     }
+
+    async function loadAdviserRiskRooms(
+  options = {}
+){
+  try{
+    if(!state.currentUser?.id){
+      state.adviserRiskRooms = [];
+
+      renderAdviserRiskRoomOptions([]);
+
+      setStatus(
+        'adviserRiskStatus',
+        'ไม่พบข้อมูลครูผู้เข้าสู่ระบบ',
+        'error'
+      );
+
+      return;
+    }
+
+    const preferredRoomKey =
+      safeText(
+        options.preferredRoomKey,
+        ''
+      );
+
+    const year =
+      safeNum(
+        el('adviserRiskYear')?.value
+      );
+
+    const term =
+      safeNum(
+        el('adviserRiskTerm')?.value
+      );
+
+    if(!year || !term){
+      state.adviserRiskRooms = [];
+      state.selectedAdviserRiskRoomKey = '';
+
+      renderAdviserRiskRoomOptions([]);
+
+      setStatus(
+        'adviserRiskStatus',
+        'กรุณาเลือกปีการศึกษาและภาคเรียน',
+        'warn'
+      );
+
+      return;
+    }
+
+    setStatus(
+      'adviserRiskStatus',
+      'กำลังโหลดห้องที่ปรึกษา...',
+      'info'
+    );
+
+    resetAdviserRiskStudentView(
+      'กำลังโหลดข้อมูลห้องที่ปรึกษา...'
+    );
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from('teacher_advisers')
+      .select(`
+        id,
+        teacher_id,
+        academic_year,
+        term,
+        class_level,
+        room,
+        adviser_role
+      `)
+      .eq(
+        'teacher_id',
+        state.currentUser.id
+      )
+      .eq(
+        'academic_year',
+        year
+      )
+      .eq(
+        'term',
+        term
+      )
+      .order(
+        'class_level',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'room',
+        {
+          ascending: true
+        }
+      );
+
+    if(error){
+      throw error;
+    }
+
+    state.adviserRiskRooms =
+      Array.isArray(data)
+        ? data
+        : [];
+
+    renderAdviserRiskRoomOptions(
+      state.adviserRiskRooms,
+      preferredRoomKey
+    );
+
+    if(!state.adviserRiskRooms.length){
+      setStatus(
+        'adviserRiskStatus',
+        `ไม่พบห้องที่ปรึกษา ปีการศึกษา ${year} ภาคเรียนที่ ${term}`,
+        'warn'
+      );
+
+      return;
+    }
+
+    const selectedRoom =
+      getSelectedAdviserRiskRoom();
+
+   if(selectedRoom){
+  /*
+   * มีห้องเดียวหรือรับห้องเดิมมาจากหน้าดูเกรด
+   * โหลดข้อมูลความเสี่ยงให้อัตโนมัติ
+   */
+  await loadAdviserRiskStudents();
+
+}else{
+      resetAdviserRiskStudentView(
+        'กรุณาเลือกห้องที่ปรึกษา'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        `พบห้องที่ปรึกษา ${state.adviserRiskRooms.length} ห้อง กรุณาเลือกห้อง`,
+        'success'
+      );
+    }
+
+  }catch(error){
+    console.error(
+      'loadAdviserRiskRooms ERROR',
+      error
+    );
+
+    state.adviserRiskRooms = [];
+    state.selectedAdviserRiskRoomKey = '';
+
+    renderAdviserRiskRoomOptions([]);
+
+    setStatus(
+      'adviserRiskStatus',
+      error.message ||
+      'โหลดห้องที่ปรึกษาไม่สำเร็จ',
+      'error'
+    );
+  }
+}
 
     async function fetchAllPages(buildQuery, pageSize = 1000){
   let from = 0;
@@ -19158,12 +21477,171 @@ bindIfExists('adviserRoomSelect', 'change', () => {
   resetAdviserSummary();
 });
 
+  /*
+ * เปลี่ยนปีในหน้าความเสี่ยง
+ */
+bindIfExists(
+  'adviserRiskYear',
+  'change',
+  async () => {
+    state.selectedAdviserRiskRoomKey = '';
+
+    await loadAdviserRiskRooms();
+  }
+);
+
+
+/*
+ * เปลี่ยนภาคเรียนในหน้าความเสี่ยง
+ */
+bindIfExists(
+  'adviserRiskTerm',
+  'change',
+  async () => {
+    state.selectedAdviserRiskRoomKey = '';
+
+    await loadAdviserRiskRooms();
+  }
+);
+
+
+/*
+ * เปลี่ยนห้องที่ปรึกษา
+ */
+bindIfExists(
+  'adviserRiskRoomSelect',
+  'change',
+  async () => {
+    state.selectedAdviserRiskRoomKey =
+      safeText(
+        el('adviserRiskRoomSelect')
+          ?.value,
+        ''
+      );
+
+    if(
+      !state.selectedAdviserRiskRoomKey
+    ){
+      resetAdviserRiskStudentView(
+        'กรุณาเลือกห้องที่ปรึกษา'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        'กรุณาเลือกห้องที่ปรึกษา',
+        'warn'
+      );
+
+      return;
+    }
+
+    await loadAdviserRiskStudents();
+  }
+);
+
+  /*
+ * เลือกนักเรียนที่มีความเสี่ยง
+ */
+bindIfExists(
+  'adviserRiskStudentSelect',
+  'change',
+  () => {
+    renderAdviserRiskSelectedStudent();
+  }
+);
+
   bindIfExists('adviserKeyword', 'input', () => {
     clearTimeout(window.__adviserSearchTimer);
     window.__adviserSearchTimer = setTimeout(loadAdviserStudents, 250);
   });
 
   bindIfExists('loadAdviserStudentsBtn', 'click', loadAdviserStudents);
+
+  /*
+ * เปิดหน้าความเสี่ยงจากหน้ารายชื่อนักเรียนในที่ปรึกษา
+ */
+bindIfExists(
+  'openAdviserMidtermRiskBtn',
+  'click',
+  async () => {
+    /*
+     * จำห้องที่เลือกอยู่ในหน้าดูเกรด
+     */
+    const sourceRoomKey =
+      safeText(
+        el('adviserRoomSelect')?.value,
+        ''
+      );
+
+    const pageChanged =
+      setActivePage(
+        'adviserrisk'
+      );
+
+    if(pageChanged === false){
+      return;
+    }
+
+    try{
+      /*
+       * โหลด App Setting หากยังไม่มี
+       */
+      if(!state.adviserSettings){
+        await loadImportSettingsFromSheet();
+      }
+
+      /*
+       * ตั้งค่าปี/เทอมจาก App Setting
+       */
+      applyAdviserRiskSettingsToDropdowns();
+
+      /*
+       * ถ้า Setting ไม่ล็อก
+       * ให้นำปี/เทอมจากหน้าดูเกรดมาใช้
+       */
+      syncAdviserSelectionToRiskPage();
+
+      /*
+       * โหลดห้อง และพยายามเลือกห้องเดิม
+       */
+      await loadAdviserRiskRooms({
+        preferredRoomKey:
+          sourceRoomKey
+      });
+
+    }catch(error){
+      console.error(
+        'openAdviserMidtermRiskBtn ERROR',
+        error
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        error.message ||
+        'เปิดหน้าข้อมูลความเสี่ยงไม่สำเร็จ',
+        'error'
+      );
+    }
+  }
+);
+
+
+/*
+ * กลับไปหน้ารายชื่อนักเรียนในที่ปรึกษา
+ */
+bindIfExists(
+  'backToAdviserBtn',
+  'click',
+  async () => {
+    setActivePage('adviser');
+
+    /*
+     * โหลดห้องเดิมอีกครั้ง
+     * เพื่อให้หน้ารายชื่อนักเรียนพร้อมใช้งาน
+     */
+    await loadAdviserRooms();
+  }
+);
 
 bindIfExists('teacherStudentSubjectSelect', 'change', () => {
   renderTeacherStudentRoomOptions();
