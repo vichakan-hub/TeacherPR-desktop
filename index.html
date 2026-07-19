@@ -6693,6 +6693,366 @@
   }
 }
 
+
+
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#17263c;
+  --muted:#6b7a90;
+  --line:#d9e3ee;
+  --primary:#2563eb;
+  --primary-dark:#1d4ed8;
+  --primary2:#38bdf8;
+  --success:#0f9d58;
+  --danger:#d92d20;
+  --warning:#b26a00;
+  --violet:#7c3aed;
+  --shadow:0 10px 30px rgba(18,38,63,.08);
+  --soft-shadow:0 10px 30px rgba(18,38,63,.08);
+}
+
+/* พื้นหลังเหมือน TeacherPR */
+html,
+body{
+  min-height:100%;
+}
+
+body{
+  margin:0 !important;
+  min-height:100vh;
+  color:var(--text) !important;
+  font-family:'Kanit',sans-serif !important;
+  background:
+    linear-gradient(
+      90deg,
+      #e89ce5 0%,
+      #b7b3ef 50%,
+      #a7d9ea 100%
+    ) !important;
+}
+
+/* พื้นหลังหน้า Login */
+.leader-login-view{
+  background:transparent !important;
+}
+
+/* พื้นหลังภายในแอป */
+.leader-app,
+.leader-main{
+  background:transparent !important;
+}
+
+/* Card หลักเหมือน TeacherPR */
+.card,
+.leader-login-card,
+.leader-login-info,
+.leader-page-placeholder,
+.subject-card,
+.kpi,
+.chart-card,
+.table-card,
+.insight-card,
+.area-kpi-section,
+.area-kpi-card,
+.filter-card,
+.subject-panel,
+.room-card{
+  background:rgba(255,255,255,.72) !important;
+  border:1px solid rgba(255,255,255,.55) !important;
+  box-shadow:var(--shadow) !important;
+}
+
+/* Card ด้านในที่ควรเป็นสีอ่อน */
+.filter-card,
+.subject-panel,
+.subject-card,
+.chart-card,
+.table-card,
+.insight-card,
+.area-kpi-section,
+.room-card{
+  border-color:var(--line) !important;
+}
+
+/* มุมโค้งแบบ TeacherPR */
+.card{
+  border-radius:20px !important;
+}
+
+.leader-login-card,
+.leader-login-info{
+  border-radius:20px !important;
+}
+
+.filter-card,
+.subject-panel,
+.subject-card,
+.kpi,
+.area-kpi-card,
+.room-card{
+  border-radius:18px !important;
+}
+
+.chart-card,
+.table-card,
+.insight-card,
+.area-kpi-section{
+  border-radius:22px !important;
+}
+
+/* Hero เหมือน TeacherPR */
+.hero,
+.leader-login-hero{
+  color:#fff !important;
+  background:
+    linear-gradient(
+      135deg,
+      #245dd8 0%,
+      #2a82ef 60%,
+      #34b4de 100%
+    ) !important;
+  border:1px solid rgba(255,255,255,.5) !important;
+  border-radius:25px !important;
+  box-shadow:var(--shadow) !important;
+}
+
+/* เอาพื้นหลังวงกลมของ LeaderPR เดิมออก */
+.leader-login-hero::before,
+.leader-login-hero::after{
+  display:none !important;
+}
+
+/* ตัวอักษรหลัก */
+h1,
+h2,
+h3,
+h4,
+.leader-login-title,
+.builder-head h2,
+.chart-title h2,
+.section-title h2,
+.subject-card .v,
+.kpi .value,
+.area-kpi-name,
+.room-card-title{
+  color:var(--text);
+}
+
+/* ตัวอักษรรอง */
+p,
+.sub,
+.text-muted,
+.builder-head p,
+.chart-title p,
+.section-title p,
+.subject-card .k,
+.subject-card .s,
+.kpi .label,
+.kpi .sub,
+.area-kpi-target,
+.area-kpi-sub{
+  color:var(--muted);
+}
+
+/* Hero ต้องเป็นตัวอักษรขาว */
+.hero h1,
+.hero p,
+.hero .school-pill,
+.hero-side,
+.hero-side .k,
+.hero-side .v,
+.leader-login-hero,
+.leader-login-hero h1,
+.leader-login-hero p,
+.leader-login-brand-sub,
+.leader-login-hero-side{
+  color:#fff !important;
+}
+
+/* ช่องกรอกและ Select */
+input,
+select,
+textarea,
+.search-box,
+.leader-login-input-wrap input,
+.leader-password-input-wrap input{
+  color:var(--text) !important;
+  background:#fff !important;
+  border:1px solid #bfd1e3 !important;
+  font-family:'Kanit',sans-serif !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.search-box:focus,
+.leader-login-input-wrap input:focus,
+.leader-password-input-wrap input:focus{
+  outline:none !important;
+  border-color:var(--primary) !important;
+  box-shadow:0 0 0 4px rgba(37,99,235,.12) !important;
+}
+
+/* ปุ่มหลัก */
+.btn-primary,
+.leader-login-submit,
+.leader-password-save{
+  color:#fff !important;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #3b82f6
+    ) !important;
+  border:0 !important;
+  box-shadow:0 8px 18px rgba(37,99,235,.18) !important;
+}
+
+/* ปุ่มรอง */
+.btn-secondary,
+.leader-password-cancel{
+  color:var(--text) !important;
+  background:#ecf2f8 !important;
+  border:1px solid #d6e2ee !important;
+  box-shadow:none !important;
+}
+
+/* ปุ่มสำเร็จ */
+.btn-success{
+  color:#0f9d58 !important;
+  background:#e9f8ef !important;
+  border:1px solid #bfe6cb !important;
+  box-shadow:none !important;
+}
+
+/* ปุ่มอันตราย */
+.btn-danger{
+  color:var(--danger) !important;
+  background:#fff0ef !important;
+  border:1px solid #ffd2cf !important;
+  box-shadow:none !important;
+}
+
+/* ตาราง */
+.table-wrap{
+  overflow:auto;
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  border-radius:18px !important;
+}
+
+table{
+  color:var(--text);
+}
+
+th{
+  color:#41536c !important;
+  background:#f8fbff !important;
+  border-color:var(--line) !important;
+}
+
+td{
+  border-color:var(--line) !important;
+}
+
+/* Badge */
+.badge{
+  color:#1d4ed8 !important;
+  background:#eef4ff !important;
+  border:1px solid #cfe0ff !important;
+}
+
+.badge.green{
+  color:#0f9d58 !important;
+  background:#e9f8ef !important;
+  border-color:#bfe6cb !important;
+}
+
+.badge.orange{
+  color:#b26a00 !important;
+  background:#fff7ea !important;
+  border-color:#ffe0aa !important;
+}
+
+.badge.red{
+  color:#d92d20 !important;
+  background:#fff0ef !important;
+  border-color:#ffd2cf !important;
+}
+
+/* กล่องสถานะ */
+.status.info{
+  color:var(--primary-dark) !important;
+  background:#eef4ff !important;
+  border-color:#cfe0ff !important;
+}
+
+.status.success{
+  color:var(--success) !important;
+  background:#e9f8ef !important;
+  border-color:#bfe6cb !important;
+}
+
+.status.error{
+  color:var(--danger) !important;
+  background:#fff0ef !important;
+  border-color:#ffd2cf !important;
+}
+
+.status.warning{
+  color:var(--warning) !important;
+  background:#fff7ea !important;
+  border-color:#ffe0aa !important;
+}
+
+/* Modal เปลี่ยนรหัสผ่าน */
+.leader-password-modal{
+  background:rgba(15,23,42,.38) !important;
+  backdrop-filter:none !important;
+}
+
+.leader-password-card{
+  background:#fff !important;
+  border:1px solid #e5e7eb !important;
+  border-radius:28px !important;
+  box-shadow:0 18px 40px rgba(15,23,42,.18) !important;
+}
+
+.leader-password-icon{
+  color:#1d4ed8 !important;
+  background:#e8f1ff !important;
+  border:0 !important;
+}
+
+.leader-password-close{
+  color:#41536c !important;
+  background:#eef3f8 !important;
+  border:0 !important;
+}
+
+/* มือถือ */
+@media (max-width:720px){
+  .leader-login-view{
+    padding:14px !important;
+  }
+
+  .leader-main .wrap{
+    padding:14px !important;
+  }
+
+  .hero,
+  .leader-login-hero{
+    border-radius:22px !important;
+  }
+
+  .card,
+  .leader-login-card,
+  .leader-login-info{
+    border-radius:20px !important;
+  }
+}
+
 </style>
 </head>
 <body>
