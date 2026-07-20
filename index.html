@@ -7420,18 +7420,23 @@ td{
         </select>
       </div>
 
-      <div class="field">
-        <span class="label-in-form">ชั้น</span>
-        <select id="midtermClassFilter" class="std">
-          <option value="">ทั้งหมด</option>
-          <option value="ม.1">ม.1</option>
-          <option value="ม.2">ม.2</option>
-          <option value="ม.3">ม.3</option>
-          <option value="ม.4">ม.4</option>
-          <option value="ม.5">ม.5</option>
-          <option value="ม.6">ม.6</option>
-        </select>
-      </div>
+<div class="field">
+  <label
+    class="label-in-form"
+    for="midtermClassFilter"
+  >
+    ชั้น
+  </label>
+
+  <select
+    id="midtermClassFilter"
+    class="std"
+  >
+    <option value="">
+      ทุกชั้น
+    </option>
+  </select>
+</div>
 
 <div class="field">
   <label
@@ -19961,6 +19966,75 @@ function groupMidtermOfferings(rows){
   return [...map.values()];
 }
 
+function renderMidtermClassFilter(
+  rows,
+  preferredClassLevel = ''
+){
+  const select =
+    el('midtermClassFilter');
+
+  if(!select){
+    return '';
+  }
+
+  /*
+   * ดึงชั้นจาก v_subject_offerings
+   * และไม่ให้ค่าซ้ำกัน
+   */
+  const classLevels =
+    Array.from(
+      new Set(
+        (rows || [])
+          .map(row =>
+            safeText(
+              row.class_level,
+              ''
+            ).trim()
+          )
+          .filter(Boolean)
+      )
+    ).sort((a, b) => {
+      return a.localeCompare(
+        b,
+        'th',
+        {
+          numeric: true,
+          sensitivity: 'base'
+        }
+      );
+    });
+
+  select.innerHTML = `
+    <option value="">
+      ทุกชั้น
+    </option>
+
+    ${classLevels.map(classLevel => `
+      <option
+        value="${escapeHtml(classLevel)}"
+      >
+        ${escapeHtml(classLevel)}
+      </option>
+    `).join('')}
+  `;
+
+  /*
+   * รักษาชั้นที่เลือกไว้
+   * ถ้ายังมีอยู่ในปี/เทอมใหม่
+   */
+  const nextValue =
+    preferredClassLevel &&
+    classLevels.includes(
+      preferredClassLevel
+    )
+      ? preferredClassLevel
+      : '';
+
+  select.value = nextValue;
+
+  return nextValue;
+}
+
 function renderMidtermSubjectFilter(
   rows,
   preferredSubjectCode = ''
@@ -20082,15 +20156,16 @@ async function loadMidtermTeachingList(){
         el('midtermTerm')?.value
       );
 
-    const classFilter =
+    /*
+     * จำค่าชั้นและวิชาที่เลือกอยู่
+     * ก่อนสร้าง Dropdown ใหม่
+     */
+    const previousClassLevel =
       safeText(
         el('midtermClassFilter')?.value,
         ''
-      );
+      ).trim();
 
-    /*
-     * รายวิชาที่เลือกจาก Dropdown
-     */
     const previousSubjectCode =
       safeText(
         el('midtermSubjectFilter')?.value,
@@ -20099,6 +20174,11 @@ async function loadMidtermTeachingList(){
 
     if(!year || !term){
       state.midtermGroups = [];
+
+      renderMidtermClassFilter(
+        [],
+        ''
+      );
 
       renderMidtermSubjectFilter(
         [],
@@ -20123,86 +20203,75 @@ async function loadMidtermTeachingList(){
     );
 
     /*
-     * อ่านเฉพาะรายการสอนของครูที่เข้าสู่ระบบ
+     * โหลดทุกรายการสอนของครูในปี/เทอมก่อน
+     *
+     * ยังไม่กรอง class_level ใน Query
+     * เพราะต้องนำข้อมูลทั้งหมดมาสร้าง Dropdown ชั้น
      */
-    let query =
-      supabaseClient
-        .from('v_subject_offerings')
-        .select(`
-          subject_offering_id,
-          subject_id,
-          teacher_id,
-          academic_year,
-          term,
-          class_level,
-          room,
-          credit,
-          section_code,
-          is_active,
-          subject_code,
-          subject_name,
-          subject_type,
-          teacher_code,
-          teacher_name
-        `)
-        .eq(
-          'teacher_id',
-          state.currentUser.id
-        )
-        .eq(
-          'academic_year',
-          Number(year)
-        )
-        .eq(
-          'term',
-          Number(term)
-        )
-        .eq(
-          'is_active',
-          true
-        )
-        .order(
-          'subject_code',
-          {
-            ascending: true
-          }
-        )
-        .order(
-          'class_level',
-          {
-            ascending: true
-          }
-        )
-        .order(
-          'room',
-          {
-            ascending: true
-          }
-        );
-
-    /*
-     * ถ้าเลือกชั้น ให้แสดงเฉพาะรายวิชา
-     * ที่ครูสอนในชั้นนั้น
-     */
-    if(classFilter){
-      query = query.eq(
-        'class_level',
-        classFilter
-      );
-    }
-
     const {
       data,
       error
-    } = await query;
+    } = await supabaseClient
+      .from('v_subject_offerings')
+      .select(`
+        subject_offering_id,
+        subject_id,
+        teacher_id,
+        academic_year,
+        term,
+        class_level,
+        room,
+        credit,
+        section_code,
+        is_active,
+        subject_code,
+        subject_name,
+        subject_type,
+        teacher_code,
+        teacher_name
+      `)
+      .eq(
+        'teacher_id',
+        state.currentUser.id
+      )
+      .eq(
+        'academic_year',
+        Number(year)
+      )
+      .eq(
+        'term',
+        Number(term)
+      )
+      .eq(
+        'is_active',
+        true
+      )
+      .order(
+        'class_level',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'room',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'subject_code',
+        {
+          ascending: true
+        }
+      );
 
     if(error){
       throw error;
     }
 
     /*
-     * ตัดรายวิชากิจกรรมออก
-     * รายวิชากิจกรรมคือรหัสขึ้นต้นด้วย "ก"
+     * ตัดวิชากิจกรรมออกก่อน
+     * จึงไม่แสดงทั้งวิชาและชั้นที่ไม่มีวิชารายงานคะแนน
      */
     const reportableRows =
       (data || []).filter(row => {
@@ -20219,38 +20288,60 @@ async function loadMidtermTeachingList(){
       });
 
     /*
-     * สร้าง Dropdown จากวิชาที่ครูคนนี้สอน
-     * และรักษาค่าที่เลือกไว้ หากยังมีอยู่
+     * สร้าง Dropdown ชั้นจากข้อมูลของครูคนนี้
+     */
+    const selectedClassLevel =
+      renderMidtermClassFilter(
+        reportableRows,
+        previousClassLevel
+      );
+
+    /*
+     * กรองข้อมูลตามชั้นหลังจากสร้าง Dropdown แล้ว
+     */
+    const classRows =
+      selectedClassLevel
+        ? reportableRows.filter(row => {
+            return (
+              safeText(
+                row.class_level,
+                ''
+              ).trim() ===
+              selectedClassLevel
+            );
+          })
+        : reportableRows;
+
+    /*
+     * Dropdown วิชาจะแสดงเฉพาะวิชา
+     * ที่ครูสอนในชั้นที่กำลังเลือก
      */
     const selectedSubjectCode =
       renderMidtermSubjectFilter(
-        reportableRows,
+        classRows,
         previousSubjectCode
       );
 
     /*
-     * จัดกลุ่มรายวิชาตามห้อง
+     * กรองรายวิชาที่เลือก
      */
-    let groups =
-      groupMidtermOfferings(
-        reportableRows
-      );
+    const visibleRows =
+      selectedSubjectCode
+        ? classRows.filter(row => {
+            return (
+              safeText(
+                row.subject_code,
+                ''
+              ).trim() ===
+              selectedSubjectCode
+            );
+          })
+        : classRows;
 
-    /*
-     * เมื่อเลือกวิชาจาก Dropdown
-     * ให้แสดงเฉพาะรหัสวิชานั้น
-     */
-    if(selectedSubjectCode){
-      groups = groups.filter(group => {
-        return (
-          safeText(
-            group.subject_code,
-            ''
-          ).trim() ===
-          selectedSubjectCode
-        );
-      });
-    }
+    const groups =
+      groupMidtermOfferings(
+        visibleRows
+      );
 
     state.midtermGroups =
       groups;
@@ -20262,9 +20353,20 @@ async function loadMidtermTeachingList(){
     if(!reportableRows.length){
       setStatus(
         'midtermListStatus',
-        classFilter
-          ? `ไม่พบรายวิชาที่ต้องรายงานกลางภาคในชั้น ${classFilter}`
-          : 'ไม่พบรายวิชาที่ต้องรายงานกลางภาค',
+        'ไม่พบรายวิชาที่ต้องรายงานกลางภาค',
+        'warn'
+      );
+
+      return;
+    }
+
+    if(
+      selectedClassLevel &&
+      !classRows.length
+    ){
+      setStatus(
+        'midtermListStatus',
+        `ไม่พบรายการสอนในชั้น ${selectedClassLevel}`,
         'warn'
       );
 
@@ -20284,14 +20386,24 @@ async function loadMidtermTeachingList(){
       return;
     }
 
-    const subjectText =
+    const filterText = [
+      selectedClassLevel
+        ? `ชั้น ${selectedClassLevel}`
+        : '',
+
       selectedSubjectCode
-        ? ` รหัสวิชา ${selectedSubjectCode}`
-        : '';
+        ? `รหัสวิชา ${selectedSubjectCode}`
+        : ''
+    ].filter(Boolean).join(' / ');
 
     setStatus(
       'midtermListStatus',
-      `พบรายการสอน ${groups.length} รายการ${subjectText}`,
+      `พบรายการสอน ${groups.length} รายการ` +
+      (
+        filterText
+          ? ` — ${filterText}`
+          : ''
+      ),
       groups.length
         ? 'success'
         : 'warn'
@@ -20304,6 +20416,11 @@ async function loadMidtermTeachingList(){
     );
 
     state.midtermGroups = [];
+
+    renderMidtermClassFilter(
+      [],
+      ''
+    );
 
     renderMidtermSubjectFilter(
       [],
