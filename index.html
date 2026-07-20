@@ -19993,11 +19993,29 @@ let query = supabaseClient
       query = query.eq('class_level', classFilter);
     }
 
-    const { data, error } = await query;
-    if(error) throw error;
+const { data, error } = await query;
+if(error) throw error;
 
-    let groups = groupMidtermOfferings(data || []);
+/*
+ * รายงานกลางภาคไม่แสดงรายวิชากิจกรรม
+ * โดยตรวจจากรหัสวิชาที่ขึ้นต้นด้วย "ก"
+ *
+ * ตัวอย่างที่ถูกซ่อน:
+ * ก23905
+ * ก21901
+ */
+const reportableRows = (data || []).filter(row => {
+  const subjectCode = safeText(
+    row.subject_code,
+    ''
+  );
 
+  return !subjectCode.startsWith('ก');
+});
+
+let groups = groupMidtermOfferings(
+  reportableRows
+);
     if(keyword){
       groups = groups.filter(g => {
         const text = `${g.subject_code || ''} ${g.subject_name || ''}`.toLowerCase();
