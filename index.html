@@ -23836,6 +23836,107 @@ function normalizeAdviserRetestStudentCode(value){
 }
 
 
+function getAdviserRetestClassLevelNumber(value){
+  const text =
+    safeText(
+      value,
+      ''
+    ).trim();
+
+  const match =
+    text.match(/[1-6]/);
+
+  if(!match){
+    return null;
+  }
+
+  const level =
+    Number(match[0]);
+
+  return Number.isFinite(level)
+    ? level
+    : null;
+}
+
+
+/*
+ * คืนค่าช่วงชั้นจากชั้นปัจจุบัน
+ *
+ * ม.1–ม.3 = มัธยมศึกษาตอนต้น
+ * ม.4–ม.6 = มัธยมศึกษาตอนปลาย
+ */
+function getAdviserRetestStageRange(
+  currentClassLevel
+){
+  const currentLevel =
+    getAdviserRetestClassLevelNumber(
+      currentClassLevel
+    );
+
+  if(
+    currentLevel >= 1 &&
+    currentLevel <= 3
+  ){
+    return {
+      key: 'lower_secondary',
+      min: 1,
+      max: 3,
+      label: 'ม.1–ม.3'
+    };
+  }
+
+  if(
+    currentLevel >= 4 &&
+    currentLevel <= 6
+  ){
+    return {
+      key: 'upper_secondary',
+      min: 4,
+      max: 6,
+      label: 'ม.4–ม.6'
+    };
+  }
+
+  return null;
+}
+
+
+/*
+ * ตรวจสอบว่าประวัติผลการเรียน
+ * อยู่ในช่วงชั้นเดียวกับนักเรียนปัจจุบันหรือไม่
+ */
+function isAdviserRetestRowInCurrentStage(
+  gradeRow,
+  currentClassLevel
+){
+  const stage =
+    getAdviserRetestStageRange(
+      currentClassLevel
+    );
+
+  const rowLevel =
+    getAdviserRetestClassLevelNumber(
+      gradeRow?.class_level
+    );
+
+  /*
+   * หากไม่สามารถระบุช่วงชั้นหรือชั้นของข้อมูลได้
+   * จะไม่แสดงรายการนั้น เพื่อป้องกันข้อมูลข้ามช่วงชั้น
+   */
+  if(
+    !stage ||
+    rowLevel === null
+  ){
+    return false;
+  }
+
+  return (
+    rowLevel >= stage.min &&
+    rowLevel <= stage.max
+  );
+}
+
+
 async function fetchAdviserRetestGradeHistory(adviserStudents){
   const students = Array.isArray(adviserStudents)
     ? adviserStudents
@@ -24103,21 +24204,40 @@ async function loadAdviserRetestRows(){
       'info'
     );
 
-    /*
-     * โหลดทุกปีและทุกภาคเรียน
-     * ด้วยทั้ง student_id และ student_code
-     */
-    const gradeRows =
-      await fetchAdviserRetestGradeHistory(
-        adviserStudents
-      );
+/*
+ * โหลดประวัติผลการเรียนทุกปี
+ * ด้วยทั้ง student_id และ student_code
+ */
+const allGradeRows =
+  await fetchAdviserRetestGradeHistory(
+    adviserStudents
+  );
 
-    /*
-     * โหลดคำขอสอบแก้ตัวที่กำลังรออนุมัติ
-     */
-    const gradeResultIds = gradeRows
-      .map(row => row.id)
-      .filter(Boolean);
+/*
+ * กรองให้เหลือเฉพาะช่วงชั้นปัจจุบัน
+ *
+ * ห้อง ม.1–ม.3:
+ * แสดงเฉพาะข้อมูลชั้น ม.1–ม.3
+ *
+ * ห้อง ม.4–ม.6:
+ * แสดงเฉพาะข้อมูลชั้น ม.4–ม.6
+ */
+const gradeRows =
+  allGradeRows.filter(row =>
+    isAdviserRetestRowInCurrentStage(
+      row,
+      selectedRoom.class_level
+    )
+  );
+
+/*
+ * โหลดคำขอสอบแก้ตัวเฉพาะรายการ
+ * ที่ผ่านการกรองช่วงชั้นแล้ว
+ */
+const gradeResultIds =
+  gradeRows
+    .map(row => row.id)
+    .filter(Boolean);
 
     const requestMap =
       await fetchAdviserRetestRequestMap(
