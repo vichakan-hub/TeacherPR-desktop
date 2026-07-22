@@ -5608,6 +5608,17 @@
   box-shadow:none;
 }
 
+/* จัดการนักเรียน */
+#manageMidtermStudentsBtn{
+  background:#f1edff !important;
+  color:#6d28d9 !important;
+  border-color:#c4b5fd !important;
+}
+
+#manageMidtermStudentsBtn:hover:not(:disabled){
+  background:#e8e0ff !important;
+}
+
 /* ดาวน์โหลด */
 #downloadMidtermTemplateBtn{
   background:#e8f1ff !important;
@@ -7053,6 +7064,706 @@ td{
   }
 }
 
+/* =====================================================
+   MIDTERM STUDENT ROSTER OVERLAY
+   จัดการรายชื่อนักเรียนก่อนกรอกคะแนน
+   ===================================================== */
+
+#midtermRosterOverlay{
+  z-index:10020;
+  padding:16px;
+  align-items:center;
+  justify-content:center;
+}
+
+
+/* กล่อง Overlay หลัก */
+#midtermRosterOverlay .midterm-roster-card{
+  width:min(1320px, calc(100vw - 32px));
+  max-width:1320px;
+  height:min(820px, calc(100vh - 32px));
+  max-height:calc(100vh - 32px);
+
+  padding:0;
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  background:#ffffff;
+  border:1px solid #d8e4ef;
+  border-radius:26px;
+  box-shadow:0 24px 60px rgba(15,23,42,.24);
+}
+
+
+/* =====================================================
+   ส่วนหัว
+   ===================================================== */
+
+.midterm-roster-header{
+  flex:0 0 auto;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+
+  padding:20px 22px 16px;
+  border-bottom:1px solid #e5edf7;
+  background:
+    linear-gradient(
+      135deg,
+      #eef4ff 0%,
+      #f8fbff 55%,
+      #f5f3ff 100%
+    );
+}
+
+.midterm-roster-header-main{
+  min-width:0;
+
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+}
+
+.midterm-roster-icon{
+  width:52px;
+  height:52px;
+  flex:0 0 52px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:17px;
+  background:#dbeafe;
+  color:#1d4ed8;
+  font-size:25px;
+}
+
+.midterm-roster-title{
+  margin:0;
+  color:#17263c;
+  font-size:23px;
+  font-weight:900;
+  line-height:1.3;
+}
+
+.midterm-roster-subject{
+  margin-top:5px;
+  color:#1d4ed8;
+  font-size:16px;
+  font-weight:900;
+  line-height:1.45;
+}
+
+.midterm-roster-meta{
+  margin-top:3px;
+  color:#64748b;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.5;
+}
+
+.midterm-roster-close-btn{
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+
+  padding:0;
+  border:0;
+  border-radius:13px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:#eef3f8;
+  color:#41536c;
+
+  font-family:inherit;
+  font-size:27px;
+  font-weight:500;
+  line-height:1;
+}
+
+.midterm-roster-close-btn:hover{
+  background:#fff0ef;
+  color:#d92d20;
+}
+
+
+/* =====================================================
+   Toolbar ด้านบน
+   ===================================================== */
+
+.midterm-roster-toolbar{
+  flex:0 0 auto;
+
+  display:grid;
+  grid-template-columns:minmax(280px, 1fr) auto;
+  gap:14px;
+  align-items:end;
+
+  padding:14px 22px;
+  border-bottom:1px solid #edf2f7;
+  background:#ffffff;
+}
+
+.midterm-roster-toolbar .field{
+  margin:0;
+}
+
+.midterm-roster-search-field{
+  max-width:520px;
+}
+
+.midterm-roster-toolbar-action{
+  min-width:220px;
+}
+
+#midtermRosterSelectAllRoomBtn{
+  width:100%;
+  height:42px;
+
+  border:1px solid #bfe6cb;
+  background:#e9f8ef;
+  color:#08783f;
+
+  font-weight:900;
+  white-space:nowrap;
+}
+
+#midtermRosterSelectAllRoomBtn:hover{
+  background:#dff4e7;
+}
+
+
+/* =====================================================
+   ตารางซ้ายและขวา
+   ===================================================== */
+
+.midterm-roster-grid{
+  flex:1 1 auto;
+  min-height:0;
+
+  display:grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    130px
+    minmax(0, 1fr);
+
+  gap:14px;
+  align-items:stretch;
+
+  padding:16px 22px;
+  background:#f8fafc;
+}
+
+.midterm-roster-panel{
+  min-width:0;
+  min-height:0;
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+  border:1px solid #d8e4ef;
+  border-radius:20px;
+  background:#ffffff;
+}
+
+.midterm-roster-panel.left{
+  border-color:#cfe0ff;
+}
+
+.midterm-roster-panel.right{
+  border-color:#bfe6cb;
+}
+
+.midterm-roster-panel-head{
+  flex:0 0 auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+
+  min-height:76px;
+  padding:13px 15px;
+
+  border-bottom:1px solid #e5edf7;
+}
+
+.midterm-roster-panel.left
+.midterm-roster-panel-head{
+  background:#eef4ff;
+}
+
+.midterm-roster-panel.right
+.midterm-roster-panel-head{
+  background:#e9f8ef;
+}
+
+.midterm-roster-panel-title{
+  color:#17263c;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.35;
+}
+
+.midterm-roster-panel-sub{
+  margin-top:3px;
+  color:#64748b;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+.midterm-roster-count{
+  flex:0 0 auto;
+
+  min-width:68px;
+  min-height:32px;
+  padding:5px 10px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.midterm-roster-count.left{
+  border:1px solid #93c5fd;
+  background:#ffffff;
+  color:#1d4ed8;
+}
+
+.midterm-roster-count.right{
+  border:1px solid #86d49f;
+  background:#ffffff;
+  color:#08783f;
+}
+
+
+/* กล่องเลื่อนของตาราง */
+.midterm-roster-table-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  background:#ffffff;
+}
+
+
+/*
+ * เขียนทับ table กลางของระบบ
+ * เพื่อไม่ให้ min-width:1200px ทำให้ Overlay ล้น
+ */
+#midtermRosterOverlay .midterm-roster-table{
+  width:100%;
+  min-width:520px !important;
+
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+#midtermRosterOverlay
+.midterm-roster-table th,
+
+#midtermRosterOverlay
+.midterm-roster-table td{
+  padding:10px 9px;
+  border-bottom:1px solid #edf2f7;
+
+  color:#17263c;
+  background:#ffffff;
+
+  font-size:13px;
+  line-height:1.4;
+  vertical-align:middle;
+}
+
+#midtermRosterOverlay
+.midterm-roster-table th{
+  position:sticky;
+  top:0;
+  z-index:3;
+
+  background:#f8fbff !important;
+  color:#41536c !important;
+
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+#midtermRosterOverlay
+.midterm-roster-table tbody tr:hover td{
+  background:#f8fbff;
+}
+
+#midtermRosterOverlay
+.midterm-roster-panel.right
+.midterm-roster-table tbody tr:hover td{
+  background:#f3fff7;
+}
+
+#midtermRosterOverlay
+.midterm-roster-table td:nth-child(1),
+#midtermRosterOverlay
+.midterm-roster-table td:nth-child(2){
+  text-align:center;
+}
+
+.midterm-roster-student-code{
+  color:#1d4ed8;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  font-size:12px;
+  font-weight:900;
+}
+
+.midterm-roster-student-name{
+  color:#17263c;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.45;
+  word-break:break-word;
+}
+
+.midterm-roster-student-meta{
+  margin-top:2px;
+  color:#6b7a90;
+  font-size:11px;
+  font-weight:600;
+}
+
+.midterm-roster-checkbox{
+  width:19px;
+  height:19px;
+  margin:0;
+
+  accent-color:#2563eb;
+  cursor:pointer;
+}
+
+
+/* =====================================================
+   ปุ่มย้ายตรงกลาง
+   ===================================================== */
+
+.midterm-roster-transfer-actions{
+  min-width:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  gap:12px;
+}
+
+.midterm-roster-transfer-btn{
+  width:100%;
+  min-height:62px;
+  height:auto;
+
+  padding:10px 9px;
+  border-radius:16px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+
+  font-family:inherit;
+  font-weight:900;
+  line-height:1.2;
+}
+
+.midterm-roster-transfer-btn.add{
+  border:1px solid #93c5fd;
+  background:#eef4ff;
+  color:#1d4ed8;
+}
+
+.midterm-roster-transfer-btn.add:hover{
+  background:#dbeafe;
+}
+
+.midterm-roster-transfer-btn.remove{
+  border:1px solid #fca5a5;
+  background:#fff0ef;
+  color:#b42318;
+}
+
+.midterm-roster-transfer-btn.remove:hover{
+  background:#fee2e2;
+}
+
+.midterm-roster-transfer-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.midterm-roster-transfer-icon{
+  font-size:24px;
+  font-weight:900;
+  line-height:1;
+}
+
+.midterm-roster-transfer-text{
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+}
+
+
+/* =====================================================
+   สถานะและ Footer
+   ===================================================== */
+
+.midterm-roster-status{
+  flex:0 0 auto;
+
+  min-height:38px;
+  margin:0;
+  padding:8px 22px;
+
+  display:flex;
+  align-items:center;
+
+  border-top:1px solid #edf2f7;
+  border-bottom:1px solid #edf2f7;
+
+  background:#ffffff;
+  font-size:13px;
+}
+
+.midterm-roster-footer{
+  flex:0 0 auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+
+  padding:14px 22px 16px;
+  background:#ffffff;
+}
+
+.midterm-roster-footer-note{
+  max-width:680px;
+  color:#64748b;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.5;
+}
+
+.midterm-roster-footer-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.midterm-roster-footer-actions button{
+  min-width:140px;
+  height:44px;
+  font-weight:900;
+}
+
+#midtermRosterConfirmBtn{
+  min-width:220px;
+}
+
+
+/* =====================================================
+   จอขนาดกลาง
+   ===================================================== */
+
+@media (max-width:1100px){
+
+  #midtermRosterOverlay{
+    align-items:flex-start;
+    overflow:auto;
+  }
+
+  #midtermRosterOverlay .midterm-roster-card{
+    width:min(860px, calc(100vw - 24px));
+    height:auto;
+    max-height:none;
+    overflow:visible;
+  }
+
+  .midterm-roster-grid{
+    grid-template-columns:1fr;
+  }
+
+  .midterm-roster-panel{
+    height:330px;
+  }
+
+  .midterm-roster-transfer-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .midterm-roster-transfer-btn{
+    min-height:48px;
+    flex-direction:row;
+    gap:8px;
+  }
+
+  .midterm-roster-transfer-btn.add
+  .midterm-roster-transfer-icon{
+    transform:rotate(90deg);
+  }
+
+  .midterm-roster-transfer-btn.remove
+  .midterm-roster-transfer-icon{
+    transform:rotate(90deg);
+  }
+}
+
+
+/* =====================================================
+   มือถือ
+   ===================================================== */
+
+@media (max-width:720px){
+
+  #midtermRosterOverlay{
+    padding:8px;
+  }
+
+  #midtermRosterOverlay .midterm-roster-card{
+    width:calc(100vw - 16px);
+    border-radius:20px;
+  }
+
+  .midterm-roster-header{
+    padding:15px;
+  }
+
+  .midterm-roster-icon{
+    width:44px;
+    height:44px;
+    flex-basis:44px;
+    border-radius:14px;
+    font-size:21px;
+  }
+
+  .midterm-roster-title{
+    font-size:19px;
+  }
+
+  .midterm-roster-subject{
+    font-size:14px;
+  }
+
+  .midterm-roster-toolbar{
+    grid-template-columns:1fr;
+    padding:12px 15px;
+  }
+
+  .midterm-roster-search-field{
+    max-width:none;
+  }
+
+  .midterm-roster-toolbar-action{
+    min-width:0;
+  }
+
+  .midterm-roster-grid{
+    gap:12px;
+    padding:12px 15px;
+  }
+
+  .midterm-roster-panel{
+    height:310px;
+  }
+
+  .midterm-roster-panel-head{
+    min-height:70px;
+    padding:11px 12px;
+  }
+
+  #midtermRosterOverlay .midterm-roster-table{
+    min-width:480px !important;
+  }
+
+  .midterm-roster-status{
+    padding:8px 15px;
+  }
+
+  .midterm-roster-footer{
+    align-items:stretch;
+    flex-direction:column;
+    padding:12px 15px 15px;
+  }
+
+  .midterm-roster-footer-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    width:100%;
+  }
+
+  .midterm-roster-footer-actions button,
+  #midtermRosterConfirmBtn{
+    width:100%;
+    min-width:0;
+  }
+}
+
+/* ปุ่มแก้ไขคะแนนหลังมีข้อมูลใน midterm_reports */
+#pageMidtermReport .midterm-edit-score-btn{
+  min-width:120px;
+  height:42px;
+  padding:0 14px;
+
+  border:1px solid #0f9d58;
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #0f9d58,
+      #22c55e
+    );
+
+  color:#ffffff;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:900;
+
+  box-shadow:
+    0 7px 16px
+    rgba(15,157,88,.20);
+}
+
+#pageMidtermReport
+.midterm-edit-score-btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(.98);
+
+  box-shadow:
+    0 10px 20px
+    rgba(15,157,88,.24);
+}
+
 </style>
 </head>
 <body>
@@ -7497,8 +8208,23 @@ td{
     </div>
   </div>
 
-  <div class="actions midterm-main-actions" style="margin:0;">
-   <button id="downloadMidtermTemplateBtn" class="btn-secondary" type="button" disabled>
+<div class="actions midterm-main-actions" style="margin:0;">
+
+<button
+  id="manageMidtermStudentsBtn"
+  class="btn-secondary"
+  type="button"
+  disabled
+>
+  👥 จัดการนักเรียน
+</button>
+
+<button
+  id="downloadMidtermTemplateBtn"
+  class="btn-secondary"
+  type="button"
+  disabled
+>
   ⬇ ดาวน์โหลด Template
 </button>
 
@@ -9669,7 +10395,330 @@ td{
   </div>
 </div>
 
-  <!-- FREE PERIOD RESERVE OVERLAY -->
+  
+
+<!-- =====================================================
+     MIDTERM STUDENT ROSTER OVERLAY
+     จัดการรายชื่อนักเรียนก่อนกรอกคะแนนกลางภาค
+     ===================================================== -->
+<div
+  id="midtermRosterOverlay"
+  class="overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="midtermRosterTitle"
+>
+  <div class="overlay-card midterm-roster-card">
+
+    <!-- ส่วนหัว -->
+    <div class="midterm-roster-header">
+
+      <div class="midterm-roster-header-main">
+        <div class="midterm-roster-icon">
+          👥
+        </div>
+
+        <div>
+          <h2
+            id="midtermRosterTitle"
+            class="midterm-roster-title"
+          >
+            จัดการนักเรียนในรายวิชา
+          </h2>
+
+          <div
+            id="midtermRosterSubjectText"
+            class="midterm-roster-subject"
+          >
+            -
+          </div>
+
+          <div
+            id="midtermRosterMetaText"
+            class="midterm-roster-meta"
+          >
+            -
+          </div>
+        </div>
+      </div>
+
+      <button
+        id="midtermRosterCloseBtn"
+        class="midterm-roster-close-btn"
+        type="button"
+        title="ปิด"
+        aria-label="ปิดหน้าจัดการนักเรียน"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- เครื่องมือด้านบน -->
+    <div class="midterm-roster-toolbar">
+
+      <div class="field midterm-roster-search-field">
+        <label
+          class="label-in-form"
+          for="midtermRosterSearchInput"
+        >
+          ค้นหานักเรียน
+        </label>
+
+        <input
+          id="midtermRosterSearchInput"
+          class="std"
+          type="search"
+          autocomplete="off"
+          placeholder="เลขประจำตัว / ชื่อ-สกุล / เลขที่"
+        >
+      </div>
+
+      <div class="midterm-roster-toolbar-action">
+        <span class="label-in-form">
+          เลือกอย่างรวดเร็ว
+        </span>
+
+        <button
+          id="midtermRosterSelectAllRoomBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ✓ เลือกนักเรียนทั้งห้อง
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- ตารางซ้ายและขวา -->
+    <div class="midterm-roster-grid">
+
+      <!-- ตารางซ้าย -->
+      <section class="midterm-roster-panel left">
+
+        <div class="midterm-roster-panel-head">
+          <div>
+            <div class="midterm-roster-panel-title">
+              นักเรียนที่ยังไม่ได้เลือก
+            </div>
+
+            <div class="midterm-roster-panel-sub">
+              เลือกนักเรียนที่ต้องการเพิ่มเข้ารายวิชา
+            </div>
+          </div>
+
+          <div
+            id="midtermRosterLeftCount"
+            class="midterm-roster-count left"
+          >
+            0 คน
+          </div>
+        </div>
+
+        <div class="midterm-roster-table-wrap">
+          <table class="midterm-roster-table">
+            <thead>
+              <tr>
+                <th
+                  style="width:52px;"
+                  class="text-center"
+                >
+                  <input
+                    id="midtermRosterSelectAllLeft"
+                    class="midterm-roster-checkbox"
+                    type="checkbox"
+                    aria-label="เลือกนักเรียนฝั่งซ้ายทั้งหมด"
+                  >
+                </th>
+
+                <th
+                  style="width:58px;"
+                  class="text-center"
+                >
+                  เลขที่
+                </th>
+
+                <th style="width:110px;">
+                  เลขประจำตัว
+                </th>
+
+                <th>
+                  ชื่อ-สกุล
+                </th>
+              </tr>
+            </thead>
+
+            <tbody id="midtermRosterLeftTbody">
+              <tr>
+                <td
+                  colspan="4"
+                  class="empty-state"
+                >
+                  กำลังโหลดรายชื่อนักเรียน...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+
+      <!-- ปุ่มย้ายตรงกลาง -->
+      <div class="midterm-roster-transfer-actions">
+
+        <button
+          id="midtermRosterAddBtn"
+          class="midterm-roster-transfer-btn add"
+          type="button"
+          title="เพิ่มนักเรียนที่เลือก"
+        >
+          <span class="midterm-roster-transfer-icon">
+            →
+          </span>
+
+          <span class="midterm-roster-transfer-text">
+            เพิ่มนักเรียน
+          </span>
+        </button>
+
+        <button
+          id="midtermRosterRemoveBtn"
+          class="midterm-roster-transfer-btn remove"
+          type="button"
+          title="นำนักเรียนที่เลือกออก"
+        >
+          <span class="midterm-roster-transfer-icon">
+            ←
+          </span>
+
+          <span class="midterm-roster-transfer-text">
+            นำออก
+          </span>
+        </button>
+
+      </div>
+
+
+      <!-- ตารางขวา -->
+      <section class="midterm-roster-panel right">
+
+        <div class="midterm-roster-panel-head">
+          <div>
+            <div class="midterm-roster-panel-title">
+              นักเรียนที่เรียนวิชานี้
+            </div>
+
+            <div class="midterm-roster-panel-sub">
+              รายชื่อที่จะปรากฏในตารางกรอกคะแนน
+            </div>
+          </div>
+
+          <div
+            id="midtermRosterRightCount"
+            class="midterm-roster-count right"
+          >
+            0 คน
+          </div>
+        </div>
+
+        <div class="midterm-roster-table-wrap">
+          <table class="midterm-roster-table">
+            <thead>
+              <tr>
+                <th
+                  style="width:52px;"
+                  class="text-center"
+                >
+                  <input
+                    id="midtermRosterSelectAllRight"
+                    class="midterm-roster-checkbox"
+                    type="checkbox"
+                    aria-label="เลือกนักเรียนฝั่งขวาทั้งหมด"
+                  >
+                </th>
+
+                <th
+                  style="width:58px;"
+                  class="text-center"
+                >
+                  เลขที่
+                </th>
+
+                <th style="width:110px;">
+                  เลขประจำตัว
+                </th>
+
+                <th>
+                  ชื่อ-สกุล
+                </th>
+              </tr>
+            </thead>
+
+            <tbody id="midtermRosterRightTbody">
+              <tr>
+                <td
+                  colspan="4"
+                  class="empty-state"
+                >
+                  ยังไม่มีนักเรียนในรายวิชานี้
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- ข้อความสถานะ -->
+    <div
+      id="midtermRosterStatus"
+      class="status info midterm-roster-status"
+    >
+      กรุณาเลือกนักเรียนจากตารางด้านซ้าย
+    </div>
+
+
+    <!-- ปุ่มล่าง -->
+    <div class="midterm-roster-footer">
+
+      <div class="midterm-roster-footer-note">
+        ตารางกรอกคะแนนและ Template Excel จะแสดงเฉพาะนักเรียนในตารางด้านขวา
+      </div>
+
+      <div class="midterm-roster-footer-actions">
+
+        <button
+          id="midtermRosterCancelBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ยกเลิก
+        </button>
+
+        <button
+          id="midtermRosterConfirmBtn"
+          class="btn-primary"
+          type="button"
+          disabled
+        >
+          ✓ ตกลงและไปกรอกคะแนน
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- FREE PERIOD RESERVE OVERLAY -->
 <div id="fpReserveOverlay" class="overlay">
   <div class="overlay-card overlay-confirm">
     <div class="overlay-head">
@@ -10017,7 +11066,17 @@ studentDetailTermRadarChart: null,
 midtermGroups: [],
 selectedMidtermGroup: null,
 midtermRows: [],
+
+midtermRosterGroup: null,
+midtermRosterAllStudents: [],
+midtermRosterSelectedStudents: [],
+midtermRosterOriginalStudentCodes: [],
+midtermRosterCheckedLeftCodes: new Set(),
+midtermRosterCheckedRightCodes: new Set(),
+midtermRosterMode: 'create',
 midtermOriginalRows: [],
+
+  
 midtermOriginalMax: {
   keep: 0,
   midterm: 0,
@@ -19946,6 +21005,19 @@ function getMidtermGroupKey(row){
   ].map(v => String(v ?? '').trim()).join('|');
 }
 
+/*
+ * ใช้จับคู่รายการสอนกับข้อมูลใน midterm_reports
+ */
+function getMidtermReportGroupKey(row){
+  return [
+    safeNum(row?.academic_year),
+    safeNum(row?.term),
+    safeText(row?.subject_code, '').trim(),
+    safeText(row?.class_level, '').trim(),
+    safeText(row?.room, '').trim()
+  ].join('|');
+}
+
 function groupMidtermOfferings(rows){
   const map = new Map();
 
@@ -20344,17 +21416,107 @@ async function loadMidtermTeachingList(){
           })
         : classRows;
 
-    const groups =
-      groupMidtermOfferings(
-        visibleRows
-      );
+/*
+ * โหลดข้อมูลกลางภาคของครูคนนี้
+ * เพื่อดูว่ารายวิชาใดเคยบันทึกคะแนนแล้ว
+ */
+const reportRows =
+  await fetchAllPages(
+    () => {
+      return supabaseClient
+        .from('midterm_reports')
+        .select(`
+          academic_year,
+          term,
+          subject_code,
+          class_level,
+          room,
+          student_code
+        `)
+        .eq(
+          'academic_year',
+          Number(year)
+        )
+        .eq(
+          'term',
+          Number(term)
+        )
+        .eq(
+          'teacher_code',
+          state.currentUser.teacher_code
+        );
+    },
+    1000
+  );
 
-    state.midtermGroups =
-      groups;
 
-    renderMidtermTeachingRows(
-      groups
+/*
+ * เก็บรหัสนักเรียนแยกตามรายวิชา
+ * ใช้ Set เพื่อป้องกันการนับนักเรียนซ้ำ
+ */
+const reportStudentMap =
+  new Map();
+
+(reportRows || []).forEach(row => {
+  const key =
+    getMidtermReportGroupKey(row);
+
+  if(!reportStudentMap.has(key)){
+    reportStudentMap.set(
+      key,
+      new Set()
     );
+  }
+
+  const studentCode =
+    normalizeMidtermRosterStudentCode(
+      row.student_code
+    );
+
+  if(studentCode){
+    reportStudentMap
+      .get(key)
+      .add(studentCode);
+  }
+});
+
+
+/*
+ * จัดกลุ่มรายการสอน
+ * พร้อมใส่สถานะว่ามีข้อมูลกลางภาคแล้วหรือยัง
+ */
+const groups =
+  groupMidtermOfferings(
+    visibleRows
+  ).map(group => {
+    const key =
+      getMidtermReportGroupKey(group);
+
+    const studentCodes =
+      reportStudentMap.get(key) ||
+      new Set();
+
+    const reportCount =
+      studentCodes.size;
+
+    return {
+      ...group,
+
+      midterm_report_count:
+        reportCount,
+
+      has_midterm_reports:
+        reportCount > 0
+    };
+  });
+
+
+state.midtermGroups =
+  groups;
+
+renderMidtermTeachingRows(
+  groups
+);
 
     if(!reportableRows.length){
       setStatus(
@@ -20445,52 +21607,216 @@ async function loadMidtermTeachingList(){
 }
 
 function renderMidtermTeachingRows(rows){
-  const tbody = el('midtermTeachingTbody');
-  if(!tbody) return;
+  const tbody =
+    el('midtermTeachingTbody');
 
-  if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">ไม่พบรายการสอน</td></tr>';
+  if(!tbody){
     return;
   }
 
-  tbody.innerHTML = rows.map((r, idx) => {
-    const roomsText = safeText(r.room, '-');
-    const sectionCount = Array.isArray(r.offerings) ? r.offerings.length : 1;
 
-    return `
+  if(!rows.length){
+    tbody.innerHTML = `
       <tr>
-        <td>
-          <div class="grade-stats-subject-cell">
-            <div class="grade-stats-subject-code">${escapeHtml(r.subject_code || '-')}</div>
-            <div class="grade-stats-subject-name">${escapeHtml(r.subject_name || '-')}</div>
-          </div>
-        </td>
-        <td class="text-center">${escapeHtml(String(r.academic_year || '-'))}/${escapeHtml(String(r.term || '-'))}</td>
-        <td class="text-center">${escapeHtml(r.class_level || '-')}</td>
-        <td class="text-center">${escapeHtml(roomsText)}</td>
-        <td class="text-center">${escapeHtml(String(sectionCount))}</td>
-        <td class="text-center">
-          <button
-            class="btn-primary"
-            type="button"
-            data-midterm-group-index="${idx}">
-            กรอกคะแนน
-          </button>
+        <td
+          colspan="6"
+          class="empty-state"
+        >
+          ไม่พบรายการสอน
         </td>
       </tr>
     `;
-  }).join('');
 
-  tbody.querySelectorAll('[data-midterm-group-index]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const idx = Number(btn.dataset.midtermGroupIndex);
-      const group = state.midtermGroups[idx];
+    return;
+  }
 
-      if(group){
-        await openMidtermGroup(group);
-      }
+
+  tbody.innerHTML =
+    rows.map((row, index) => {
+      const roomsText =
+        safeText(
+          row.room,
+          '-'
+        );
+
+      const sectionCount =
+        Array.isArray(row.offerings)
+          ? row.offerings.length
+          : 1;
+
+      const hasReports =
+        row.has_midterm_reports === true;
+
+      const buttonClass =
+        hasReports
+          ? 'midterm-edit-score-btn'
+          : 'btn-primary';
+
+      const buttonText =
+        hasReports
+          ? '✏️ แก้ไขคะแนน'
+          : '📝 กรอกคะแนน';
+
+      const reportCountText =
+        hasReports
+          ? `
+            <div class="small" style="margin-top:5px;">
+              บันทึกแล้ว
+              ${escapeHtml(
+                String(
+                  row.midterm_report_count ||
+                  0
+                )
+              )}
+              คน
+            </div>
+          `
+          : '';
+
+      return `
+        <tr>
+          <td>
+            <div class="grade-stats-subject-cell">
+
+              <div class="grade-stats-subject-code">
+                ${escapeHtml(
+                  row.subject_code ||
+                  '-'
+                )}
+              </div>
+
+              <div class="grade-stats-subject-name">
+                ${escapeHtml(
+                  row.subject_name ||
+                  '-'
+                )}
+              </div>
+
+            </div>
+          </td>
+
+          <td class="text-center">
+            ${escapeHtml(
+              String(
+                row.academic_year ||
+                '-'
+              )
+            )}/${
+              escapeHtml(
+                String(
+                  row.term ||
+                  '-'
+                )
+              )
+            }
+          </td>
+
+          <td class="text-center">
+            ${escapeHtml(
+              row.class_level ||
+              '-'
+            )}
+          </td>
+
+          <td class="text-center">
+            ${escapeHtml(
+              roomsText
+            )}
+          </td>
+
+          <td class="text-center">
+            ${escapeHtml(
+              String(sectionCount)
+            )}
+          </td>
+
+          <td class="text-center">
+            <button
+              class="${buttonClass}"
+              type="button"
+              data-midterm-group-index="${index}"
+              data-midterm-group-action="${
+                hasReports
+                  ? 'edit'
+                  : 'create'
+              }"
+            >
+              ${buttonText}
+            </button>
+
+            ${reportCountText}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+
+  tbody
+    .querySelectorAll(
+      '[data-midterm-group-index]'
+    )
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        async () => {
+          const index =
+            Number(
+              button.dataset
+                .midtermGroupIndex
+            );
+
+          const action =
+            button.dataset
+              .midtermGroupAction;
+
+          const group =
+            state.midtermGroups[
+              index
+            ];
+
+          if(!group){
+            return;
+          }
+
+
+          /*
+           * มีข้อมูลแล้ว:
+           * โหลดคะแนนเดิมและเลื่อนไปตาราง
+           */
+          if(action === 'edit'){
+            await openMidtermGroup(
+              group
+            );
+
+            return;
+          }
+
+
+          /*
+           * ยังไม่มีข้อมูล:
+           * เปิด Overlay เลือกนักเรียน
+           */
+          if(
+            !confirmDiscardMidtermChanges(
+              'เปิดรายวิชาอื่น',
+              () => {
+                openMidtermRosterOverlay(
+                  group,
+                  'create'
+                );
+              }
+            )
+          ){
+            return;
+          }
+
+          await openMidtermRosterOverlay(
+            group,
+            'create'
+          );
+        }
+      );
     });
-  });
 }
 
 function getStudentFullName(row){
@@ -20503,147 +21829,1973 @@ function getStudentFullName(row){
   );
 }
 
-async function openMidtermGroup(group){
+/* =====================================================
+   MIDTERM STUDENT ROSTER
+   จัดการนักเรียนก่อนกรอกคะแนนกลางภาค
+   ===================================================== */
+
+
+/*
+ * ทำรหัสนักเรียนให้อยู่ในรูปแบบเดียวกัน
+ */
+function normalizeMidtermRosterStudentCode(value){
+  return String(value ?? '')
+    .trim()
+    .replace(/\.0$/, '');
+}
+
+
+/*
+ * เรียงนักเรียนตามเลขที่ แล้วตามชื่อ
+ */
+function sortMidtermRosterStudents(rows){
+  return [...(rows || [])].sort((a, b) => {
+    const noA = Number(a.student_no || 0);
+    const noB = Number(b.student_no || 0);
+
+    if(noA !== noB){
+      return noA - noB;
+    }
+
+    return safeText(
+      a.student_name,
+      ''
+    ).localeCompare(
+      safeText(b.student_name, ''),
+      'th',
+      {
+        numeric: true,
+        sensitivity: 'base'
+      }
+    );
+  });
+}
+
+
+/*
+ * สร้างข้อมูลนักเรียนจากตาราง students
+ */
+function createMidtermRosterStudentFromStudent(row){
+  return {
+    student_id: row?.id || null,
+
+    student_code:
+      normalizeMidtermRosterStudentCode(
+        row?.sid
+      ),
+
+    student_no:
+      safeNum(row?.current_no),
+
+    student_name:
+      safeText(
+        row?.raw_full_name,
+        '-'
+      ),
+
+    keep_score: '',
+    midterm_score: '',
+    total_score: 0,
+    score_percent: 0,
+    attendance_score: '',
+    attendance_percent: 0
+  };
+}
+
+
+/*
+ * สร้างข้อมูลนักเรียนจาก midterm_reports
+ *
+ * หากพบข้อมูลนักเรียนใน students
+ * จะใช้ชื่อและเลขที่ปัจจุบันจาก students
+ */
+function createMidtermRosterStudentFromReport(
+  report,
+  student = null
+){
+  return {
+    student_id:
+      student?.id ||
+      report?.student_id ||
+      null,
+
+    student_code:
+      normalizeMidtermRosterStudentCode(
+        report?.student_code ||
+        student?.sid
+      ),
+
+    student_no:
+      safeNum(
+        student?.current_no ??
+        report?.student_no
+      ),
+
+    student_name:
+      safeText(
+        student?.raw_full_name ||
+        report?.student_name,
+        '-'
+      ),
+
+    keep_score:
+      report?.keep_score ?? '',
+
+    midterm_score:
+      report?.midterm_score ?? '',
+
+    total_score:
+      report?.total_score ?? 0,
+
+    score_percent:
+      report?.score_percent ?? 0,
+
+    attendance_score:
+      report?.attendance_score ?? '',
+
+    attendance_percent:
+      report?.attendance_percent ?? 0
+  };
+}
+
+
+/*
+ * รายชื่อนักเรียนฝั่งซ้าย
+ *
+ * นักเรียนทั้งหมดในห้อง
+ * ลบด้วยนักเรียนที่อยู่ฝั่งขวา
+ */
+function getMidtermRosterLeftStudents(){
+  const selectedCodes =
+    new Set(
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).map(row =>
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      )
+    );
+
+  return sortMidtermRosterStudents(
+    (
+      state.midtermRosterAllStudents ||
+      []
+    ).filter(row => {
+      const studentCode =
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        );
+
+      return (
+        studentCode &&
+        !selectedCodes.has(studentCode)
+      );
+    })
+  );
+}
+
+
+/*
+ * กรองตามคำค้นหา
+ */
+function filterMidtermRosterStudents(
+  rows,
+  keyword
+){
+  const searchText =
+    safeText(keyword, '')
+      .trim()
+      .toLowerCase();
+
+  if(!searchText){
+    return rows || [];
+  }
+
+  return (rows || []).filter(row => {
+    const text = [
+      row.student_no,
+      row.student_code,
+      row.student_name
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return text.includes(searchText);
+  });
+}
+
+
+/*
+ * คืนค่ารายชื่อที่กำลังแสดง
+ * หลังผ่านช่องค้นหาแล้ว
+ */
+function getVisibleMidtermRosterStudents(side){
+  const keyword =
+    safeText(
+      el('midtermRosterSearchInput')?.value,
+      ''
+    );
+
+  if(side === 'right'){
+    return filterMidtermRosterStudents(
+      sortMidtermRosterStudents(
+        state.midtermRosterSelectedStudents ||
+        []
+      ),
+      keyword
+    );
+  }
+
+  return filterMidtermRosterStudents(
+    getMidtermRosterLeftStudents(),
+    keyword
+  );
+}
+
+
+/*
+ * สร้างแถวตารางนักเรียน
+ */
+function createMidtermRosterTableRow(
+  student,
+  side
+){
+  const studentCode =
+    normalizeMidtermRosterStudentCode(
+      student.student_code
+    );
+
+  const checkedSet =
+    side === 'right'
+      ? state.midtermRosterCheckedRightCodes
+      : state.midtermRosterCheckedLeftCodes;
+
+  const checked =
+    checkedSet?.has(studentCode)
+      ? 'checked'
+      : '';
+
+  return `
+    <tr>
+      <td class="text-center">
+        <input
+          class="midterm-roster-checkbox"
+          type="checkbox"
+          data-midterm-roster-side="${escapeHtml(side)}"
+          data-midterm-roster-code="${escapeHtml(studentCode)}"
+          ${checked}
+          aria-label="เลือก ${escapeHtml(student.student_name || studentCode)}"
+        >
+      </td>
+
+      <td class="text-center">
+        ${escapeHtml(student.student_no || '-')}
+      </td>
+
+      <td>
+        <span class="midterm-roster-student-code">
+          ${escapeHtml(studentCode || '-')}
+        </span>
+      </td>
+
+      <td>
+        <div class="midterm-roster-student-name">
+          ${escapeHtml(student.student_name || '-')}
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+
+/*
+ * อัปเดตสถานะ Checkbox และปุ่มต่าง ๆ
+ */
+function updateMidtermRosterControls(){
+  const visibleLeft =
+    getVisibleMidtermRosterStudents('left');
+
+  const visibleRight =
+    getVisibleMidtermRosterStudents('right');
+
+  const checkedLeftCount =
+    visibleLeft.filter(row =>
+      state.midtermRosterCheckedLeftCodes.has(
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      )
+    ).length;
+
+  const checkedRightCount =
+    visibleRight.filter(row =>
+      state.midtermRosterCheckedRightCodes.has(
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      )
+    ).length;
+
+
+  const selectAllLeft =
+    el('midtermRosterSelectAllLeft');
+
+  if(selectAllLeft){
+    selectAllLeft.checked =
+      visibleLeft.length > 0 &&
+      checkedLeftCount === visibleLeft.length;
+
+    selectAllLeft.indeterminate =
+      checkedLeftCount > 0 &&
+      checkedLeftCount < visibleLeft.length;
+  }
+
+
+  const selectAllRight =
+    el('midtermRosterSelectAllRight');
+
+  if(selectAllRight){
+    selectAllRight.checked =
+      visibleRight.length > 0 &&
+      checkedRightCount === visibleRight.length;
+
+    selectAllRight.indeterminate =
+      checkedRightCount > 0 &&
+      checkedRightCount < visibleRight.length;
+  }
+
+
+  const addBtn =
+    el('midtermRosterAddBtn');
+
+  if(addBtn){
+    addBtn.disabled =
+      state.midtermRosterCheckedLeftCodes.size === 0;
+  }
+
+
+  const removeBtn =
+    el('midtermRosterRemoveBtn');
+
+  if(removeBtn){
+    removeBtn.disabled =
+      state.midtermRosterCheckedRightCodes.size === 0;
+  }
+
+
+  const confirmBtn =
+    el('midtermRosterConfirmBtn');
+
+  if(confirmBtn){
+    confirmBtn.disabled =
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).length === 0;
+  }
+}
+
+
+/*
+ * ผูก Checkbox รายคนหลัง Render ตาราง
+ */
+function bindMidtermRosterRowCheckboxes(){
+  document
+    .querySelectorAll(
+      '[data-midterm-roster-side][data-midterm-roster-code]'
+    )
+    .forEach(checkbox => {
+      checkbox.addEventListener(
+        'change',
+        () => {
+          const side =
+            checkbox.dataset.midtermRosterSide;
+
+          const studentCode =
+            normalizeMidtermRosterStudentCode(
+              checkbox.dataset.midtermRosterCode
+            );
+
+          const checkedSet =
+            side === 'right'
+              ? state.midtermRosterCheckedRightCodes
+              : state.midtermRosterCheckedLeftCodes;
+
+          if(checkbox.checked){
+            checkedSet.add(studentCode);
+          }else{
+            checkedSet.delete(studentCode);
+          }
+
+          updateMidtermRosterControls();
+        }
+      );
+    });
+}
+
+
+/*
+ * Render ตารางซ้ายและขวา
+ */
+function renderMidtermRosterTables(){
+  const leftTbody =
+    el('midtermRosterLeftTbody');
+
+  const rightTbody =
+    el('midtermRosterRightTbody');
+
+  if(
+    !leftTbody ||
+    !rightTbody
+  ){
+    return;
+  }
+
+
+  const allLeftStudents =
+    getMidtermRosterLeftStudents();
+
+  const allRightStudents =
+    sortMidtermRosterStudents(
+      state.midtermRosterSelectedStudents ||
+      []
+    );
+
+  const visibleLeftStudents =
+    getVisibleMidtermRosterStudents('left');
+
+  const visibleRightStudents =
+    getVisibleMidtermRosterStudents('right');
+
+
+  if(visibleLeftStudents.length){
+    leftTbody.innerHTML =
+      visibleLeftStudents
+        .map(student =>
+          createMidtermRosterTableRow(
+            student,
+            'left'
+          )
+        )
+        .join('');
+  }else{
+    leftTbody.innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          ${
+            allLeftStudents.length
+              ? 'ไม่พบนักเรียนที่ตรงกับคำค้นหา'
+              : 'นักเรียนทั้งหมดถูกเพิ่มเข้ารายวิชาแล้ว'
+          }
+        </td>
+      </tr>
+    `;
+  }
+
+
+  if(visibleRightStudents.length){
+    rightTbody.innerHTML =
+      visibleRightStudents
+        .map(student =>
+          createMidtermRosterTableRow(
+            student,
+            'right'
+          )
+        )
+        .join('');
+  }else{
+    rightTbody.innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          ${
+            allRightStudents.length
+              ? 'ไม่พบนักเรียนที่ตรงกับคำค้นหา'
+              : 'ยังไม่มีนักเรียนในรายวิชานี้'
+          }
+        </td>
+      </tr>
+    `;
+  }
+
+
+  const leftCount =
+    el('midtermRosterLeftCount');
+
+  if(leftCount){
+    leftCount.textContent =
+      `${allLeftStudents.length} คน`;
+  }
+
+
+  const rightCount =
+    el('midtermRosterRightCount');
+
+  if(rightCount){
+    rightCount.textContent =
+      `${allRightStudents.length} คน`;
+  }
+
+
+  bindMidtermRosterRowCheckboxes();
+  updateMidtermRosterControls();
+}
+
+
+/*
+ * โหลดนักเรียนทั้งหมดในห้อง
+ * และรายชื่อเดิมจาก midterm_reports
+ */
+async function loadMidtermRosterData(group){
+  const currentRoom =
+    String(group?.room || '')
+      .trim();
+
+  const entryFilter =
+    teacherStudentGetEntryFilterByClassLevel(
+      group?.class_level,
+      group?.academic_year
+    );
+
+
+  /*
+   * โหลดนักเรียนทั้งหมดในห้อง
+   */
+  let studentQuery =
+    supabaseClient
+      .from('students')
+      .select(`
+        id,
+        sid,
+        current_room,
+        current_no,
+        raw_full_name,
+        entry_academic_year,
+        entry_level,
+        is_active
+      `)
+      .eq('is_active', true)
+      .eq('current_room', currentRoom)
+      .order(
+        'current_no',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'raw_full_name',
+        {
+          ascending: true
+        }
+      );
+
+  if(entryFilter){
+    studentQuery =
+      studentQuery
+        .eq(
+          'entry_academic_year',
+          entryFilter.entry_academic_year
+        )
+        .eq(
+          'entry_level',
+          entryFilter.entry_level
+        );
+  }
+
+
+  const {
+    data: students,
+    error: studentsError
+  } = await studentQuery;
+
+  if(studentsError){
+    throw studentsError;
+  }
+
+
+  /*
+   * โหลดนักเรียนที่มีข้อมูลเดิมใน midterm_reports
+   */
+  const {
+    data: oldReports,
+    error: reportsError
+  } = await supabaseClient
+    .from('midterm_reports')
+    .select('*')
+    .eq(
+      'academic_year',
+      Number(group.academic_year)
+    )
+    .eq(
+      'term',
+      Number(group.term)
+    )
+    .eq(
+      'subject_code',
+      group.subject_code
+    )
+    .eq(
+      'teacher_code',
+      state.currentUser.teacher_code
+    )
+    .eq(
+      'class_level',
+      group.class_level
+    )
+    .eq(
+      'room',
+      group.room
+    );
+
+if(reportsError){
+  throw reportsError;
+}
+
+
+/*
+ * ถ้ามีข้อมูลเดิม ให้ใช้คะแนนเต็มเดิม
+ * ถ้ายังไม่มีข้อมูล ให้เริ่มต้นที่ 0
+ */
+const firstOldReport =
+  (oldReports || [])[0] ||
+  null;
+
+state.midtermMax = firstOldReport
+  ? {
+      keep:
+        Number(
+          firstOldReport.keep_max || 0
+        ),
+
+      midterm:
+        Number(
+          firstOldReport.midterm_max || 0
+        ),
+
+      attendance:
+        Number(
+          firstOldReport.attendance_max || 0
+        )
+    }
+  : {
+      keep: 0,
+      midterm: 0,
+      attendance: 0
+    };
+
+
+const allStudents =
+    (students || [])
+      .map(
+        createMidtermRosterStudentFromStudent
+      )
+      .filter(row => row.student_code);
+
+
+  const studentMap =
+    new Map(
+      (students || []).map(student => [
+        normalizeMidtermRosterStudentCode(
+          student.sid
+        ),
+        student
+      ])
+    );
+
+
+  const selectedStudents =
+    (oldReports || [])
+      .map(report => {
+        const studentCode =
+          normalizeMidtermRosterStudentCode(
+            report.student_code
+          );
+
+        const student =
+          studentMap.get(studentCode) ||
+          null;
+
+        return createMidtermRosterStudentFromReport(
+          report,
+          student
+        );
+      })
+      .filter(row => row.student_code);
+
+
+  state.midtermRosterAllStudents =
+    sortMidtermRosterStudents(
+      allStudents
+    );
+
+  state.midtermRosterSelectedStudents =
+    sortMidtermRosterStudents(
+      selectedStudents
+    );
+
+  state.midtermRosterOriginalStudentCodes =
+    selectedStudents.map(row =>
+      normalizeMidtermRosterStudentCode(
+        row.student_code
+      )
+    );
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+}
+
+
+/*
+ * เปิด Overlay จัดการนักเรียน
+ */
+async function openMidtermRosterOverlay(
+  group,
+  mode = 'create'
+){
   try{
-    if(!confirmDiscardMidtermChanges('เปิดรายวิชาอื่น', () => {
-      openMidtermGroup(group);
-    })){
+    if(!group){
+      throw new Error(
+        'ไม่พบข้อมูลรายวิชาที่ต้องการจัดการ'
+      );
+    }
+
+
+    state.midtermRosterGroup =
+      group;
+
+    state.midtermRosterMode =
+      mode;
+
+
+    const subjectText =
+      [
+        group.subject_code || '-',
+        group.subject_name || '-'
+      ].join(' ');
+
+    const metaText =
+      `ชั้น ${group.class_level || '-'} ` +
+      `ห้อง ${group.room || '-'} | ` +
+      `ปีการศึกษา ${group.academic_year || '-'} ` +
+      `ภาคเรียน ${group.term || '-'}`;
+
+
+    el('midtermRosterSubjectText').textContent =
+      subjectText;
+
+    el('midtermRosterMetaText').textContent =
+      metaText;
+
+    el('midtermRosterSearchInput').value =
+      '';
+
+    el('midtermRosterLeftTbody').innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          กำลังโหลดรายชื่อนักเรียน...
+        </td>
+      </tr>
+    `;
+
+    el('midtermRosterRightTbody').innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          กำลังโหลดข้อมูลรายวิชา...
+        </td>
+      </tr>
+    `;
+
+
+    setStatus(
+      'midtermRosterStatus',
+      'กำลังโหลดรายชื่อนักเรียน...',
+      'info'
+    );
+
+
+    const overlay =
+      el('midtermRosterOverlay');
+
+    overlay?.classList.add('show');
+
+
+    await loadMidtermRosterData(group);
+
+    renderMidtermRosterTables();
+
+
+    const selectedCount =
+      state
+        .midtermRosterSelectedStudents
+        .length;
+
+    if(selectedCount){
+      setStatus(
+        'midtermRosterStatus',
+        `พบรายชื่อนักเรียนในรายวิชานี้ ${selectedCount} คน`,
+        'success'
+      );
+    }else{
+      setStatus(
+        'midtermRosterStatus',
+        'ยังไม่มีนักเรียนในรายวิชานี้ กรุณาเลือกนักเรียนจากตารางด้านซ้าย',
+        'info'
+      );
+    }
+
+  }catch(error){
+    console.error(
+      'openMidtermRosterOverlay error:',
+      error
+    );
+
+    setStatus(
+      'midtermRosterStatus',
+      error?.message ||
+      'ไม่สามารถโหลดรายชื่อนักเรียนได้',
+      'error'
+    );
+  }
+}
+
+
+/*
+ * ปิด Overlay
+ */
+function closeMidtermRosterOverlay(){
+  el('midtermRosterOverlay')
+    ?.classList.remove('show');
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+}
+
+/*
+ * สร้าง Map เก็บข้อมูลนักเรียน
+ *
+ * นักเรียนเดิมที่มีคะแนนแล้ว
+ * จะใช้ข้อมูลจากตารางขวาก่อน
+ */
+function getMidtermRosterStudentCache(){
+  const cache =
+    new Map();
+
+
+  (
+    state.midtermRosterAllStudents ||
+    []
+  ).forEach(row => {
+    const code =
+      normalizeMidtermRosterStudentCode(
+        row.student_code
+      );
+
+    if(code){
+      cache.set(
+        code,
+        {
+          ...row
+        }
+      );
+    }
+  });
+
+
+  /*
+   * ข้อมูลในตารางคะแนนเดิม
+   * ใช้ช่วยรักษาคะแนนไว้
+   * กรณีนำออกแล้วเพิ่มกลับก่อนกดตกลง
+   */
+  (
+    state.midtermRows ||
+    []
+  ).forEach(row => {
+    const code =
+      normalizeMidtermRosterStudentCode(
+        row.student_code
+      );
+
+    if(code){
+      cache.set(
+        code,
+        {
+          ...row
+        }
+      );
+    }
+  });
+
+
+  /*
+   * ตารางขวามีลำดับความสำคัญสูงสุด
+   */
+  (
+    state.midtermRosterSelectedStudents ||
+    []
+  ).forEach(row => {
+    const code =
+      normalizeMidtermRosterStudentCode(
+        row.student_code
+      );
+
+    if(code){
+      cache.set(
+        code,
+        {
+          ...row
+        }
+      );
+    }
+  });
+
+
+  return cache;
+}
+
+
+/*
+ * เพิ่มนักเรียนที่ Checkbox เลือกไว้
+ * จากตารางซ้ายไปตารางขวา
+ */
+function addCheckedMidtermRosterStudents(){
+  const selectedCodes =
+    new Set(
+      state.midtermRosterCheckedLeftCodes ||
+      []
+    );
+
+  if(!selectedCodes.size){
+    return;
+  }
+
+
+  const studentCache =
+    getMidtermRosterStudentCache();
+
+  const currentSelectedMap =
+    new Map(
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).map(row => [
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        ),
+        row
+      ])
+    );
+
+
+  selectedCodes.forEach(code => {
+    const student =
+      studentCache.get(code);
+
+    if(
+      student &&
+      !currentSelectedMap.has(code)
+    ){
+      currentSelectedMap.set(
+        code,
+        {
+          ...student
+        }
+      );
+    }
+  });
+
+
+  state.midtermRosterSelectedStudents =
+    sortMidtermRosterStudents(
+      [
+        ...currentSelectedMap.values()
+      ]
+    );
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+
+
+  renderMidtermRosterTables();
+
+  setStatus(
+    'midtermRosterStatus',
+    `เพิ่มนักเรียนแล้ว ${selectedCodes.size} คน ขณะนี้มีนักเรียนในรายวิชา ${state.midtermRosterSelectedStudents.length} คน`,
+    'success'
+  );
+}
+
+
+/*
+ * นำนักเรียนที่ Checkbox เลือกไว้
+ * ออกจากตารางขวา
+ */
+function removeCheckedMidtermRosterStudents(){
+  const removedCodes =
+    new Set(
+      state.midtermRosterCheckedRightCodes ||
+      []
+    );
+
+  if(!removedCodes.size){
+    return;
+  }
+
+
+  state.midtermRosterSelectedStudents =
+    sortMidtermRosterStudents(
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).filter(row => {
+        const code =
+          normalizeMidtermRosterStudentCode(
+            row.student_code
+          );
+
+        return !removedCodes.has(code);
+      })
+    );
+
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+
+
+  renderMidtermRosterTables();
+
+  setStatus(
+    'midtermRosterStatus',
+    `นำนักเรียนออกแล้ว ${removedCodes.size} คน ขณะนี้เหลือนักเรียนในรายวิชา ${state.midtermRosterSelectedStudents.length} คน`,
+    state.midtermRosterSelectedStudents.length
+      ? 'warn'
+      : 'error'
+  );
+}
+
+
+/*
+ * เพิ่มนักเรียนที่เหลือทั้งหมด
+ * จากตารางซ้ายเข้าตารางขวา
+ */
+function selectAllRoomMidtermRosterStudents(){
+  const leftStudents =
+    getMidtermRosterLeftStudents();
+
+  if(!leftStudents.length){
+    setStatus(
+      'midtermRosterStatus',
+      'นักเรียนทั้งหมดอยู่ในตารางด้านขวาแล้ว',
+      'info'
+    );
+
+    return;
+  }
+
+
+  const selectedMap =
+    new Map(
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).map(row => [
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        ),
+        row
+      ])
+    );
+
+
+  leftStudents.forEach(student => {
+    const code =
+      normalizeMidtermRosterStudentCode(
+        student.student_code
+      );
+
+    if(code){
+      selectedMap.set(
+        code,
+        {
+          ...student
+        }
+      );
+    }
+  });
+
+
+  state.midtermRosterSelectedStudents =
+    sortMidtermRosterStudents(
+      [
+        ...selectedMap.values()
+      ]
+    );
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+
+
+  renderMidtermRosterTables();
+
+  setStatus(
+    'midtermRosterStatus',
+    `เลือกนักเรียนทั้งห้องแล้ว รวม ${state.midtermRosterSelectedStudents.length} คน`,
+    'success'
+  );
+}
+
+
+/*
+ * Checkbox เลือกทั้งหมดของตารางซ้ายหรือขวา
+ *
+ * เลือกเฉพาะนักเรียนที่กำลังมองเห็น
+ * หลังผ่านช่องค้นหา
+ */
+function toggleAllVisibleMidtermRosterStudents(
+  side,
+  checked
+){
+  const visibleStudents =
+    getVisibleMidtermRosterStudents(
+      side
+    );
+
+  const checkedSet =
+    side === 'right'
+      ? state.midtermRosterCheckedRightCodes
+      : state.midtermRosterCheckedLeftCodes;
+
+
+  visibleStudents.forEach(student => {
+    const code =
+      normalizeMidtermRosterStudentCode(
+        student.student_code
+      );
+
+    if(!code){
       return;
     }
 
-    state.selectedMidtermGroup = group;
-    state.midtermRows = [];
+    if(checked){
+      checkedSet.add(code);
+    }else{
+      checkedSet.delete(code);
+    }
+  });
 
-    el('midtermSelectedTitle').textContent =
-      `${group.subject_code || '-'} ${group.subject_name || '-'}`;
 
-    el('midtermSelectedSub').textContent =
-      `ชั้น ${group.class_level || '-'} ห้อง ${group.room || '-'} | ปี ${group.academic_year}/${group.term}`;
-
-    setStatus('midtermFormStatus', 'กำลังโหลดรายชื่อนักเรียน...', 'info');
-    el('saveMidtermBtn').disabled = true;
-
-const currentRoom = String(group.room || '').trim();
-const entryFilter = teacherStudentGetEntryFilterByClassLevel(
-  group.class_level,
-  group.academic_year
-);
-
-let studentQuery = supabaseClient
-  .from('students')
-  .select('id, sid, current_room, current_no, raw_full_name, entry_academic_year, entry_level, is_active')
-  .eq('is_active', true)
-  .eq('current_room', currentRoom)
-  .order('current_no', { ascending:true })
-  .order('raw_full_name', { ascending:true });
-
-if (entryFilter) {
-  studentQuery = studentQuery
-    .eq('entry_academic_year', entryFilter.entry_academic_year)
-    .eq('entry_level', entryFilter.entry_level);
+  renderMidtermRosterTables();
 }
 
-const { data: students, error: stuError } = await studentQuery;
-if (stuError) throw stuError;
 
-    if(stuError) throw stuError;
+/*
+ * นำรายชื่อตารางขวา
+ * ไปแสดงในหน้ากรอกคะแนน
+ */
+function applyMidtermRosterToScoreTable(){
+  const group =
+    state.midtermRosterGroup;
 
-const studentRows = (students || []).map(stu => ({
-  student_id: stu.id || null,
-  student_code: safeText(stu.sid, ''),
-  student_no: safeNum(stu.current_no),
-  student_name: safeText(stu.raw_full_name, '-'),
-  keep_score: '',
-  midterm_score: '',
-  total_score: 0,
-  score_percent: 0,
-  attendance_score: '',
-  attendance_percent: 0
-}));
-
-    const { data: oldReports, error: oldError } = await supabaseClient
-      .from('midterm_reports')
-      .select('*')
-      .eq('academic_year', Number(group.academic_year))
-      .eq('term', Number(group.term))
-      .eq('subject_code', group.subject_code)
-      .eq('teacher_code', state.currentUser.teacher_code)
-      .eq('class_level', group.class_level)
-      .eq('room', group.room);
-
-    if(oldError) throw oldError;
-
-    const oldMap = new Map(
-      (oldReports || []).map(r => [String(r.student_code || '').trim(), r])
+  const selectedStudents =
+    sortMidtermRosterStudents(
+      state.midtermRosterSelectedStudents ||
+      []
     );
 
-    state.midtermRows = studentRows.map(row => {
-      const old = oldMap.get(String(row.student_code || '').trim());
-      if(!old) return row;
 
-      state.midtermMax.keep = Number(old.keep_max || state.midtermMax.keep || 0);
-      state.midtermMax.midterm = Number(old.midterm_max || state.midtermMax.midterm || 0);
-      state.midtermMax.attendance = Number(old.attendance_max || state.midtermMax.attendance || 0);
+  if(!group){
+    setStatus(
+      'midtermRosterStatus',
+      'ไม่พบข้อมูลรายวิชา',
+      'error'
+    );
 
-      return {
-        ...row,
-        keep_score: old.keep_score ?? '',
-        midterm_score: old.midterm_score ?? '',
-        total_score: old.total_score ?? 0,
-        score_percent: old.score_percent ?? 0,
-        attendance_score: old.attendance_score ?? '',
-        attendance_percent: old.attendance_percent ?? 0
-      };
-    });
+    return;
+  }
 
-    el('midtermKeepMax').value = state.midtermMax.keep || 0;
-    el('midtermScoreMax').value = state.midtermMax.midterm || 0;
-    el('midtermAttendanceMax').value = state.midtermMax.attendance || 0;
 
-calculateAllMidtermRows();
-renderMidtermRows();
+  if(!selectedStudents.length){
+    setStatus(
+      'midtermRosterStatus',
+      'กรุณาเลือกนักเรียนอย่างน้อย 1 คน',
+      'error'
+    );
 
-captureMidtermOriginalState();
-refreshMidtermDirtyUI();
+    return;
+  }
 
-setStatus(
-  'midtermFormStatus',
-  state.midtermRows.length
-    ? `โหลดรายชื่อนักเรียน ${state.midtermRows.length} คน`
-    : 'ไม่พบนักเรียนในห้องนี้',
-  state.midtermRows.length ? 'success' : 'warn'
+
+  /*
+   * เก็บรหัสนักเรียนที่ถูกนำออก
+   * จะใช้สำหรับลบออกจาก midterm_reports
+   * ในขั้นตอนถัดไป
+   */
+  const selectedCodeSet =
+    new Set(
+      selectedStudents.map(row =>
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      )
+    );
+
+  state.midtermRosterRemovedStudentCodes =
+    (
+      state.midtermRosterOriginalStudentCodes ||
+      []
+    ).filter(code =>
+      !selectedCodeSet.has(
+        normalizeMidtermRosterStudentCode(
+          code
+        )
+      )
+    );
+
+
+  state.selectedMidtermGroup =
+    group;
+
+  state.midtermRows =
+    selectedStudents.map(row => ({
+      ...row,
+
+      student_code:
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        ),
+
+      keep_score:
+        row.keep_score ?? '',
+
+      midterm_score:
+        row.midterm_score ?? '',
+
+      total_score:
+        Number(
+          row.total_score || 0
+        ),
+
+      score_percent:
+        Number(
+          row.score_percent || 0
+        ),
+
+      attendance_score:
+        row.attendance_score ?? '',
+
+      attendance_percent:
+        Number(
+          row.attendance_percent || 0
+        )
+    }));
+
+
+  /*
+   * แสดงหัวข้อรายวิชา
+   */
+  if(el('midtermSelectedTitle')){
+    el('midtermSelectedTitle').textContent =
+      `${group.subject_code || '-'} ${group.subject_name || '-'}`;
+  }
+
+  if(el('midtermSelectedSub')){
+    el('midtermSelectedSub').textContent =
+      `ชั้น ${group.class_level || '-'} ` +
+      `ห้อง ${group.room || '-'} | ` +
+      `ปี ${group.academic_year || '-'}/` +
+      `${group.term || '-'}`;
+  }
+
+
+  /*
+   * แสดงคะแนนเต็มเดิม
+   */
+  if(el('midtermKeepMax')){
+    el('midtermKeepMax').value =
+      Number(
+        state.midtermMax.keep || 0
+      );
+  }
+
+  if(el('midtermScoreMax')){
+    el('midtermScoreMax').value =
+      Number(
+        state.midtermMax.midterm || 0
+      );
+  }
+
+  if(el('midtermAttendanceMax')){
+    el('midtermAttendanceMax').value =
+      Number(
+        state.midtermMax.attendance || 0
+      );
+  }
+
+
+  calculateAllMidtermRows();
+  renderMidtermRows();
+
+  captureMidtermOriginalState();
+  refreshMidtermDirtyUI();
+
+
+  const hasRows =
+    state.midtermRows.length > 0;
+
+
+  if(el('saveMidtermBtn')){
+    el('saveMidtermBtn').disabled =
+      !hasRows;
+  }
+
+  if(el('downloadMidtermTemplateBtn')){
+    el('downloadMidtermTemplateBtn').disabled =
+      !hasRows;
+  }
+
+  if(el('importMidtermExcelBtn')){
+    el('importMidtermExcelBtn').disabled =
+      !hasRows;
+  }
+
+  /*
+ * รายวิชาใหม่ยังไม่ได้บันทึกลง midterm_reports
+ * จึงยังไม่เปิดปุ่มจัดการนักเรียนซ้ำ
+ */
+if(el('manageMidtermStudentsBtn')){
+  el('manageMidtermStudentsBtn').disabled =
+    true;
+}
+
+  if(el('midtermExcelInput')){
+    el('midtermExcelInput').value =
+      '';
+  }
+
+
+  setStatus(
+    'midtermFormStatus',
+    `พร้อมกรอกคะแนนนักเรียน ${state.midtermRows.length} คน`,
+    'success'
+  );
+
+
+  closeMidtermRosterOverlay();
+
+
+  /*
+   * เลื่อนไปยังหน้าตารางกรอกคะแนน
+   */
+  window.requestAnimationFrame(() => {
+    el('midtermSelectedTitle')
+      ?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+  });
+}
+
+/*
+ * เปิด Overlay จัดการนักเรียน
+ * จากหน้าตารางกรอกคะแนน
+ */
+async function manageCurrentMidtermStudents(){
+  const group =
+    state.selectedMidtermGroup;
+
+  if(!group){
+    showToast(
+      'ยังจัดการนักเรียนไม่ได้',
+      'กรุณาเลือกรายวิชาก่อน',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  /*
+   * ถ้ามีคะแนนแก้ไขค้างอยู่
+   * ให้เตือนก่อนเปิด Overlay
+   */
+  if(
+    !confirmDiscardMidtermChanges(
+      'จัดการนักเรียน',
+      () => {
+        openMidtermRosterOverlay(
+          group,
+          'manage'
+        );
+      }
+    )
+  ){
+    return;
+  }
+
+
+  await openMidtermRosterOverlay(
+    group,
+    'manage'
+  );
+}
+
+
+/* =====================================================
+   EVENT LISTENERS ของ MIDTERM ROSTER OVERLAY
+   ===================================================== */
+
+/*
+ * เปิดจัดการนักเรียนจากหน้ากรอกคะแนน
+ */
+el('manageMidtermStudentsBtn')
+  ?.addEventListener(
+    'click',
+    manageCurrentMidtermStudents
+  );
+
+/*
+ * ค้นหานักเรียน
+ */
+el('midtermRosterSearchInput')
+  ?.addEventListener(
+    'input',
+    () => {
+      state.midtermRosterCheckedLeftCodes =
+        new Set();
+
+      state.midtermRosterCheckedRightCodes =
+        new Set();
+
+      renderMidtermRosterTables();
+    }
+  );
+
+
+/*
+ * Checkbox เลือกทั้งหมดฝั่งซ้าย
+ */
+el('midtermRosterSelectAllLeft')
+  ?.addEventListener(
+    'change',
+    event => {
+      toggleAllVisibleMidtermRosterStudents(
+        'left',
+        event.target.checked
+      );
+    }
+  );
+
+
+/*
+ * Checkbox เลือกทั้งหมดฝั่งขวา
+ */
+el('midtermRosterSelectAllRight')
+  ?.addEventListener(
+    'change',
+    event => {
+      toggleAllVisibleMidtermRosterStudents(
+        'right',
+        event.target.checked
+      );
+    }
+  );
+
+
+/*
+ * เพิ่มนักเรียน
+ */
+el('midtermRosterAddBtn')
+  ?.addEventListener(
+    'click',
+    addCheckedMidtermRosterStudents
+  );
+
+
+/*
+ * นำนักเรียนออก
+ */
+el('midtermRosterRemoveBtn')
+  ?.addEventListener(
+    'click',
+    removeCheckedMidtermRosterStudents
+  );
+
+
+/*
+ * เลือกนักเรียนทั้งห้อง
+ */
+el('midtermRosterSelectAllRoomBtn')
+  ?.addEventListener(
+    'click',
+    selectAllRoomMidtermRosterStudents
+  );
+
+
+/*
+ * กดตกลง
+ */
+el('midtermRosterConfirmBtn')
+  ?.addEventListener(
+    'click',
+    applyMidtermRosterToScoreTable
+  );
+
+
+/*
+ * ปุ่มยกเลิกและปุ่มกากบาท
+ */
+el('midtermRosterCancelBtn')
+  ?.addEventListener(
+    'click',
+    closeMidtermRosterOverlay
+  );
+
+el('midtermRosterCloseBtn')
+  ?.addEventListener(
+    'click',
+    closeMidtermRosterOverlay
+  );
+
+
+/*
+ * คลิกพื้นหลังนอกกล่องเพื่อปิด
+ */
+el('midtermRosterOverlay')
+  ?.addEventListener(
+    'click',
+    event => {
+      if(
+        event.target ===
+        el('midtermRosterOverlay')
+      ){
+        closeMidtermRosterOverlay();
+      }
+    }
+  );
+
+
+/*
+ * กด Escape เพื่อปิด Overlay
+ */
+document.addEventListener(
+  'keydown',
+  event => {
+    if(
+      event.key === 'Escape' &&
+      el('midtermRosterOverlay')
+        ?.classList.contains('show')
+    ){
+      closeMidtermRosterOverlay();
+    }
+  }
 );
 
-    const hasMidtermRows = !!state.midtermRows.length;
+async function openMidtermGroup(group){
+  try{
 
-el('saveMidtermBtn').disabled = !hasMidtermRows;
+    /*
+     * ป้องกันการเปลี่ยนวิชา
+     * ขณะที่มีคะแนนยังไม่ได้บันทึก
+     */
+    if(
+      !confirmDiscardMidtermChanges(
+        'เปิดรายวิชาอื่น',
+        () => {
+          openMidtermGroup(group);
+        }
+      )
+    ){
+      return;
+    }
 
-if(el('downloadMidtermTemplateBtn')){
-  el('downloadMidtermTemplateBtn').disabled = !hasMidtermRows;
-}
 
-if(el('importMidtermExcelBtn')){
-  el('importMidtermExcelBtn').disabled = !hasMidtermRows;
-}
+    if(!group){
+      throw new Error(
+        'ไม่พบข้อมูลรายวิชาที่ต้องการแก้ไข'
+      );
+    }
+
+
+    state.selectedMidtermGroup =
+      group;
+
+    state.midtermRows =
+      [];
+
+    state.midtermMax = {
+      keep: 0,
+      midterm: 0,
+      attendance: 0
+    };
+
+
+    /*
+     * แสดงหัวข้อรายวิชา
+     */
+    if(el('midtermSelectedTitle')){
+      el('midtermSelectedTitle').textContent =
+        `${group.subject_code || '-'} ` +
+        `${group.subject_name || '-'}`;
+    }
+
+
+    if(el('midtermSelectedSub')){
+      el('midtermSelectedSub').textContent =
+        `ชั้น ${group.class_level || '-'} ` +
+        `ห้อง ${group.room || '-'} | ` +
+        `ปี ${group.academic_year || '-'}/` +
+        `${group.term || '-'}`;
+    }
+
+
+    setStatus(
+      'midtermFormStatus',
+      'กำลังโหลดข้อมูลคะแนนเดิม...',
+      'info'
+    );
+
+
+    /*
+     * ปิดปุ่มชั่วคราวระหว่างโหลด
+     */
+    if(el('saveMidtermBtn')){
+      el('saveMidtermBtn').disabled =
+        true;
+    }
+
+    if(el('downloadMidtermTemplateBtn')){
+      el('downloadMidtermTemplateBtn').disabled =
+        true;
+    }
+
+    if(el('importMidtermExcelBtn')){
+      el('importMidtermExcelBtn').disabled =
+        true;
+    }
+
     
-  }catch(err){
-    state.midtermRows = [];
+
+
+    /*
+     * โหลดเฉพาะนักเรียนที่มีอยู่ใน
+     * midterm_reports ของรายวิชานี้
+     */
+    const {
+      data: oldReports,
+      error: oldError
+    } = await supabaseClient
+      .from('midterm_reports')
+      .select('*')
+      .eq(
+        'academic_year',
+        Number(group.academic_year)
+      )
+      .eq(
+        'term',
+        Number(group.term)
+      )
+      .eq(
+        'subject_code',
+        group.subject_code
+      )
+      .eq(
+        'teacher_code',
+        state.currentUser.teacher_code
+      )
+      .eq(
+        'class_level',
+        group.class_level
+      )
+      .eq(
+        'room',
+        group.room
+      )
+      .order(
+        'student_no',
+        {
+          ascending: true
+        }
+      )
+      .order(
+        'student_name',
+        {
+          ascending: true
+        }
+      );
+
+
+    if(oldError){
+      throw oldError;
+    }
+
+
+    const reportRows =
+      oldReports ||
+      [];
+
+
+    /*
+     * กรณีข้อมูลถูกลบหลังจากโหลดรายการสอนแล้ว
+     */
+    if(!reportRows.length){
+      state.midtermRows =
+        [];
+
+      renderMidtermRows();
+
+      setStatus(
+        'midtermFormStatus',
+        'ไม่พบข้อมูลคะแนนของรายวิชานี้ กรุณาโหลดรายการสอนใหม่',
+        'warn'
+      );
+
+      await loadMidtermTeachingList();
+
+      return;
+    }
+
+
+    /*
+     * ใช้คะแนนเต็มจากแถวแรก
+     * เพราะนักเรียนในรายวิชาเดียวกัน
+     * ใช้คะแนนเต็มชุดเดียวกัน
+     */
+    const firstReport =
+      reportRows[0];
+
+    state.midtermMax = {
+      keep:
+        Number(
+          firstReport.keep_max ||
+          0
+        ),
+
+      midterm:
+        Number(
+          firstReport.midterm_max ||
+          0
+        ),
+
+      attendance:
+        Number(
+          firstReport.attendance_max ||
+          0
+        )
+    };
+
+
+    /*
+     * สร้างตารางคะแนนจาก midterm_reports เท่านั้น
+     */
+    state.midtermRows =
+      sortMidtermRosterStudents(
+        reportRows.map(report => ({
+          student_id:
+            report.student_id ||
+            null,
+
+          student_code:
+            normalizeMidtermRosterStudentCode(
+              report.student_code
+            ),
+
+          student_no:
+            safeNum(
+              report.student_no
+            ),
+
+          student_name:
+            safeText(
+              report.student_name,
+              '-'
+            ),
+
+          keep_score:
+            report.keep_score ??
+            '',
+
+          midterm_score:
+            report.midterm_score ??
+            '',
+
+          total_score:
+            Number(
+              report.total_score ||
+              0
+            ),
+
+          score_percent:
+            Number(
+              report.score_percent ||
+              0
+            ),
+
+          attendance_score:
+            report.attendance_score ??
+            '',
+
+          attendance_percent:
+            Number(
+              report.attendance_percent ||
+              0
+            )
+        }))
+      );
+
+
+    /*
+     * เก็บรายชื่อเดิมไว้
+     * สำหรับใช้ตอนเปิดจัดการนักเรียน
+     */
+    state.midtermRosterOriginalStudentCodes =
+      state.midtermRows.map(row =>
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      );
+
+    state.midtermRosterRemovedStudentCodes =
+      [];
+
+
+    /*
+     * แสดงคะแนนเต็ม
+     */
+    if(el('midtermKeepMax')){
+      el('midtermKeepMax').value =
+        state.midtermMax.keep;
+    }
+
+    if(el('midtermScoreMax')){
+      el('midtermScoreMax').value =
+        state.midtermMax.midterm;
+    }
+
+    if(el('midtermAttendanceMax')){
+      el('midtermAttendanceMax').value =
+        state.midtermMax.attendance;
+    }
+
+
+    calculateAllMidtermRows();
     renderMidtermRows();
-    setStatus('midtermFormStatus', err.message || 'โหลดข้อมูลไม่สำเร็จ', 'error');
+
+    captureMidtermOriginalState();
+    refreshMidtermDirtyUI();
+
+
+    const hasMidtermRows =
+      state.midtermRows.length > 0;
+
+
+    if(el('saveMidtermBtn')){
+      el('saveMidtermBtn').disabled =
+        !hasMidtermRows;
+    }
+
+    if(el('downloadMidtermTemplateBtn')){
+      el('downloadMidtermTemplateBtn').disabled =
+        !hasMidtermRows;
+    }
+
+    if(el('importMidtermExcelBtn')){
+      el('importMidtermExcelBtn').disabled =
+        !hasMidtermRows;
+    }
+
+    if(el('manageMidtermStudentsBtn')){
+  el('manageMidtermStudentsBtn').disabled =
+    !hasMidtermRows;
+}
+
+    if(el('midtermExcelInput')){
+      el('midtermExcelInput').value =
+        '';
+    }
+
+
+    setStatus(
+      'midtermFormStatus',
+      `โหลดข้อมูลคะแนนนักเรียน ${state.midtermRows.length} คน`,
+      'success'
+    );
+
+
+    /*
+     * เลื่อนไปยังตารางกรอกคะแนนทันที
+     */
+    window.requestAnimationFrame(() => {
+      el('midtermSelectedTitle')
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+    });
+
+
+  }catch(error){
+    console.error(
+      'openMidtermGroup error:',
+      error
+    );
+
+
+    state.midtermRows =
+      [];
+
+    renderMidtermRows();
+
+
+    if(el('saveMidtermBtn')){
+      el('saveMidtermBtn').disabled =
+        true;
+    }
+
+    if(el('downloadMidtermTemplateBtn')){
+      el('downloadMidtermTemplateBtn').disabled =
+        true;
+    }
+
+    if(el('importMidtermExcelBtn')){
+      el('importMidtermExcelBtn').disabled =
+        true;
+    }
+
+
+    setStatus(
+      'midtermFormStatus',
+      error?.message ||
+      'โหลดข้อมูลคะแนนไม่สำเร็จ',
+      'error'
+    );
   }
-  const hasMidtermRows = !!state.midtermRows.length;
-
-if(el('saveMidtermBtn')){
-  el('saveMidtermBtn').disabled = !hasMidtermRows;
-}
-
-if(el('downloadMidtermTemplateBtn')){
-  el('downloadMidtermTemplateBtn').disabled = !hasMidtermRows;
-}
-
-if(el('importMidtermExcelBtn')){
-  el('importMidtermExcelBtn').disabled = !hasMidtermRows;
-}
 }
 
 
@@ -20846,6 +23998,17 @@ async function saveMidtermReport(){
 
 if(error) throw error;
 
+
+/*
+ * บันทึกลง midterm_reports แล้ว
+ * เปิดใช้ปุ่มจัดการนักเรียน
+ */
+if(el('manageMidtermStudentsBtn')){
+  el('manageMidtermStudentsBtn').disabled =
+    false;
+}
+
+
 captureMidtermOriginalState();
 renderMidtermRows();
 
@@ -20884,9 +24047,21 @@ function clearMidtermForm(){
   if(el('midtermKeepMax')) el('midtermKeepMax').value = 0;
   if(el('midtermScoreMax')) el('midtermScoreMax').value = 0;
   if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = 0;
-  if(el('saveMidtermBtn')) el('saveMidtermBtn').disabled = true;
-  if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
-  if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
+if(el('saveMidtermBtn')){
+  el('saveMidtermBtn').disabled = true;
+}
+
+if(el('manageMidtermStudentsBtn')){
+  el('manageMidtermStudentsBtn').disabled = true;
+}
+
+if(el('downloadMidtermTemplateBtn')){
+  el('downloadMidtermTemplateBtn').disabled = true;
+}
+
+if(el('importMidtermExcelBtn')){
+  el('importMidtermExcelBtn').disabled = true;
+}
   if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
   if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
   if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
