@@ -23843,19 +23843,34 @@ async function openMidtermGroup(group){
       );
 
 
-    /*
-     * เก็บรายชื่อเดิมไว้
-     * สำหรับใช้ตอนเปิดจัดการนักเรียน
-     */
-    state.midtermRosterOriginalStudentCodes =
-      state.midtermRows.map(row =>
-        normalizeMidtermRosterStudentCode(
-          row.student_code
-        )
-      );
+/*
+ * ลบเฉพาะรหัสที่ถูกลบออกจากรายชื่อเดิม
+ *
+ * ห้ามนำรหัสนักเรียนที่เพิ่งเพิ่มใหม่
+ * มาใส่เป็นข้อมูลเดิม เพราะนักเรียนใหม่
+ * ยังไม่ได้บันทึกลง midterm_reports
+ */
+const removedCodeSet =
+  new Set(
+    removedCodes.map(
+      normalizeMidtermRosterStudentCode
+    )
+  );
 
-    state.midtermRosterRemovedStudentCodes =
-      [];
+state.midtermRosterOriginalStudentCodes =
+  (
+    state.midtermRosterOriginalStudentCodes ||
+    []
+  ).filter(code =>
+    !removedCodeSet.has(
+      normalizeMidtermRosterStudentCode(
+        code
+      )
+    )
+  );
+
+state.midtermRosterRemovedStudentCodes =
+  [];
 
 
     /*
@@ -24251,44 +24266,213 @@ showToast(
 }
 
 function clearMidtermForm(){
-  if(!confirmDiscardMidtermChanges('ล้างตาราง', () => {
-    clearMidtermForm();
-  })){
+  /*
+   * ตรวจข้อมูลที่ยังไม่ได้บันทึกก่อนล้าง
+   */
+  if(
+    !confirmDiscardMidtermChanges(
+      'ล้างตาราง',
+      () => {
+        clearMidtermForm();
+      }
+    )
+  ){
     return;
   }
 
-  state.selectedMidtermGroup = null;
-  state.midtermRows = [];
-  state.midtermMax = { keep:0, midterm:0, attendance:0 };
+
+  /* =====================================================
+     ล้างข้อมูลตารางคะแนน
+     ===================================================== */
+
+  state.selectedMidtermGroup =
+    null;
+
+  state.midtermRows =
+    [];
+
+  state.midtermMax = {
+    keep: 0,
+    midterm: 0,
+    attendance: 0
+  };
+
+
+  /* =====================================================
+     ล้างข้อมูล Overlay จัดการนักเรียน
+     ===================================================== */
+
+  state.midtermRosterGroup =
+    null;
+
+  state.midtermRosterAllStudents =
+    [];
+
+  state.midtermRosterSelectedStudents =
+    [];
+
+  state.midtermRosterOriginalStudentCodes =
+    [];
+
+  state.midtermRosterRemovedStudentCodes =
+    [];
+
+  state.midtermRosterCheckedLeftCodes =
+    new Set();
+
+  state.midtermRosterCheckedRightCodes =
+    new Set();
+
+  state.midtermRosterMode =
+    'create';
+
+
+  /*
+   * ล้างสถานะข้อมูลที่ยังไม่ได้บันทึก
+   */
   resetMidtermDirtyState();
 
-  if(el('midtermSelectedTitle')) el('midtermSelectedTitle').textContent = 'ตารางบันทึกคะแนนกลางภาค';
-  if(el('midtermSelectedSub')) el('midtermSelectedSub').textContent = 'กรุณาเลือกรายวิชาจากรายการสอนด้านบน';
 
-  if(el('midtermKeepMax')) el('midtermKeepMax').value = 0;
-  if(el('midtermScoreMax')) el('midtermScoreMax').value = 0;
-  if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = 0;
-if(el('saveMidtermBtn')){
-  el('saveMidtermBtn').disabled = true;
-}
+  /* =====================================================
+     ปิดและรีเซ็ต Overlay
+     ===================================================== */
 
-if(el('manageMidtermStudentsBtn')){
-  el('manageMidtermStudentsBtn').disabled = true;
-}
+  el('midtermRosterOverlay')
+    ?.classList.remove('show');
 
-if(el('downloadMidtermTemplateBtn')){
-  el('downloadMidtermTemplateBtn').disabled = true;
-}
 
-if(el('importMidtermExcelBtn')){
-  el('importMidtermExcelBtn').disabled = true;
-}
-  if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
-  if(el('downloadMidtermTemplateBtn')) el('downloadMidtermTemplateBtn').disabled = true;
-  if(el('importMidtermExcelBtn')) el('importMidtermExcelBtn').disabled = true;
-  if(el('midtermExcelInput')) el('midtermExcelInput').value = '';
+  if(el('midtermRosterSearchInput')){
+    el('midtermRosterSearchInput').value =
+      '';
+  }
 
-  setStatus('midtermFormStatus', 'ยังไม่ได้เลือกวิชา', 'info');
+
+  if(el('midtermRosterConfirmBtn')){
+    el('midtermRosterConfirmBtn').textContent =
+      '✓ ตกลงและไปกรอกคะแนน';
+
+    el('midtermRosterConfirmBtn').disabled =
+      true;
+  }
+
+
+  if(el('midtermRosterLeftCount')){
+    el('midtermRosterLeftCount').textContent =
+      '0 คน';
+  }
+
+
+  if(el('midtermRosterRightCount')){
+    el('midtermRosterRightCount').textContent =
+      '0 คน';
+  }
+
+
+  if(el('midtermRosterLeftTbody')){
+    el('midtermRosterLeftTbody').innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          ยังไม่ได้เลือกรายวิชา
+        </td>
+      </tr>
+    `;
+  }
+
+
+  if(el('midtermRosterRightTbody')){
+    el('midtermRosterRightTbody').innerHTML = `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-state"
+        >
+          ยังไม่ได้เลือกรายวิชา
+        </td>
+      </tr>
+    `;
+  }
+
+
+  /* =====================================================
+     รีเซ็ตหัวข้อหน้ากรอกคะแนน
+     ===================================================== */
+
+  if(el('midtermSelectedTitle')){
+    el('midtermSelectedTitle').textContent =
+      'ตารางบันทึกคะแนนกลางภาค';
+  }
+
+
+  if(el('midtermSelectedSub')){
+    el('midtermSelectedSub').textContent =
+      'กรุณาเลือกรายวิชาจากรายการสอนด้านบน';
+  }
+
+
+  /* =====================================================
+     รีเซ็ตคะแนนเต็ม
+     ===================================================== */
+
+  if(el('midtermKeepMax')){
+    el('midtermKeepMax').value =
+      0;
+  }
+
+  if(el('midtermScoreMax')){
+    el('midtermScoreMax').value =
+      0;
+  }
+
+  if(el('midtermAttendanceMax')){
+    el('midtermAttendanceMax').value =
+      0;
+  }
+
+
+  /* =====================================================
+     ปิดปุ่มทั้งหมด
+     ===================================================== */
+
+  if(el('manageMidtermStudentsBtn')){
+    el('manageMidtermStudentsBtn').disabled =
+      true;
+  }
+
+  if(el('downloadMidtermTemplateBtn')){
+    el('downloadMidtermTemplateBtn').disabled =
+      true;
+  }
+
+  if(el('importMidtermExcelBtn')){
+    el('importMidtermExcelBtn').disabled =
+      true;
+  }
+
+  if(el('saveMidtermBtn')){
+    el('saveMidtermBtn').disabled =
+      true;
+  }
+
+
+  /*
+   * ล้างไฟล์ Excel ที่เคยเลือก
+   */
+  if(el('midtermExcelInput')){
+    el('midtermExcelInput').value =
+      '';
+  }
+
+
+  setStatus(
+    'midtermFormStatus',
+    'ยังไม่ได้เลือกวิชา',
+    'info'
+  );
+
+
   renderMidtermRows();
 }
 
@@ -24352,17 +24536,132 @@ function isMidtermMaxChanged(key){
   return normalizeMidtermCompareValue(state.midtermMax[key]) !== normalizeMidtermCompareValue(state.midtermOriginalMax[key]);
 }
 
+/*
+ * รหัสนักเรียนที่อยู่ในตารางกรอกคะแนนปัจจุบัน
+ */
+function getCurrentMidtermStudentCodes(){
+  return [
+    ...new Set(
+      (state.midtermRows || [])
+        .map(row =>
+          normalizeMidtermRosterStudentCode(
+            row.student_code
+          )
+        )
+        .filter(Boolean)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(
+      b,
+      'th',
+      {
+        numeric: true,
+        sensitivity: 'base'
+      }
+    )
+  );
+}
+
+
+/*
+ * รหัสนักเรียนที่มีอยู่จริงใน midterm_reports
+ */
+function getSavedMidtermStudentCodes(){
+  return [
+    ...new Set(
+      (
+        state.midtermRosterOriginalStudentCodes ||
+        []
+      )
+        .map(
+          normalizeMidtermRosterStudentCode
+        )
+        .filter(Boolean)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(
+      b,
+      'th',
+      {
+        numeric: true,
+        sensitivity: 'base'
+      }
+    )
+  );
+}
+
+
+/*
+ * ตรวจว่ารายชื่อนักเรียนปัจจุบัน
+ * ต่างจากรายชื่อที่บันทึกในฐานข้อมูลหรือไม่
+ */
+function hasMidtermRosterUnsavedChanges(){
+  const currentCodes =
+    getCurrentMidtermStudentCodes();
+
+  const savedCodes =
+    getSavedMidtermStudentCodes();
+
+
+  if(
+    currentCodes.length !==
+    savedCodes.length
+  ){
+    return true;
+  }
+
+
+  return currentCodes.some(
+    (code, index) =>
+      code !== savedCodes[index]
+  );
+}
+
+
 function hasMidtermUnsavedChanges(){
-  if(!state.selectedMidtermGroup) return false;
+  if(!state.selectedMidtermGroup){
+    return false;
+  }
 
-  if(isMidtermMaxChanged('keep')) return true;
-  if(isMidtermMaxChanged('midterm')) return true;
-  if(isMidtermMaxChanged('attendance')) return true;
 
-  const keys = ['keep_score', 'midterm_score', 'attendance_score'];
+  /*
+   * เพิ่มนักเรียนใหม่แต่ยังไม่ได้บันทึก
+   */
+  if(hasMidtermRosterUnsavedChanges()){
+    return true;
+  }
 
-  return (state.midtermRows || []).some((row, idx) =>
-    keys.some(key => isMidtermScoreChanged(idx, key))
+
+  if(isMidtermMaxChanged('keep')){
+    return true;
+  }
+
+  if(isMidtermMaxChanged('midterm')){
+    return true;
+  }
+
+  if(isMidtermMaxChanged('attendance')){
+    return true;
+  }
+
+
+  const keys = [
+    'keep_score',
+    'midterm_score',
+    'attendance_score'
+  ];
+
+
+  return (
+    state.midtermRows ||
+    []
+  ).some((row, idx) =>
+    keys.some(key =>
+      isMidtermScoreChanged(
+        idx,
+        key
+      )
+    )
   );
 }
 
@@ -24626,121 +24925,458 @@ function readMidtermMaxFromExcel(aoa){
 function applyMidtermExcelRows(aoa){
   assertMidtermGroupReady();
 
-  const headerRowIndex = findMidtermHeaderRow(aoa);
+
+  /*
+   * ตรวจหาหัวตาราง
+   */
+  const headerRowIndex =
+    findMidtermHeaderRow(aoa);
+
   if(headerRowIndex < 0){
-    throw new Error('ไม่พบหัวตารางที่ถูกต้องในไฟล์ Excel\nต้องมีคอลัมน์ เลขประจำตัว, คะแนนเก็บ, กลางภาค, เวลาเรียน');
+    throw new Error(
+      'ไม่พบหัวตารางที่ถูกต้องในไฟล์ Excel\n' +
+      'ต้องมีคอลัมน์ เลขประจำตัว, คะแนนเก็บ, ' +
+      'กลางภาค และเวลาเรียน'
+    );
   }
 
-  readMidtermMaxFromExcel(aoa);
 
-  const headers = (aoa[headerRowIndex] || []).map(normalizeMidtermHeader);
+  const headers =
+    (aoa[headerRowIndex] || [])
+      .map(normalizeMidtermHeader);
 
-  const idxSid = findMidtermColumnIndex(headers, ['เลขประจำตัว', 'sid', 'รหัสนักเรียน']);
-  const idxKeep = findMidtermColumnIndex(headers, ['คะแนนเก็บ', 'keep_score', 'keep']);
-  const idxMid = findMidtermColumnIndex(headers, ['กลางภาค', 'midterm_score', 'midterm']);
-  const idxAtt = findMidtermColumnIndex(headers, ['เวลาเรียน', 'attendance_score', 'attendance']);
 
-  if(idxSid < 0 || idxKeep < 0 || idxMid < 0 || idxAtt < 0){
-    throw new Error('หัวตารางไม่ครบ กรุณาใช้ Template ที่ระบบดาวน์โหลดให้');
+  const idxSid =
+    findMidtermColumnIndex(
+      headers,
+      [
+        'เลขประจำตัว',
+        'sid',
+        'รหัสนักเรียน'
+      ]
+    );
+
+  const idxKeep =
+    findMidtermColumnIndex(
+      headers,
+      [
+        'คะแนนเก็บ',
+        'keep_score',
+        'keep'
+      ]
+    );
+
+  const idxMid =
+    findMidtermColumnIndex(
+      headers,
+      [
+        'กลางภาค',
+        'midterm_score',
+        'midterm'
+      ]
+    );
+
+  const idxAtt =
+    findMidtermColumnIndex(
+      headers,
+      [
+        'เวลาเรียน',
+        'attendance_score',
+        'attendance'
+      ]
+    );
+
+
+  if(
+    idxSid < 0 ||
+    idxKeep < 0 ||
+    idxMid < 0 ||
+    idxAtt < 0
+  ){
+    throw new Error(
+      'หัวตารางไม่ครบ กรุณาใช้ Template ' +
+      'ที่ระบบดาวน์โหลดให้'
+    );
   }
 
-  const rowMap = new Map(
-    state.midtermRows.map((row, idx) => [
-      String(row.student_code || '').trim(),
-      { row, idx }
-    ])
-  );
 
-  const changedCells = [];
-  let matchCount = 0;
-  let missCount = 0;
-  let changedRowCount = 0;
+  /*
+   * Map รายชื่อนักเรียนในตารางคะแนนปัจจุบัน
+   */
+  const rowMap =
+    new Map(
+      (state.midtermRows || [])
+        .map((row, idx) => {
+          const studentCode =
+            normalizeMidtermRosterStudentCode(
+              row.student_code
+            );
 
-  const dataRows = aoa.slice(headerRowIndex + 1);
+          return [
+            studentCode,
+            {
+              row,
+              idx
+            }
+          ];
+        })
+        .filter(([studentCode]) =>
+          Boolean(studentCode)
+        )
+    );
+
+
+  /*
+   * อ่านข้อมูลจาก Excel ก่อน
+   * แต่ยังไม่แก้คะแนนใน state
+   */
+  const parsedRows =
+    [];
+
+  const seenCodes =
+    new Set();
+
+  const duplicateCodes =
+    new Set();
+
+  const unknownCodes =
+    new Set();
+
+
+  const dataRows =
+    aoa.slice(
+      headerRowIndex + 1
+    );
+
 
   dataRows.forEach(excelRow => {
-    if(!excelRow || excelRow.every(v => String(v || '').trim() === '')) return;
-
-    const sid = String(excelRow[idxSid] || '').trim();
-    if(!sid) return;
-
-    const target = rowMap.get(sid);
-    if(!target){
-      missCount++;
+    if(
+      !excelRow ||
+      excelRow.every(value =>
+        String(value ?? '').trim() === ''
+      )
+    ){
       return;
     }
 
-    let rowChanged = false;
+
+    const studentCode =
+      normalizeMidtermRosterStudentCode(
+        excelRow[idxSid]
+      );
+
+
+    /*
+     * แถวที่ไม่มีรหัสนักเรียนไม่นำมาคิด
+     */
+    if(!studentCode){
+      return;
+    }
+
+
+    /*
+     * ตรวจรหัสซ้ำในไฟล์
+     */
+    if(seenCodes.has(studentCode)){
+      duplicateCodes.add(
+        studentCode
+      );
+
+      return;
+    }
+
+    seenCodes.add(
+      studentCode
+    );
+
+
+    /*
+     * ตรวจว่าอยู่ในรายชื่อที่จัดการไว้หรือไม่
+     */
+    if(!rowMap.has(studentCode)){
+      unknownCodes.add(
+        studentCode
+      );
+
+      return;
+    }
+
+
+    parsedRows.push({
+      student_code:
+        studentCode,
+
+      keep_score:
+        excelRow[idxKeep],
+
+      midterm_score:
+        excelRow[idxMid],
+
+      attendance_score:
+        excelRow[idxAtt]
+    });
+  });
+
+
+  /*
+   * ห้ามแก้คะแนน หากพบรหัสซ้ำ
+   */
+  if(duplicateCodes.size > 0){
+    const codeText =
+      [...duplicateCodes]
+        .slice(0, 10)
+        .join(', ');
+
+    throw new Error(
+      `พบเลขประจำตัวนักเรียนซ้ำในไฟล์: ${codeText}\n` +
+      'กรุณาตรวจสอบไฟล์แล้วนำเข้าใหม่'
+    );
+  }
+
+
+  /*
+   * ห้ามแก้คะแนน หากมีนักเรียน
+   * ที่ไม่ได้อยู่ในตารางคะแนนปัจจุบัน
+   */
+  if(unknownCodes.size > 0){
+    const codeText =
+      [...unknownCodes]
+        .slice(0, 10)
+        .join(', ');
+
+    const moreText =
+      unknownCodes.size > 10
+        ? ` และอีก ${unknownCodes.size - 10} คน`
+        : '';
+
+    throw new Error(
+      `พบนักเรียนที่ไม่ได้อยู่ในรายวิชานี้: ` +
+      `${codeText}${moreText}\n` +
+      'กรุณากด “จัดการนักเรียน” เพื่อเพิ่มนักเรียนก่อน ' +
+      'หรือดาวน์โหลด Template ใหม่'
+    );
+  }
+
+
+  if(!parsedRows.length){
+    throw new Error(
+      'ไม่พบข้อมูลนักเรียนสำหรับนำเข้าในไฟล์ Excel'
+    );
+  }
+
+
+  /*
+   * ผ่านการตรวจรายชื่อแล้ว
+   * จึงอ่านคะแนนเต็มจากไฟล์
+   */
+  readMidtermMaxFromExcel(aoa);
+
+
+  const changedCells =
+    [];
+
+  let changedRowCount =
+    0;
+
+
+  /*
+   * นำคะแนนไปใส่เฉพาะนักเรียน
+   * ที่อยู่ในตารางปัจจุบัน
+   */
+  parsedRows.forEach(excelRow => {
+    const target =
+      rowMap.get(
+        excelRow.student_code
+      );
+
+    if(!target){
+      return;
+    }
+
+
+    let rowChanged =
+      false;
+
 
     const updates = [
-      { key:'keep_score', value:excelRow[idxKeep] },
-      { key:'midterm_score', value:excelRow[idxMid] },
-      { key:'attendance_score', value:excelRow[idxAtt] }
+      {
+        key: 'keep_score',
+        value: excelRow.keep_score
+      },
+      {
+        key: 'midterm_score',
+        value: excelRow.midterm_score
+      },
+      {
+        key: 'attendance_score',
+        value: excelRow.attendance_score
+      }
     ];
 
+
     updates.forEach(item => {
-      const raw = String(item.value ?? '').trim();
-      if(raw === '') return;
+      const raw =
+        String(
+          item.value ?? ''
+        ).trim();
 
-      const n = Number(raw);
-      if(!Number.isFinite(n)) return;
 
-      const oldValue = String(target.row[item.key] ?? '').trim();
-      const newValue = String(n);
+      /*
+       * ช่องว่างจะไม่เขียนทับคะแนนเดิม
+       */
+      if(raw === ''){
+        return;
+      }
+
+
+      const numberValue =
+        Number(raw);
+
+
+      /*
+       * ค่าที่ไม่ใช่ตัวเลข
+       * จะปล่อยให้ระบบตรวจแจ้งภายหลัง
+       */
+      if(!Number.isFinite(numberValue)){
+        target.row[item.key] =
+          raw;
+
+        changedCells.push({
+          rowIndex:
+            target.idx,
+
+          key:
+            item.key
+        });
+
+        rowChanged =
+          true;
+
+        return;
+      }
+
+
+      const oldValue =
+        normalizeMidtermCompareValue(
+          target.row[item.key]
+        );
+
+      const newValue =
+        normalizeMidtermCompareValue(
+          numberValue
+        );
+
 
       if(oldValue !== newValue){
-        target.row[item.key] = n;
+        target.row[item.key] =
+          numberValue;
+
         changedCells.push({
-          rowIndex: target.idx,
-          key: item.key
+          rowIndex:
+            target.idx,
+
+          key:
+            item.key
         });
-        rowChanged = true;
+
+        rowChanged =
+          true;
       }
     });
 
-    calculateMidtermRow(target.row);
 
-    if(rowChanged) changedRowCount++;
-    matchCount++;
+    calculateMidtermRow(
+      target.row
+    );
+
+
+    if(rowChanged){
+      changedRowCount++;
+    }
   });
+
 
   calculateAllMidtermRows();
   renderMidtermRows();
 
-  changedCells.forEach(ch => {
-    const input = document.querySelector(
-      `#midtermTbody [data-midterm-idx="${ch.rowIndex}"][data-midterm-key="${ch.key}"]`
-    );
 
-    if(input){
-      input.classList.add('changed-score');
-    }
+  /*
+   * ทำสีช่องที่มีการเปลี่ยนแปลง
+   */
+  changedCells.forEach(change => {
+    const input =
+      document.querySelector(
+        `#midtermTbody ` +
+        `[data-midterm-idx="${change.rowIndex}"]` +
+        `[data-midterm-key="${change.key}"]`
+      );
+
+    input?.classList.add(
+      'changed-score'
+    );
   });
+
+
   refreshMidtermDirtyUI();
 
-const invalidCount = validateMidtermImportedInputs();
 
-const importStatusText =
-  `นำเข้า Excel สำเร็จ: เปลี่ยนแปลง ${changedRowCount} แถว | จับคู่ได้ ${matchCount} แถว | ไม่พบในตาราง ${missCount} แถว${invalidCount ? ` | พบค่าผิดปกติ ${invalidCount} ช่อง` : ''}`;
+  const invalidCount =
+    validateMidtermImportedInputs();
 
-if(state.midtermDirty){
-  setStatus(
-    'midtermFormStatus',
-    `${importStatusText}\nมีการแก้ไขคะแนนที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”`,
-    'warn'
-  );
-}else{
-  setStatus(
-    'midtermFormStatus',
-    importStatusText,
-    invalidCount ? 'warn' : 'success'
-  );
-}
+
+  /*
+   * นักเรียนในตารางที่ไม่อยู่ในไฟล์
+   * จะคงคะแนนเดิมไว้
+   */
+  const missingFromFileCount =
+    Math.max(
+      0,
+      rowMap.size -
+      parsedRows.length
+    );
+
+
+  const importStatusText =
+    `นำเข้า Excel สำเร็จ: ` +
+    `จับคู่ได้ ${parsedRows.length} คน | ` +
+    `เปลี่ยนแปลง ${changedRowCount} คน` +
+    (
+      missingFromFileCount > 0
+        ? ` | ไม่มีข้อมูลในไฟล์ ${missingFromFileCount} คน`
+        : ''
+    ) +
+    (
+      invalidCount > 0
+        ? ` | พบค่าผิดปกติ ${invalidCount} ช่อง`
+        : ''
+    );
+
+
+  if(state.midtermDirty){
+    setStatus(
+      'midtermFormStatus',
+      `${importStatusText}\n` +
+      'มีข้อมูลที่ยังไม่ได้บันทึก ' +
+      'กรุณากด “บันทึกคะแนนกลางภาค”',
+      'warn'
+    );
+  }else{
+    setStatus(
+      'midtermFormStatus',
+      importStatusText,
+      invalidCount > 0
+        ? 'warn'
+        : 'success'
+    );
+  }
+
 
   showToast(
     'นำเข้าสำเร็จ',
-    `นำเข้าคะแนนจาก Excel แล้ว ${changedRowCount} แถว`,
-    invalidCount ? 'warn' : 'success'
+    `นำเข้าคะแนนจาก Excelแล้ว ${parsedRows.length} คน`,
+    invalidCount > 0
+      ? 'warn'
+      : 'success'
   );
 }
 
