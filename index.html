@@ -11071,6 +11071,7 @@ midtermRosterGroup: null,
 midtermRosterAllStudents: [],
 midtermRosterSelectedStudents: [],
 midtermRosterOriginalStudentCodes: [],
+midtermRosterRemovedStudentCodes: [],
 midtermRosterCheckedLeftCodes: new Set(),
 midtermRosterCheckedRightCodes: new Set(),
 midtermRosterMode: 'create',
@@ -23014,12 +23015,78 @@ function toggleAllVisibleMidtermRosterStudents(
   renderMidtermRosterTables();
 }
 
+/*
+ * ลบนักเรียนที่ถูกนำออกจากรายวิชา
+ * ออกจาก midterm_reports จริง
+ */
+async function deleteRemovedMidtermReports(
+  group,
+  studentCodes
+){
+  const codes = [
+    ...new Set(
+      (studentCodes || [])
+        .map(
+          normalizeMidtermRosterStudentCode
+        )
+        .filter(Boolean)
+    )
+  ];
+
+  if(!group || !codes.length){
+    return 0;
+  }
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from('midterm_reports')
+    .delete()
+    .eq(
+      'academic_year',
+      Number(group.academic_year)
+    )
+    .eq(
+      'term',
+      Number(group.term)
+    )
+    .eq(
+      'subject_code',
+      group.subject_code
+    )
+    .eq(
+      'teacher_code',
+      state.currentUser.teacher_code
+    )
+    .eq(
+      'class_level',
+      group.class_level
+    )
+    .eq(
+      'room',
+      group.room
+    )
+    .in(
+      'student_code',
+      codes
+    );
+
+
+  if(error){
+    throw error;
+  }
+
+
+  return codes.length;
+}
+
 
 /*
  * นำรายชื่อตารางขวา
  * ไปแสดงในหน้ากรอกคะแนน
  */
-function applyMidtermRosterToScoreTable(){
+async function applyMidtermRosterToScoreTable(){
   const group =
     state.midtermRosterGroup;
 
@@ -23066,21 +23133,122 @@ function applyMidtermRosterToScoreTable(){
       )
     );
 
-  state.midtermRosterRemovedStudentCodes =
-    (
-      state.midtermRosterOriginalStudentCodes ||
-      []
-    ).filter(code =>
-      !selectedCodeSet.has(
-        normalizeMidtermRosterStudentCode(
-          code
-        )
+state.midtermRosterRemovedStudentCodes =
+  (
+    state.midtermRosterOriginalStudentCodes ||
+    []
+  ).filter(code =>
+    !selectedCodeSet.has(
+      normalizeMidtermRosterStudentCode(
+        code
       )
+    )
+  );
+
+
+/*
+ * กรณีเปิดจากปุ่มจัดการนักเรียน
+ * และมีนักเรียนเดิมถูกนำออก
+ * ให้ลบจาก midterm_reports จริง
+ */
+const removedCodes =
+  state.midtermRosterRemovedStudentCodes ||
+  [];
+
+if(
+  state.midtermRosterMode === 'manage' &&
+  removedCodes.length > 0
+){
+  const confirmDelete =
+    window.confirm(
+      `ยืนยันนำนักเรียนออก ${removedCodes.length} คน\n\n` +
+      `ข้อมูลคะแนนกลางภาคของนักเรียนที่นำออก ` +
+      `จะถูกลบจากระบบด้วย`
     );
 
 
-  state.selectedMidtermGroup =
-    group;
+  if(!confirmDelete){
+    setStatus(
+      'midtermRosterStatus',
+      'ยกเลิกการนำรายชื่อนักเรียนออก',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  const confirmBtn =
+    el('midtermRosterConfirmBtn');
+
+  if(confirmBtn){
+    confirmBtn.disabled = true;
+    confirmBtn.textContent =
+      'กำลังลบข้อมูล...';
+  }
+
+
+  setStatus(
+    'midtermRosterStatus',
+    `กำลังลบนักเรียน ${removedCodes.length} คนออกจากรายวิชา...`,
+    'info'
+  );
+
+
+  try{
+    await deleteRemovedMidtermReports(
+      group,
+      removedCodes
+    );
+
+    /*
+     * อัปเดตรายชื่อเดิมให้ตรงกับฐานข้อมูลใหม่
+     */
+    state.midtermRosterOriginalStudentCodes =
+      selectedStudents.map(row =>
+        normalizeMidtermRosterStudentCode(
+          row.student_code
+        )
+      );
+
+    state.midtermRosterRemovedStudentCodes =
+      [];
+
+  }catch(error){
+    console.error(
+      'deleteRemovedMidtermReports error:',
+      error
+    );
+
+    if(confirmBtn){
+      confirmBtn.textContent =
+        '✓ ตกลงและไปกรอกคะแนน';
+
+      confirmBtn.disabled =
+        false;
+    }
+
+    setStatus(
+      'midtermRosterStatus',
+      error?.message ||
+      'ลบนักเรียนออกจากรายวิชาไม่สำเร็จ',
+      'error'
+    );
+
+    showToast(
+      'ลบข้อมูลไม่สำเร็จ',
+      error?.message ||
+      'ไม่สามารถลบนักเรียนออกจากรายวิชาได้',
+      'error'
+    );
+
+    return;
+  }
+}
+
+
+state.selectedMidtermGroup =
+  group;
 
   state.midtermRows =
     selectedStudents.map(row => ({
@@ -23205,6 +23373,11 @@ if(el('manageMidtermStudentsBtn')){
     `พร้อมกรอกคะแนนนักเรียน ${state.midtermRows.length} คน`,
     'success'
   );
+
+  if(el('midtermRosterConfirmBtn')){
+  el('midtermRosterConfirmBtn').textContent =
+    '✓ ตกลงและไปกรอกคะแนน';
+}
 
 
   closeMidtermRosterOverlay();
