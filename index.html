@@ -22186,16 +22186,36 @@ function updateMidtermRosterControls(){
   }
 
 
-  const confirmBtn =
-    el('midtermRosterConfirmBtn');
+const confirmBtn =
+  el('midtermRosterConfirmBtn');
 
-  if(confirmBtn){
-    confirmBtn.disabled =
-      (
-        state.midtermRosterSelectedStudents ||
-        []
-      ).length === 0;
-  }
+if(confirmBtn){
+  const selectedCount =
+    (
+      state.midtermRosterSelectedStudents ||
+      []
+    ).length;
+
+  /*
+   * กรอกคะแนนครั้งแรก:
+   * ต้องเลือกนักเรียนอย่างน้อย 1 คน
+   *
+   * จัดการนักเรียนเดิม:
+   * อนุญาตให้เหลือ 0 คน เพื่อให้ลบข้อมูลทั้งหมดได้
+   */
+  const canConfirmEmptyRoster =
+    state.midtermRosterMode === 'manage' &&
+    (
+      state.midtermRosterOriginalStudentCodes ||
+      []
+    ).length > 0;
+
+  confirmBtn.disabled =
+    !(
+      selectedCount > 0 ||
+      canConfirmEmptyRoster
+    );
+}
 }
 
 
@@ -23108,15 +23128,31 @@ async function applyMidtermRosterToScoreTable(){
   }
 
 
-  if(!selectedStudents.length){
-    setStatus(
-      'midtermRosterStatus',
-      'กรุณาเลือกนักเรียนอย่างน้อย 1 คน',
-      'error'
-    );
+/*
+ * กรอกคะแนนครั้งแรกต้องมีนักเรียนอย่างน้อย 1 คน
+ *
+ * แต่ถ้าเปิดจากปุ่มจัดการนักเรียน
+ * สามารถนำออกทั้งหมดได้
+ */
+const canSaveEmptyRoster =
+  state.midtermRosterMode === 'manage' &&
+  (
+    state.midtermRosterOriginalStudentCodes ||
+    []
+  ).length > 0;
 
-    return;
-  }
+if(
+  !selectedStudents.length &&
+  !canSaveEmptyRoster
+){
+  setStatus(
+    'midtermRosterStatus',
+    'กรุณาเลือกนักเรียนอย่างน้อย 1 คน',
+    'error'
+  );
+
+  return;
+}
 
 
   /*
@@ -23154,6 +23190,15 @@ state.midtermRosterRemovedStudentCodes =
 const removedCodes =
   state.midtermRosterRemovedStudentCodes ||
   [];
+
+
+/*
+ * จำนวนข้อมูลเดิมที่ลบออกจาก midterm_reports สำเร็จ
+ * ใช้ตรวจว่าจะต้องรีโหลดรายการสอนด้านบนหรือไม่
+ */
+let deletedReportCount =
+  0;
+
 
 if(
   state.midtermRosterMode === 'manage' &&
@@ -23196,14 +23241,24 @@ if(
 
 
   try{
-    await deleteRemovedMidtermReports(
-      group,
-      removedCodes
-    );
+await deleteRemovedMidtermReports(
+  group,
+  removedCodes
+);
 
-    /*
-     * อัปเดตรายชื่อเดิมให้ตรงกับฐานข้อมูลใหม่
-     */
+
+/*
+ * จำจำนวนที่ลบสำเร็จ
+ * เพื่อรีเฟรชจำนวนคนในรายการสอนด้านบน
+ */
+deletedReportCount =
+  removedCodes.length;
+
+
+/*
+ * อัปเดตรายชื่อเดิมให้ตรงกับฐานข้อมูลใหม่
+ */
+
     state.midtermRosterOriginalStudentCodes =
       selectedStudents.map(row =>
         normalizeMidtermRosterStudentCode(
@@ -23353,13 +23408,20 @@ state.selectedMidtermGroup =
       !hasRows;
   }
 
-  /*
- * รายวิชาใหม่ยังไม่ได้บันทึกลง midterm_reports
- * จึงยังไม่เปิดปุ่มจัดการนักเรียนซ้ำ
+/*
+ * ถ้ามีนักเรียนเพิ่มใหม่ที่ยังไม่ได้บันทึก
+ * ให้ปิดปุ่มจัดการนักเรียนไว้ก่อน
+ *
+ * ถ้ามีเพียงการลบข้อมูลเดิม ซึ่งลบฐานข้อมูลแล้ว
+ * สามารถเปิดปุ่มจัดการนักเรียนต่อได้
  */
 if(el('manageMidtermStudentsBtn')){
+  const rosterNeedsSave =
+    hasMidtermRosterUnsavedChanges();
+
   el('manageMidtermStudentsBtn').disabled =
-    true;
+    !hasRows ||
+    rosterNeedsSave;
 }
 
   if(el('midtermExcelInput')){
@@ -23368,25 +23430,68 @@ if(el('manageMidtermStudentsBtn')){
   }
 
 
+if(hasRows){
   setStatus(
     'midtermFormStatus',
     `พร้อมกรอกคะแนนนักเรียน ${state.midtermRows.length} คน`,
     'success'
   );
 
-  if(el('midtermRosterConfirmBtn')){
+}else{
+  setStatus(
+    'midtermFormStatus',
+    'นำนักเรียนออกจากรายวิชาทั้งหมดแล้ว ไม่มีข้อมูลสำหรับกรอกคะแนน',
+    'warn'
+  );
+}
+
+if(el('midtermRosterConfirmBtn')){
   el('midtermRosterConfirmBtn').textContent =
     '✓ ตกลงและไปกรอกคะแนน';
 }
 
+closeMidtermRosterOverlay();
 
-  closeMidtermRosterOverlay();
+
+/*
+ * หากมีการลบนักเรียนเดิมออกจาก midterm_reports
+ * ให้โหลดรายการสอนด้านบนใหม่ทันที
+ *
+ * ตารางกรอกคะแนนปัจจุบันจะไม่ถูกล้าง
+ */
+if(deletedReportCount > 0){
+  try{
+    await loadMidtermTeachingList();
+
+    showToast(
+      'ปรับรายชื่อแล้ว',
+      `ลบนักเรียนออกจากรายวิชา ${deletedReportCount} คน`,
+      'success'
+    );
+
+  }catch(reloadError){
+    /*
+     * การลบในฐานข้อมูลสำเร็จแล้ว
+     * แม้รีโหลดจำนวนด้านบนไม่สำเร็จ
+     */
+    console.warn(
+      'reload teaching list after delete error:',
+      reloadError
+    );
+
+    showToast(
+      'ลบรายชื่อแล้ว',
+      'ลบนักเรียนสำเร็จ แต่ยังรีเฟรชจำนวนด้านบนไม่สำเร็จ',
+      'warn'
+    );
+  }
+}
 
 
-  /*
-   * เลื่อนไปยังหน้าตารางกรอกคะแนน
-   */
-  window.requestAnimationFrame(() => {
+/*
+ * เลื่อนไปยังหน้าตารางกรอกคะแนน
+ */
+window.requestAnimationFrame(() => {
     el('midtermSelectedTitle')
       ?.scrollIntoView({
         behavior: 'smooth',
