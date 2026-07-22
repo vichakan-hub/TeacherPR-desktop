@@ -22531,24 +22531,64 @@ const allStudents =
     );
 
 
-  const selectedStudents =
-    (oldReports || [])
-      .map(report => {
-        const studentCode =
-          normalizeMidtermRosterStudentCode(
-            report.student_code
+  /*
+ * ตรวจว่ากำลังเปิดจัดการรายชื่อ
+ * ของวิชาที่แสดงอยู่ในตารางคะแนนหรือไม่
+ */
+const isManagingCurrentGroup =
+  state.midtermRosterMode === 'manage' &&
+  state.selectedMidtermGroup &&
+  getMidtermReportGroupKey(
+    state.selectedMidtermGroup
+  ) ===
+  getMidtermReportGroupKey(group) &&
+  Array.isArray(
+    state.midtermRows
+  ) &&
+  state.midtermRows.length > 0;
+
+
+/*
+ * หากเปิดจากปุ่มจัดการนักเรียน
+ * ให้ใช้รายชื่อปัจจุบันจาก state.midtermRows
+ *
+ * ทำให้รายชื่อที่เลือกไว้แต่ยังไม่บันทึก
+ * ยังคงอยู่ในตารางขวา
+ */
+const selectedStudents =
+  isManagingCurrentGroup
+    ? state.midtermRows
+        .map(row => ({
+          ...row,
+
+          student_code:
+            normalizeMidtermRosterStudentCode(
+              row.student_code
+            )
+        }))
+        .filter(row =>
+          row.student_code
+        )
+
+    : (oldReports || [])
+        .map(report => {
+          const studentCode =
+            normalizeMidtermRosterStudentCode(
+              report.student_code
+            );
+
+          const student =
+            studentMap.get(studentCode) ||
+            null;
+
+          return createMidtermRosterStudentFromReport(
+            report,
+            student
           );
-
-        const student =
-          studentMap.get(studentCode) ||
-          null;
-
-        return createMidtermRosterStudentFromReport(
-          report,
-          student
+        })
+        .filter(row =>
+          row.student_code
         );
-      })
-      .filter(row => row.student_code);
 
 
   state.midtermRosterAllStudents =
@@ -22561,12 +22601,24 @@ const allStudents =
       selectedStudents
     );
 
-  state.midtermRosterOriginalStudentCodes =
-    selectedStudents.map(row =>
-      normalizeMidtermRosterStudentCode(
-        row.student_code
-      )
-    );
+/*
+ * รายชื่อเดิมต้องมาจาก midterm_reports เท่านั้น
+ *
+ * นักเรียนที่เลือกไว้ในหน้าจอแต่ยังไม่ได้บันทึก
+ * จะยังถูกตรวจว่าเป็นข้อมูลค้างบันทึก
+ */
+state.midtermRosterOriginalStudentCodes =
+  [
+    ...new Set(
+      (oldReports || [])
+        .map(report =>
+          normalizeMidtermRosterStudentCode(
+            report.student_code
+          )
+        )
+        .filter(Boolean)
+    )
+  ];
 
   state.midtermRosterCheckedLeftCodes =
     new Set();
@@ -23487,20 +23539,15 @@ state.selectedMidtermGroup =
       !hasRows;
   }
 
+
 /*
- * ถ้ามีนักเรียนเพิ่มใหม่ที่ยังไม่ได้บันทึก
- * ให้ปิดปุ่มจัดการนักเรียนไว้ก่อน
- *
- * ถ้ามีเพียงการลบข้อมูลเดิม ซึ่งลบฐานข้อมูลแล้ว
- * สามารถเปิดปุ่มจัดการนักเรียนต่อได้
+ * เมื่อตารางคะแนนมีนักเรียนแล้ว
+ * ให้เปิดปุ่มจัดการนักเรียนได้ทันที
+ * แม้รายชื่อยังไม่ได้บันทึกลง midterm_reports
  */
 if(el('manageMidtermStudentsBtn')){
-  const rosterNeedsSave =
-    hasMidtermRosterUnsavedChanges();
-
   el('manageMidtermStudentsBtn').disabled =
-    !hasRows ||
-    rosterNeedsSave;
+    !hasRows;
 }
 
   if(el('midtermExcelInput')){
@@ -23577,6 +23624,10 @@ focusMidtermScoreTable();
  * เปิด Overlay จัดการนักเรียน
  * จากหน้าตารางกรอกคะแนน
  */
+/*
+ * เปิด Overlay จัดการนักเรียน
+ * จากหน้าตารางกรอกคะแนน
+ */
 async function manageCurrentMidtermStudents(){
   const group =
     state.selectedMidtermGroup;
@@ -23593,20 +23644,19 @@ async function manageCurrentMidtermStudents(){
 
 
   /*
-   * ถ้ามีคะแนนแก้ไขค้างอยู่
-   * ให้เตือนก่อนเปิด Overlay
+   * ถ้ามีการกรอกหรือแก้ไขคะแนนแล้ว
+   * ให้บันทึกคะแนนก่อนจัดการรายชื่อ
+   *
+   * แต่ถ้ามีเพียงการเพิ่มรายชื่อนักเรียน
+   * ที่ยังไม่ได้บันทึก สามารถจัดการต่อได้
    */
-  if(
-    !confirmDiscardMidtermChanges(
-      'จัดการนักเรียน',
-      () => {
-        openMidtermRosterOverlay(
-          group,
-          'manage'
-        );
-      }
-    )
-  ){
+  if(hasMidtermScoreUnsavedChanges()){
+    showToast(
+      'กรุณาบันทึกคะแนนก่อน',
+      'มีคะแนนหรือคะแนนเต็มที่แก้ไขแล้ว กรุณาบันทึกก่อนจัดการรายชื่อนักเรียน',
+      'warn'
+    );
+
     return;
   }
 
