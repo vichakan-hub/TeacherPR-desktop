@@ -7203,7 +7203,7 @@ td{
   flex:0 0 auto;
 
   display:grid;
-  grid-template-columns:minmax(280px, 1fr) auto;
+  grid-template-columns:minmax(280px, 520px);
   gap:14px;
   align-items:end;
 
@@ -7224,20 +7224,16 @@ td{
   min-width:220px;
 }
 
-#midtermRosterSelectAllRoomBtn{
-  width:100%;
-  height:42px;
-
-  border:1px solid #bfe6cb;
+/* ปุ่มเพิ่มนักเรียนทั้งหมด */
+.midterm-roster-transfer-btn.all{
+  border:1px solid #86d49f;
   background:#e9f8ef;
   color:#08783f;
-
-  font-weight:900;
-  white-space:nowrap;
 }
 
-#midtermRosterSelectAllRoomBtn:hover{
+.midterm-roster-transfer-btn.all:hover{
   background:#dff4e7;
+  border-color:#65c586;
 }
 
 
@@ -10475,19 +10471,7 @@ td{
         >
       </div>
 
-      <div class="midterm-roster-toolbar-action">
-        <span class="label-in-form">
-          เลือกอย่างรวดเร็ว
-        </span>
 
-        <button
-          id="midtermRosterSelectAllRoomBtn"
-          class="btn-secondary"
-          type="button"
-        >
-          ✓ เลือกนักเรียนทั้งห้อง
-        </button>
-      </div>
 
     </div>
 
@@ -10567,11 +10551,26 @@ td{
 
 
       <!-- ปุ่มย้ายตรงกลาง -->
-      <div class="midterm-roster-transfer-actions">
+<div class="midterm-roster-transfer-actions">
 
-        <button
-          id="midtermRosterAddBtn"
-          class="midterm-roster-transfer-btn add"
+  <button
+    id="midtermRosterSelectAllRoomBtn"
+    class="midterm-roster-transfer-btn all"
+    type="button"
+    title="เพิ่มนักเรียนทั้งหมด"
+  >
+    <span class="midterm-roster-transfer-icon">
+      ⇉
+    </span>
+
+    <span class="midterm-roster-transfer-text">
+      เพิ่ม นร. ทั้งหมด
+    </span>
+  </button>
+
+  <button
+    id="midtermRosterAddBtn"
+    class="midterm-roster-transfer-btn add"
           type="button"
           title="เพิ่มนักเรียนที่เลือก"
         >
@@ -10580,7 +10579,7 @@ td{
           </span>
 
           <span class="midterm-roster-transfer-text">
-            เพิ่มนักเรียน
+            เพิ่ม นร. ที่เลือก
           </span>
         </button>
 
