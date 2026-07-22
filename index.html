@@ -23101,6 +23101,85 @@ async function deleteRemovedMidtermReports(
   return codes.length;
 }
 
+/*
+ * เลื่อนไปยังตารางคะแนนกลางภาค
+ * และโฟกัสช่องคะแนนเก็บของนักเรียนคนแรก
+ */
+function focusMidtermScoreTable(){
+  window.requestAnimationFrame(() => {
+
+    /*
+     * เลื่อนไปยัง Card ตารางคะแนน
+     */
+    const scoreCard =
+      el('midtermSelectedTitle')
+        ?.closest('section.card') ||
+      el('midtermTbody');
+
+    scoreCard?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+
+    /*
+     * รอให้การเลื่อนและ Render ตารางเสร็จก่อน
+     */
+    window.setTimeout(() => {
+      const firstScoreInput =
+        document.querySelector(
+          '#midtermTbody ' +
+          '.midterm-score-input' +
+          '[data-midterm-key="keep_score"]'
+        ) ||
+        document.querySelector(
+          '#midtermTbody .midterm-score-input'
+        );
+
+
+      /*
+       * บนคอมพิวเตอร์ให้โฟกัสช่องคะแนนแรก
+       *
+       * บนมือถือให้เลื่อนอย่างเดียว
+       * เพื่อไม่ให้แป้นพิมพ์เด้งขึ้นอัตโนมัติ
+       */
+      const isDesktop =
+        window.matchMedia(
+          '(min-width: 721px)'
+        ).matches;
+
+
+      if(
+        isDesktop &&
+        firstScoreInput &&
+        !firstScoreInput.disabled
+      ){
+        try{
+          firstScoreInput.focus({
+            preventScroll: true
+          });
+
+        }catch(error){
+          firstScoreInput.focus();
+        }
+
+
+        /*
+         * เลือกตัวเลขเดิมทั้งหมด
+         * เพื่อให้พิมพ์ค่าใหม่ทับได้ทันที
+         */
+        if(
+          typeof firstScoreInput.select ===
+          'function'
+        ){
+          firstScoreInput.select();
+        }
+      }
+
+    }, 450);
+  });
+}
+
 
 /*
  * นำรายชื่อตารางขวา
@@ -23489,15 +23568,9 @@ if(deletedReportCount > 0){
 
 
 /*
- * เลื่อนไปยังหน้าตารางกรอกคะแนน
+ * เลื่อนไปและโฟกัสตารางกรอกคะแนน
  */
-window.requestAnimationFrame(() => {
-    el('midtermSelectedTitle')
-      ?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-  });
+focusMidtermScoreTable();
 }
 
 /*
@@ -24044,13 +24117,10 @@ state.midtermRosterRemovedStudentCodes =
     /*
      * เลื่อนไปยังตารางกรอกคะแนนทันที
      */
-    window.requestAnimationFrame(() => {
-      el('midtermSelectedTitle')
-        ?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-    });
+/*
+ * เลื่อนไปและโฟกัสตารางกรอกคะแนนทันที
+ */
+focusMidtermScoreTable();
 
 
   }catch(error){
@@ -24227,6 +24297,37 @@ function validateMidtermRows(){
 }
 
 async function saveMidtermReport(){
+  const saveBtn =
+    el('saveMidtermBtn');
+
+
+  /*
+   * ป้องกันการกดบันทึกซ้ำ
+   */
+  if(
+    saveBtn?.dataset.saving ===
+    'true'
+  ){
+    return;
+  }
+
+
+  if(saveBtn){
+    saveBtn.dataset.saving =
+      'true';
+
+    saveBtn.dataset.normalText =
+      saveBtn.textContent ||
+      '💾 บันทึกคะแนนกลางภาค';
+
+    saveBtn.disabled =
+      true;
+
+    saveBtn.textContent =
+      '⏳ กำลังบันทึก...';
+  }
+
+
   try{
     if(!state.selectedMidtermGroup){
       throw new Error('กรุณาเลือกรายวิชาก่อนบันทึก');
@@ -24365,8 +24466,55 @@ showToast(
 );
     
   }catch(err){
-    setStatus('midtermFormStatus', err.message || 'บันทึกไม่สำเร็จ', 'error');
-    showToast('บันทึกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+    console.error(
+      'saveMidtermReport error:',
+      err
+    );
+
+    setStatus(
+      'midtermFormStatus',
+      err?.message ||
+      'บันทึกไม่สำเร็จ',
+      'error'
+    );
+
+    showToast(
+      'บันทึกไม่สำเร็จ',
+      err?.message ||
+      'เกิดข้อผิดพลาด',
+      'error'
+    );
+
+  }finally{
+
+    /*
+     * คืนข้อความและสถานะปุ่ม
+     * ไม่ว่าบันทึกสำเร็จหรือเกิดข้อผิดพลาด
+     */
+    if(saveBtn){
+      saveBtn.dataset.saving =
+        'false';
+
+      saveBtn.textContent =
+        saveBtn.dataset.normalText ||
+        '💾 บันทึกคะแนนกลางภาค';
+
+      delete saveBtn.dataset.normalText;
+
+
+      const canSave =
+        Boolean(
+          state.selectedMidtermGroup
+        ) &&
+        Array.isArray(
+          state.midtermRows
+        ) &&
+        state.midtermRows.length > 0;
+
+
+      saveBtn.disabled =
+        !canSave;
+    }
   }
 }
 
@@ -24722,20 +24870,14 @@ function hasMidtermRosterUnsavedChanges(){
   );
 }
 
-
-function hasMidtermUnsavedChanges(){
+    /*
+ * ตรวจเฉพาะคะแนนและคะแนนเต็ม
+ * ไม่รวมการเพิ่มหรือลดรายชื่อนักเรียน
+ */
+function hasMidtermScoreUnsavedChanges(){
   if(!state.selectedMidtermGroup){
     return false;
   }
-
-
-  /*
-   * เพิ่มนักเรียนใหม่แต่ยังไม่ได้บันทึก
-   */
-  if(hasMidtermRosterUnsavedChanges()){
-    return true;
-  }
-
 
   if(isMidtermMaxChanged('keep')){
     return true;
@@ -24749,13 +24891,11 @@ function hasMidtermUnsavedChanges(){
     return true;
   }
 
-
   const keys = [
     'keep_score',
     'midterm_score',
     'attendance_score'
   ];
-
 
   return (
     state.midtermRows ||
@@ -24768,6 +24908,18 @@ function hasMidtermUnsavedChanges(){
       )
     )
   );
+}
+
+function hasMidtermUnsavedChanges(){
+  if(!state.selectedMidtermGroup){
+    return false;
+  }
+
+  if(hasMidtermRosterUnsavedChanges()){
+    return true;
+  }
+
+  return hasMidtermScoreUnsavedChanges();
 }
 
 function refreshMidtermDirtyUI(options = {}){
@@ -24796,15 +24948,49 @@ function refreshMidtermDirtyUI(options = {}){
 
   el('saveMidtermBtn')?.classList.toggle('has-unsaved', state.midtermDirty);
 
-  if(state.midtermDirty){
-    setStatus(
-      'midtermFormStatus',
-      'มีการแก้ไขคะแนนที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”',
-      'warn'
-    );
-  }else if(options.cleanText){
-    setStatus('midtermFormStatus', options.cleanText, options.cleanType || 'success');
+if(state.midtermDirty){
+  const rosterChanged =
+    hasMidtermRosterUnsavedChanges();
+
+  const scoreChanged =
+    hasMidtermScoreUnsavedChanges();
+
+  let message =
+    'มีข้อมูลที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”';
+
+  if(
+    rosterChanged &&
+    scoreChanged
+  ){
+    message =
+      'มีการเปลี่ยนแปลงรายชื่อนักเรียนและคะแนนที่ยังไม่ได้บันทึก ' +
+      'กรุณากด “บันทึกคะแนนกลางภาค”';
+
+  }else if(rosterChanged){
+    message =
+      'มีนักเรียนที่เพิ่มเข้ารายวิชาแต่ยังไม่ได้บันทึก ' +
+      'กรุณากรอกคะแนนและกด “บันทึกคะแนนกลางภาค”';
+
+  }else if(scoreChanged){
+    message =
+      'มีการแก้ไขคะแนนที่ยังไม่ได้บันทึก ' +
+      'กรุณากด “บันทึกคะแนนกลางภาค”';
   }
+
+  setStatus(
+    'midtermFormStatus',
+    message,
+    'warn'
+  );
+
+}else if(options.cleanText){
+  setStatus(
+    'midtermFormStatus',
+    options.cleanText,
+    options.cleanType ||
+    'success'
+  );
+}
 }
 
 function isOnMidtermReportPage(){
@@ -24814,16 +25000,52 @@ function isOnMidtermReportPage(){
   );
 }
 
-function confirmDiscardMidtermChanges(actionText = 'ดำเนินการต่อ', onConfirm = null){
-  if(!isOnMidtermReportPage()) return true;
-  if(!state.midtermDirty) return true;
+function confirmDiscardMidtermChanges(
+  actionText = 'ดำเนินการต่อ',
+  onConfirm = null
+){
+  if(!isOnMidtermReportPage()){
+    return true;
+  }
+
+  if(!state.midtermDirty){
+    return true;
+  }
+
+  const rosterChanged =
+    hasMidtermRosterUnsavedChanges();
+
+  const scoreChanged =
+    hasMidtermScoreUnsavedChanges();
+
+  let message =
+    'คุณมีข้อมูลที่ยังไม่ได้บันทึก';
+
+  if(
+    rosterChanged &&
+    scoreChanged
+  ){
+    message =
+      'คุณมีรายชื่อนักเรียนและคะแนนที่ยังไม่ได้บันทึก';
+
+  }else if(rosterChanged){
+    message =
+      'คุณมีนักเรียนที่เพิ่มเข้ารายวิชาแต่ยังไม่ได้บันทึก';
+
+  }else if(scoreChanged){
+    message =
+      'คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก';
+  }
 
   openUnsavedOverlay(
-    `คุณมีคะแนนที่แก้ไขแล้วแต่ยังไม่ได้บันทึก`,
+    `${message}\nหากดำเนินการต่อ ข้อมูลที่ยังไม่ได้บันทึกจะหายไป`,
     () => {
       resetMidtermDirtyState();
 
-      if(typeof onConfirm === 'function'){
+      if(
+        typeof onConfirm ===
+        'function'
+      ){
         onConfirm();
       }
     }
