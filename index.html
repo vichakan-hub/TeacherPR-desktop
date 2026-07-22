@@ -24169,7 +24169,31 @@ async function saveMidtermReport(){
         onConflict: 'academic_year,term,subject_code,teacher_code,class_level,room,student_code'
       });
 
-if(error) throw error;
+if(error){
+  throw error;
+}
+
+
+/*
+ * อัปเดตรายชื่อนักเรียนเดิม
+ * ให้ตรงกับข้อมูลที่บันทึกลง midterm_reports แล้ว
+ */
+state.midtermRosterOriginalStudentCodes =
+  state.midtermRows
+    .map(row =>
+      normalizeMidtermRosterStudentCode(
+        row.student_code
+      )
+    )
+    .filter(Boolean);
+
+
+/*
+ * ไม่มีนักเรียนที่รอลบแล้ว
+ * เพราะการบันทึกครั้งนี้เสร็จสมบูรณ์
+ */
+state.midtermRosterRemovedStudentCodes =
+  [];
 
 
 /*
@@ -24186,9 +24210,33 @@ captureMidtermOriginalState();
 renderMidtermRows();
 
 refreshMidtermDirtyUI({
-  cleanText: `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
-  cleanType: 'success'
+  cleanText:
+    `บันทึกคะแนนกลางภาคสำเร็จ ${payload.length} รายการ`,
+
+  cleanType:
+    'success'
 });
+
+
+/*
+ * โหลดรายการสอนด้านบนใหม่
+ * เพื่อเปลี่ยนปุ่มจาก "กรอกคะแนน"
+ * เป็น "แก้ไขคะแนน" สีเขียวทันที
+ */
+try{
+  await loadMidtermTeachingList();
+
+}catch(reloadError){
+  /*
+   * คะแนนบันทึกสำเร็จแล้ว
+   * จึงไม่ให้ความผิดพลาดจากการรีโหลดรายการสอน
+   * ไปแสดงว่าเป็นการบันทึกล้มเหลว
+   */
+  console.warn(
+    'reload midterm teaching list error:',
+    reloadError
+  );
+}
 
 showToast(
   'บันทึกสำเร็จ',
