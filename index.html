@@ -24071,34 +24071,25 @@ async function openMidtermGroup(group){
 
 
 /*
- * ลบเฉพาะรหัสที่ถูกลบออกจากรายชื่อเดิม
- *
- * ห้ามนำรหัสนักเรียนที่เพิ่งเพิ่มใหม่
- * มาใส่เป็นข้อมูลเดิม เพราะนักเรียนใหม่
- * ยังไม่ได้บันทึกลง midterm_reports
+ * รายชื่อนักเรียนที่โหลดจาก midterm_reports
+ * ถือเป็นรายชื่อเดิมที่บันทึกไว้แล้ว
  */
-const removedCodeSet =
-  new Set(
-    removedCodes.map(
-      normalizeMidtermRosterStudentCode
-    )
-  );
-
 state.midtermRosterOriginalStudentCodes =
-  (
-    state.midtermRosterOriginalStudentCodes ||
-    []
-  ).filter(code =>
-    !removedCodeSet.has(
+  state.midtermRows
+    .map(row =>
       normalizeMidtermRosterStudentCode(
-        code
+        row.student_code
       )
     )
-  );
+    .filter(Boolean);
 
+
+/*
+ * เมื่อเพิ่งเปิดข้อมูลเดิม
+ * ยังไม่มีนักเรียนที่รอถูกลบ
+ */
 state.midtermRosterRemovedStudentCodes =
   [];
-
 
     /*
      * แสดงคะแนนเต็ม
