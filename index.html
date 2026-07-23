@@ -8313,43 +8313,42 @@ td{
 }
 
 
-/* กล่อง Checkbox และชื่อคอลัมน์ */
+/*
+ * Checkbox เปิดกรอก
+ * อยู่ใต้ช่องคะแนนเต็ม
+ */
 #midtermScoreOverlay
 .midterm-column-selector{
-  min-height:32px;
-  margin:0 0 6px;
+  min-height:24px;
+  margin:7px 0 0;
 
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:7px;
+  gap:6px;
 
-  padding:5px 9px;
-  border:1px solid #cbd8e8;
-  border-radius:10px;
+  padding:0;
 
-  background:#ffffff;
-  color:#41536c;
+  border:0;
+  border-radius:0;
+  background:transparent;
 
-  font-size:12px;
-  font-weight:900;
-  line-height:1.25;
+  color:#64748b;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.2;
 
   cursor:pointer;
   user-select:none;
 
   transition:
-    background .16s ease,
-    border-color .16s ease,
     color .16s ease,
-    box-shadow .16s ease;
+    opacity .16s ease;
 }
 
 
 #midtermScoreOverlay
 .midterm-column-selector:hover{
-  border-color:#93c5fd;
-  background:#eef6ff;
   color:#1d4ed8;
 }
 
@@ -8368,28 +8367,24 @@ td{
 }
 
 
-/* หัวคอลัมน์ที่กำลังเลือก */
+/*
+ * หัวคอลัมน์ที่กำลังเลือก
+ * ใช้เพียงพื้นหลังฟ้าอ่อน ไม่มีกรอบสีน้ำเงิน
+ */
 #midtermScoreOverlay
 .midterm-entry-head.active{
   background:#e8f1ff !important;
-
-  box-shadow:
-    inset 3px 0 0 #2563eb,
-    inset -3px 0 0 #2563eb,
-    inset 0 3px 0 #2563eb;
+  box-shadow:none !important;
 }
 
 
-/* กล่อง Checkbox ของคอลัมน์ที่เลือก */
 #midtermScoreOverlay
 .midterm-entry-head.active
 .midterm-column-selector{
-  border-color:#60a5fa;
-  background:#dbeafe;
+  border:0;
+  background:transparent;
   color:#1d4ed8;
-
-  box-shadow:
-    0 0 0 3px rgba(37,99,235,.12);
+  box-shadow:none;
 }
 
 
@@ -9009,80 +9004,84 @@ td{
     </th>
 
 
-    <!-- คะแนนเก็บ -->
-    <th
-      class="
-        text-center
-        midterm-entry-head
-      "
-      data-midterm-column-head="keep_score"
+<!-- คะแนนเก็บ -->
+<th
+  class="
+    text-center
+    midterm-entry-head
+  "
+  data-midterm-column-head="keep_score"
+>
+  <div class="midterm-head-title">
+    คะแนนเก็บ
+  </div>
+
+  <div class="midterm-head-max">
+    เต็ม
+
+    <input
+      id="midtermKeepMax"
+      class="midterm-max-input"
+      type="number"
+      min="0"
+      value="0"
     >
-      <label
-        class="midterm-column-selector"
-        for="midtermColumnKeepCheckbox"
-      >
-        <input
-          id="midtermColumnKeepCheckbox"
-          class="midterm-column-checkbox"
-          type="checkbox"
-          data-midterm-column-key="keep_score"
-        >
+  </div>
 
-        <span>
-          กรอกคะแนนเก็บ
-        </span>
-      </label>
-
-      <div class="midterm-head-max">
-        เต็ม
-
-        <input
-          id="midtermKeepMax"
-          class="midterm-max-input"
-          type="number"
-          min="0"
-          value="0"
-        >
-      </div>
-    </th>
-
-
-    <!-- คะแนนกลางภาค -->
-    <th
-      class="
-        text-center
-        midterm-entry-head
-      "
-      data-midterm-column-head="midterm_score"
+  <label
+    class="midterm-column-selector"
+    for="midtermColumnKeepCheckbox"
+  >
+    <input
+      id="midtermColumnKeepCheckbox"
+      class="midterm-column-checkbox"
+      type="checkbox"
+      data-midterm-column-key="keep_score"
     >
-      <label
-        class="midterm-column-selector"
-        for="midtermColumnMidtermCheckbox"
-      >
-        <input
-          id="midtermColumnMidtermCheckbox"
-          class="midterm-column-checkbox"
-          type="checkbox"
-          data-midterm-column-key="midterm_score"
-        >
 
-        <span>
-          กรอกกลางภาค
-        </span>
-      </label>
+    <span>กรอก</span>
+  </label>
+</th>
 
-      <div class="midterm-head-max">
-        เต็ม
 
-        <input
-          id="midtermScoreMax"
-          class="midterm-max-input"
-          type="number"
-          min="0"
-          value="0"
-        >
-      </div>
-    </th>
+<!-- คะแนนกลางภาค -->
+<th
+  class="
+    text-center
+    midterm-entry-head
+  "
+  data-midterm-column-head="midterm_score"
+>
+  <div class="midterm-head-title">
+    กลางภาค
+  </div>
+
+  <div class="midterm-head-max">
+    เต็ม
+
+    <input
+      id="midtermScoreMax"
+      class="midterm-max-input"
+      type="number"
+      min="0"
+      value="0"
+    >
+  </div>
+
+  <label
+    class="midterm-column-selector"
+    for="midtermColumnMidtermCheckbox"
+  >
+    <input
+      id="midtermColumnMidtermCheckbox"
+      class="midterm-column-checkbox"
+      type="checkbox"
+      data-midterm-column-key="midterm_score"
+    >
+
+    <span>เปิดกรอก</span>
+  </label>
+</th>
 
 
     <th
@@ -9100,42 +9099,44 @@ td{
     </th>
 
 
-    <!-- เวลาเรียน -->
-    <th
-      class="
-        text-center
-        midterm-entry-head
-      "
-      data-midterm-column-head="attendance_score"
+<!-- เวลาเรียน -->
+<th
+  class="
+    text-center
+    midterm-entry-head
+  "
+  data-midterm-column-head="attendance_score"
+>
+  <div class="midterm-head-title">
+    เวลาเรียน
+  </div>
+
+  <div class="midterm-head-max">
+    เต็ม
+
+    <input
+      id="midtermAttendanceMax"
+      class="midterm-max-input"
+      type="number"
+      min="0"
+      value="0"
     >
-      <label
-        class="midterm-column-selector"
-        for="midtermColumnAttendanceCheckbox"
-      >
-        <input
-          id="midtermColumnAttendanceCheckbox"
-          class="midterm-column-checkbox"
-          type="checkbox"
-          data-midterm-column-key="attendance_score"
-        >
+  </div>
 
-        <span>
-          กรอกเวลาเรียน
-        </span>
-      </label>
+  <label
+    class="midterm-column-selector"
+    for="midtermColumnAttendanceCheckbox"
+  >
+    <input
+      id="midtermColumnAttendanceCheckbox"
+      class="midterm-column-checkbox"
+      type="checkbox"
+      data-midterm-column-key="attendance_score"
+    >
 
-      <div class="midterm-head-max">
-        เต็ม
-
-        <input
-          id="midtermAttendanceMax"
-          class="midterm-max-input"
-          type="number"
-          min="0"
-          value="0"
-        >
-      </div>
-    </th>
+    <span>เปิดกรอก</span>
+  </label>
+</th>
 
 
     <th
