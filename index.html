@@ -24020,46 +24020,68 @@ document.addEventListener(
 );
 
 /*
- * เลื่อนไปยังตารางคะแนนกลางภาค
+ * เลื่อนตารางภายใน Overlay กลับขึ้นด้านบน
  * และโฟกัสช่องคะแนนเก็บของนักเรียนคนแรก
  */
 function focusMidtermScoreTable(){
   window.requestAnimationFrame(() => {
 
+    const overlay =
+      el('midtermScoreOverlay');
+
+
     /*
-     * เลื่อนไปยัง Card ตารางคะแนน
+     * ต้องให้ Overlay เปิดและมองเห็นก่อน
      */
-    const scoreCard =
-      el('midtermSelectedTitle')
-        ?.closest('section.card') ||
-      el('midtermTbody');
-
-    scoreCard?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    if(
+      !overlay ||
+      !overlay.classList.contains('show')
+    ){
+      return;
+    }
 
 
     /*
-     * รอให้การเลื่อนและ Render ตารางเสร็จก่อน
+     * เลื่อนเฉพาะกล่องตารางภายใน Overlay
+     * ไม่เลื่อนหน้าหลักด้านหลัง
+     */
+    const tableWrap =
+      overlay.querySelector(
+        '.midterm-score-overlay-card > .table-wrap'
+      );
+
+
+    if(tableWrap){
+      tableWrap.scrollTop =
+        0;
+
+      tableWrap.scrollLeft =
+        0;
+    }
+
+
+    /*
+     * รอให้ Overlay และตาราง Render เสร็จก่อน
      */
     window.setTimeout(() => {
+
       const firstScoreInput =
-        document.querySelector(
+        overlay.querySelector(
           '#midtermTbody ' +
           '.midterm-score-input' +
           '[data-midterm-key="keep_score"]'
         ) ||
-        document.querySelector(
+        overlay.querySelector(
           '#midtermTbody .midterm-score-input'
         );
 
 
       /*
-       * บนคอมพิวเตอร์ให้โฟกัสช่องคะแนนแรก
+       * บนคอมพิวเตอร์:
+       * โฟกัสช่องคะแนนแรกและเลือกค่าทั้งหมด
        *
-       * บนมือถือให้เลื่อนอย่างเดียว
-       * เพื่อไม่ให้แป้นพิมพ์เด้งขึ้นอัตโนมัติ
+       * บนมือถือ:
+       * ไม่เปิดแป้นพิมพ์อัตโนมัติ
        */
       const isDesktop =
         window.matchMedia(
@@ -24068,33 +24090,32 @@ function focusMidtermScoreTable(){
 
 
       if(
-        isDesktop &&
-        firstScoreInput &&
-        !firstScoreInput.disabled
+        !isDesktop ||
+        !firstScoreInput ||
+        firstScoreInput.disabled
       ){
-        try{
-          firstScoreInput.focus({
-            preventScroll: true
-          });
-
-        }catch(error){
-          firstScoreInput.focus();
-        }
-
-
-        /*
-         * เลือกตัวเลขเดิมทั้งหมด
-         * เพื่อให้พิมพ์ค่าใหม่ทับได้ทันที
-         */
-        if(
-          typeof firstScoreInput.select ===
-          'function'
-        ){
-          firstScoreInput.select();
-        }
+        return;
       }
 
-    }, 450);
+
+      try{
+        firstScoreInput.focus({
+          preventScroll: true
+        });
+
+      }catch(error){
+        firstScoreInput.focus();
+      }
+
+
+      if(
+        typeof firstScoreInput.select ===
+        'function'
+      ){
+        firstScoreInput.select();
+      }
+
+    }, 180);
   });
 }
 
