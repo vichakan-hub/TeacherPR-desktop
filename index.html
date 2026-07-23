@@ -11920,6 +11920,9 @@ midtermGroups: [],
 selectedMidtermGroup: null,
 midtermRows: [],
 
+
+midtermActiveColumn: '',
+
 midtermRosterGroup: null,
 midtermRosterAllStudents: [],
 midtermRosterSelectedStudents: [],
@@ -25325,6 +25328,287 @@ openMidtermScoreOverlay();
 }
 
 
+/* =====================================================
+   MIDTERM COLUMN ENTRY MODE
+   บังคับเลือกคอลัมน์ก่อนกรอก
+   ===================================================== */
+
+const MIDTERM_ENTRY_COLUMNS = {
+  keep_score: {
+    label: 'คะแนนเก็บ',
+    checkboxId: 'midtermColumnKeepCheckbox',
+    maxInputId: 'midtermKeepMax'
+  },
+
+  midterm_score: {
+    label: 'คะแนนกลางภาค',
+    checkboxId: 'midtermColumnMidtermCheckbox',
+    maxInputId: 'midtermScoreMax'
+  },
+
+  attendance_score: {
+    label: 'เวลาเรียน',
+    checkboxId: 'midtermColumnAttendanceCheckbox',
+    maxInputId: 'midtermAttendanceMax'
+  }
+};
+
+
+/*
+ * ตรวจว่าเป็น key ของคอลัมน์กรอกคะแนนหรือไม่
+ */
+function isValidMidtermEntryColumn(key){
+  return Object.prototype.hasOwnProperty.call(
+    MIDTERM_ENTRY_COLUMNS,
+    key
+  );
+}
+
+
+/*
+ * ปรับ Checkbox หัวตาราง ช่องคะแนนเต็ม
+ * และช่องกรอกคะแนนนักเรียนทั้งหมด
+ */
+function applyMidtermColumnEntryMode(){
+  const activeKey =
+    isValidMidtermEntryColumn(
+      state.midtermActiveColumn
+    )
+      ? state.midtermActiveColumn
+      : '';
+
+
+  /*
+   * ปรับ Checkbox และหัวคอลัมน์
+   */
+  Object.entries(
+    MIDTERM_ENTRY_COLUMNS
+  ).forEach(([key, config]) => {
+    const isActive =
+      activeKey === key;
+
+    const checkbox =
+      el(config.checkboxId);
+
+    const maxInput =
+      el(config.maxInputId);
+
+    const head =
+      document.querySelector(
+        `[data-midterm-column-head="${key}"]`
+      );
+
+
+    if(checkbox){
+      checkbox.checked =
+        isActive;
+    }
+
+
+    if(maxInput){
+      /*
+       * ต้องเลือก Checkbox ก่อน
+       * จึงจะกรอกคะแนนเต็มได้
+       */
+      maxInput.disabled =
+        !isActive;
+
+      maxInput.tabIndex =
+        isActive
+          ? 0
+          : -1;
+    }
+
+
+    if(head){
+      head.classList.toggle(
+        'active',
+        isActive
+      );
+
+      head.classList.toggle(
+        'column-locked',
+        !isActive
+      );
+    }
+  });
+
+
+  /*
+   * ปรับช่องกรอกคะแนนรายคน
+   */
+  document
+    .querySelectorAll(
+      '#midtermTbody ' +
+      '.midterm-score-input' +
+      '[data-midterm-key]'
+    )
+    .forEach(input => {
+      const inputKey =
+        input.dataset.midtermKey || '';
+
+      const isActive =
+        activeKey !== '' &&
+        inputKey === activeKey;
+
+
+      input.disabled =
+        !isActive;
+
+      input.tabIndex =
+        isActive
+          ? 0
+          : -1;
+
+      input.classList.toggle(
+        'column-active',
+        isActive
+      );
+
+      input.classList.toggle(
+        'column-locked',
+        !isActive
+      );
+    });
+}
+
+
+/*
+ * เปลี่ยนคอลัมน์ที่กำลังกรอก
+ */
+function setMidtermActiveColumn(
+  columnKey,
+  focusFirstField = true
+){
+  const nextKey =
+    isValidMidtermEntryColumn(
+      columnKey
+    )
+      ? columnKey
+      : '';
+
+
+  state.midtermActiveColumn =
+    nextKey;
+
+  applyMidtermColumnEntryMode();
+
+
+  if(!nextKey){
+    setStatus(
+      'midtermFormStatus',
+      'กรุณาเลือก Checkbox ของคอลัมน์ที่ต้องการกรอกก่อน',
+      'info'
+    );
+
+    return;
+  }
+
+
+  const config =
+    MIDTERM_ENTRY_COLUMNS[
+      nextKey
+    ];
+
+
+  setStatus(
+    'midtermFormStatus',
+    `กำลังกรอก${config.label} — กด Tab เพื่อเลื่อนไปยังนักเรียนคนถัดไป`,
+    'info'
+  );
+
+
+  if(!focusFirstField){
+    return;
+  }
+
+
+  /*
+   * เริ่มจากช่องคะแนนเต็มของคอลัมน์นั้น
+   */
+  window.setTimeout(() => {
+    const maxInput =
+      el(config.maxInputId);
+
+    if(
+      !maxInput ||
+      maxInput.disabled
+    ){
+      return;
+    }
+
+
+    try{
+      maxInput.focus({
+        preventScroll: true
+      });
+
+    }catch(error){
+      maxInput.focus();
+    }
+
+
+    if(
+      typeof maxInput.select ===
+      'function'
+    ){
+      maxInput.select();
+    }
+  }, 50);
+}
+
+
+/*
+ * รับ Event จาก Checkbox
+ *
+ * เลือกได้ครั้งละ 1 คอลัมน์
+ * หากกดช่องเดิมซ้ำจะกลับไปล็อกทุกคอลัมน์
+ */
+function handleMidtermColumnCheckboxChanged(
+  event
+){
+  const checkbox =
+    event.target;
+
+  const columnKey =
+    checkbox?.dataset
+      ?.midtermColumnKey || '';
+
+
+  if(
+    !isValidMidtermEntryColumn(
+      columnKey
+    )
+  ){
+    return;
+  }
+
+
+  if(checkbox.checked){
+    /*
+     * เลือกคอลัมน์ใหม่
+     * Checkbox อื่นจะถูกยกเลิกโดย
+     * applyMidtermColumnEntryMode()
+     */
+    setMidtermActiveColumn(
+      columnKey
+    );
+
+    return;
+  }
+
+
+  /*
+   * ยกเลิก Checkbox ที่กำลังเลือก
+   */
+  if(
+    state.midtermActiveColumn ===
+    columnKey
+  ){
+    setMidtermActiveColumn('');
+  }
+}
+
 
 function calculateMidtermRow(row){
   const keep = Number(row.keep_score || 0);
@@ -25353,10 +25637,18 @@ function renderMidtermRows(){
   const tbody = el('midtermTbody');
   if(!tbody) return;
 
-  if(!state.midtermRows.length){
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">กรุณาเลือกรายวิชาจากรายการสอนด้านบน</td></tr>';
-    return;
-  }
+if(!state.midtermRows.length){
+  tbody.innerHTML =
+    '<tr>' +
+      '<td colspan="9" class="empty-state">' +
+        'กรุณาเลือกรายวิชาจากรายการสอนด้านบน' +
+      '</td>' +
+    '</tr>';
+
+  applyMidtermColumnEntryMode();
+
+  return;
+}
 
   tbody.innerHTML = state.midtermRows.map((r, idx) => {
     const scoreLow = Number(r.score_percent || 0) < 50;
@@ -25417,6 +25709,8 @@ function renderMidtermRows(){
       </tr>
     `;
   }).join('');
+
+  applyMidtermColumnEntryMode();
 }
 
 function syncMidtermMaxFromInputs(){
@@ -27678,6 +27972,317 @@ bindIfExists('midtermKeepMax', 'input', handleMidtermMaxInput);
 bindIfExists('midtermScoreMax', 'input', handleMidtermMaxInput);
 bindIfExists('midtermAttendanceMax', 'input', handleMidtermMaxInput);
 
+/*
+ * Tab จากคะแนนเต็ม
+ * ไปยังนักเรียนคนแรกของคอลัมน์นั้น
+ */
+bindIfExists(
+  'midtermKeepMax',
+  'keydown',
+  handleMidtermEntryTab
+);
+
+bindIfExists(
+  'midtermScoreMax',
+  'keydown',
+  handleMidtermEntryTab
+);
+
+bindIfExists(
+  'midtermAttendanceMax',
+  'keydown',
+  handleMidtermEntryTab
+);
+  
+/*
+ * Checkbox เลือกคอลัมน์ที่ต้องการกรอก
+ */
+bindIfExists(
+  'midtermColumnKeepCheckbox',
+  'change',
+  handleMidtermColumnCheckboxChanged
+);
+
+bindIfExists(
+  'midtermColumnMidtermCheckbox',
+  'change',
+  handleMidtermColumnCheckboxChanged
+);
+
+bindIfExists(
+  'midtermColumnAttendanceCheckbox',
+  'change',
+  handleMidtermColumnCheckboxChanged
+);
+
+
+/*
+ * เริ่มต้นโดยล็อกทุกคอลัมน์
+ */
+applyMidtermColumnEntryMode();
+
+  /* =====================================================
+   MIDTERM TAB NAVIGATION
+   กด Tab เพื่อเลื่อนลงคอลัมน์เดิมทีละคน
+   ===================================================== */
+
+/*
+ * รายการช่องกรอกของคอลัมน์ที่กำลังเลือก
+ * เรียงตามลำดับนักเรียนในตาราง
+ */
+function getMidtermActiveColumnInputs(){
+  const activeKey =
+    state.midtermActiveColumn || '';
+
+  if(
+    !isValidMidtermEntryColumn(
+      activeKey
+    )
+  ){
+    return [];
+  }
+
+
+  return [
+    ...document.querySelectorAll(
+      '#midtermTbody ' +
+      '.midterm-score-input' +
+      `[data-midterm-key="${activeKey}"]`
+    )
+  ]
+    .filter(input =>
+      !input.disabled
+    )
+    .sort((a, b) =>
+      Number(
+        a.dataset.midtermIdx || 0
+      ) -
+      Number(
+        b.dataset.midtermIdx || 0
+      )
+    );
+}
+
+
+/*
+ * โฟกัสช่องกรอกและเลื่อนแถว
+ * ให้อยู่ในพื้นที่ที่มองเห็น
+ */
+function focusMidtermEntryField(
+  input,
+  selectValue = true
+){
+  if(
+    !input ||
+    input.disabled
+  ){
+    return;
+  }
+
+
+  try{
+    input.focus({
+      preventScroll: true
+    });
+
+  }catch(error){
+    input.focus();
+  }
+
+
+  /*
+   * เลื่อนเฉพาะตารางใน Overlay
+   */
+  input.scrollIntoView({
+    block: 'nearest',
+    inline: 'nearest',
+    behavior: 'auto'
+  });
+
+
+  /*
+   * เลือกค่าปัจจุบันทั้งหมด
+   * เพื่อให้พิมพ์ค่าใหม่ทับได้ทันที
+   */
+  if(
+    selectValue &&
+    typeof input.select === 'function'
+  ){
+    window.setTimeout(() => {
+      input.select();
+    }, 0);
+  }
+}
+
+
+/*
+ * ควบคุมปุ่ม Tab
+ *
+ * คะแนนเต็ม
+ *   → นักเรียนคนที่ 1
+ *   → นักเรียนคนที่ 2
+ *   → ไล่ลงไปจนคนสุดท้าย
+ *
+ * เมื่อถึงคนสุดท้าย
+ * ระบบจะกลับไปนักเรียนคนแรกของคอลัมน์เดิม
+ */
+function handleMidtermEntryTab(
+  event
+){
+  if(
+    event.key !== 'Tab' ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey
+  ){
+    return;
+  }
+
+
+  const activeKey =
+    state.midtermActiveColumn || '';
+
+  if(
+    !isValidMidtermEntryColumn(
+      activeKey
+    )
+  ){
+    return;
+  }
+
+
+  const config =
+    MIDTERM_ENTRY_COLUMNS[
+      activeKey
+    ];
+
+  const maxInput =
+    el(config.maxInputId);
+
+  const rowInputs =
+    getMidtermActiveColumnInputs();
+
+  const target =
+    event.target;
+
+
+  /*
+   * จากคะแนนเต็มไปนักเรียนคนแรก
+   */
+  if(target === maxInput){
+
+    /*
+     * Shift + Tab จากคะแนนเต็ม
+     * ปล่อยให้ Browser ย้อนกลับตามปกติ
+     */
+    if(event.shiftKey){
+      return;
+    }
+
+
+    if(!rowInputs.length){
+      return;
+    }
+
+
+    event.preventDefault();
+
+    focusMidtermEntryField(
+      rowInputs[0]
+    );
+
+    return;
+  }
+
+
+  /*
+   * ต้องเป็นช่องของคอลัมน์ที่กำลังเลือกเท่านั้น
+   */
+  if(
+    !target?.matches(
+      '#midtermTbody ' +
+      '.midterm-score-input'
+    ) ||
+    target.dataset.midtermKey !==
+      activeKey
+  ){
+    return;
+  }
+
+
+  const currentIndex =
+    rowInputs.indexOf(
+      target
+    );
+
+  if(currentIndex < 0){
+    return;
+  }
+
+
+  event.preventDefault();
+
+
+  /*
+   * Shift + Tab
+   * ย้อนกลับไปคนก่อนหน้า
+   */
+  if(event.shiftKey){
+
+    if(currentIndex > 0){
+      focusMidtermEntryField(
+        rowInputs[
+          currentIndex - 1
+        ]
+      );
+
+    }else{
+      /*
+       * คนแรกย้อนกลับไปคะแนนเต็ม
+       */
+      focusMidtermEntryField(
+        maxInput
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+   * Tab ปกติ
+   * ไปนักเรียนคนถัดไป
+   */
+  if(
+    currentIndex <
+    rowInputs.length - 1
+  ){
+    focusMidtermEntryField(
+      rowInputs[
+        currentIndex + 1
+      ]
+    );
+
+    return;
+  }
+
+
+  /*
+   * ถึงนักเรียนคนสุดท้าย
+   * วนกลับไปคนแรกของคอลัมน์เดิม
+   */
+  focusMidtermEntryField(
+    rowInputs[0]
+  );
+
+
+  setStatus(
+    'midtermFormStatus',
+    `ถึงนักเรียนคนสุดท้ายของคอลัมน์${config.label}แล้ว ระบบกลับไปนักเรียนคนแรก`,
+    'success'
+  );
+}
+
 function handleMidtermScoreChanged(e){
   const target = e.target;
 
@@ -27712,6 +28317,16 @@ function handleMidtermScoreChanged(e){
 
 bindIfExists('midtermTbody', 'input', handleMidtermScoreChanged);
 bindIfExists('midtermTbody', 'change', handleMidtermScoreChanged);
+
+/*
+ * Tab ไล่ลงทีละแถว
+ * ในคอลัมน์ที่กำลังเลือก
+ */
+bindIfExists(
+  'midtermTbody',
+  'keydown',
+  handleMidtermEntryTab
+);
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
 
