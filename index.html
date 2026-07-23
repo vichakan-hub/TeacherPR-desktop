@@ -5641,11 +5641,7 @@
 }
 
 /* ล้าง */
-#clearMidtermBtn{
-  background:#fdeaea !important;
-  color:#c0392b !important;
-  border-color:#f3b1ad !important;
-}
+
 
 /* hover เฉพาะปุ่ม */
 #downloadMidtermTemplateBtn:hover:not(:disabled){
@@ -5660,9 +5656,7 @@
   background:#d6f2dd !important;
 }
 
-#clearMidtermBtn:hover:not(:disabled){
-  background:#fad9d7 !important;
-}
+
 
     /* ซ่อน input เลือกไฟล์ แต่ยังให้ JS click() เปิด file picker ได้ */
 #midtermExcelInput.midterm-file-input{
@@ -7903,10 +7897,7 @@ td{
 }
 
 
-#midtermScoreOverlay
-#clearMidtermBtn{
-  min-width:118px !important;
-}
+
 
 
 /* =====================================================
@@ -8804,9 +8795,7 @@ td{
   💾 บันทึกคะแนนกลางภาค
 </button>
 
-<button id="clearMidtermBtn" class="btn-secondary" type="button">
-  🗑 ล้างตาราง
-</button>
+
   </div>
   <button
   id="midtermScoreCloseBtn"
@@ -27483,7 +27472,7 @@ bindIfExists('midtermTbody', 'input', handleMidtermScoreChanged);
 bindIfExists('midtermTbody', 'change', handleMidtermScoreChanged);
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
-bindIfExists('clearMidtermBtn', 'click', clearMidtermForm);
+
 
 bindIfExists('downloadMidtermTemplateBtn', 'click', downloadMidtermTemplateExcel);
 
