@@ -8023,7 +8023,16 @@ td{
 #midtermScoreOverlay
 .midterm-score-input{
   height:38px;
+
+  border:1.5px solid #bfd0e2;
+  border-radius:14px;
+
   background:#ffffff;
+  color:#0f172a;
+
+  font-size:22px;
+  font-weight:900;
+  text-align:center;
 }
 
 
@@ -8369,12 +8378,48 @@ td{
 
 /*
  * หัวคอลัมน์ที่กำลังเลือก
- * ใช้เพียงพื้นหลังฟ้าอ่อน ไม่มีกรอบสีน้ำเงิน
+ * ใช้พื้นหลังอ่อนคนละโทนตามประเภท
  */
 #midtermScoreOverlay
 .midterm-entry-head.active{
-  background:#e8f1ff !important;
   box-shadow:none !important;
+}
+
+/* คะแนนเก็บ */
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="keep_score"]{
+  background:#eef6ff !important;
+}
+
+/* กลางภาค */
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="midterm_score"]{
+  background:#f4efff !important;
+}
+
+/* เวลาเรียน */
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="attendance_score"]{
+  background:#eefbf3 !important;
+}
+
+
+/*
+ * เมื่อคอลัมน์ถูกเลือก ให้สีเด่นขึ้นเล็กน้อย
+ */
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="keep_score"].active{
+  background:#dcebff !important;
+}
+
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="midterm_score"].active{
+  background:#e8ddff !important;
+}
+
+#midtermScoreOverlay
+.midterm-entry-head[data-midterm-column-head="attendance_score"].active{
+  background:#dcf6e6 !important;
 }
 
 
@@ -8386,6 +8431,24 @@ td{
   color:#1d4ed8;
   box-shadow:none;
 }
+
+#midtermScoreOverlay
+.midterm-max-input{
+  width:54px;
+  height:34px;
+
+  border:1.5px solid #bfd0e2;
+  border-radius:12px;
+
+  background:#ffffff;
+  color:#1e293b;
+
+  font-size:16px;
+  font-weight:900;
+  text-align:center;
+}
+
+    
 
 
 /* ช่องคะแนนเต็มในคอลัมน์ที่เลือก */
@@ -8399,52 +8462,63 @@ td{
 }
 
 
-/* คอลัมน์ที่ไม่ได้เลือก */
 #midtermScoreOverlay
 .midterm-entry-head.column-locked{
-  opacity:.72;
+  opacity:1;
 }
 
 
 #midtermScoreOverlay
 .midterm-entry-head.column-locked
 .midterm-max-input{
-  background:#edf2f7 !important;
-  color:#94a3b8 !important;
+  background:#f8fbff !important;
+  color:#64748b !important;
+  border-color:#d9e5f0 !important;
   cursor:not-allowed;
+}
+
+#midtermScoreOverlay
+.midterm-head-max{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  color:#475569;
+  font-size:12px;
+  font-weight:800;
 }
 
 
 /* ช่องคะแนนรายคนที่ถูกล็อก */
 #midtermScoreOverlay
 .midterm-score-input.column-locked{
-  border-color:#d8e2ec !important;
-  background:#edf2f7 !important;
-  color:#94a3b8 !important;
+  border-color:#d9e5f0 !important;
+  background:#f8fbff !important;
+  color:#64748b !important;
 
   box-shadow:none !important;
   cursor:not-allowed;
 }
 
 
-/* ช่องคะแนนของคอลัมน์ที่กำลังเลือก */
 #midtermScoreOverlay
 .midterm-score-input.column-active{
   border:2px solid #2563eb !important;
   background:#ffffff !important;
+  color:#0f172a !important;
 
   box-shadow:
-    0 0 0 3px rgba(37,99,235,.10);
+    0 0 0 2px rgba(37,99,235,.10);
 }
 
 
-/* เมื่อโฟกัสช่องในคอลัมน์ที่เลือก */
 #midtermScoreOverlay
 .midterm-score-input.column-active:focus{
   border-color:#1d4ed8 !important;
 
   box-shadow:
-    0 0 0 4px rgba(37,99,235,.18) !important;
+    0 0 0 3px rgba(37,99,235,.16) !important;
 }
 
 
@@ -8463,6 +8537,74 @@ td{
     height:17px !important;
     min-width:17px;
   }
+}
+
+#midtermScoreOverlay
+.midterm-head-title{
+  margin-bottom:6px;
+
+  color:#1e293b;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.2;
+}
+
+/* =====================================================
+   READ-ONLY RESULT CELLS
+   รวมคะแนน / %คะแนน / %เวลาเรียน
+   ===================================================== */
+
+/*
+ * ถ้าค่าผลลัพธ์เป็น input readonly หรือ disabled
+ * จะได้สวยขึ้นและอ่านง่ายขึ้น
+ */
+#midtermScoreOverlay
+#midtermTbody td:nth-child(6) input,
+#midtermScoreOverlay
+#midtermTbody td:nth-child(7) input,
+#midtermScoreOverlay
+#midtermTbody td:nth-child(9) input{
+  border:1.5px solid #d7e3ef !important;
+  border-radius:999px !important;
+
+  background:#ffffff !important;
+  color:#0f172a !important;
+
+  font-size:22px !important;
+  font-weight:900 !important;
+  text-align:center !important;
+}
+
+
+/* รวมคะแนน */
+#midtermScoreOverlay
+#midtermTbody td:nth-child(6) input{
+  background:#eef6ff !important;
+  border-color:#c8ddff !important;
+  color:#1d4ed8 !important;
+}
+
+/* %คะแนน */
+#midtermScoreOverlay
+#midtermTbody td:nth-child(7) input{
+  background:#f3edff !important;
+  border-color:#d8c8ff !important;
+  color:#7c3aed !important;
+}
+
+/* %เวลาเรียน */
+#midtermScoreOverlay
+#midtermTbody td:nth-child(9) input{
+  background:#edf9f1 !important;
+  border-color:#c9ead3 !important;
+  color:#15803d !important;
+}
+
+#midtermScoreOverlay
+.midterm-table tbody td{
+  color:#1e293b;
+  font-size:16px;
+  font-weight:700;
 }
 
 </style>
