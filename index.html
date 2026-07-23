@@ -24369,6 +24369,10 @@ async function applyMidtermRosterToScoreTable(){
     );
 
 
+const currentRosterMode =
+  state.midtermRosterMode;
+
+
   if(!group){
     setStatus(
       'midtermRosterStatus',
@@ -24591,6 +24595,18 @@ state.selectedMidtermGroup =
         )
     }));
 
+  /*
+ * กรอกคะแนนครั้งแรก:
+ * ต้องเลือก Checkbox ใหม่เสมอ
+ *
+ * จัดการนักเรียน:
+ * ให้คงคอลัมน์เดิมไว้ได้
+ */
+if(currentRosterMode === 'create'){
+  state.midtermActiveColumn =
+    '';
+}
+
 
   /*
    * แสดงหัวข้อรายวิชา
@@ -24678,13 +24694,63 @@ if(el('manageMidtermStudentsBtn')){
 
 
 if(hasRows){
-  setStatus(
-    'midtermFormStatus',
-    `พร้อมกรอกคะแนนนักเรียน ${state.midtermRows.length} คน`,
-    'success'
-  );
+
+  /*
+   * กรอกคะแนนครั้งแรก
+   * ต้องล็อกทุกคอลัมน์และให้ครูเลือกก่อน
+   */
+  if(currentRosterMode === 'create'){
+
+    setMidtermActiveColumn(
+      '',
+      false
+    );
+
+    setStatus(
+      'midtermFormStatus',
+      `มีนักเรียน ${state.midtermRows.length} คน — กรุณาเลือก Checkbox ของคอลัมน์ที่ต้องการกรอก`,
+      'info'
+    );
+
+  }else{
+
+    /*
+     * กลับจากจัดการนักเรียน
+     * ถ้ามีคอลัมน์เลือกอยู่ให้คงไว้
+     */
+    applyMidtermColumnEntryMode();
+
+    if(
+      isValidMidtermEntryColumn(
+        state.midtermActiveColumn
+      )
+    ){
+      const activeConfig =
+        MIDTERM_ENTRY_COLUMNS[
+          state.midtermActiveColumn
+        ];
+
+      setStatus(
+        'midtermFormStatus',
+        `กำลังกรอก${activeConfig.label} — กด Tab เพื่อไปยังนักเรียนคนถัดไป`,
+        'info'
+      );
+
+    }else{
+      setStatus(
+        'midtermFormStatus',
+        `มีนักเรียน ${state.midtermRows.length} คน — กรุณาเลือก Checkbox ของคอลัมน์ที่ต้องการกรอก`,
+        'info'
+      );
+    }
+  }
 
 }else{
+  state.midtermActiveColumn =
+    '';
+
+  applyMidtermColumnEntryMode();
+
   setStatus(
     'midtermFormStatus',
     'นำนักเรียนออกจากรายวิชาทั้งหมดแล้ว ไม่มีข้อมูลสำหรับกรอกคะแนน',
@@ -24966,17 +25032,27 @@ async function openMidtermGroup(group){
     }
 
 
-    state.selectedMidtermGroup =
-      group;
+state.selectedMidtermGroup =
+  group;
 
-    state.midtermRows =
-      [];
+state.midtermRows =
+  [];
 
-    state.midtermMax = {
-      keep: 0,
-      midterm: 0,
-      attendance: 0
-    };
+state.midtermMax = {
+  keep: 0,
+  midterm: 0,
+  attendance: 0
+};
+
+
+/*
+ * เปิดรายวิชาใหม่ต้องยกเลิก Checkbox เดิม
+ * และล็อกช่องกรอกทั้งหมดก่อน
+ */
+state.midtermActiveColumn =
+  '';
+
+applyMidtermColumnEntryMode();
 
 
     /*
@@ -25277,7 +25353,20 @@ state.midtermRosterRemovedStudentCodes =
 
     setStatus(
       'midtermFormStatus',
-      `โหลดข้อมูลคะแนนนักเรียน ${state.midtermRows.length} คน`,
+      /*
+ * โหลดคะแนนเดิมมาแสดงได้
+ * แต่ยังห้ามแก้จนกว่าจะเลือก Checkbox
+ */
+setMidtermActiveColumn(
+  '',
+  false
+);
+
+setStatus(
+  'midtermFormStatus',
+  `โหลดข้อมูลนักเรียน ${state.midtermRows.length} คนแล้ว — กรุณาเลือก Checkbox ของคอลัมน์ที่ต้องการกรอก`,
+  'info'
+);
       'success'
     );
 
@@ -26006,6 +26095,14 @@ function clearMidtermForm(){
     midterm: 0,
     attendance: 0
   };
+
+  /*
+ * ยกเลิก Checkbox และล็อกทุกคอลัมน์
+ */
+state.midtermActiveColumn =
+  '';
+
+applyMidtermColumnEntryMode();
 
 
   /* =====================================================
