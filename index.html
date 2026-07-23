@@ -7431,6 +7431,14 @@ td{
   word-break:break-word;
 }
 
+.midterm-roster-student-no{
+  color:#17263c;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.45;
+  word-break:break-word;
+}
+
 .midterm-roster-student-meta{
   margin-top:2px;
   color:#6b7a90;
@@ -23295,8 +23303,10 @@ function createMidtermRosterTableRow(
         >
       </td>
 
-      <td class="midterm-roster-student-name">
+      <td> 
+      <span class="midterm-roster-student-no">
         ${escapeHtml(student.student_no || '-')}
+      </span>
       </td>
 
       <td>
