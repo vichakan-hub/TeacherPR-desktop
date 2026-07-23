@@ -8607,6 +8607,211 @@ td{
   font-weight:700;
 }
 
+/* =====================================================
+   MIDTERM TABLE FINAL VISUAL TUNING
+   หัวตารางส้มอ่อน + ลดขนาดและน้ำหนักตัวเลข
+   ===================================================== */
+
+
+/* -----------------------------------------------------
+   1. หัวตารางทั้งหมดเป็นสีส้มอ่อน
+   ----------------------------------------------------- */
+
+#midtermScoreOverlay
+.midterm-table thead th{
+  background:#fff3e2 !important;
+  color:#4b3a2a !important;
+
+  border-bottom:
+    1px solid #f2cfa4 !important;
+}
+
+
+/*
+ * ยกเลิกสีฟ้า ม่วง และเขียวเดิม
+ * ให้ 3 คอลัมน์ใช้สีส้มอ่อนเหมือนกัน
+ */
+#midtermScoreOverlay
+.midterm-entry-head[
+  data-midterm-column-head="keep_score"
+],
+#midtermScoreOverlay
+.midterm-entry-head[
+  data-midterm-column-head="midterm_score"
+],
+#midtermScoreOverlay
+.midterm-entry-head[
+  data-midterm-column-head="attendance_score"
+]{
+  background:#fff3e2 !important;
+}
+
+
+/*
+ * คอลัมน์ที่กำลังเปิดกรอก
+ * ใช้สีส้มเข้มขึ้นเล็กน้อย
+ */
+#midtermScoreOverlay
+.midterm-entry-head.active{
+  background:#ffe6c5 !important;
+  box-shadow:none !important;
+}
+
+
+/* ชื่อหัวตาราง */
+#midtermScoreOverlay
+.midterm-head-title{
+  color:#573a1f !important;
+
+  font-size:13px;
+  font-weight:700;
+}
+
+
+/* เลขที่ เลขประจำตัว ชื่อ-สกุล */
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(1),
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(2),
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(3){
+  background:#fff3e2 !important;
+
+  color:#573a1f !important;
+  font-weight:700 !important;
+}
+
+
+/* รวมคะแนน %คะแนน %เวลาเรียน */
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(6),
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(7),
+#midtermScoreOverlay
+.midterm-table thead th:nth-child(9){
+  background:#fff3e2 !important;
+
+  color:#573a1f !important;
+  font-weight:700 !important;
+}
+
+
+
+/* -----------------------------------------------------
+   2. ลดขนาดและความหนาของตัวเลขคะแนน
+   ----------------------------------------------------- */
+
+/* ช่องกรอกคะแนนรายคน */
+#midtermScoreOverlay
+.midterm-score-input{
+  color:#27364a !important;
+
+  font-size:17px !important;
+  font-weight:600 !important;
+}
+
+
+/* ช่องที่กำลังเปิดกรอก */
+#midtermScoreOverlay
+.midterm-score-input.column-active{
+  color:#17263c !important;
+
+  font-size:17px !important;
+  font-weight:600 !important;
+}
+
+
+/* ช่องที่ถูกล็อก */
+#midtermScoreOverlay
+.midterm-score-input.column-locked{
+  color:#64748b !important;
+
+  font-size:17px !important;
+  font-weight:500 !important;
+}
+
+
+/* ช่องคะแนนเต็มที่หัวตาราง */
+#midtermScoreOverlay
+.midterm-max-input{
+  color:#334155 !important;
+
+  font-size:14px !important;
+  font-weight:600 !important;
+}
+
+
+/* ช่องคะแนนเต็มของคอลัมน์ที่เปิด */
+#midtermScoreOverlay
+.midterm-entry-head.active
+.midterm-max-input{
+  color:#17263c !important;
+
+  font-size:14px !important;
+  font-weight:600 !important;
+}
+
+
+/*
+ * ผลลัพธ์อัตโนมัติ:
+ * รวมคะแนน / %คะแนน / %เวลาเรียน
+ */
+#midtermScoreOverlay
+.midterm-readonly{
+  color:#17263c !important;
+
+  font-size:15px !important;
+  font-weight:600 !important;
+}
+
+
+/*
+ * รองรับกรณีผลลัพธ์ถูกสร้างเป็น input
+ */
+#midtermScoreOverlay
+#midtermTbody td:nth-child(6) input,
+#midtermScoreOverlay
+#midtermTbody td:nth-child(7) input,
+#midtermScoreOverlay
+#midtermTbody td:nth-child(9) input{
+  font-size:15px !important;
+  font-weight:600 !important;
+}
+
+
+
+/* -----------------------------------------------------
+   3. ลดความหนาเลขที่ เลขประจำตัว และชื่อ-สกุล
+   ----------------------------------------------------- */
+
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(1),
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(2),
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(3){
+  color:#24364b !important;
+
+  font-size:14px !important;
+  font-weight:500 !important;
+}
+
+
+/* เลขที่และเลขประจำตัวให้อยู่ระดับกลาง */
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(1),
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(2){
+  font-weight:500 !important;
+}
+
+
+/* ชื่อ-สกุล ไม่หนาเกินไป */
+#midtermScoreOverlay
+.midterm-table tbody td:nth-child(3){
+  font-weight:500 !important;
+}
+
 </style>
 </head>
 <body>
