@@ -28505,19 +28505,38 @@ function getMidtermActiveColumnInputs(){
 }
 
 
-/*
- * โฟกัสช่องกรอกและเลื่อนแถว
- * ให้อยู่ในพื้นที่ที่มองเห็น
- */
 function focusMidtermEntryField(
   input,
-  selectValue = true
+  selectValue = true,
+  scrollMode = 'nearest'
 ){
   if(
     !input ||
     input.disabled
   ){
     return;
+  }
+
+
+  const tableWrap =
+    input.closest(
+      '.midterm-score-overlay-card > .table-wrap'
+    ) ||
+    document.querySelector(
+      '#midtermScoreOverlay ' +
+      '.midterm-score-overlay-card > .table-wrap'
+    );
+
+
+  /*
+   * กรณีวนจากนักเรียนคนสุดท้าย
+   * กลับไปนักเรียนคนแรก
+   */
+  if(
+    scrollMode === 'top' &&
+    tableWrap
+  ){
+    tableWrap.scrollTop = 0;
   }
 
 
@@ -28532,13 +28551,15 @@ function focusMidtermEntryField(
 
 
   /*
-   * เลื่อนเฉพาะตารางใน Overlay
+   * กรณีเลื่อนระหว่างนักเรียนตามปกติ
    */
-  input.scrollIntoView({
-    block: 'nearest',
-    inline: 'nearest',
-    behavior: 'auto'
-  });
+  if(scrollMode !== 'top'){
+    input.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+      behavior: 'auto'
+    });
+  }
 
 
   /*
@@ -28553,20 +28574,27 @@ function focusMidtermEntryField(
       input.select();
     }, 0);
   }
+
+
+  /*
+   * ป้องกัน Browser เลื่อนกลับหลังโฟกัส
+   */
+  if(
+    scrollMode === 'top' &&
+    tableWrap
+  ){
+    window.requestAnimationFrame(() => {
+      tableWrap.scrollTop = 0;
+
+      window.setTimeout(() => {
+        tableWrap.scrollTop = 0;
+      }, 30);
+    });
+  }
 }
 
 
-/*
- * ควบคุมปุ่ม Tab
- *
- * คะแนนเต็ม
- *   → นักเรียนคนที่ 1
- *   → นักเรียนคนที่ 2
- *   → ไล่ลงไปจนคนสุดท้าย
- *
- * เมื่อถึงคนสุดท้าย
- * ระบบจะกลับไปนักเรียนคนแรกของคอลัมน์เดิม
- */
+
 function handleMidtermEntryTab(
   event
 ){
@@ -28708,13 +28736,12 @@ function handleMidtermEntryTab(
   }
 
 
-  /*
-   * ถึงนักเรียนคนสุดท้าย
-   * วนกลับไปคนแรกของคอลัมน์เดิม
-   */
-  focusMidtermEntryField(
-    rowInputs[0]
-  );
+
+focusMidtermEntryField(
+  rowInputs[0],
+  true,
+  'top'
+);
 
 
   setStatus(
