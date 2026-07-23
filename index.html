@@ -24009,102 +24009,56 @@ document.addEventListener(
 );
 
 /*
- * เลื่อนตารางภายใน Overlay กลับขึ้นด้านบน
- * และโฟกัสช่องคะแนนเก็บของนักเรียนคนแรก
+ * เปิดตารางคะแนนโดยเริ่มจากด้านบนสุด
+ *
+ * ไม่โฟกัสช่องคะแนนอัตโนมัติ
+ * เพื่อป้องกันแถวเลขที่ 1 หลบใต้หัวตาราง
  */
 function focusMidtermScoreTable(){
+  const overlay =
+    el('midtermScoreOverlay');
+
+  if(
+    !overlay ||
+    !overlay.classList.contains('show')
+  ){
+    return;
+  }
+
+
+  const tableWrap =
+    overlay.querySelector(
+      '.midterm-score-overlay-card > .table-wrap'
+    );
+
+
+  if(!tableWrap){
+    return;
+  }
+
+
+  /*
+   * รีเซ็ตหลายรอบ เพราะตารางอาจยัง Render
+   * หรือกำลังคำนวณความสูงอยู่
+   */
+  const resetTablePosition = () => {
+    tableWrap.scrollTop = 0;
+    tableWrap.scrollLeft = 0;
+  };
+
+
   window.requestAnimationFrame(() => {
+    resetTablePosition();
 
-    const overlay =
-      el('midtermScoreOverlay');
+    window.setTimeout(
+      resetTablePosition,
+      80
+    );
 
-
-    /*
-     * ต้องให้ Overlay เปิดและมองเห็นก่อน
-     */
-    if(
-      !overlay ||
-      !overlay.classList.contains('show')
-    ){
-      return;
-    }
-
-
-    /*
-     * เลื่อนเฉพาะกล่องตารางภายใน Overlay
-     * ไม่เลื่อนหน้าหลักด้านหลัง
-     */
-    const tableWrap =
-      overlay.querySelector(
-        '.midterm-score-overlay-card > .table-wrap'
-      );
-
-
-    if(tableWrap){
-      tableWrap.scrollTop =
-        0;
-
-      tableWrap.scrollLeft =
-        0;
-    }
-
-
-    /*
-     * รอให้ Overlay และตาราง Render เสร็จก่อน
-     */
-    window.setTimeout(() => {
-
-      const firstScoreInput =
-        overlay.querySelector(
-          '#midtermTbody ' +
-          '.midterm-score-input' +
-          '[data-midterm-key="keep_score"]'
-        ) ||
-        overlay.querySelector(
-          '#midtermTbody .midterm-score-input'
-        );
-
-
-      /*
-       * บนคอมพิวเตอร์:
-       * โฟกัสช่องคะแนนแรกและเลือกค่าทั้งหมด
-       *
-       * บนมือถือ:
-       * ไม่เปิดแป้นพิมพ์อัตโนมัติ
-       */
-      const isDesktop =
-        window.matchMedia(
-          '(min-width: 721px)'
-        ).matches;
-
-
-      if(
-        !isDesktop ||
-        !firstScoreInput ||
-        firstScoreInput.disabled
-      ){
-        return;
-      }
-
-
-      try{
-        firstScoreInput.focus({
-          preventScroll: true
-        });
-
-      }catch(error){
-        firstScoreInput.focus();
-      }
-
-
-      if(
-        typeof firstScoreInput.select ===
-        'function'
-      ){
-        firstScoreInput.select();
-      }
-
-    }, 180);
+    window.setTimeout(
+      resetTablePosition,
+      220
+    );
   });
 }
 
