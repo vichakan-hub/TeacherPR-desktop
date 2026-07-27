@@ -27505,10 +27505,6 @@ function getMidtermExcelScoreValue(
 }
 
 
-/*
- * ดาวน์โหลด Excel พร้อมคะแนนปัจจุบัน
- * ที่กำลังแสดงอยู่บนหน้าจอ
- */
 function downloadMidtermTemplateExcel(){
   try{
     assertMidtermGroupReady();
@@ -27522,58 +27518,83 @@ function downloadMidtermTemplateExcel(){
 
 
     if(
-      !Array.isArray(
-        state.midtermRows
-      ) ||
-      !state.midtermRows.length
+      !Array.isArray(state.midtermRows) ||
+      state.midtermRows.length === 0
     ){
       throw new Error(
-        'ยังไม่มีรายชื่อนักเรียนสำหรับดาวน์โหลด'
+        'ยังไม่มีรายชื่อนักเรียนในตาราง'
       );
     }
 
 
     /*
-     * ดึงคะแนนเต็มล่าสุดจากช่องบนหน้าจอ
-     * ก่อนนำไปสร้างไฟล์
+     * อ่านคะแนนเต็มล่าสุดจากหน้าจอ
      */
     syncMidtermMaxFromInputs();
 
 
-    const keepMax =
-      getMidtermExcelScoreValue(
-        state.midtermMax?.keep
-      );
+    /*
+     * แปลงคะแนนสำหรับใส่ใน Excel
+     *
+     * - ช่องว่างคงเป็นช่องว่าง
+     * - ค่า 0 ยังคงเป็น 0
+     * - ตัวเลขถูกส่งออกเป็น Number
+     */
+    const toExcelScoreValue = value => {
+      if(
+        value === '' ||
+        value === null ||
+        value === undefined
+      ){
+        return '';
+      }
 
-    const midtermMax =
-      getMidtermExcelScoreValue(
-        state.midtermMax?.midterm
-      );
 
-    const attendanceMax =
-      getMidtermExcelScoreValue(
-        state.midtermMax?.attendance
-      );
+      const numberValue =
+        Number(value);
+
+
+      if(Number.isFinite(numberValue)){
+        return numberValue;
+      }
+
+
+      return String(value).trim();
+    };
 
 
     /*
-     * แถวที่ 1 = คะแนนเต็ม
-     * แถวที่ 2 = เว้นบรรทัด
-     * แถวที่ 3 = หัวตาราง
+     * รูปแบบตรงตามไฟล์ตัวอย่าง
+     *
+     * แถว 1 = ชื่อคะแนนเต็ม
+     * แถว 2 = ค่าคะแนนเต็ม
+     * แถว 3 = หัวตาราง
+     * แถว 4 เป็นต้นไป = ข้อมูลนักเรียน
      */
     const aoa = [
       [
+        '',
+        '',
+        '',
         'คะแนนเก็บเต็ม',
-        keepMax,
-
         'กลางภาคเต็ม',
-        midtermMax,
-
-        'เวลาเรียนเต็ม',
-        attendanceMax
+        'เวลาเรียนเต็ม'
       ],
 
-      [],
+      [
+        '',
+        '',
+        '',
+        toExcelScoreValue(
+          state.midtermMax?.keep
+        ),
+        toExcelScoreValue(
+          state.midtermMax?.midterm
+        ),
+        toExcelScoreValue(
+          state.midtermMax?.attendance
+        )
+      ],
 
       [
         'เลขที่',
@@ -27587,31 +27608,31 @@ function downloadMidtermTemplateExcel(){
 
 
     /*
-     * ใช้ค่าปัจจุบันบนหน้าจอ
-     *
-     * ดังนั้นคะแนนที่ครูแก้แล้ว
-     * แต่ยังไม่ได้กดบันทึก
-     * จะติดไปในไฟล์ด้วย
+     * ใช้คะแนนปัจจุบันที่แสดงบนหน้าจอ
      */
     state.midtermRows.forEach(row => {
       aoa.push([
         row.student_no ?? '',
 
+        /*
+         * บังคับเลขประจำตัวเป็นข้อความ
+         * ป้องกันเลข 0 ด้านหน้าหาย
+         */
         String(
           row.student_code ?? ''
         ).trim(),
 
         row.student_name || '',
 
-        getMidtermExcelScoreValue(
+        toExcelScoreValue(
           row.keep_score
         ),
 
-        getMidtermExcelScoreValue(
+        toExcelScoreValue(
           row.midterm_score
         ),
 
-        getMidtermExcelScoreValue(
+        toExcelScoreValue(
           row.attendance_score
         )
       ]);
@@ -27626,6 +27647,7 @@ function downloadMidtermTemplateExcel(){
 
     /*
      * ความกว้างคอลัมน์
+     * ตรงตามไฟล์ตัวอย่าง
      */
     ws['!cols'] = [
       { wch: 8 },
@@ -27638,7 +27660,19 @@ function downloadMidtermTemplateExcel(){
 
 
     /*
-     * เปิดตัวกรองไว้ที่แถวหัวตาราง
+     * ความสูงแถวใกล้เคียงไฟล์ตัวอย่าง
+     */
+    ws['!rows'] =
+      aoa.map((row, index) => ({
+        hpt:
+          index === 1
+            ? 14.4
+            : 15.6
+      }));
+
+
+    /*
+     * ตัวกรองเริ่มที่แถวหัวตาราง
      */
     ws['!autofilter'] = {
       ref:
@@ -27673,9 +27707,10 @@ function downloadMidtermTemplateExcel(){
 
       showToast(
         'ดาวน์โหลดสำเร็จ',
-        'ไฟล์ Excel มีคะแนนปัจจุบันบนหน้าจอ รวมถึงคะแนนที่แก้ไขแต่ยังไม่ได้บันทึก',
+        'ดาวน์โหลด Excel พร้อมคะแนนปัจจุบันแล้ว โดยมีคะแนนที่แก้ไขบนหน้าจอแต่ยังไม่ได้บันทึกอยู่ในไฟล์ด้วย',
         'warn'
       );
+
 
       setStatus(
         'midtermFormStatus',
@@ -27733,34 +27768,141 @@ function findMidtermColumnIndex(headers, names){
   return headers.findIndex(h => normalizedNames.includes(h));
 }
 
-function readMidtermMaxFromExcel(aoa){
-  const flatRows = aoa.slice(0, 8);
+function readMidtermMaxFromExcel(
+  aoa
+){
+  const firstRows =
+    aoa.slice(0, 8);
 
-  flatRows.forEach(row => {
-    (row || []).forEach((cell, idx) => {
-      const label = normalizeMidtermHeader(cell);
-      const nextValue = row[idx + 1];
 
-      if(label === 'คะแนนเก็บเต็ม'){
-        const n = Number(nextValue);
-        if(Number.isFinite(n) && n > 0) state.midtermMax.keep = n;
+  /*
+   * ค้นหาค่าตัวเลขที่ใช้ได้
+   */
+  const findValidMaxValue =
+    values => {
+
+      for(const value of values){
+
+        if(
+          value === '' ||
+          value === null ||
+          value === undefined
+        ){
+          continue;
+        }
+
+
+        const numberValue =
+          Number(value);
+
+
+        if(
+          Number.isFinite(numberValue) &&
+          numberValue > 0
+        ){
+          return numberValue;
+        }
       }
 
-      if(label === 'กลางภาคเต็ม'){
-        const n = Number(nextValue);
-        if(Number.isFinite(n) && n > 0) state.midtermMax.midterm = n;
-      }
 
-      if(label === 'เวลาเรียนเต็ม'){
-        const n = Number(nextValue);
-        if(Number.isFinite(n) && n > 0) state.midtermMax.attendance = n;
-      }
-    });
-  });
+      return null;
+    };
 
-  if(el('midtermKeepMax')) el('midtermKeepMax').value = state.midtermMax.keep || 0;
-  if(el('midtermScoreMax')) el('midtermScoreMax').value = state.midtermMax.midterm || 0;
-  if(el('midtermAttendanceMax')) el('midtermAttendanceMax').value = state.midtermMax.attendance || 0;
+
+  firstRows.forEach(
+    (row, rowIndex) => {
+
+      (row || []).forEach(
+        (cell, columnIndex) => {
+
+          const label =
+            normalizeMidtermHeader(
+              cell
+            );
+
+
+          /*
+           * รองรับ 2 รูปแบบ
+           *
+           * แบบเดิม:
+           * คะแนนเก็บเต็ม | 40
+           *
+           * แบบไฟล์ตัวอย่าง:
+           * คะแนนเก็บเต็ม
+           * 40
+           */
+          const maxValue =
+            findValidMaxValue([
+              /*
+               * ช่องด้านล่าง
+               */
+              aoa[
+                rowIndex + 1
+              ]?.[
+                columnIndex
+              ],
+
+              /*
+               * ช่องด้านขวา
+               */
+              row[
+                columnIndex + 1
+              ]
+            ]);
+
+
+          if(maxValue === null){
+            return;
+          }
+
+
+          if(
+            label ===
+            'คะแนนเก็บเต็ม'
+          ){
+            state.midtermMax.keep =
+              maxValue;
+          }
+
+
+          if(
+            label ===
+            'กลางภาคเต็ม'
+          ){
+            state.midtermMax.midterm =
+              maxValue;
+          }
+
+
+          if(
+            label ===
+            'เวลาเรียนเต็ม'
+          ){
+            state.midtermMax.attendance =
+              maxValue;
+          }
+        }
+      );
+    }
+  );
+
+
+  if(el('midtermKeepMax')){
+    el('midtermKeepMax').value =
+      state.midtermMax.keep || 0;
+  }
+
+
+  if(el('midtermScoreMax')){
+    el('midtermScoreMax').value =
+      state.midtermMax.midterm || 0;
+  }
+
+
+  if(el('midtermAttendanceMax')){
+    el('midtermAttendanceMax').value =
+      state.midtermMax.attendance || 0;
+  }
 }
 
 function applyMidtermExcelRows(aoa){
