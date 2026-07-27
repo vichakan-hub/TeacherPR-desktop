@@ -27463,6 +27463,399 @@ function getMidtermTemplateFileName(){
   return `midterm_${subjectCode}_${teacherCode}_${year}_${term}_${classNum}_${room}.xlsx`;
 }
 
+  /* =====================================================
+   MIDTERM EXCEL FILE NAME VALIDATION
+   ป้องกันนำเข้าไฟล์ผิดรายวิชา
+   ===================================================== */
+
+/*
+ * ปรับข้อความสำหรับเปรียบเทียบ
+ * เช่น ว30103 และ W30103
+ */
+function normalizeMidtermFilenameText(
+  value
+){
+  return String(
+    value ?? ''
+  )
+    .trim()
+    .replace(/\s+/g, '')
+    .toUpperCase();
+}
+
+
+/*
+ * ดึงค่าตัวเลขจากข้อมูล
+ *
+ * ตัวอย่าง:
+ * ม.4     → 4
+ * ห้อง 01 → 1
+ * 2569    → 2569
+ */
+function normalizeMidtermFilenameNumber(
+  value
+){
+  const matched =
+    String(
+      value ?? ''
+    ).match(/\d+/);
+
+
+  if(!matched){
+    return '';
+  }
+
+
+  const numberValue =
+    Number(
+      matched[0]
+    );
+
+
+  return Number.isFinite(
+    numberValue
+  )
+    ? String(numberValue)
+    : matched[0];
+}
+
+
+/*
+ * ปรับรหัสครูให้เป็นรูปแบบเดียวกัน
+ */
+function normalizeMidtermFilenameTeacher(
+  value
+){
+  const raw =
+    String(
+      value ?? ''
+    ).trim();
+
+
+  if(
+    typeof normalizeTeacherCode ===
+    'function'
+  ){
+    return normalizeMidtermFilenameText(
+      normalizeTeacherCode(raw)
+    );
+  }
+
+
+  return normalizeMidtermFilenameText(
+    raw
+  );
+}
+
+
+/*
+ * แยกข้อมูลออกจากชื่อไฟล์
+ *
+ * รองรับชื่อไฟล์ซ้ำที่ Browser เติม:
+ * midterm_..._1 (1).xlsx
+ * midterm_..._1 (2).xlsx
+ */
+function parseMidtermExcelFileName(
+  filename
+){
+  const rawFilename =
+    String(
+      filename ?? ''
+    ).trim();
+
+
+  if(
+    !/\.(xlsx|xls)$/i.test(
+      rawFilename
+    )
+  ){
+    throw new Error(
+      'รองรับเฉพาะไฟล์ Excel นามสกุล .xlsx หรือ .xls'
+    );
+  }
+
+
+  let baseName =
+    rawFilename
+      .replace(
+        /\.(xlsx|xls)$/i,
+        ''
+      )
+      .trim();
+
+
+  /*
+   * เอาเลขที่ Browser เติมเมื่อดาวน์โหลดซ้ำออก
+   *
+   * เช่น:
+   * midterm_..._1 (1)
+   * เหลือ:
+   * midterm_..._1
+   */
+  baseName =
+    baseName
+      .replace(
+        /\s*\(\d+\)\s*$/,
+        ''
+      )
+      .trim();
+
+
+  /*
+   * อ่านข้อมูลจากท้ายชื่อไฟล์
+   *
+   * 1 = รหัสวิชา
+   * 2 = รหัสครู
+   * 3 = ปีการศึกษา
+   * 4 = เทอม
+   * 5 = ชั้น
+   * 6 = ห้อง
+   */
+  const matched =
+    baseName.match(
+      /^midterm_(.+)_([^_]+)_([^_]+)_([^_]+)_([^_]+)_([^_]+)$/i
+    );
+
+
+  if(!matched){
+    throw new Error(
+      'ชื่อไฟล์ไม่ถูกต้อง — กรุณาใช้ไฟล์ Excel ที่ดาวน์โหลดจากรายวิชานี้'
+    );
+  }
+
+
+  return {
+    subject_code:
+      String(
+        matched[1] ?? ''
+      ).trim(),
+
+    teacher_code:
+      String(
+        matched[2] ?? ''
+      ).trim(),
+
+    academic_year:
+      String(
+        matched[3] ?? ''
+      ).trim(),
+
+    term:
+      String(
+        matched[4] ?? ''
+      ).trim(),
+
+    class_level:
+      String(
+        matched[5] ?? ''
+      ).trim(),
+
+    room:
+      String(
+        matched[6] ?? ''
+      ).trim()
+  };
+}
+
+
+/*
+ * ตรวจชื่อไฟล์กับรายวิชาที่กำลังเปิด
+ */
+function validateMidtermExcelFileName(
+  filename
+){
+  const group =
+    state.selectedMidtermGroup;
+
+  const user =
+    state.currentUser || {};
+
+
+  if(!group){
+    throw new Error(
+      'กรุณาเลือกรายวิชาก่อนนำเข้า Excel'
+    );
+  }
+
+
+  const parsed =
+    parseMidtermExcelFileName(
+      filename
+    );
+
+
+  const expectedTeacherCode =
+    user.teacher_code ||
+    group.teacher_code ||
+    '';
+
+
+  const expectedClassLevel =
+    normalizeMidtermFilenameNumber(
+      group.class_level
+    );
+
+  const expectedRoom =
+    normalizeMidtermFilenameNumber(
+      group.room
+    );
+
+
+  const checks = [
+    {
+      label:
+        'รหัสวิชา',
+
+      actual:
+        normalizeMidtermFilenameText(
+          parsed.subject_code
+        ),
+
+      expected:
+        normalizeMidtermFilenameText(
+          group.subject_code
+        ),
+
+      actualDisplay:
+        parsed.subject_code,
+
+      expectedDisplay:
+        group.subject_code
+    },
+
+    {
+      label:
+        'รหัสครู',
+
+      actual:
+        normalizeMidtermFilenameTeacher(
+          parsed.teacher_code
+        ),
+
+      expected:
+        normalizeMidtermFilenameTeacher(
+          expectedTeacherCode
+        ),
+
+      actualDisplay:
+        parsed.teacher_code,
+
+      expectedDisplay:
+        expectedTeacherCode
+    },
+
+    {
+      label:
+        'ปีการศึกษา',
+
+      actual:
+        normalizeMidtermFilenameNumber(
+          parsed.academic_year
+        ),
+
+      expected:
+        normalizeMidtermFilenameNumber(
+          group.academic_year
+        ),
+
+      actualDisplay:
+        parsed.academic_year,
+
+      expectedDisplay:
+        group.academic_year
+    },
+
+    {
+      label:
+        'ภาคเรียน',
+
+      actual:
+        normalizeMidtermFilenameNumber(
+          parsed.term
+        ),
+
+      expected:
+        normalizeMidtermFilenameNumber(
+          group.term
+        ),
+
+      actualDisplay:
+        parsed.term,
+
+      expectedDisplay:
+        group.term
+    },
+
+    {
+      label:
+        'ชั้น',
+
+      actual:
+        normalizeMidtermFilenameNumber(
+          parsed.class_level
+        ),
+
+      expected:
+        expectedClassLevel,
+
+      actualDisplay:
+        parsed.class_level,
+
+      expectedDisplay:
+        expectedClassLevel
+    },
+
+    {
+      label:
+        'ห้อง',
+
+      actual:
+        normalizeMidtermFilenameNumber(
+          parsed.room
+        ),
+
+      expected:
+        expectedRoom,
+
+      actualDisplay:
+        parsed.room,
+
+      expectedDisplay:
+        expectedRoom
+    }
+  ];
+
+
+  const mismatches =
+    checks.filter(item =>
+      item.actual !==
+      item.expected
+    );
+
+
+  if(mismatches.length){
+    const mismatchText =
+      mismatches
+        .map(item =>
+          `${item.label}ในไฟล์ ` +
+          `${item.actualDisplay || '-'} ` +
+          `(ต้องเป็น ` +
+          `${item.expectedDisplay || '-'})`
+        )
+        .join(', ');
+
+
+    throw new Error(
+      `ไฟล์ Excel ไม่ตรงกับรายวิชาที่กำลังเปิด: ` +
+      `${mismatchText} — ` +
+      `กรุณาใช้ไฟล์ ${getMidtermTemplateFileName()}`
+    );
+  }
+
+
+  return parsed;
+}
+
 function assertMidtermGroupReady(){
   if(!state.selectedMidtermGroup){
     throw new Error('กรุณาเลือกรายวิชาก่อน');
@@ -27923,7 +28316,7 @@ function applyMidtermExcelRows(aoa){
     );
   }
 
-  readMidtermMaxFromExcel(aoa);
+ 
 
 
   const headers =
@@ -28390,11 +28783,38 @@ function importMidtermExcelFile(file){
       throw new Error('กรุณาเลือกไฟล์ Excel ก่อน');
     }
 
-    if(typeof XLSX === 'undefined'){
-      throw new Error('ไม่พบไลบรารี XLSX สำหรับอ่านไฟล์ Excel');
-    }
+if(typeof XLSX === 'undefined'){
+  throw new Error(
+    'ไม่พบไลบรารี XLSX สำหรับอ่านไฟล์ Excel'
+  );
+}
 
-    const reader = new FileReader();
+
+/*
+ * ตรวจชื่อไฟล์ก่อนเริ่มอ่านข้อมูล
+ *
+ * ต้องตรงทั้ง:
+ * - รหัสวิชา
+ * - รหัสครู
+ * - ปีการศึกษา
+ * - ภาคเรียน
+ * - ชั้น
+ * - ห้อง
+ */
+validateMidtermExcelFileName(
+  file.name
+);
+
+
+setStatus(
+  'midtermFormStatus',
+  'ชื่อไฟล์ตรงกับรายวิชาแล้ว กำลังอ่านข้อมูล Excel...',
+  'info'
+);
+
+
+const reader =
+  new FileReader();
 
     reader.onload = e => {
       try{
@@ -28424,10 +28844,33 @@ function importMidtermExcelFile(file){
     };
 
     reader.readAsArrayBuffer(file);
-  }catch(err){
-    setStatus('midtermFormStatus', err.message || 'นำเข้า Excel ไม่สำเร็จ', 'error');
-    showToast('นำเข้าไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+}catch(err){
+
+  /*
+   * ล้างค่าเพื่อให้เลือกไฟล์เดิม
+   * หรือเลือกไฟล์ใหม่ได้ทันที
+   */
+  if(el('midtermExcelInput')){
+    el('midtermExcelInput').value =
+      '';
   }
+
+
+  setStatus(
+    'midtermFormStatus',
+    err.message ||
+      'นำเข้า Excel ไม่สำเร็จ',
+    'error'
+  );
+
+
+  showToast(
+    'นำเข้าไม่สำเร็จ',
+    err.message ||
+      'เกิดข้อผิดพลาด',
+    'error'
+  );
+}
 }
 
 function guardMidtermUnsaved(actionLabel, onProceed){
