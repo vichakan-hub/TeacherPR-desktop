@@ -27262,52 +27262,240 @@ function assertMidtermGroupReady(){
   }
 }
 
+/*
+ * แปลงค่าคะแนนสำหรับใส่ใน Excel
+ *
+ * - ช่องว่างยังคงเป็นช่องว่าง
+ * - ตัวเลขถูกส่งออกเป็น Number
+ * - ป้องกันค่า 0 ถูกเปลี่ยนเป็นช่องว่าง
+ */
+function getMidtermExcelScoreValue(
+  value
+){
+  if(
+    value === '' ||
+    value === null ||
+    value === undefined
+  ){
+    return '';
+  }
+
+
+  const numberValue =
+    Number(value);
+
+
+  if(Number.isFinite(numberValue)){
+    return numberValue;
+  }
+
+
+  return String(value).trim();
+}
+
+
+/*
+ * ดาวน์โหลด Excel พร้อมคะแนนปัจจุบัน
+ * ที่กำลังแสดงอยู่บนหน้าจอ
+ */
 function downloadMidtermTemplateExcel(){
   try{
     assertMidtermGroupReady();
 
+
     if(typeof XLSX === 'undefined'){
-      throw new Error('ไม่พบไลบรารี XLSX สำหรับสร้างไฟล์ Excel');
+      throw new Error(
+        'ไม่พบไลบรารี XLSX สำหรับสร้างไฟล์ Excel'
+      );
     }
 
+
+    if(
+      !Array.isArray(
+        state.midtermRows
+      ) ||
+      !state.midtermRows.length
+    ){
+      throw new Error(
+        'ยังไม่มีรายชื่อนักเรียนสำหรับดาวน์โหลด'
+      );
+    }
+
+
+    /*
+     * ดึงคะแนนเต็มล่าสุดจากช่องบนหน้าจอ
+     * ก่อนนำไปสร้างไฟล์
+     */
+    syncMidtermMaxFromInputs();
+
+
+    const keepMax =
+      getMidtermExcelScoreValue(
+        state.midtermMax?.keep
+      );
+
+    const midtermMax =
+      getMidtermExcelScoreValue(
+        state.midtermMax?.midterm
+      );
+
+    const attendanceMax =
+      getMidtermExcelScoreValue(
+        state.midtermMax?.attendance
+      );
+
+
+    /*
+     * แถวที่ 1 = คะแนนเต็ม
+     * แถวที่ 2 = เว้นบรรทัด
+     * แถวที่ 3 = หัวตาราง
+     */
     const aoa = [
-      ['เลขที่', 'เลขประจำตัว', 'ชื่อ-สกุล', 'คะแนนเก็บ', 'กลางภาค', 'เวลาเรียน']
+      [
+        'คะแนนเก็บเต็ม',
+        keepMax,
+
+        'กลางภาคเต็ม',
+        midtermMax,
+
+        'เวลาเรียนเต็ม',
+        attendanceMax
+      ],
+
+      [],
+
+      [
+        'เลขที่',
+        'เลขประจำตัว',
+        'ชื่อ-สกุล',
+        'คะแนนเก็บ',
+        'กลางภาค',
+        'เวลาเรียน'
+      ]
     ];
 
+
+    /*
+     * ใช้ค่าปัจจุบันบนหน้าจอ
+     *
+     * ดังนั้นคะแนนที่ครูแก้แล้ว
+     * แต่ยังไม่ได้กดบันทึก
+     * จะติดไปในไฟล์ด้วย
+     */
     state.midtermRows.forEach(row => {
       aoa.push([
         row.student_no ?? '',
-        row.student_code || '',
+
+        String(
+          row.student_code ?? ''
+        ).trim(),
+
         row.student_name || '',
-        '',
-        '',
-        ''
+
+        getMidtermExcelScoreValue(
+          row.keep_score
+        ),
+
+        getMidtermExcelScoreValue(
+          row.midterm_score
+        ),
+
+        getMidtermExcelScoreValue(
+          row.attendance_score
+        )
       ]);
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
 
+    const ws =
+      XLSX.utils.aoa_to_sheet(
+        aoa
+      );
+
+
+    /*
+     * ความกว้างคอลัมน์
+     */
     ws['!cols'] = [
-      { wch: 8 },   // เลขที่
-      { wch: 14 },  // เลขประจำตัว
-      { wch: 36 },  // ชื่อ-สกุล
-      { wch: 14 },  // คะแนนเก็บ
-      { wch: 14 },  // กลางภาค
-      { wch: 14 }   // เวลาเรียน
+      { wch: 8 },
+      { wch: 14 },
+      { wch: 36 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 }
     ];
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'คะแนนกลางภาค');
 
-    XLSX.writeFile(wb, getMidtermTemplateFileName());
+    /*
+     * เปิดตัวกรองไว้ที่แถวหัวตาราง
+     */
+    ws['!autofilter'] = {
+      ref:
+        `A3:F${aoa.length}`
+    };
+
+
+    const wb =
+      XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+      wb,
+      ws,
+      'คะแนนกลางภาค'
+    );
+
+
+    const hasUnsavedChanges =
+      typeof hasMidtermUnsavedChanges ===
+        'function' &&
+      hasMidtermUnsavedChanges();
+
+
+    XLSX.writeFile(
+      wb,
+      getMidtermTemplateFileName()
+    );
+
+
+    if(hasUnsavedChanges){
+
+      showToast(
+        'ดาวน์โหลดสำเร็จ',
+        'ไฟล์ Excel มีคะแนนปัจจุบันบนหน้าจอ รวมถึงคะแนนที่แก้ไขแต่ยังไม่ได้บันทึก',
+        'warn'
+      );
+
+      setStatus(
+        'midtermFormStatus',
+        'ดาวน์โหลด Excel แล้ว — ไฟล์มีคะแนนที่แก้ไขบนหน้าจอ แต่คะแนนดังกล่าวยังไม่ได้บันทึกเข้าระบบ',
+        'warn'
+      );
+
+    }else{
+
+      showToast(
+        'ดาวน์โหลดสำเร็จ',
+        'ดาวน์โหลด Excel พร้อมคะแนนปัจจุบันแล้ว',
+        'success'
+      );
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'downloadMidtermTemplateExcel error:',
+      error
+    );
+
 
     showToast(
-      'ดาวน์โหลดสำเร็จ',
-      'ดาวน์โหลด Template Excel สำหรับกรอกคะแนนกลางภาคแล้ว',
-      'success'
+      'ดาวน์โหลดไม่สำเร็จ',
+      error.message ||
+        'เกิดข้อผิดพลาด',
+      'error'
     );
-  }catch(err){
-    showToast('ดาวน์โหลดไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
   }
 }
 
