@@ -27037,75 +27037,286 @@ function hasMidtermUnsavedChanges(){
   return hasMidtermScoreUnsavedChanges();
 }
 
-function refreshMidtermDirtyUI(options = {}){
-  state.midtermDirty = hasMidtermUnsavedChanges();
+/*
+ * สรุปจำนวนคะแนนที่เปลี่ยนจากข้อมูลเดิม
+ *
+ * scoreFieldCount = จำนวนช่องคะแนนรายคนที่แก้
+ * studentCount    = จำนวนนักเรียนที่ถูกแก้คะแนน
+ * maxFieldCount   = จำนวนช่องคะแนนเต็มที่แก้
+ */
+function getMidtermChangedScoreSummary(){
+  const scoreKeys = [
+    'keep_score',
+    'midterm_score',
+    'attendance_score'
+  ];
 
-  document
-    .querySelectorAll('#midtermTbody [data-midterm-idx][data-midterm-key]')
-    .forEach(input => {
-      const idx = Number(input.dataset.midtermIdx);
-      const key = input.dataset.midtermKey;
-      input.classList.toggle('changed-score', isMidtermScoreChanged(idx, key));
+
+  const changedStudentCodes =
+    new Set();
+
+
+  let scoreFieldCount = 0;
+
+
+  (
+    state.midtermRows ||
+    []
+  ).forEach((row, idx) => {
+    let rowHasChangedScore =
+      false;
+
+
+    scoreKeys.forEach(key => {
+      if(
+        isMidtermScoreChanged(
+          idx,
+          key
+        )
+      ){
+        scoreFieldCount += 1;
+        rowHasChangedScore = true;
+      }
     });
 
-  const maxMap = {
-    midtermKeepMax: 'keep',
-    midtermScoreMax: 'midterm',
-    midtermAttendanceMax: 'attendance'
-  };
 
-  Object.entries(maxMap).forEach(([id, key]) => {
-    const input = el(id);
-    if(input){
-      input.classList.toggle('changed-score', isMidtermMaxChanged(key));
+    if(!rowHasChangedScore){
+      return;
     }
+
+
+    /*
+     * ใช้เลขประจำตัวนักเรียนเป็นตัวนับ
+     * หากไม่มีเลขประจำตัวจึงใช้ตำแหน่งแถวแทน
+     */
+    const studentCode =
+      normalizeMidtermRosterStudentCode(
+        row?.student_code
+      );
+
+
+    changedStudentCodes.add(
+      studentCode ||
+      `row-${idx}`
+    );
   });
 
-  el('saveMidtermBtn')?.classList.toggle('has-unsaved', state.midtermDirty);
 
-if(state.midtermDirty){
-  const rosterChanged =
-    hasMidtermRosterUnsavedChanges();
+  const maxKeys = [
+    'keep',
+    'midterm',
+    'attendance'
+  ];
 
-  const scoreChanged =
-    hasMidtermScoreUnsavedChanges();
 
-  let message =
-    'มีข้อมูลที่ยังไม่ได้บันทึก กรุณากด “บันทึกคะแนนกลางภาค”';
+  const maxFieldCount =
+    maxKeys.filter(key =>
+      isMidtermMaxChanged(key)
+    ).length;
 
-  if(
-    rosterChanged &&
-    scoreChanged
-  ){
-    message =
-      'มีการเปลี่ยนแปลงรายชื่อนักเรียนและคะแนนที่ยังไม่ได้บันทึก ' +
-      'กรุณากด “บันทึกคะแนนกลางภาค”';
 
-  }else if(rosterChanged){
-    message =
-      'มีนักเรียนที่เพิ่มเข้ารายวิชาแต่ยังไม่ได้บันทึก ' +
-      'กรุณากรอกคะแนนและกด “บันทึกคะแนนกลางภาค”';
+  return {
+    scoreFieldCount,
 
-  }else if(scoreChanged){
-    message =
-      'มีการแก้ไขคะแนนที่ยังไม่ได้บันทึก ' +
-      'กรุณากด “บันทึกคะแนนกลางภาค”';
-  }
+    studentCount:
+      changedStudentCodes.size,
 
-  setStatus(
-    'midtermFormStatus',
-    message,
-    'warn'
-  );
+    maxFieldCount,
 
-}else if(options.cleanText){
-  setStatus(
-    'midtermFormStatus',
-    options.cleanText,
-    options.cleanType ||
-    'success'
-  );
+    totalFieldCount:
+      scoreFieldCount +
+      maxFieldCount
+  };
 }
+
+function refreshMidtermDirtyUI(
+  options = {}
+){
+  state.midtermDirty =
+    hasMidtermUnsavedChanges();
+
+
+  /*
+   * ไฮไลท์ช่องคะแนนรายคน
+   */
+  document
+    .querySelectorAll(
+      '#midtermTbody ' +
+      '[data-midterm-idx]' +
+      '[data-midterm-key]'
+    )
+    .forEach(input => {
+      const idx =
+        Number(
+          input.dataset.midtermIdx
+        );
+
+      const key =
+        input.dataset.midtermKey;
+
+
+      input.classList.toggle(
+        'changed-score',
+        isMidtermScoreChanged(
+          idx,
+          key
+        )
+      );
+    });
+
+
+  /*
+   * ไฮไลท์ช่องคะแนนเต็ม
+   */
+  const maxMap = {
+    midtermKeepMax:
+      'keep',
+
+    midtermScoreMax:
+      'midterm',
+
+    midtermAttendanceMax:
+      'attendance'
+  };
+
+
+  Object
+    .entries(maxMap)
+    .forEach(([id, key]) => {
+      const input =
+        el(id);
+
+
+      if(!input){
+        return;
+      }
+
+
+      input.classList.toggle(
+        'changed-score',
+        isMidtermMaxChanged(key)
+      );
+    });
+
+
+  /*
+   * ทำให้ปุ่มบันทึกเด่น
+   * เมื่อมีข้อมูลที่ยังไม่บันทึก
+   */
+  el('saveMidtermBtn')
+    ?.classList
+    .toggle(
+      'has-unsaved',
+      state.midtermDirty
+    );
+
+
+  if(state.midtermDirty){
+    const rosterChanged =
+      hasMidtermRosterUnsavedChanges();
+
+    const scoreChanged =
+      hasMidtermScoreUnsavedChanges();
+
+    const changedSummary =
+      getMidtermChangedScoreSummary();
+
+
+    const scoreMessages = [];
+
+
+    /*
+     * คะแนนรายคน
+     */
+    if(
+      changedSummary
+        .scoreFieldCount > 0
+    ){
+      scoreMessages.push(
+        `แก้ไขคะแนน ` +
+        `${changedSummary.scoreFieldCount} ช่อง ` +
+        `ของนักเรียน ` +
+        `${changedSummary.studentCount} คน`
+      );
+    }
+
+
+    /*
+     * คะแนนเต็ม
+     */
+    if(
+      changedSummary
+        .maxFieldCount > 0
+    ){
+      scoreMessages.push(
+        `แก้ไขคะแนนเต็ม ` +
+        `${changedSummary.maxFieldCount} ช่อง`
+      );
+    }
+
+
+    let message =
+      'มีข้อมูลที่ยังไม่ได้บันทึก';
+
+
+    /*
+     * เปลี่ยนทั้งรายชื่อและคะแนน
+     */
+    if(
+      rosterChanged &&
+      scoreChanged
+    ){
+      const scoreText =
+        scoreMessages.length
+          ? scoreMessages.join(' และ ')
+          : 'มีการแก้ไขคะแนน';
+
+
+      message =
+        `มีการเปลี่ยนแปลงรายชื่อนักเรียน และ${scoreText}` +
+        ' — กรุณากด “บันทึกคะแนนกลางภาค”';
+
+
+    /*
+     * เปลี่ยนเฉพาะรายชื่อ
+     */
+    }else if(rosterChanged){
+      message =
+        'มีการเปลี่ยนแปลงรายชื่อนักเรียนที่ยังไม่ได้บันทึก' +
+        ' — กรุณากรอกคะแนนและกด “บันทึกคะแนนกลางภาค”';
+
+
+    /*
+     * เปลี่ยนเฉพาะคะแนน
+     */
+    }else if(scoreChanged){
+      const scoreText =
+        scoreMessages.length
+          ? scoreMessages.join(' และ ')
+          : 'มีการแก้ไขคะแนน';
+
+
+      message =
+        `${scoreText}` +
+        ' — กรุณากด “บันทึกคะแนนกลางภาค”';
+    }
+
+
+    setStatus(
+      'midtermFormStatus',
+      message,
+      'warn'
+    );
+
+
+  }else if(options.cleanText){
+    setStatus(
+      'midtermFormStatus',
+      options.cleanText,
+      options.cleanType ||
+        'success'
+    );
+  }
 }
 
 function isOnMidtermReportPage(){
@@ -29149,11 +29360,22 @@ focusMidtermEntryField(
 );
 
 
-  setStatus(
-    'midtermFormStatus',
-    `ถึงนักเรียนคนสุดท้ายของคอลัมน์${config.label}แล้ว ระบบกลับไปนักเรียนคนแรก`,
+/*
+ * หากมีคะแนนที่ยังไม่บันทึก
+ * ให้คงข้อความสรุปจำนวนที่แก้ไว้
+ *
+ * หากไม่มีข้อมูลเปลี่ยนแปลง
+ * จึงแสดงข้อความว่ากลับไปคนแรก
+ */
+refreshMidtermDirtyUI({
+  cleanText:
+    `ถึงนักเรียนคนสุดท้ายของคอลัมน์` +
+    `${config.label}แล้ว ` +
+    `ระบบกลับไปนักเรียนคนแรก`,
+
+  cleanType:
     'success'
-  );
+});
 }
 
 function handleMidtermScoreChanged(e){
