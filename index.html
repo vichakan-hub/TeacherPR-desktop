@@ -30038,6 +30038,178 @@ refreshMidtermDirtyUI({
 });
 }
 
+/* =====================================================
+   MIDTERM ARROW KEY NAVIGATION
+   ใช้ลูกศรขึ้น–ลงเลื่อนช่องกรอกในคอลัมน์เดิม
+   ===================================================== */
+
+function handleMidtermEntryArrowKey(
+  event
+){
+  /*
+   * รับเฉพาะลูกศรขึ้นและลง
+   */
+  if(
+    (
+      event.key !== 'ArrowDown' &&
+      event.key !== 'ArrowUp'
+    ) ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey
+  ){
+    return;
+  }
+
+
+  const target =
+    event.target;
+
+
+  /*
+   * ต้องเป็นช่องคะแนนของนักเรียนเท่านั้น
+   * ไม่กระทบช่องคะแนนเต็มบนหัวตาราง
+   */
+  if(
+    !target?.matches(
+      '#midtermTbody ' +
+      '.midterm-score-input'
+    )
+  ){
+    return;
+  }
+
+
+  const activeKey =
+    state.midtermActiveColumn || '';
+
+
+  if(
+    !isValidMidtermEntryColumn(
+      activeKey
+    )
+  ){
+    return;
+  }
+
+
+  /*
+   * ต้องเป็นช่องของคอลัมน์
+   * ที่เปิด Checkbox อยู่เท่านั้น
+   */
+  if(
+    target.disabled ||
+    target.dataset.midtermKey !==
+      activeKey
+  ){
+    return;
+  }
+
+
+  const rowInputs =
+    getMidtermActiveColumnInputs();
+
+
+  const currentIndex =
+    rowInputs.indexOf(
+      target
+    );
+
+
+  if(currentIndex < 0){
+    return;
+  }
+
+
+  /*
+   * ป้องกันพฤติกรรมเดิมของ input type="number"
+   *
+   * ตามปกติลูกศรขึ้น–ลงจะเพิ่มหรือลดคะแนน
+   * แต่เราจะใช้สำหรับย้ายช่องแทน
+   */
+  event.preventDefault();
+
+
+  /*
+   * ลูกศรขึ้น:
+   * ย้อนกลับไปนักเรียนคนก่อนหน้า
+   */
+  if(event.key === 'ArrowUp'){
+
+    /*
+     * คนแรกให้อยู่ที่คนแรก
+     * ไม่วนไปคนสุดท้าย
+     */
+    if(currentIndex === 0){
+      focusMidtermEntryField(
+        rowInputs[0]
+      );
+
+      return;
+    }
+
+
+    focusMidtermEntryField(
+      rowInputs[
+        currentIndex - 1
+      ]
+    );
+
+    return;
+  }
+
+
+  /*
+   * ลูกศรลง:
+   * ไปนักเรียนคนถัดไป
+   */
+  if(
+    currentIndex <
+    rowInputs.length - 1
+  ){
+    focusMidtermEntryField(
+      rowInputs[
+        currentIndex + 1
+      ]
+    );
+
+    return;
+  }
+
+
+  /*
+   * นักเรียนคนสุดท้าย:
+   * วนกลับนักเรียนคนแรก
+   * และเลื่อนตารางขึ้นบนสุด
+   */
+  focusMidtermEntryField(
+    rowInputs[0],
+    true,
+    'top'
+  );
+
+
+  const config =
+    MIDTERM_ENTRY_COLUMNS[
+      activeKey
+    ];
+
+
+  /*
+   * ถ้ามีคะแนนแก้ไขอยู่
+   * ให้คงข้อความสรุปจำนวนที่แก้ไข
+   */
+  refreshMidtermDirtyUI({
+    cleanText:
+      `ถึงนักเรียนคนสุดท้ายของคอลัมน์` +
+      `${config.label}แล้ว ` +
+      `ระบบกลับไปนักเรียนคนแรก`,
+
+    cleanType:
+      'success'
+  });
+}
+
 function handleMidtermScoreChanged(e){
   const target = e.target;
 
@@ -30074,13 +30246,24 @@ bindIfExists('midtermTbody', 'input', handleMidtermScoreChanged);
 bindIfExists('midtermTbody', 'change', handleMidtermScoreChanged);
 
 /*
- * Tab ไล่ลงทีละแถว
- * ในคอลัมน์ที่กำลังเลือก
+ * Tab และ Shift + Tab
+ * ไล่ขึ้น–ลงในคอลัมน์ที่กำลังเลือก
  */
 bindIfExists(
   'midtermTbody',
   'keydown',
   handleMidtermEntryTab
+);
+
+
+/*
+ * ลูกศรลง = นักเรียนคนถัดไป
+ * ลูกศรขึ้น = นักเรียนคนก่อนหน้า
+ */
+bindIfExists(
+  'midtermTbody',
+  'keydown',
+  handleMidtermEntryArrowKey
 );
 
 bindIfExists('saveMidtermBtn', 'click', saveMidtermReport);
