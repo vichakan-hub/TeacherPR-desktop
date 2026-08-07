@@ -9252,18 +9252,31 @@ td{
     <span>ครูที่ปรึกษา</span>
   </div>
 
-<button id="menuAdviserBtn" class="sidebar-link" type="button" data-side-page="adviser">
+<button
+  id="menuAdviserBtn"
+  class="sidebar-link"
+  type="button"
+  data-side-page="adviser"
+>
   <span class="sidebar-icon">👩‍🏫</span>
   <span class="sidebar-label">นักเรียนในที่ปรึกษา</span>
 </button>
 
+<button
+  id="menuAdviserRiskBtn"
+  class="sidebar-link"
+  type="button"
+  data-side-page="adviserrisk"
+>
+  <span class="sidebar-icon">⚠️</span>
+  <span class="sidebar-label">นักเรียนที่เสี่ยงติด 0, ร, มส และ มผ</span>
+</button>
 
-        <button
+<button
   id="menuAdviserRetestBtn"
   class="sidebar-link"
   type="button"
   data-side-page="adviserretest"
-  
 >
   <span class="sidebar-icon">🧾</span>
   <span class="sidebar-label">ติดตามผลสอบแก้ตัว</span>
@@ -12752,13 +12765,7 @@ const map = {
   home: 'menuHomeBtn',
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
-
-  /*
-   * หน้าความเสี่ยงเป็นเมนูย่อยของ
-   * นักเรียนในที่ปรึกษา
-   */
-  adviserrisk: 'menuAdviserBtn',
-
+  adviserrisk: 'menuAdviserRiskBtn',
   adviserretest: 'menuAdviserRetestBtn',
   gradestats: 'menuGradeStatsBtn',
   teacherstudent: 'menuTeacherStudentBtn'
@@ -29550,6 +29557,62 @@ bindIfExists('menuAdviserBtn', 'click', async () => {
   setActivePage('adviser');
   await loadAdviserRooms();
 });
+
+
+/*
+ * เปิดหน้านักเรียนที่เสี่ยงจาก Sidebar
+ */
+bindIfExists(
+  'menuAdviserRiskBtn',
+  'click',
+  async () => {
+    const pageChanged =
+      setActivePage('adviserrisk');
+
+    if(pageChanged === false){
+      return;
+    }
+
+    try{
+      /*
+       * โหลดค่าปีการศึกษาและภาคเรียน
+       * จาก App Setting
+       */
+      if(!state.adviserSettings){
+        await loadImportSettingsFromSheet();
+      }
+
+      applyAdviserRiskSettingsToDropdowns();
+
+      /*
+       * โหลดห้องที่ครูเป็นที่ปรึกษา
+       * และจำห้องที่เคยเลือกไว้
+       */
+      await loadAdviserRiskRooms({
+        preferredRoomKey:
+          state.selectedAdviserRiskRoomKey || ''
+      });
+
+    }catch(error){
+      console.error(
+        'menuAdviserRiskBtn ERROR',
+        error
+      );
+
+      resetAdviserRiskStudentView(
+        'โหลดข้อมูลความเสี่ยงไม่สำเร็จ'
+      );
+
+      setStatus(
+        'adviserRiskStatus',
+        error.message ||
+        'โหลดข้อมูลนักเรียนที่มีความเสี่ยงไม่สำเร็จ',
+        'error'
+      );
+    }
+  }
+);
+
 
 bindIfExists(
   'menuAdviserRetestBtn',
