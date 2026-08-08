@@ -29,6 +29,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- QR CODE GENERATOR -->
+<script src="./vendor/qrcode.min.js"></script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -9012,6 +9016,641 @@ td{
     0 0 0 3px rgba(37,99,235,.16) !important;
 }
 
+/* =====================================================
+   TEACHERPR : QR CODE GENERATOR
+   ===================================================== */
+
+#pageQrGenerator{
+  width:100%;
+}
+
+.qrgen-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.65fr) minmax(320px,.85fr);
+  gap:18px;
+  align-items:start;
+}
+
+.qrgen-panel,
+.qrgen-preview-card{
+  background:rgba(255,255,255,.76);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+}
+
+.qrgen-panel{
+  padding:22px;
+}
+
+.qrgen-preview-card{
+  padding:18px;
+  position:sticky;
+  top:18px;
+}
+
+.qrgen-heading{
+  margin-bottom:18px;
+}
+
+.qrgen-heading h2{
+  margin:0;
+  font-size:24px;
+  font-weight:800;
+  color:var(--text);
+}
+
+.qrgen-heading p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.qrgen-field{
+  margin-bottom:14px;
+}
+
+.qrgen-label{
+  display:block;
+  margin-bottom:6px;
+  color:#4d6078;
+  font-size:14px;
+  font-weight:700;
+}
+
+.qrgen-input,
+.qrgen-select{
+  width:100%;
+  height:44px;
+  border:1px solid #c8d6e4;
+  border-radius:14px;
+  padding:0 14px;
+  font-family:'Kanit',sans-serif;
+  font-size:15px;
+  color:var(--text);
+  background:#fff;
+  outline:none;
+}
+
+.qrgen-input:focus,
+.qrgen-select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+.qrgen-input:disabled,
+.qrgen-select:disabled{
+  opacity:.6;
+  background:#f4f7fa;
+  cursor:not-allowed;
+}
+
+.qrgen-file-input{
+  width:100%;
+  min-height:44px;
+  border:1px solid #c8d6e4;
+  border-radius:14px;
+  padding:8px 12px;
+  font-family:'Kanit',sans-serif;
+  font-size:14px;
+  background:#fff;
+  color:var(--text);
+}
+
+.qrgen-muted{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.qrgen-toggle-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:34px;
+  flex-wrap:wrap;
+}
+
+.qrgen-toggle-row input[type="checkbox"],
+.qrgen-toggle-row input[type="radio"]{
+  width:17px;
+  height:17px;
+  accent-color:var(--primary);
+  cursor:pointer;
+}
+
+.qrgen-toggle-row label{
+  font-size:14px;
+  font-weight:600;
+  color:#41536c;
+  cursor:pointer;
+}
+
+.qrgen-subcard{
+  margin-top:8px;
+  padding:14px;
+  border:1px solid #d8e4ef;
+  border-radius:16px;
+  background:#f8fbff;
+}
+
+.qrgen-disabled{
+  opacity:.55;
+  pointer-events:none;
+}
+
+.qrgen-radio-row{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+.qrgen-radio-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:14px;
+  color:#41536c;
+  font-weight:600;
+}
+
+.qrgen-caption-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 150px;
+  gap:12px;
+  align-items:end;
+}
+
+.qrgen-option-grid{
+  display:grid;
+  grid-template-columns:130px 115px 115px minmax(180px,1fr);
+  gap:12px;
+  align-items:end;
+}
+
+.qrgen-color{
+  width:100%;
+  height:44px;
+  padding:4px;
+  border:1px solid #c8d6e4;
+  border-radius:14px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.qrgen-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+.qrgen-btn{
+  min-height:44px;
+  border:0;
+  border-radius:14px;
+  padding:0 18px;
+  font-family:'Kanit',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.qrgen-btn:hover{
+  transform:translateY(-1px);
+}
+
+.qrgen-btn-primary{
+  color:#fff;
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+}
+
+.qrgen-btn-secondary{
+  color:#41536c;
+  background:#eef3f8;
+  border:1px solid #d6e2ee;
+}
+
+.qrgen-preview-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.qrgen-preview-title{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  color:#17324d;
+}
+
+.qrgen-preview-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:#1d4ed8;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.qrgen-preview-box{
+  min-height:370px;
+  border:1px solid #d8e4ef;
+  border-radius:18px;
+  background:
+    linear-gradient(45deg,#f5f8fc 25%,transparent 25%),
+    linear-gradient(-45deg,#f5f8fc 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#f5f8fc 75%),
+    linear-gradient(-45deg,transparent 75%,#f5f8fc 75%);
+  background-size:20px 20px;
+  background-position:0 0,0 10px,10px -10px,-10px 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  padding:14px;
+}
+
+.qrgen-placeholder{
+  text-align:center;
+  color:#7b93a7;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.qrgen-placeholder-icon{
+  font-size:54px;
+  margin-bottom:8px;
+}
+
+#qrgenPreviewImage{
+  max-width:100%;
+  max-height:340px;
+  object-fit:contain;
+  display:none;
+  border-radius:12px;
+}
+
+.qrgen-download{
+  width:100%;
+  margin-top:12px;
+}
+
+.qrgen-mini-tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+
+.qrgen-footer-note{
+  margin-top:12px;
+  text-align:center;
+  color:#7b93a7;
+  font-size:11px;
+  line-height:1.5;
+}
+
+/* =====================================================
+   QR GENERATOR : RESPONSIVE / MOBILE / PWA
+   ===================================================== */
+
+/*
+ * Sidebar กินพื้นที่บน Desktop
+ * จึงเปลี่ยนเป็น 1 คอลัมน์ก่อนถึง Mobile จริง
+ */
+@media (max-width:1180px){
+
+  .qrgen-layout{
+    grid-template-columns:1fr;
+  }
+
+  .qrgen-preview-card{
+    position:static;
+    top:auto;
+  }
+
+  .qrgen-preview-box{
+    min-height:340px;
+  }
+}
+
+
+/* =====================================================
+   TABLET / TEACHERPR MOBILE MODE
+   TeacherPR ใช้ breakpoint 900px
+   ===================================================== */
+
+@media (max-width:900px){
+
+  #pageQrGenerator{
+    width:100%;
+    min-width:0;
+  }
+
+  .qrgen-layout{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    min-width:0;
+    gap:14px;
+  }
+
+  .qrgen-panel,
+  .qrgen-preview-card{
+    width:100%;
+    min-width:0;
+    padding:18px;
+    border-radius:20px;
+  }
+
+  .qrgen-heading{
+    margin-bottom:16px;
+  }
+
+  .qrgen-heading h2{
+    font-size:22px;
+  }
+
+  .qrgen-heading p{
+    font-size:13px;
+  }
+
+
+  /*
+   * Caption
+   */
+  .qrgen-caption-grid{
+    grid-template-columns:minmax(0,1fr) 140px;
+    gap:10px;
+  }
+
+
+  /*
+   * ขนาด / สี / ชื่อไฟล์
+   */
+  .qrgen-option-grid{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+
+  /*
+   * Preview
+   */
+  .qrgen-preview-card{
+    position:static;
+  }
+
+  .qrgen-preview-box{
+    min-height:320px;
+  }
+
+  #qrgenPreviewImage{
+    max-width:100%;
+    max-height:310px;
+  }
+
+
+  /*
+   * ปุ่มให้แตะง่ายขึ้น
+   */
+  .qrgen-btn{
+    min-height:46px;
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width:640px){
+
+  .qrgen-panel,
+  .qrgen-preview-card{
+    padding:15px;
+    border-radius:18px;
+  }
+
+  .qrgen-heading h2{
+    font-size:20px;
+  }
+
+
+  /*
+   * สำคัญสำหรับ iPhone
+   *
+   * input ต่ำกว่า 16px อาจทำ Safari zoom
+   * ตอนแตะช่องกรอก
+   */
+  .qrgen-input,
+  .qrgen-select,
+  .qrgen-file-input{
+    font-size:16px;
+  }
+
+
+  .qrgen-input,
+  .qrgen-select{
+    height:48px;
+  }
+
+  .qrgen-file-input{
+    min-height:48px;
+  }
+
+
+  /*
+   * Caption เรียงลง
+   */
+  .qrgen-caption-grid{
+    grid-template-columns:1fr;
+  }
+
+
+  /*
+   * option 2 ช่อง
+   */
+  .qrgen-option-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+
+  /*
+   * ชื่อไฟล์กินเต็มแถว
+   */
+  .qrgen-option-grid
+  .qrgen-field:last-child{
+    grid-column:1 / -1;
+  }
+
+
+  /*
+   * Checkbox / Radio แตะง่าย
+   */
+  .qrgen-toggle-row{
+    min-height:42px;
+  }
+
+  .qrgen-toggle-row input[type="checkbox"],
+  .qrgen-toggle-row input[type="radio"]{
+    width:19px;
+    height:19px;
+    flex:0 0 auto;
+  }
+
+  .qrgen-radio-row{
+    gap:12px;
+  }
+
+  .qrgen-radio-item{
+    min-height:38px;
+  }
+
+
+  /*
+   * Preview
+   */
+  .qrgen-preview-box{
+    min-height:280px;
+    padding:12px;
+  }
+
+  #qrgenPreviewImage{
+    max-height:270px;
+  }
+
+
+  /*
+   * ปุ่มหลัก
+   */
+  .qrgen-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .qrgen-actions .qrgen-btn{
+    width:100%;
+  }
+
+
+  /*
+   * ปุ่มใต้ Preview
+   */
+  .qrgen-download{
+    min-height:50px;
+    font-size:15px;
+  }
+
+  .qrgen-mini-tools{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .qrgen-mini-tools .qrgen-btn{
+    min-height:46px;
+    padding-left:10px;
+    padding-right:10px;
+  }
+
+
+  /*
+   * รองรับพื้นที่ Safe Area ของ PWA/iPhone
+   */
+  #pageQrGenerator{
+    padding-bottom:
+      max(
+        8px,
+        env(safe-area-inset-bottom)
+      );
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+   ===================================================== */
+
+@media (max-width:480px){
+
+  .qrgen-layout{
+    gap:12px;
+  }
+
+  .qrgen-panel,
+  .qrgen-preview-card{
+    padding:14px;
+    border-radius:17px;
+  }
+
+
+  /*
+   * ขนาด / สี / ชื่อไฟล์
+   * เปลี่ยนเป็นหนึ่งช่องต่อแถว
+   */
+  .qrgen-option-grid{
+    grid-template-columns:1fr;
+  }
+
+  .qrgen-option-grid
+  .qrgen-field:last-child{
+    grid-column:auto;
+  }
+
+
+  /*
+   * ปุ่ม Refresh / Clear
+   */
+  .qrgen-actions{
+    grid-template-columns:1fr;
+  }
+
+
+  /*
+   * Copy image / Copy text
+   */
+  .qrgen-mini-tools{
+    grid-template-columns:1fr;
+  }
+
+
+  .qrgen-preview-head{
+    align-items:flex-start;
+  }
+
+  .qrgen-preview-title{
+    font-size:17px;
+  }
+
+  .qrgen-preview-status{
+    font-size:10px;
+  }
+
+
+  .qrgen-preview-box{
+    min-height:255px;
+  }
+
+  #qrgenPreviewImage{
+    max-height:245px;
+  }
+
+}
+
 </style>
 </head>
 <body>
@@ -9313,6 +9952,17 @@ td{
       </button>
     </div>
   </div>
+        <!-- ===== QR CODE GENERATOR ===== -->
+<button
+  id="menuQrGeneratorBtn"
+  class="sidebar-link"
+  type="button"
+  data-side-page="qrgenerator"
+>
+  <span class="sidebar-icon">🔳</span>
+  <span class="sidebar-label">สร้าง QR Code</span>
+</button>
+<!-- ===== END QR CODE GENERATOR ===== -->
 </nav>
 
       <div class="sidebar-footer">
@@ -9371,6 +10021,417 @@ td{
           </div>
         </div>
       </section>
+
+<!-- =====================================================
+     PAGE : QR CODE GENERATOR
+     ===================================================== -->
+<div id="pageQrGenerator" class="hidden">
+
+  <div class="qrgen-layout">
+
+    <!-- ================= LEFT ================= -->
+    <section class="qrgen-panel">
+
+      <div class="qrgen-heading">
+        <h2>QR Code Generator</h2>
+        <p>
+          สร้าง QR Code สำหรับลิงก์ เอกสาร แบบฝึกหัด
+          และสื่อการเรียนรู้ พร้อมดาวน์โหลดเป็นไฟล์ PNG
+        </p>
+      </div>
+
+      <!-- ข้อมูลหลัก -->
+      <div class="qrgen-field">
+        <label class="qrgen-label" for="qrgenText">
+          ข้อความ / ลิงก์ / ข้อมูล
+        </label>
+
+        <input
+          type="text"
+          id="qrgenText"
+          class="qrgen-input"
+          placeholder="วางลิงก์ หรือพิมพ์ข้อความที่ต้องการสร้าง QR Code"
+        >
+
+        <div class="qrgen-muted">
+          พิมพ์ข้อความหรือวางลิงก์ แล้วระบบจะแสดงตัวอย่างให้อัตโนมัติ
+        </div>
+      </div>
+
+
+      <!-- Caption -->
+      <div class="qrgen-field">
+
+        <div class="qrgen-toggle-row">
+          <input type="checkbox" id="qrgenShowCaption">
+
+          <label for="qrgenShowCaption">
+            แสดงข้อความใต้ QR Code
+          </label>
+        </div>
+
+        <div class="qrgen-caption-grid">
+
+          <div class="qrgen-field" style="margin-bottom:0;">
+            <label
+              class="qrgen-label"
+              for="qrgenCaptionText"
+            >
+              ข้อความใต้ QR
+            </label>
+
+            <input
+              type="text"
+              id="qrgenCaptionText"
+              class="qrgen-input"
+              placeholder="ข้อความใต้ QR Code"
+              disabled
+            >
+          </div>
+
+
+          <div class="qrgen-field" style="margin-bottom:0;">
+            <label
+              class="qrgen-label"
+              for="qrgenCaptionFontSize"
+            >
+              ขนาดตัวอักษร
+            </label>
+
+            <select
+              id="qrgenCaptionFontSize"
+              class="qrgen-select"
+              disabled
+            >
+              <option value="16">16 px</option>
+              <option value="18">18 px</option>
+              <option value="20" selected>20 px</option>
+              <option value="24">24 px</option>
+              <option value="28">28 px</option>
+              <option value="32">32 px</option>
+              <option value="36">36 px</option>
+              <option value="40">40 px</option>
+              <option value="48">48 px</option>
+              <option value="56">56 px</option>
+              <option value="64">64 px</option>
+              <option value="72">72 px</option>
+              <option value="84">84 px</option>
+              <option value="96">96 px</option>
+              <option value="108">108 px</option>
+              <option value="120">120 px</option>
+              <option value="132">132 px</option>
+              <option value="144">144 px</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="qrgen-muted">
+          หากไม่กรอกข้อความ ระบบจะใช้ข้อความจากช่องหลักแทน
+          และแสดงสูงสุดไม่เกิน 4 บรรทัด
+        </div>
+
+      </div>
+
+
+      <!-- Logo -->
+      <div class="qrgen-field">
+
+        <div class="qrgen-toggle-row">
+
+          <input
+            type="checkbox"
+            id="qrgenShowCenterLogo"
+          >
+
+          <label for="qrgenShowCenterLogo">
+            ใส่โลโก้ / รูปตรงกลาง QR Code
+          </label>
+
+        </div>
+
+
+        <div
+          id="qrgenLogoOptionsBox"
+          class="qrgen-subcard qrgen-disabled"
+        >
+
+          <div class="qrgen-radio-row">
+
+            <label class="qrgen-radio-item">
+              <input
+                type="radio"
+                name="qrgenLogoMode"
+                id="qrgenLogoModeSchool"
+                value="school"
+                checked
+              >
+              ใช้โลโก้โรงเรียน
+            </label>
+
+
+            <label class="qrgen-radio-item">
+              <input
+                type="radio"
+                name="qrgenLogoMode"
+                id="qrgenLogoModeUpload"
+                value="upload"
+              >
+              อัปโหลดรูปของตนเอง
+            </label>
+
+          </div>
+
+
+          <div
+            id="qrgenUploadBox"
+            class="qrgen-field qrgen-disabled"
+            style="margin-top:12px;margin-bottom:0;"
+          >
+
+            <label
+              class="qrgen-label"
+              for="qrgenLogoUpload"
+            >
+              อัปโหลดรูป
+            </label>
+
+            <input
+              type="file"
+              id="qrgenLogoUpload"
+              class="qrgen-file-input"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              disabled
+            >
+
+            <div class="qrgen-muted">
+              รองรับ PNG, JPG, WEBP และ SVG ขนาดไม่เกิน 5 MB
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- OPTIONS -->
+      <div class="qrgen-option-grid">
+
+        <div class="qrgen-field" style="margin-bottom:0;">
+
+          <label
+            class="qrgen-label"
+            for="qrgenSize"
+          >
+            ขนาด QR
+          </label>
+
+          <select
+            id="qrgenSize"
+            class="qrgen-select"
+          >
+            <option value="300">300 px</option>
+            <option value="400" selected>400 px</option>
+            <option value="500">500 px</option>
+            <option value="700">700 px</option>
+          </select>
+
+        </div>
+
+
+        <div class="qrgen-field" style="margin-bottom:0;">
+
+          <label
+            class="qrgen-label"
+            for="qrgenDarkColor"
+          >
+            สี QR
+          </label>
+
+          <input
+            type="color"
+            id="qrgenDarkColor"
+            class="qrgen-color"
+            value="#000000"
+          >
+
+        </div>
+
+
+        <div class="qrgen-field" style="margin-bottom:0;">
+
+          <label
+            class="qrgen-label"
+            for="qrgenBgColor"
+          >
+            สีพื้นหลัง
+          </label>
+
+          <input
+            type="color"
+            id="qrgenBgColor"
+            class="qrgen-color"
+            value="#ffffff"
+          >
+
+        </div>
+
+
+        <div class="qrgen-field" style="margin-bottom:0;">
+
+          <label
+            class="qrgen-label"
+            for="qrgenFileName"
+          >
+            ชื่อไฟล์
+          </label>
+
+          <input
+            type="text"
+            id="qrgenFileName"
+            class="qrgen-input"
+            placeholder="เช่น qr-code"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- Transparent -->
+      <div
+        class="qrgen-field"
+        style="margin-top:14px;margin-bottom:0;"
+      >
+
+        <div class="qrgen-toggle-row">
+
+          <input
+            type="checkbox"
+            id="qrgenTransparentBg"
+          >
+
+          <label for="qrgenTransparentBg">
+            พื้นหลังโปร่งใส
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTION -->
+      <div class="qrgen-actions">
+
+        <button
+          type="button"
+          id="qrgenGenerateBtn"
+          class="qrgen-btn qrgen-btn-primary"
+        >
+          🔄 รีเฟรช QR
+        </button>
+
+
+        <button
+          type="button"
+          id="qrgenClearBtn"
+          class="qrgen-btn qrgen-btn-secondary"
+        >
+          ล้างข้อมูล
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= RIGHT ================= -->
+    <aside class="qrgen-preview-card">
+
+      <div class="qrgen-preview-head">
+
+        <h3 class="qrgen-preview-title">
+          ตัวอย่าง QR Code
+        </h3>
+
+        <div
+          id="qrgenPreviewStatus"
+          class="qrgen-preview-status"
+        >
+          ยังไม่มีตัวอย่าง
+        </div>
+
+      </div>
+
+
+      <div class="qrgen-preview-box">
+
+        <div
+          id="qrgenPlaceholder"
+          class="qrgen-placeholder"
+        >
+          <div class="qrgen-placeholder-icon">
+            🔳
+          </div>
+
+          พิมพ์ข้อความหรือลิงก์ด้านซ้าย<br>
+          แล้วตัวอย่าง QR Code จะขึ้นทันที
+        </div>
+
+
+        <img
+          id="qrgenPreviewImage"
+          alt="QR Code Preview"
+        >
+
+      </div>
+
+
+      <button
+        type="button"
+        id="qrgenDownloadBtn"
+        class="qrgen-btn qrgen-btn-primary qrgen-download"
+      >
+        ⬇️ ดาวน์โหลด PNG
+      </button>
+
+
+      <div class="qrgen-mini-tools">
+
+        <button
+          type="button"
+          id="qrgenCopyImageBtn"
+          class="qrgen-btn qrgen-btn-secondary"
+        >
+          📋 คัดลอกรูป
+        </button>
+
+
+        <button
+          type="button"
+          id="qrgenCopyTextBtn"
+          class="qrgen-btn qrgen-btn-secondary"
+        >
+          🔗 คัดลอกข้อความ
+        </button>
+
+      </div>
+
+
+      <div class="qrgen-footer-note">
+        ระบบใช้ Error Correction ระดับสูง<br>
+        เพื่อช่วยให้ QR Code ยังคงสแกนได้ดีเมื่อมีโลโก้ตรงกลาง
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
+<!-- =====================================================
+     END PAGE : QR CODE GENERATOR
+     ===================================================== -->
 
 <div id="pageMidtermReport" class="hidden">
   <section class="card" style="margin-bottom:18px;">
@@ -12276,7 +13337,7 @@ td{
 </div>
 <!-- ===== END RETEST CANCEL SUBMISSION OVERLAY ===== -->
 
-<div id="toastWrap" class="toast-wrap"></div>
+
   <div id="toastWrap" class="toast-wrap"></div>
   <div id="fpFloatingTooltip" class="fp-floating-tooltip hidden"></div>
 
@@ -12662,6 +13723,7 @@ function setActivePage(page){
   const isGradeStats = page === 'gradestats';
   const isTeacherStudent = page === 'teacherstudent';
   const isAdviserRetest = page === 'adviserretest';
+  const isQrGenerator = page === 'qrgenerator';
 
   if(!isFreePeriod && !isMidtermReport && !isImport){
     closeAllSidebarGroups();
@@ -12696,6 +13758,9 @@ function setActivePage(page){
 
   el('pageTeacherStudent')
     ?.classList.toggle('hidden', !isTeacherStudent);
+
+  el('pageQrGenerator')
+  ?.classList.toggle('hidden', !isQrGenerator);
 
   setSidebarActiveMain(page);
   updateAppTopbarTitle(page);
@@ -12768,7 +13833,8 @@ const map = {
   adviserrisk: 'menuAdviserRiskBtn',
   adviserretest: 'menuAdviserRetestBtn',
   gradestats: 'menuGradeStatsBtn',
-  teacherstudent: 'menuTeacherStudentBtn'
+  teacherstudent: 'menuTeacherStudentBtn',
+  qrgenerator: 'menuQrGeneratorBtn'
 };
 
   const targetId = map[page];
@@ -12830,7 +13896,15 @@ const titleMap = {
   'ติดตามการสอบแก้ตัว',
   'ติดตามสถานะยังไม่แก้ รออนุมัติ และอนุมัติแล้วของนักเรียนในที่ปรึกษา'
 ],
-  freeperiod: ['จองคาบว่าง', 'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง']
+  freeperiod: [
+  'จองคาบว่าง',
+  'ค้นหา จอง และตรวจสอบรายการจองคาบว่าง'
+],
+
+qrgenerator: [
+  'สร้าง QR Code',
+  'สร้าง QR Code สำหรับลิงก์ เอกสาร แบบฝึกหัด และสื่อการเรียนรู้'
+]
 };
 
   const item = titleMap[page] || titleMap.home;
@@ -29505,7 +30579,1725 @@ document.addEventListener(
   }
 );
 
+  /* =====================================================
+   TEACHERPR : QR CODE GENERATOR
+   ===================================================== */
+
+const QRGEN_SCHOOL_LOGO_URL = './assets/school-logo.png';
+const QRGEN_MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+const QRGEN_MAX_CAPTION_LINES = 4;
+
+let qrgenUploadedLogoData = null;
+let qrgenGeneratedDataURL = null;
+let qrgenRenderTimer = null;
+let qrgenRenderToken = 0;
+let qrgenInitialized = false;
+
+
+/* =====================================================
+   BASIC HELPERS
+   ===================================================== */
+
+function qrgenEl(id){
+  return document.getElementById(id);
+}
+
+
+function qrgenNotify(title, text, type = 'success'){
+  if(typeof showToast === 'function'){
+    showToast(title, text, type);
+    return;
+  }
+
+  console.log(`[QR Generator] ${title}: ${text}`);
+}
+
+
+function qrgenSetPreviewStatus(text){
+  const node = qrgenEl('qrgenPreviewStatus');
+
+  if(node){
+    node.textContent = text;
+  }
+}
+
+
+function qrgenGetSelectedLogoMode(){
+  const selected = document.querySelector(
+    'input[name="qrgenLogoMode"]:checked'
+  );
+
+  return selected ? selected.value : 'school';
+}
+
+
+/* =====================================================
+   UI STATE
+   ===================================================== */
+
+function qrgenUpdateCaptionUI(){
+  const enabled =
+    qrgenEl('qrgenShowCaption')?.checked === true;
+
+  const captionInput =
+    qrgenEl('qrgenCaptionText');
+
+  const fontSize =
+    qrgenEl('qrgenCaptionFontSize');
+
+  if(captionInput){
+    captionInput.disabled = !enabled;
+
+    if(!enabled){
+      captionInput.value = '';
+    }
+  }
+
+  if(fontSize){
+    fontSize.disabled = !enabled;
+  }
+}
+
+
+function qrgenUpdateLogoUI(){
+
+  const enabled =
+    qrgenEl('qrgenShowCenterLogo')?.checked === true;
+
+  const mode =
+    qrgenGetSelectedLogoMode();
+
+  const optionsBox =
+    qrgenEl('qrgenLogoOptionsBox');
+
+  const uploadBox =
+    qrgenEl('qrgenUploadBox');
+
+  const uploadInput =
+    qrgenEl('qrgenLogoUpload');
+
+
+  optionsBox?.classList.toggle(
+    'qrgen-disabled',
+    !enabled
+  );
+
+
+  const uploadEnabled =
+    enabled && mode === 'upload';
+
+
+  uploadBox?.classList.toggle(
+    'qrgen-disabled',
+    !uploadEnabled
+  );
+
+
+  if(uploadInput){
+    uploadInput.disabled = !uploadEnabled;
+  }
+}
+
+
+function qrgenUpdateBackgroundUI(){
+
+  const transparent =
+    qrgenEl('qrgenTransparentBg')?.checked === true;
+
+  const bgColor =
+    qrgenEl('qrgenBgColor');
+
+  if(bgColor){
+    bgColor.disabled = transparent;
+  }
+}
+
+
+/* =====================================================
+   PREVIEW
+   ===================================================== */
+
+function qrgenResetPreview(){
+
+  qrgenRenderToken++;
+
+  qrgenGeneratedDataURL = null;
+
+  const image =
+    qrgenEl('qrgenPreviewImage');
+
+  const placeholder =
+    qrgenEl('qrgenPlaceholder');
+
+
+  if(image){
+    image.style.display = 'none';
+    image.removeAttribute('src');
+  }
+
+  if(placeholder){
+    placeholder.style.display = 'block';
+  }
+
+  qrgenSetPreviewStatus('ยังไม่มีตัวอย่าง');
+}
+
+
+function qrgenDebounceGenerate(){
+
+  clearTimeout(qrgenRenderTimer);
+
+  qrgenRenderTimer = setTimeout(() => {
+
+    const text =
+      qrgenEl('qrgenText')?.value.trim() || '';
+
+    if(text){
+      qrgenGenerateQRCode();
+    }else{
+      qrgenResetPreview();
+    }
+
+  }, 180);
+}
+
+
+/* =====================================================
+   CLEAR
+   ===================================================== */
+
+function qrgenClearAll(){
+
+  const text =
+    qrgenEl('qrgenText');
+
+  const caption =
+    qrgenEl('qrgenCaptionText');
+
+  const showCaption =
+    qrgenEl('qrgenShowCaption');
+
+  const captionFont =
+    qrgenEl('qrgenCaptionFontSize');
+
+  const showLogo =
+    qrgenEl('qrgenShowCenterLogo');
+
+  const schoolLogo =
+    qrgenEl('qrgenLogoModeSchool');
+
+  const upload =
+    qrgenEl('qrgenLogoUpload');
+
+  const size =
+    qrgenEl('qrgenSize');
+
+  const dark =
+    qrgenEl('qrgenDarkColor');
+
+  const transparent =
+    qrgenEl('qrgenTransparentBg');
+
+  const background =
+    qrgenEl('qrgenBgColor');
+
+  const fileName =
+    qrgenEl('qrgenFileName');
+
+
+  if(text) text.value = '';
+  if(caption) caption.value = '';
+
+  if(showCaption){
+    showCaption.checked = false;
+  }
+
+  if(captionFont){
+    captionFont.value = '20';
+  }
+
+  if(showLogo){
+    showLogo.checked = false;
+  }
+
+  if(schoolLogo){
+    schoolLogo.checked = true;
+  }
+
+  if(upload){
+    upload.value = '';
+  }
+
+  qrgenUploadedLogoData = null;
+
+  if(size){
+    size.value = '400';
+  }
+
+  if(dark){
+    dark.value = '#000000';
+  }
+
+  if(transparent){
+    transparent.checked = false;
+  }
+
+  if(background){
+    background.value = '#ffffff';
+  }
+
+  if(fileName){
+    fileName.value = '';
+  }
+
+
+  qrgenUpdateCaptionUI();
+  qrgenUpdateLogoUI();
+  qrgenUpdateBackgroundUI();
+  qrgenResetPreview();
+}
+
+
+/* =====================================================
+   FILE NAME
+   ===================================================== */
+
+function qrgenSanitizeFileName(name){
+
+  return String(name || '')
+    .replace(/[\\/:*?"<>|]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+
+/* =====================================================
+   CAPTION
+   ===================================================== */
+
+function qrgenIsLikelyURL(text){
+
+  return /^https?:\/\//i.test(text) ||
+         /^www\./i.test(text);
+}
+
+
+function qrgenGetCaptionFallback(text){
+
+  if(!text){
+    return '';
+  }
+
+  if(!qrgenIsLikelyURL(text)){
+    return text;
+  }
+
+
+  try{
+
+    const normalized =
+      text.startsWith('http')
+        ? text
+        : 'https://' + text;
+
+    const url =
+      new URL(normalized);
+
+    return url.hostname.replace(/^www\./i, '');
+
+  }catch(error){
+
+    return text;
+  }
+}
+
+
+/* =====================================================
+   TEXT SEGMENT
+   ===================================================== */
+
+function qrgenSplitCharacters(text){
+
+  try{
+
+    if(
+      typeof Intl !== 'undefined' &&
+      typeof Intl.Segmenter !== 'undefined'
+    ){
+
+      const segmenter =
+        new Intl.Segmenter(
+          'th',
+          { granularity:'grapheme' }
+        );
+
+      return Array
+        .from(segmenter.segment(text))
+        .map(item => item.segment);
+    }
+
+  }catch(error){
+    console.warn(
+      'Intl.Segmenter unavailable',
+      error
+    );
+  }
+
+  return Array.from(text);
+}
+
+
+/* =====================================================
+   WRAP CAPTION
+   ===================================================== */
+
+function qrgenWrapSmartText(
+  ctx,
+  text,
+  maxWidth
+){
+
+  if(!text){
+    return [''];
+  }
+
+
+  /*
+   * กรณีมีเว้นวรรค
+   */
+  if(text.includes(' ')){
+
+    const words =
+      text.split(/\s+/);
+
+    const lines = [];
+
+    let line = '';
+
+
+    for(
+      let i = 0;
+      i < words.length;
+      i++
+    ){
+
+      const testLine =
+        line
+          ? line + ' ' + words[i]
+          : words[i];
+
+      const width =
+        ctx.measureText(testLine).width;
+
+
+      if(
+        width > maxWidth &&
+        line
+      ){
+
+        lines.push(line);
+        line = words[i];
+
+      }else{
+
+        line = testLine;
+      }
+    }
+
+
+    if(line){
+      lines.push(line);
+    }
+
+    return lines;
+  }
+
+
+  /*
+   * ภาษาไทยหรือข้อความไม่มีเว้นวรรค
+   */
+  const chars =
+    qrgenSplitCharacters(text);
+
+  const lines = [];
+
+  let line = '';
+
+
+  for(
+    let i = 0;
+    i < chars.length;
+    i++
+  ){
+
+    const testLine =
+      line + chars[i];
+
+    const width =
+      ctx.measureText(testLine).width;
+
+
+    if(
+      width > maxWidth &&
+      line
+    ){
+
+      lines.push(line);
+      line = chars[i];
+
+    }else{
+
+      line = testLine;
+    }
+  }
+
+
+  if(line){
+    lines.push(line);
+  }
+
+
+  return lines;
+}
+
+
+/* =====================================================
+   TRIM TEXT
+   ===================================================== */
+
+function qrgenTrimTextToWidth(
+  ctx,
+  text,
+  maxWidth,
+  suffix = ''
+){
+
+  const chars =
+    qrgenSplitCharacters(text);
+
+  while(
+    chars.length &&
+    ctx.measureText(
+      chars.join('') + suffix
+    ).width > maxWidth
+  ){
+
+    chars.pop();
+  }
+
+
+  return chars.join('') + suffix;
+}
+
+
+/* =====================================================
+   DRAW CAPTION
+   ===================================================== */
+
+function qrgenDrawCaption(
+  ctx,
+  lines,
+  canvasWidth,
+  canvasHeight,
+  color,
+  fontSize = 20
+){
+
+  ctx.save();
+
+  ctx.fillStyle =
+    color || '#111111';
+
+  ctx.font =
+    `600 ${fontSize}px Kanit, sans-serif`;
+
+  ctx.textAlign =
+    'center';
+
+  ctx.textBaseline =
+    'middle';
+
+
+  const lineHeight =
+    Math.round(fontSize * 1.25);
+
+  const blockHeight =
+    lines.length * lineHeight;
+
+  const startY =
+    canvasHeight -
+    blockHeight +
+    Math.round(fontSize * 0.4);
+
+  const centerX =
+    canvasWidth / 2;
+
+
+  lines.forEach((line, index) => {
+
+    ctx.fillText(
+      line,
+      centerX,
+      startY + (index * lineHeight)
+    );
+  });
+
+
+  ctx.restore();
+}
+
+
+/* =====================================================
+   IMAGE LOADER
+   ===================================================== */
+
+function qrgenLoadImage(src){
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const img =
+        new Image();
+
+      img.crossOrigin =
+        'anonymous';
+
+      img.onload =
+        () => resolve(img);
+
+      img.onerror =
+        () => reject(
+          new Error('Image load failed')
+        );
+
+      img.src = src;
+    }
+  );
+}
+
+
+/* =====================================================
+   ROUND RECT
+   ===================================================== */
+
+function qrgenRoundRect(
+  ctx,
+  x,
+  y,
+  width,
+  height,
+  radius
+){
+
+  const r =
+    Math.min(
+      radius,
+      width / 2,
+      height / 2
+    );
+
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    x + r,
+    y
+  );
+
+  ctx.lineTo(
+    x + width - r,
+    y
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y,
+    x + width,
+    y + r
+  );
+
+  ctx.lineTo(
+    x + width,
+    y + height - r
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y + height,
+    x + width - r,
+    y + height
+  );
+
+  ctx.lineTo(
+    x + r,
+    y + height
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y + height,
+    x,
+    y + height - r
+  );
+
+  ctx.lineTo(
+    x,
+    y + r
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y,
+    x + r,
+    y
+  );
+
+  ctx.closePath();
+}
+
+
+/* =====================================================
+   CENTER LOGO
+   ===================================================== */
+
+async function qrgenDrawCenterLogo(
+  ctx,
+  logoSrc,
+  qrSize,
+  bgFillColor = '#ffffff'
+){
+
+  const img =
+    await qrgenLoadImage(logoSrc);
+
+
+  const logoSize =
+    qrSize * 0.22;
+
+  const x =
+    (qrSize - logoSize) / 2;
+
+  const y =
+    (qrSize - logoSize) / 2;
+
+
+  ctx.save();
+
+
+  /*
+   * พื้นหลังโลโก้
+   */
+  ctx.fillStyle =
+    bgFillColor || '#ffffff';
+
+  qrgenRoundRect(
+    ctx,
+    x - 8,
+    y - 8,
+    logoSize + 16,
+    logoSize + 16,
+    16
+  );
+
+  ctx.fill();
+
+
+  /*
+   * Clip โลโก้
+   */
+  qrgenRoundRect(
+    ctx,
+    x,
+    y,
+    logoSize,
+    logoSize,
+    12
+  );
+
+  ctx.clip();
+
+
+  ctx.drawImage(
+    img,
+    x,
+    y,
+    logoSize,
+    logoSize
+  );
+
+
+  ctx.restore();
+}
+
+
+/* =====================================================
+   GENERATE QR
+   ===================================================== */
+
+async function qrgenGenerateQRCode(){
+
+  const qrText =
+    qrgenEl('qrgenText')
+      ?.value
+      .trim() || '';
+
+  const showCaption =
+    qrgenEl('qrgenShowCaption')
+      ?.checked === true;
+
+  const captionText =
+    qrgenEl('qrgenCaptionText')
+      ?.value
+      .trim() || '';
+
+  const captionFontSize =
+    parseInt(
+      qrgenEl('qrgenCaptionFontSize')
+        ?.value || '20',
+      10
+    ) || 20;
+
+  const showCenterLogo =
+    qrgenEl('qrgenShowCenterLogo')
+      ?.checked === true;
+
+  const logoMode =
+    qrgenGetSelectedLogoMode();
+
+  const qrSize =
+    parseInt(
+      qrgenEl('qrgenSize')
+        ?.value || '400',
+      10
+    ) || 400;
+
+  const darkColor =
+    qrgenEl('qrgenDarkColor')
+      ?.value || '#000000';
+
+  const transparentBg =
+    qrgenEl('qrgenTransparentBg')
+      ?.checked === true;
+
+  const bgColor =
+    qrgenEl('qrgenBgColor')
+      ?.value || '#ffffff';
+
+
+  if(!qrText){
+
+    qrgenResetPreview();
+    return;
+  }
+
+
+  /*
+   * ตรวจ library
+   */
+  if(
+    typeof QRCode === 'undefined' ||
+    typeof QRCode.toCanvas !== 'function'
+  ){
+
+    qrgenSetPreviewStatus(
+      'ไม่พบ QR Library'
+    );
+
+    qrgenNotify(
+      'สร้าง QR Code ไม่สำเร็จ',
+      'ไม่สามารถโหลด QR Code Library ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
+      'error'
+    );
+
+    return;
+  }
+
+
+  /*
+   * ป้องกันผล render เก่ามาทับผลใหม่
+   */
+  const renderToken =
+    ++qrgenRenderToken;
+
+
+  qrgenSetPreviewStatus(
+    'กำลังสร้างตัวอย่าง...'
+  );
+
+
+  try{
+
+    /*
+     * รอ Font
+     */
+    if(document.fonts?.ready){
+      await document.fonts.ready;
+    }
+
+
+    /*
+     * QR Canvas
+     */
+    const qrCanvas =
+      document.createElement('canvas');
+
+
+    await QRCode.toCanvas(
+      qrCanvas,
+      qrText,
+      {
+        width: qrSize,
+        margin: 2,
+
+        errorCorrectionLevel: 'H',
+
+        color: {
+
+          dark:
+            darkColor,
+
+          light:
+            transparentBg
+              ? '#0000'
+              : bgColor
+        }
+      }
+    );
+
+
+    /*
+     * Caption calculation
+     */
+    const tempCanvas =
+      document.createElement('canvas');
+
+    const tempCtx =
+      tempCanvas.getContext('2d');
+
+
+    tempCtx.font =
+      `600 ${captionFontSize}px Kanit, sans-serif`;
+
+
+    let lines = [];
+
+    let extraTextHeight = 0;
+
+
+    if(showCaption){
+
+      const smartCaption =
+        captionText ||
+        qrgenGetCaptionFallback(qrText);
+
+
+      lines =
+        qrgenWrapSmartText(
+          tempCtx,
+          smartCaption,
+          qrSize - 40
+        );
+
+
+      if(
+        lines.length >
+        QRGEN_MAX_CAPTION_LINES
+      ){
+
+        lines =
+          lines.slice(
+            0,
+            QRGEN_MAX_CAPTION_LINES
+          );
+
+
+        const lastIndex =
+          lines.length - 1;
+
+
+        lines[lastIndex] =
+          qrgenTrimTextToWidth(
+            tempCtx,
+            lines[lastIndex],
+            qrSize - 60,
+            '...'
+          );
+      }
+
+
+      const lineHeight =
+        Math.round(
+          captionFontSize * 1.25
+        );
+
+
+      extraTextHeight =
+        Math.max(
+          lineHeight + 26,
+          26 +
+          (lines.length * lineHeight)
+        );
+    }
+
+
+    /*
+     * Final Canvas
+     */
+    const finalCanvas =
+      document.createElement('canvas');
+
+
+    finalCanvas.width =
+      qrSize;
+
+    finalCanvas.height =
+      qrSize + extraTextHeight;
+
+
+    const ctx =
+      finalCanvas.getContext('2d');
+
+
+    if(!transparentBg){
+
+      ctx.fillStyle =
+        bgColor;
+
+      ctx.fillRect(
+        0,
+        0,
+        finalCanvas.width,
+        finalCanvas.height
+      );
+
+    }else{
+
+      ctx.clearRect(
+        0,
+        0,
+        finalCanvas.width,
+        finalCanvas.height
+      );
+    }
+
+
+    /*
+     * Draw QR
+     */
+    ctx.drawImage(
+      qrCanvas,
+      0,
+      0,
+      qrSize,
+      qrSize
+    );
+
+
+    /*
+     * Logo
+     */
+    let missingUploadLogo = false;
+
+
+    if(showCenterLogo){
+
+      let logoSrc = null;
+
+
+      if(
+        logoMode === 'school'
+      ){
+
+        logoSrc =
+          QRGEN_SCHOOL_LOGO_URL;
+
+      }else if(
+        logoMode === 'upload' &&
+        qrgenUploadedLogoData
+      ){
+
+        logoSrc =
+          qrgenUploadedLogoData;
+
+      }else if(
+        logoMode === 'upload'
+      ){
+
+        missingUploadLogo = true;
+      }
+
+
+      if(logoSrc){
+
+        try{
+
+          await qrgenDrawCenterLogo(
+            ctx,
+            logoSrc,
+            qrSize,
+            transparentBg
+              ? '#ffffff'
+              : bgColor
+          );
+
+        }catch(logoError){
+
+          console.error(
+            'QR logo draw failed:',
+            logoError
+          );
+
+
+          qrgenNotify(
+            'ใส่โลโก้ไม่สำเร็จ',
+            'ไม่สามารถวาดโลโก้ตรงกลาง QR Code ได้',
+            'warn'
+          );
+        }
+      }
+    }
+
+
+    /*
+     * Caption
+     */
+    if(
+      showCaption &&
+      lines.length
+    ){
+
+      qrgenDrawCaption(
+        ctx,
+        lines,
+        qrSize,
+        finalCanvas.height,
+        darkColor,
+        captionFontSize
+      );
+    }
+
+
+    /*
+     * ถ้ามี render ใหม่แล้ว
+     * ไม่ให้ render เก่าทับ
+     */
+    if(
+      renderToken !==
+      qrgenRenderToken
+    ){
+      return;
+    }
+
+
+    /*
+     * Export PNG
+     */
+    qrgenGeneratedDataURL =
+      finalCanvas.toDataURL(
+        'image/png'
+      );
+
+
+    const preview =
+      qrgenEl(
+        'qrgenPreviewImage'
+      );
+
+    const placeholder =
+      qrgenEl(
+        'qrgenPlaceholder'
+      );
+
+
+    if(preview){
+
+      preview.src =
+        qrgenGeneratedDataURL;
+
+      preview.style.display =
+        'block';
+    }
+
+
+    if(placeholder){
+
+      placeholder.style.display =
+        'none';
+    }
+
+
+    if(missingUploadLogo){
+
+      qrgenSetPreviewStatus(
+        'พร้อมใช้งาน • ยังไม่ได้เลือกรูป'
+      );
+
+    }else{
+
+      qrgenSetPreviewStatus(
+        'พร้อมดาวน์โหลด'
+      );
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'QR Generator Error:',
+      error
+    );
+
+
+    if(
+      renderToken !==
+      qrgenRenderToken
+    ){
+      return;
+    }
+
+
+    qrgenSetPreviewStatus(
+      'เกิดข้อผิดพลาด'
+    );
+
+
+    qrgenNotify(
+      'สร้าง QR Code ไม่สำเร็จ',
+      'เกิดข้อผิดพลาดในการสร้าง QR Code กรุณาลองใหม่อีกครั้ง',
+      'error'
+    );
+  }
+}
+
+
+/* =====================================================
+   UPLOAD LOGO
+   ===================================================== */
+
+function qrgenHandleLogoUpload(event){
+
+  const file =
+    event.target.files?.[0];
+
+
+  if(!file){
+
+    qrgenUploadedLogoData = null;
+
+    qrgenDebounceGenerate();
+
+    return;
+  }
+
+
+  const allowedTypes = [
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'image/svg+xml'
+  ];
+
+
+  if(
+    !allowedTypes.includes(
+      file.type
+    )
+  ){
+
+    event.target.value = '';
+
+    qrgenUploadedLogoData =
+      null;
+
+
+    qrgenNotify(
+      'ไฟล์ไม่รองรับ',
+      'กรุณาอัปโหลดไฟล์ PNG, JPG, WEBP หรือ SVG',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  if(
+    file.size >
+    QRGEN_MAX_UPLOAD_SIZE
+  ){
+
+    event.target.value = '';
+
+    qrgenUploadedLogoData =
+      null;
+
+
+    qrgenNotify(
+      'ไฟล์ใหญ่เกินไป',
+      'กรุณาอัปโหลดรูปที่มีขนาดไม่เกิน 5 MB',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = event => {
+
+    qrgenUploadedLogoData =
+      event.target.result;
+
+    qrgenDebounceGenerate();
+  };
+
+
+  reader.onerror = () => {
+
+    qrgenUploadedLogoData =
+      null;
+
+    const input =
+      qrgenEl(
+        'qrgenLogoUpload'
+      );
+
+    if(input){
+      input.value = '';
+    }
+
+
+    qrgenNotify(
+      'อ่านไฟล์ไม่สำเร็จ',
+      'ไม่สามารถอ่านรูปที่อัปโหลดได้ กรุณาลองใหม่อีกครั้ง',
+      'error'
+    );
+  };
+
+
+  reader.readAsDataURL(file);
+}
+
+
+/* =====================================================
+   DOWNLOAD
+   ===================================================== */
+
+function qrgenDownloadQRCode(){
+
+  if(!qrgenGeneratedDataURL){
+
+    qrgenNotify(
+      'ยังไม่มี QR Code',
+      'กรุณาสร้าง QR Code ก่อนดาวน์โหลด',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  const rawName =
+    qrgenEl('qrgenFileName')
+      ?.value
+      .trim() || 'qrcode';
+
+
+  const safeName =
+    qrgenSanitizeFileName(
+      rawName
+    ) || 'qrcode';
+
+
+  const link =
+    document.createElement('a');
+
+
+  link.href =
+    qrgenGeneratedDataURL;
+
+  link.download =
+    safeName + '.png';
+
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+
+  qrgenNotify(
+    'ดาวน์โหลดสำเร็จ',
+    `ดาวน์โหลด ${safeName}.png แล้ว`,
+    'success'
+  );
+}
+
+
+/* =====================================================
+   COPY IMAGE
+   ===================================================== */
+
+async function qrgenCopyImage(){
+
+  if(!qrgenGeneratedDataURL){
+
+    qrgenNotify(
+      'ยังไม่มี QR Code',
+      'กรุณาสร้าง QR Code ก่อนคัดลอกรูป',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  if(
+    !navigator.clipboard ||
+    typeof ClipboardItem === 'undefined'
+  ){
+
+    qrgenNotify(
+      'ไม่รองรับการคัดลอกรูป',
+      'เบราว์เซอร์หรืออุปกรณ์นี้ไม่รองรับการคัดลอกรูปลง Clipboard',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        qrgenGeneratedDataURL
+      );
+
+    const blob =
+      await response.blob();
+
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'image/png': blob
+      })
+    ]);
+
+
+    qrgenNotify(
+      'คัดลอกสำเร็จ',
+      'คัดลอกรูป QR Code เรียบร้อยแล้ว',
+      'success'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'Copy QR image failed:',
+      error
+    );
+
+
+    qrgenNotify(
+      'คัดลอกรูปไม่สำเร็จ',
+      'เบราว์เซอร์อาจไม่อนุญาตให้คัดลอกรูป กรุณาใช้ปุ่มดาวน์โหลดแทน',
+      'error'
+    );
+  }
+}
+
+
+/* =====================================================
+   COPY TEXT
+   ===================================================== */
+
+async function qrgenCopyText(){
+
+  const text =
+    qrgenEl('qrgenText')
+      ?.value
+      .trim() || '';
+
+
+  if(!text){
+
+    qrgenNotify(
+      'ยังไม่มีข้อความ',
+      'ยังไม่มีข้อความหรือลิงก์ให้คัดลอก',
+      'warn'
+    );
+
+    return;
+  }
+
+
+  try{
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+
+    qrgenNotify(
+      'คัดลอกสำเร็จ',
+      'คัดลอกข้อความเรียบร้อยแล้ว',
+      'success'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'Copy QR text failed:',
+      error
+    );
+
+
+    qrgenNotify(
+      'คัดลอกข้อความไม่สำเร็จ',
+      'เบราว์เซอร์ไม่อนุญาตให้เข้าถึง Clipboard',
+      'error'
+    );
+  }
+}
+
+
+/* =====================================================
+   INITIALIZE
+   ===================================================== */
+
+function qrgenInit(){
+
+  if(qrgenInitialized){
+    return;
+  }
+
+
+  /*
+   * ถ้ายังไม่มีหน้า QR
+   * ไม่ต้อง init
+   */
+  if(
+    !qrgenEl(
+      'pageQrGenerator'
+    )
+  ){
+    return;
+  }
+
+
+  qrgenInitialized = true;
+
+
+  /*
+   * Text input
+   */
+  qrgenEl('qrgenText')
+    ?.addEventListener(
+      'input',
+      qrgenDebounceGenerate
+    );
+
+
+  qrgenEl('qrgenCaptionText')
+    ?.addEventListener(
+      'input',
+      qrgenDebounceGenerate
+    );
+
+
+  /*
+   * Select
+   */
+  qrgenEl('qrgenCaptionFontSize')
+    ?.addEventListener(
+      'change',
+      qrgenDebounceGenerate
+    );
+
+
+  qrgenEl('qrgenSize')
+    ?.addEventListener(
+      'change',
+      qrgenDebounceGenerate
+    );
+
+
+  /*
+   * Colors
+   */
+  qrgenEl('qrgenDarkColor')
+    ?.addEventListener(
+      'input',
+      qrgenDebounceGenerate
+    );
+
+
+  qrgenEl('qrgenBgColor')
+    ?.addEventListener(
+      'input',
+      qrgenDebounceGenerate
+    );
+
+
+  /*
+   * Caption checkbox
+   */
+  qrgenEl('qrgenShowCaption')
+    ?.addEventListener(
+      'change',
+      () => {
+
+        qrgenUpdateCaptionUI();
+        qrgenDebounceGenerate();
+      }
+    );
+
+
+  /*
+   * Logo checkbox
+   */
+  qrgenEl('qrgenShowCenterLogo')
+    ?.addEventListener(
+      'change',
+      () => {
+
+        qrgenUpdateLogoUI();
+        qrgenDebounceGenerate();
+      }
+    );
+
+
+  /*
+   * Transparent background
+   */
+  qrgenEl('qrgenTransparentBg')
+    ?.addEventListener(
+      'change',
+      () => {
+
+        qrgenUpdateBackgroundUI();
+        qrgenDebounceGenerate();
+      }
+    );
+
+
+  /*
+   * Logo mode
+   */
+  [
+    'qrgenLogoModeSchool',
+    'qrgenLogoModeUpload'
+  ]
+  .forEach(id => {
+
+    qrgenEl(id)
+      ?.addEventListener(
+        'change',
+        () => {
+
+          qrgenUpdateLogoUI();
+          qrgenDebounceGenerate();
+        }
+      );
+  });
+
+
+  /*
+   * Upload logo
+   */
+  qrgenEl('qrgenLogoUpload')
+    ?.addEventListener(
+      'change',
+      qrgenHandleLogoUpload
+    );
+
+
+  /*
+   * Buttons
+   */
+  qrgenEl('qrgenGenerateBtn')
+    ?.addEventListener(
+      'click',
+      qrgenGenerateQRCode
+    );
+
+
+  qrgenEl('qrgenClearBtn')
+    ?.addEventListener(
+      'click',
+      qrgenClearAll
+    );
+
+
+  qrgenEl('qrgenDownloadBtn')
+    ?.addEventListener(
+      'click',
+      qrgenDownloadQRCode
+    );
+
+
+  qrgenEl('qrgenCopyImageBtn')
+    ?.addEventListener(
+      'click',
+      qrgenCopyImage
+    );
+
+
+  qrgenEl('qrgenCopyTextBtn')
+    ?.addEventListener(
+      'click',
+      qrgenCopyText
+    );
+
+
+  /*
+   * Initial state
+   */
+  qrgenUpdateCaptionUI();
+
+  qrgenUpdateLogoUI();
+
+  qrgenUpdateBackgroundUI();
+
+  qrgenResetPreview();
+}
+
+
+/* =====================================================
+   START QR GENERATOR
+   ===================================================== */
+
+if(
+  document.readyState === 'loading'
+){
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    qrgenInit,
+    { once:true }
+  );
+
+}else{
+
+  qrgenInit();
+}
+
+/* =====================================================
+   END : QR CODE GENERATOR
+   ===================================================== */
+
   bindIfExists('menuHomeBtn', 'click', () => setActivePage('home'));
+  bindIfExists(
+  'menuQrGeneratorBtn',
+  'click',
+  () => setActivePage('qrgenerator')
+);
 bindIfExists('menuGradeReportBtn', 'click', () => {
   const shell = el('appShell');
   const group = el('sidebarGradeReportGroup');
