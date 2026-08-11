@@ -7602,6 +7602,53 @@ td{
   min-width:220px;
 }
 
+/* =====================================================
+   MIDTERM ROSTER : ไม่มีนักเรียนเลือกเรียน
+   ===================================================== */
+
+#midtermRosterNoStudentsBtn{
+  min-width:250px;
+  height:44px;
+
+  padding:0 18px;
+  border:1px solid #f4c66b;
+  border-radius:14px;
+
+  background:#fff7ea;
+  color:#9a5b00;
+
+  font-family:inherit;
+  font-size:14px;
+  font-weight:900;
+
+  white-space:nowrap;
+
+  transition:
+    background .16s ease,
+    border-color .16s ease,
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+
+#midtermRosterNoStudentsBtn:hover{
+  background:#ffedc8;
+  border-color:#eab65b;
+
+  transform:translateY(-1px);
+
+  box-shadow:
+    0 7px 16px
+    rgba(178,106,0,.14);
+}
+
+#midtermRosterNoStudentsBtn:focus-visible{
+  outline:none;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(178,106,0,.16);
+}
+
 
 /* =====================================================
    จอขนาดกลาง
@@ -9016,6 +9063,15 @@ td{
     0 0 0 3px rgba(37,99,235,.16) !important;
 }
 
+@media (max-width:720px){
+
+  #midtermRosterNoStudentsBtn{
+    width:100%;
+    min-width:0;
+  }
+
+}
+
 /* =====================================================
    TEACHERPR : QR CODE GENERATOR
    ===================================================== */
@@ -9649,6 +9705,237 @@ td{
 
   #qrgenPreviewImage{
     max-height:245px;
+  }
+
+}
+
+/* =====================================================
+   MIDTERM : NO STUDENTS CONFIRM OVERLAY
+   ===================================================== */
+
+#midtermNoStudentsOverlay{
+  z-index:10040;
+  background:rgba(15,23,42,.50);
+}
+
+#midtermNoStudentsOverlay
+.midterm-no-students-card{
+  width:min(560px, calc(100vw - 28px));
+  padding:24px;
+  border-radius:26px;
+
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+
+  box-shadow:
+    0 24px 60px rgba(15,23,42,.26);
+}
+
+
+/* ===== หัว ===== */
+
+.midterm-no-students-head{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+
+  margin-bottom:18px;
+}
+
+.midterm-no-students-icon{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:17px;
+
+  background:#fff7ea;
+  color:#b26a00;
+
+  font-size:26px;
+}
+
+.midterm-no-students-heading{
+  min-width:0;
+}
+
+.midterm-no-students-title{
+  margin:0;
+
+  color:#17263c;
+  font-size:22px;
+  font-weight:900;
+  line-height:1.35;
+}
+
+.midterm-no-students-sub{
+  margin-top:5px;
+
+  color:#6b7a90;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.55;
+}
+
+
+/* ===== ข้อมูลรายวิชา ===== */
+
+.midterm-no-students-subject-box{
+  padding:15px 17px;
+  margin-bottom:14px;
+
+  border:1px solid #cfe0ff;
+  border-radius:18px;
+
+  background:#f8fbff;
+}
+
+.midterm-no-students-label{
+  color:#64748b;
+  font-size:12px;
+  font-weight:800;
+}
+
+.midterm-no-students-subject{
+  margin-top:4px;
+
+  color:#1d4ed8;
+  font-size:17px;
+  font-weight:900;
+  line-height:1.45;
+}
+
+.midterm-no-students-meta{
+  margin-top:4px;
+
+  color:#475569;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.5;
+}
+
+
+/* ===== กล่องเตือน ===== */
+
+.midterm-no-students-warning{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+
+  padding:14px 16px;
+
+  border:1px solid #ffe0aa;
+  border-radius:18px;
+
+  background:#fff7ea;
+}
+
+.midterm-no-students-warning-icon{
+  flex:0 0 auto;
+  font-size:21px;
+}
+
+.midterm-no-students-warning-title{
+  color:#8a5800;
+  font-size:14px;
+  font-weight:900;
+}
+
+.midterm-no-students-warning-text{
+  margin-top:4px;
+
+  color:#9a6700;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.6;
+}
+
+
+/* ===== 0 คน ===== */
+
+.midterm-no-students-count-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+
+  margin-top:14px;
+  padding:12px 16px;
+
+  border:1px solid #ffd2cf;
+  border-radius:16px;
+
+  background:#fff8f8;
+
+  color:#64748b;
+  font-size:13px;
+  font-weight:800;
+}
+
+.midterm-no-students-count-box strong{
+  color:#d92d20;
+  font-size:18px;
+  font-weight:900;
+}
+
+
+/* ===== ปุ่ม ===== */
+
+.midterm-no-students-actions{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:10px;
+
+  margin-top:18px;
+}
+
+.midterm-no-students-actions button{
+  width:100%;
+  height:46px;
+
+  border-radius:14px;
+
+  font-family:inherit;
+  font-weight:900;
+}
+
+.midterm-no-students-confirm-btn{
+  border:1px solid #e2a43c;
+
+  background:
+    linear-gradient(
+      135deg,
+      #d99724,
+      #f0ad37
+    );
+
+  color:#ffffff;
+
+  box-shadow:
+    0 8px 18px rgba(178,106,0,.18);
+}
+
+.midterm-no-students-confirm-btn:hover{
+  transform:translateY(-1px);
+
+  box-shadow:
+    0 11px 22px rgba(178,106,0,.22);
+}
+
+
+@media (max-width:560px){
+
+  #midtermNoStudentsOverlay
+  .midterm-no-students-card{
+    padding:18px;
+  }
+
+  .midterm-no-students-actions{
+    grid-template-columns:1fr;
   }
 
 }
@@ -13168,26 +13455,146 @@ td{
         ตารางกรอกคะแนนและ Template Excel จะแสดงเฉพาะนักเรียนในตารางด้านขวา
       </div>
 
-      <div class="midterm-roster-footer-actions">
+<div class="midterm-roster-footer-actions">
 
-        <button
-          id="midtermRosterCancelBtn"
-          class="btn-secondary"
-          type="button"
-        >
-          ยกเลิก
-        </button>
+  <!-- ไม่มีนักเรียนเลือกเรียน -->
+  <button
+    id="midtermRosterNoStudentsBtn"
+    class="midterm-roster-no-students-btn hidden"
+    type="button"
+  >
+    🚫 ไม่มีนักเรียนเลือกเรียนวิชานี้
+  </button>
 
-        <button
-          id="midtermRosterConfirmBtn"
-          class="btn-primary"
-          type="button"
-          disabled
-        >
-          ✓ ตกลงและไปกรอกคะแนน
-        </button>
+  <button
+    id="midtermRosterCancelBtn"
+    class="btn-secondary"
+    type="button"
+  >
+    ยกเลิก
+  </button>
 
+  <button
+    id="midtermRosterConfirmBtn"
+    class="btn-primary"
+    type="button"
+    disabled
+  >
+    ✓ ตกลงและไปกรอกคะแนน
+  </button>
+
+</div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     MIDTERM NO STUDENTS CONFIRM OVERLAY
+     ยืนยันว่าไม่มีนักเรียนเลือกเรียนวิชานี้
+     ===================================================== -->
+<div
+  id="midtermNoStudentsOverlay"
+  class="overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="midtermNoStudentsTitle"
+>
+  <div class="overlay-card midterm-no-students-card">
+
+    <div class="midterm-no-students-head">
+
+      <div class="midterm-no-students-icon">
+        🚫
       </div>
+
+      <div class="midterm-no-students-heading">
+        <h2
+          id="midtermNoStudentsTitle"
+          class="midterm-no-students-title"
+        >
+          ยืนยันว่าไม่มีนักเรียนเลือกเรียนวิชานี้?
+        </h2>
+
+        <div class="midterm-no-students-sub">
+          กรุณาตรวจสอบรายวิชาและห้องเรียนให้ถูกต้องก่อนยืนยัน
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="midterm-no-students-subject-box">
+
+      <div class="midterm-no-students-label">
+        รายวิชา
+      </div>
+
+      <div
+        id="midtermNoStudentsSubject"
+        class="midterm-no-students-subject"
+      >
+        -
+      </div>
+
+      <div
+        id="midtermNoStudentsMeta"
+        class="midterm-no-students-meta"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="midterm-no-students-warning">
+
+      <div class="midterm-no-students-warning-icon">
+        ⚠️
+      </div>
+
+      <div>
+        <div class="midterm-no-students-warning-title">
+          หลังยืนยัน รายการนี้จะถือว่าดำเนินการแล้ว
+        </div>
+
+        <div class="midterm-no-students-warning-text">
+          ใช้สำหรับกรณีที่รายวิชานี้เปิดลงทะเบียนไว้
+          แต่ไม่มีนักเรียนในห้องนี้เลือกเรียนจริง
+          และจะไม่ต้องมีการกรอกคะแนนกลางภาคสำหรับห้องนี้
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="midterm-no-students-count-box">
+      <span>นักเรียนที่เรียนวิชานี้</span>
+
+      <strong>
+        0 คน
+      </strong>
+    </div>
+
+
+    <div class="midterm-no-students-actions">
+
+      <button
+        id="midtermNoStudentsCancelBtn"
+        class="btn-secondary"
+        type="button"
+      >
+        ยกเลิก
+      </button>
+
+      <button
+        id="midtermNoStudentsConfirmBtn"
+        class="midterm-no-students-confirm-btn"
+        type="button"
+      >
+        ✓ ยืนยันว่าไม่มีนักเรียนเลือก
+      </button>
 
     </div>
 
@@ -24675,35 +25082,45 @@ function updateMidtermRosterControls(){
   }
 
 
+const selectedCount =
+  (
+    state.midtermRosterSelectedStudents ||
+    []
+  ).length;
+
+
+/* =====================================================
+   ปุ่ม "ไม่มีนักเรียนเลือกเรียนวิชานี้"
+   แสดงเฉพาะเมื่อฝั่งขวาไม่มีนักเรียน
+   ===================================================== */
+
+const noStudentsBtn =
+  el('midtermRosterNoStudentsBtn');
+
+if(noStudentsBtn){
+
+  if(selectedCount === 0){
+    noStudentsBtn.classList.remove('hidden');
+    noStudentsBtn.disabled = false;
+  }else{
+    noStudentsBtn.classList.add('hidden');
+    noStudentsBtn.disabled = true;
+  }
+
+}
+
+
+/* =====================================================
+   ปุ่มตกลงและไปกรอกคะแนน
+   ต้องมีนักเรียนอย่างน้อย 1 คนเท่านั้น
+   ===================================================== */
+
 const confirmBtn =
   el('midtermRosterConfirmBtn');
 
 if(confirmBtn){
-  const selectedCount =
-    (
-      state.midtermRosterSelectedStudents ||
-      []
-    ).length;
-
-  /*
-   * กรอกคะแนนครั้งแรก:
-   * ต้องเลือกนักเรียนอย่างน้อย 1 คน
-   *
-   * จัดการนักเรียนเดิม:
-   * อนุญาตให้เหลือ 0 คน เพื่อให้ลบข้อมูลทั้งหมดได้
-   */
-  const canConfirmEmptyRoster =
-    state.midtermRosterMode === 'manage' &&
-    (
-      state.midtermRosterOriginalStudentCodes ||
-      []
-    ).length > 0;
-
   confirmBtn.disabled =
-    !(
-      selectedCount > 0 ||
-      canConfirmEmptyRoster
-    );
+    selectedCount === 0;
 }
 }
 
@@ -26578,7 +26995,38 @@ el('midtermRosterSelectAllRoomBtn')
     'click',
     selectAllRoomMidtermRosterStudents
   );
+/*
+ * แจ้งว่าไม่มีนักเรียนเลือกเรียนวิชานี้
+ */
+el('midtermRosterNoStudentsBtn')
+  ?.addEventListener(
+    'click',
+    openMidtermNoStudentsOverlay
+  );
 
+  /*
+ * ยกเลิกการยืนยันไม่มีนักเรียน
+ */
+el('midtermNoStudentsCancelBtn')
+  ?.addEventListener(
+    'click',
+    closeMidtermNoStudentsOverlay
+  );
+
+    el('midtermNoStudentsOverlay')
+  ?.addEventListener(
+    'click',
+    event => {
+
+      if(
+        event.target ===
+        el('midtermNoStudentsOverlay')
+      ){
+        closeMidtermNoStudentsOverlay();
+      }
+
+    }
+  );
 
 /*
  * กดตกลง
@@ -26623,21 +27071,51 @@ el('midtermRosterOverlay')
   );
 
 
-/*
- * กด Escape เพื่อปิด Overlay
- */
 document.addEventListener(
   'keydown',
   event => {
+
+    if(event.key !== 'Escape'){
+      return;
+    }
+
+
+    /*
+     * ถ้า Overlay ยืนยันไม่มีนักเรียนเปิดอยู่
+     * ให้ปิดอันบนก่อน
+     */
     if(
-      event.key === 'Escape' &&
+      el('midtermNoStudentsOverlay')
+        ?.classList.contains('show')
+    ){
+
+      closeMidtermNoStudentsOverlay();
+
+      return;
+    }
+
+
+    /*
+     * แล้วค่อยปิด Overlay จัดการนักเรียน
+     */
+    if(
       el('midtermRosterOverlay')
         ?.classList.contains('show')
     ){
+
       closeMidtermRosterOverlay();
+
     }
+
   }
 );
+
+
+el('midtermNoStudentsConfirmBtn')
+  ?.addEventListener(
+    'click',
+    confirmMidtermNoStudents
+  );
 
 async function openMidtermGroup(group){
   try{
@@ -27791,6 +28269,14 @@ applyMidtermColumnEntryMode();
       true;
   }
 
+  if(el('midtermRosterNoStudentsBtn')){
+  el('midtermRosterNoStudentsBtn')
+    .classList.add('hidden');
+
+  el('midtermRosterNoStudentsBtn')
+    .disabled = true;
+}
+
 
   if(el('midtermRosterLeftCount')){
     el('midtermRosterLeftCount').textContent =
@@ -27910,6 +28396,316 @@ applyMidtermColumnEntryMode();
 
 
   renderMidtermRows();
+}
+
+/* =====================================================
+   MIDTERM : ไม่มีนักเรียนเลือกเรียน
+   CONFIRM OVERLAY
+   ===================================================== */
+
+function openMidtermNoStudentsOverlay(){
+
+  const group =
+    state.midtermRosterGroup ||
+    state.selectedMidtermGroup;
+
+
+  if(!group){
+
+    setStatus(
+      'midtermRosterStatus',
+      'ไม่พบข้อมูลรายวิชา',
+      'error'
+    );
+
+    return;
+  }
+
+
+  /*
+   * ต้องไม่มีนักเรียนฝั่งขวาจริง ๆ
+   */
+  const selectedCount =
+    (
+      state.midtermRosterSelectedStudents ||
+      []
+    ).length;
+
+
+  if(selectedCount > 0){
+
+    setStatus(
+      'midtermRosterStatus',
+      `ยังมีนักเรียนในรายวิชานี้ ${selectedCount} คน`,
+      'warn'
+    );
+
+    return;
+  }
+
+
+  /*
+   * รายวิชา
+   */
+  if(el('midtermNoStudentsSubject')){
+
+    el('midtermNoStudentsSubject')
+      .textContent =
+        `${group.subject_code || '-'} ` +
+        `${group.subject_name || '-'}`;
+
+  }
+
+
+  /*
+   * ชั้น / ห้อง / ปี / เทอม
+   */
+  if(el('midtermNoStudentsMeta')){
+
+    el('midtermNoStudentsMeta')
+      .textContent =
+        `ชั้น ${group.class_level || '-'} ` +
+        `ห้อง ${group.room || '-'} | ` +
+        `ปีการศึกษา ${group.academic_year || '-'} ` +
+        `ภาคเรียน ${group.term || '-'}`;
+
+  }
+
+
+  el('midtermNoStudentsOverlay')
+    ?.classList.add('show');
+}
+
+
+function closeMidtermNoStudentsOverlay(){
+
+  el('midtermNoStudentsOverlay')
+    ?.classList.remove('show');
+
+}
+
+async function confirmMidtermNoStudents(){
+
+  const group =
+    state.midtermRosterGroup ||
+    state.selectedMidtermGroup;
+
+  const confirmBtn =
+    el('midtermNoStudentsConfirmBtn');
+
+
+  try{
+
+    /* =====================================================
+       ตรวจข้อมูลก่อนบันทึก
+       ===================================================== */
+
+    if(!group){
+      throw new Error(
+        'ไม่พบข้อมูลรายวิชาที่ต้องการยืนยัน'
+      );
+    }
+
+
+    /*
+     * ป้องกันกรณีนักเรียนถูกเพิ่มกลับเข้ามา
+     * แต่ Overlay ยืนยันยังเปิดค้างอยู่
+     */
+    const selectedCount =
+      (
+        state.midtermRosterSelectedStudents ||
+        []
+      ).length;
+
+    if(selectedCount > 0){
+      throw new Error(
+        `ไม่สามารถยืนยันได้ เนื่องจากยังมีนักเรียน ${selectedCount} คน`
+      );
+    }
+
+
+    if(!state.currentUser?.teacher_code){
+      throw new Error(
+        'ไม่พบข้อมูลผู้ใช้งาน กรุณาเข้าสู่ระบบใหม่'
+      );
+    }
+
+
+    /* =====================================================
+       Loading
+       ===================================================== */
+
+    if(confirmBtn){
+
+      confirmBtn.disabled = true;
+
+      confirmBtn.dataset.normalText =
+        confirmBtn.textContent || '';
+
+      confirmBtn.textContent =
+        'กำลังบันทึก...';
+
+    }
+
+
+    /* =====================================================
+       เรียก RPC
+       ===================================================== */
+
+    const {
+      data,
+      error
+    } = await supabaseClient.rpc(
+      'declare_midterm_no_students',
+      {
+        p_academic_year:
+          Number(group.academic_year),
+
+        p_term:
+          Number(group.term),
+
+        p_subject_code:
+          safeText(
+            group.subject_code,
+            ''
+          ),
+
+        p_subject_name:
+          safeText(
+            group.subject_name,
+            ''
+          ),
+
+        p_teacher_code:
+          safeText(
+            state.currentUser.teacher_code,
+            ''
+          ),
+
+        p_teacher_name:
+          safeText(
+            state.currentUser.full_name,
+            ''
+          ),
+
+        p_class_level:
+          safeText(
+            group.class_level,
+            ''
+          ),
+
+        p_room:
+          safeText(
+            group.room,
+            ''
+          )
+      }
+    );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    /*
+     * RPC ของเรา return jsonb
+     */
+    const result =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+
+    if(
+      result &&
+      result.ok === false
+    ){
+      throw new Error(
+        result.message ||
+        'บันทึกสถานะไม่สำเร็จ'
+      );
+    }
+
+
+    /* =====================================================
+       บันทึกสำเร็จ
+       ===================================================== */
+
+    closeMidtermNoStudentsOverlay();
+    closeMidtermRosterOverlay();
+
+
+    showToast(
+      'บันทึกเรียบร้อย',
+      'ยืนยันแล้วว่าไม่มีนักเรียนเลือกเรียนวิชานี้',
+      'success'
+    );
+
+
+    /*
+     * ล้าง state ของ Roster
+     * เพื่อป้องกันข้อมูลห้องเดิมค้าง
+     */
+    state.midtermRosterGroup =
+      null;
+
+    state.midtermRosterAllStudents =
+      [];
+
+    state.midtermRosterSelectedStudents =
+      [];
+
+    state.midtermRosterOriginalStudentCodes =
+      [];
+
+    state.midtermRosterRemovedStudentCodes =
+      [];
+
+    state.midtermRosterCheckedLeftCodes =
+      new Set();
+
+    state.midtermRosterCheckedRightCodes =
+      new Set();
+
+    state.midtermRosterMode =
+      'create';
+
+
+  }catch(error){
+
+    console.error(
+      'confirmMidtermNoStudents ERROR',
+      error
+    );
+
+
+    showToast(
+      'บันทึกไม่สำเร็จ',
+      error?.message ||
+      'เกิดข้อผิดพลาดในการบันทึก',
+      'error'
+    );
+
+
+  }finally{
+
+    /*
+     * คืนปุ่มเป็นสถานะปกติ
+     */
+    if(confirmBtn){
+
+      confirmBtn.disabled = false;
+
+      confirmBtn.textContent =
+        confirmBtn.dataset.normalText ||
+        '✓ ยืนยันว่าไม่มีนักเรียนเลือก';
+
+      delete confirmBtn.dataset.normalText;
+
+    }
+
+  }
 }
 
 function normalizeMidtermCompareValue(value){
