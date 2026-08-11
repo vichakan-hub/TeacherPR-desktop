@@ -9940,6 +9940,57 @@ td{
 
 }
 
+/* =====================================================
+   MIDTERM LIST : ไม่มีนักเรียนเลือก
+   ===================================================== */
+
+#pageMidtermReport
+.midterm-no-students-status-btn{
+  width:120px;
+  min-width:120px;
+
+  height:42px;
+  padding:0 10px;
+
+  border:1px solid #f4c66b;
+  border-radius:14px;
+
+  background:#fff7ea;
+  color:#9a5b00;
+
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+
+  line-height:1.25;
+  white-space:normal;
+
+  opacity:1;
+  cursor:pointer;
+}
+
+
+#pageMidtermReport
+.midterm-no-students-status-btn:hover{
+  background:#ffedc8;
+  border-color:#eab65b;
+  transform:translateY(-1px);
+
+  box-shadow:
+    0 7px 16px
+    rgba(178,106,0,.14);
+}
+
+
+.midterm-no-students-caption{
+  margin-top:5px;
+
+  color:#9a6700;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.35;
+}
+
 </style>
 </head>
 <body>
@@ -24375,6 +24426,72 @@ const reportStudentMap =
   }
 });
 
+/*
+ * =====================================================
+ * โหลดสถานะรายวิชาที่ครูยืนยันว่า
+ * "ไม่มีนักเรียนเลือกเรียน"
+ * =====================================================
+ */
+const declarationRows =
+  await fetchAllPages(
+    () => {
+      return supabaseClient
+        .from('midterm_report_declarations')
+        .select(`
+          academic_year,
+          term,
+          subject_code,
+          teacher_code,
+          class_level,
+          room,
+          report_status,
+          declared_at
+        `)
+        .eq(
+          'academic_year',
+          Number(year)
+        )
+        .eq(
+          'term',
+          Number(term)
+        )
+        .eq(
+          'teacher_code',
+          state.currentUser.teacher_code
+        )
+        .eq(
+          'report_status',
+          'no_students'
+        );
+    },
+    1000
+  );
+
+
+/*
+ * เก็บสถานะ no_students
+ * ด้วย Group Key เดียวกับ midterm_reports
+ */
+const noStudentsGroupSet =
+  new Set();
+
+(declarationRows || []).forEach(row => {
+
+  if(
+    safeText(
+      row.report_status,
+      ''
+    ).trim() !== 'no_students'
+  ){
+    return;
+  }
+
+  noStudentsGroupSet.add(
+    getMidtermReportGroupKey(row)
+  );
+
+});
+
 
 /*
  * จัดกลุ่มรายการสอน
@@ -24384,15 +24501,42 @@ const groups =
   groupMidtermOfferings(
     visibleRows
   ).map(group => {
+
     const key =
       getMidtermReportGroupKey(group);
 
+
+    /*
+     * จำนวนเด็กที่มีคะแนนอยู่จริง
+     */
     const studentCodes =
       reportStudentMap.get(key) ||
       new Set();
 
     const reportCount =
       studentCodes.size;
+
+
+    /*
+     * ครูเคยยืนยันว่าไม่มีนักเรียนเลือกหรือไม่
+     */
+    const hasNoStudentsDeclaration =
+      noStudentsGroupSet.has(key);
+
+
+    /*
+     * ถ้ามีคะแนนจริง ให้คะแนนจริงมีลำดับสูงกว่า
+     * no_students
+     *
+     * ป้องกันกรณีข้อมูล declaration เก่าค้าง
+     */
+    const hasReports =
+      reportCount > 0;
+
+    const isNoStudents =
+      !hasReports &&
+      hasNoStudentsDeclaration;
+
 
     return {
       ...group,
@@ -24401,8 +24545,28 @@ const groups =
         reportCount,
 
       has_midterm_reports:
-        reportCount > 0
+        hasReports,
+
+      has_no_students_declaration:
+        isNoStudents,
+
+      midterm_report_status:
+        hasReports
+          ? 'reported'
+          : (
+              isNoStudents
+                ? 'no_students'
+                : 'pending'
+            ),
+
+      /*
+       * ใช้ภายหลังใน AdminPR / KPI ได้ด้วย
+       */
+      is_midterm_resolved:
+        hasReports ||
+        isNoStudents
     };
+
   });
 
 
@@ -24540,33 +24704,70 @@ function renderMidtermTeachingRows(rows){
           : 1;
 
       const hasReports =
-        row.has_midterm_reports === true;
+  row.has_midterm_reports === true;
 
-      const buttonClass =
-        hasReports
-          ? 'midterm-edit-score-btn'
-          : 'btn-primary';
+const hasNoStudents =
+  !hasReports &&
+  row.has_no_students_declaration === true;
 
-      const buttonText =
-        hasReports
-          ? '✏️ แก้ไขคะแนน'
-          : '📝 กรอกคะแนน';
 
-      const reportCountText =
-        hasReports
+/*
+ * สีปุ่ม
+ */
+const buttonClass =
+  hasReports
+    ? 'midterm-edit-score-btn'
+    : (
+        hasNoStudents
+          ? 'midterm-no-students-status-btn'
+          : 'btn-primary'
+      );
+
+
+/*
+ * ข้อความปุ่ม
+ */
+const buttonText =
+  hasReports
+    ? '✏️ แก้ไขคะแนน'
+    : (
+        hasNoStudents
+          ? '🚫 ไม่มีนักเรียนเลือก'
+          : '📝 กรอกคะแนน'
+      );
+
+
+/*
+ * ข้อความใต้ปุ่ม
+ */
+const reportCountText =
+  hasReports
+    ? `
+        <div
+          class="small"
+          style="margin-top:5px;"
+        >
+          บันทึกแล้ว
+          ${escapeHtml(
+            String(
+              row.midterm_report_count ||
+              0
+            )
+          )}
+          คน
+        </div>
+      `
+    : (
+        hasNoStudents
           ? `
-            <div class="small" style="margin-top:5px;">
-              บันทึกแล้ว
-              ${escapeHtml(
-                String(
-                  row.midterm_report_count ||
-                  0
-                )
-              )}
-              คน
-            </div>
-          `
-          : '';
+              <div
+                class="midterm-no-students-caption"
+              >
+                ✓ ยืนยันแล้ว · 0 คน
+              </div>
+            `
+          : ''
+      );
 
       return `
         <tr>
@@ -24626,15 +24827,25 @@ function renderMidtermTeachingRows(rows){
           </td>
 
           <td class="text-center">
-            <button
-              class="${buttonClass}"
-              type="button"
+<button
+  class="${buttonClass}"
+  type="button"
+  title="${
+    hasNoStudents
+      ? 'กดเพื่อยกเลิกสถานะไม่มีนักเรียนเลือก'
+      : ''
+  }"
+  data-midterm-group-index="${index}"
               data-midterm-group-index="${index}"
-              data-midterm-group-action="${
-                hasReports
-                  ? 'edit'
-                  : 'create'
-              }"
+data-midterm-group-action="${
+  hasReports
+    ? 'edit'
+    : (
+        hasNoStudents
+          ? 'no_students'
+          : 'create'
+      )
+}"
             >
               ${buttonText}
             </button>
@@ -24685,6 +24896,20 @@ function renderMidtermTeachingRows(rows){
 
             return;
           }
+
+
+          /*
+ * เคยยืนยันว่าไม่มีนักเรียนเลือก
+ * ให้สามารถยกเลิกสถานะและเลือกนักเรียนใหม่
+ */
+if(action === 'no_students'){
+
+  await clearMidtermNoStudentsStatus(
+    group
+  );
+
+  return;
+}
 
 
           /*
@@ -28484,6 +28709,159 @@ function closeMidtermNoStudentsOverlay(){
 
 }
 
+async function clearMidtermNoStudentsStatus(
+  group
+){
+
+  if(!group){
+    return;
+  }
+
+
+  const confirmed =
+    window.confirm(
+      `ยกเลิกสถานะ "ไม่มีนักเรียนเลือกเรียน" หรือไม่?\n\n` +
+      `${group.subject_code || '-'} ` +
+      `${group.subject_name || '-'}\n` +
+      `ชั้น ${group.class_level || '-'} ` +
+      `ห้อง ${group.room || '-'}\n\n` +
+      `หลังจากยกเลิก ระบบจะเปิดหน้าจัดการนักเรียนให้เลือกนักเรียนใหม่`
+    );
+
+
+  if(!confirmed){
+    return;
+  }
+
+
+  try{
+
+    const {
+      data,
+      error
+    } = await supabaseClient.rpc(
+      'clear_midterm_no_students',
+      {
+        p_academic_year:
+          Number(
+            group.academic_year
+          ),
+
+        p_term:
+          Number(
+            group.term
+          ),
+
+        p_subject_code:
+          safeText(
+            group.subject_code,
+            ''
+          ),
+
+        p_teacher_code:
+          safeText(
+            state.currentUser?.teacher_code,
+            ''
+          ),
+
+        p_class_level:
+          safeText(
+            group.class_level,
+            ''
+          ),
+
+        p_room:
+          safeText(
+            group.room,
+            ''
+          )
+      }
+    );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    const result =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+
+    if(
+      result &&
+      result.ok === false
+    ){
+      throw new Error(
+        result.message ||
+        'ยกเลิกสถานะไม่สำเร็จ'
+      );
+    }
+
+
+    /*
+     * โหลดรายการสอนใหม่ก่อน
+     */
+    await loadMidtermTeachingList();
+
+
+    showToast(
+      'ยกเลิกสถานะแล้ว',
+      'สามารถเลือกนักเรียนและกรอกคะแนนได้ตามปกติ',
+      'success'
+    );
+
+
+    /*
+     * หา group ตัวใหม่หลัง reload
+     * ป้องกันใช้ object เก่าที่มีสถานะ no_students ค้าง
+     */
+    const key =
+      getMidtermReportGroupKey(
+        group
+      );
+
+
+    const freshGroup =
+      (
+        state.midtermGroups ||
+        []
+      ).find(item =>
+        getMidtermReportGroupKey(
+          item
+        ) === key
+      ) || group;
+
+
+    /*
+     * เปิดหน้าจัดการนักเรียนทันที
+     */
+    await openMidtermRosterOverlay(
+      freshGroup,
+      'create'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'clearMidtermNoStudentsStatus ERROR',
+      error
+    );
+
+
+    showToast(
+      'ยกเลิกสถานะไม่สำเร็จ',
+      error?.message ||
+      'เกิดข้อผิดพลาด',
+      'error'
+    );
+
+  }
+}
+
 async function confirmMidtermNoStudents(){
 
   const group =
@@ -28632,15 +29010,22 @@ async function confirmMidtermNoStudents(){
        บันทึกสำเร็จ
        ===================================================== */
 
-    closeMidtermNoStudentsOverlay();
-    closeMidtermRosterOverlay();
+closeMidtermNoStudentsOverlay();
+closeMidtermRosterOverlay();
 
 
-    showToast(
-      'บันทึกเรียบร้อย',
-      'ยืนยันแล้วว่าไม่มีนักเรียนเลือกเรียนวิชานี้',
-      'success'
-    );
+/*
+ * โหลดรายการสอนใหม่
+ * เพื่อเปลี่ยนสถานะบนหน้าหลักทันที
+ */
+await loadMidtermTeachingList();
+
+
+showToast(
+  'บันทึกเรียบร้อย',
+  'ยืนยันแล้วว่าไม่มีนักเรียนเลือกเรียนวิชานี้',
+  'success'
+);
 
 
     /*
