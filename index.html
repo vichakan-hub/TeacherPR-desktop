@@ -5624,6 +5624,127 @@
   box-shadow:none;
 }
 
+/* =====================================================
+   EXAM ELIGIBILITY : Teaching List
+   รายงานนักเรียนไม่มีสิทธิ์สอบ
+   ===================================================== */
+
+#pageExamEligibility .table-wrap{
+  overflow-x:auto !important;
+  max-width:100%;
+}
+
+#pageExamEligibility .midterm-list-table{
+  width:100%;
+  min-width:780px !important;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+#pageExamEligibility .midterm-list-table th,
+#pageExamEligibility .midterm-list-table td{
+  padding:12px 10px !important;
+  vertical-align:middle;
+  white-space:normal;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+}
+
+
+/* รายวิชา */
+#pageExamEligibility .midterm-list-table th:nth-child(1),
+#pageExamEligibility .midterm-list-table td:nth-child(1){
+  width:260px !important;
+  min-width:260px !important;
+}
+
+
+/* ปี / เทอม */
+#pageExamEligibility .midterm-list-table th:nth-child(2),
+#pageExamEligibility .midterm-list-table td:nth-child(2){
+  width:95px !important;
+  text-align:center;
+}
+
+
+/* ชั้น */
+#pageExamEligibility .midterm-list-table th:nth-child(3),
+#pageExamEligibility .midterm-list-table td:nth-child(3){
+  width:75px !important;
+  text-align:center;
+}
+
+
+/* ห้อง */
+#pageExamEligibility .midterm-list-table th:nth-child(4),
+#pageExamEligibility .midterm-list-table td:nth-child(4){
+  width:75px !important;
+  text-align:center;
+}
+
+
+/* Section */
+#pageExamEligibility .midterm-list-table th:nth-child(5),
+#pageExamEligibility .midterm-list-table td:nth-child(5){
+  width:110px !important;
+  text-align:center;
+}
+
+
+/* จัดการ */
+#pageExamEligibility .midterm-list-table th:nth-child(6),
+#pageExamEligibility .midterm-list-table td:nth-child(6){
+  width:160px !important;
+  text-align:center;
+}
+
+
+/* ปุ่มรายงาน มส */
+#pageExamEligibility .exam-eligibility-report-btn{
+  width:130px;
+  height:42px;
+  padding:0 12px;
+
+  border:1px solid #fca5a5;
+  border-radius:14px;
+
+  background:#fff0ef;
+  color:#b42318;
+
+  font-family:inherit;
+  font-size:14px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+
+#pageExamEligibility .exam-eligibility-report-btn:hover{
+  background:#fee2e2;
+  transform:translateY(-1px);
+}
+
+
+#pageExamEligibility .exam-eligibility-disabled-btn{
+  width:130px;
+  min-height:42px;
+  height:auto;
+
+  padding:7px 10px;
+
+  border:1px solid #d6e2ee;
+  border-radius:14px;
+
+  background:#eef3f8;
+  color:#6b7a90;
+
+  font-family:inherit;
+  font-size:12px;
+  font-weight:800;
+
+  cursor:not-allowed;
+}
+
 /* จัดการนักเรียน */
 #manageMidtermStudentsBtn{
   background:#f1edff !important;
@@ -10207,6 +10328,17 @@ td{
         <span class="sidebar-label">รายงานผลกลางภาค</span>
       </button>
 
+      <!-- ===== รายงานนักเรียนไม่มีสิทธิ์สอบ =====
+<button
+  id="sideExamEligibilityBtn"
+  class="sidebar-sublink"
+  type="button"
+  data-grade-side-page="examEligibility"
+>
+  <span class="sidebar-subicon">🚫</span>
+  <span class="sidebar-label">รายงานนักเรียนไม่มีสิทธิ์สอบ</span>
+</button> -->
+
       <button id="sideFinalReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="import">
         <span class="sidebar-subicon">📥</span>
         <span class="sidebar-label">รายงานผลปลายภาค</span>
@@ -10772,7 +10904,133 @@ td{
 <!-- =====================================================
      END PAGE : QR CODE GENERATOR
      ===================================================== -->
+<!-- =====================================================
+     PAGE : รายงานนักเรียนไม่มีสิทธิ์สอบ
+     ===================================================== -->
 
+<div id="pageExamEligibility" class="hidden">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="preview-topbar">
+      <div>
+        <h2>รายงานนักเรียนไม่มีสิทธิ์สอบ</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          เลือกรายวิชาที่รับผิดชอบ เพื่อรายงานนักเรียนที่ไม่มีสิทธิ์สอบ (มส)
+          โดยใช้ข้อมูลรายชื่อนักเรียนและเวลาเรียนจากรายงานผลกลางภาค
+        </div>
+      </div>
+    </div>
+
+
+<div class="toolbar-4">
+
+  <div class="field">
+    <span class="label-in-form">ปีการศึกษา</span>
+
+    <select
+      id="examEligibilityYear"
+      class="std"
+    >
+      <option value="">กำลังโหลด...</option>
+    </select>
+  </div>
+
+
+  <div class="field">
+    <span class="label-in-form">ภาคเรียน</span>
+
+    <select
+      id="examEligibilityTerm"
+      class="std"
+    >
+      <option value="">กำลังโหลด...</option>
+    </select>
+  </div>
+
+
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="examEligibilityClassFilter"
+    >
+      ชั้น
+    </label>
+
+    <select
+      id="examEligibilityClassFilter"
+      class="std"
+    >
+      <option value="">ทุกชั้น</option>
+    </select>
+  </div>
+
+
+  <div class="field">
+    <label
+      class="label-in-form"
+      for="examEligibilitySubjectFilter"
+    >
+      รหัสวิชา / ชื่อวิชา
+    </label>
+
+    <select
+      id="examEligibilitySubjectFilter"
+      class="std"
+    >
+      <option value="">ทุกรายวิชา</option>
+    </select>
+  </div>
+
+</div>
+
+
+    <div
+      id="examEligibilityStatus"
+      class="status info"
+    >
+      เลือกรายวิชาเพื่อรายงานนักเรียนไม่มีสิทธิ์สอบ
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table class="midterm-list-table">
+
+        <thead>
+          <tr>
+            <th>รายวิชา</th>
+            <th>ปี / เทอม</th>
+            <th>ชั้น</th>
+            <th>ห้อง</th>
+            <th>Section</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+
+        <tbody id="examEligibilityTeachingTbody">
+
+          <tr>
+            <td colspan="6" class="small" style="text-align:center;">
+              กำลังรอโหลดรายการสอน
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- =====================================================
+     END PAGE : รายงานนักเรียนไม่มีสิทธิ์สอบ
+     ===================================================== -->
+        
 <div id="pageMidtermReport" class="hidden">
   <section class="card" style="margin-bottom:18px;">
     <div class="preview-topbar">
@@ -14002,6 +14260,10 @@ midtermGroups: [],
 selectedMidtermGroup: null,
 midtermRows: [],
 
+/* ===== Exam Eligibility / มส ===== */
+examEligibilityGroups: [],
+selectedExamEligibilityGroup: null,
+
 
 midtermActiveColumn: '',
 
@@ -14173,9 +14435,16 @@ function setActivePage(page){
     return false;
   }
 
-  const isHome = page === 'home';
-  const isMidtermReport = page === 'midtermReport';
-  const isImport = page === 'import';
+const isHome = page === 'home';
+
+const isMidtermReport =
+  page === 'midtermReport';
+
+const isExamEligibility =
+  page === 'examEligibility';
+
+const isImport =
+  page === 'import';
   const isAdviser = page === 'adviser';
   const isAdviserRisk = page === 'adviserrisk';
   const isRetest = page === 'retest';
@@ -14185,18 +14454,35 @@ function setActivePage(page){
   const isAdviserRetest = page === 'adviserretest';
   const isQrGenerator = page === 'qrgenerator';
 
-  if(!isFreePeriod && !isMidtermReport && !isImport){
-    closeAllSidebarGroups();
-  }
+if(
+  !isFreePeriod &&
+  !isMidtermReport &&
+  !isExamEligibility &&
+  !isImport
+){
+  closeAllSidebarGroups();
+}
 
   el('pageHome')
     ?.classList.toggle('hidden', !isHome);
 
-  el('pageMidtermReport')
-    ?.classList.toggle('hidden', !isMidtermReport);
+el('pageMidtermReport')
+  ?.classList.toggle(
+    'hidden',
+    !isMidtermReport
+  );
 
-  el('pageImport')
-    ?.classList.toggle('hidden', !isImport);
+el('pageExamEligibility')
+  ?.classList.toggle(
+    'hidden',
+    !isExamEligibility
+  );
+
+el('pageImport')
+  ?.classList.toggle(
+    'hidden',
+    !isImport
+  );
 
   el('pageAdviser')
     ?.classList.toggle('hidden', !isAdviser);
@@ -14239,6 +14525,14 @@ function setActivePage(page){
     loadMidtermTeachingList();
   }
 
+  if(isExamEligibility){
+
+  applyExamEligibilitySettings();
+
+  loadExamEligibilityTeachingList();
+
+}
+
   closeMobileSidebar();
 
   return true;
@@ -14280,11 +14574,18 @@ function setSidebarActiveMain(page){
     return;
   }
 
-  if(page === 'midtermReport' || page === 'import'){
-    el('menuGradeReportBtn')?.classList.add('active');
-    setSidebarActiveGradeSubPage(page);
-    return;
-  }
+if(
+  page === 'midtermReport' ||
+  page === 'examEligibility' ||
+  page === 'import'
+){
+  el('menuGradeReportBtn')
+    ?.classList.add('active');
+
+  setSidebarActiveGradeSubPage(page);
+
+  return;
+}
 
 const map = {
   home: 'menuHomeBtn',
@@ -14307,10 +14608,16 @@ const map = {
     .querySelectorAll('#sidebarGradeReportGroup .sidebar-sublink')
     .forEach(btn => btn.classList.remove('active'));
 
-  const map = {
-    midtermReport: 'sideMidtermReportBtn',
-    import: 'sideFinalReportBtn'
-  };
+const map = {
+  midtermReport:
+    'sideMidtermReportBtn',
+
+  examEligibility:
+    'sideExamEligibilityBtn',
+
+  import:
+    'sideFinalReportBtn'
+};
 
   const targetId = map[page || 'import'];
   if(targetId){
@@ -14345,8 +14652,20 @@ const titleMap = {
   retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
   gradestats: ['สถิติผลการเรียน', 'ดู Dashboard ผลการเรียนเฉพาะรายวิชาที่ครูมีสิทธิ์ดู'],
   teacherstudent: ['ข้อมูลนักเรียนที่สอน', 'ดูผลการเรียนย้อนหลังของนักเรียนในรายวิชาที่ครูสอน'],
-  midtermReport: ['รายงานผลกลางภาค', 'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'],
-  import: ['รายงานผลปลายภาค', 'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'],
+midtermReport: [
+  'รายงานผลกลางภาค',
+  'สำหรับรายงานคะแนนหน่วยการเรียนรู้ คะแนนกลางภาค และเวลาเรียน'
+],
+
+examEligibility: [
+  'รายงานนักเรียนไม่มีสิทธิ์สอบ',
+  'รายงานนักเรียนที่ไม่มีสิทธิ์สอบ (มส) จากข้อมูลเวลาเรียนกลางภาค'
+],
+
+import: [
+  'รายงานผลปลายภาค',
+  'สำหรับรายงานผลการเรียนปลายภาคและตรวจสอบก่อนบันทึก'
+],
   adviser: ['นักเรียนในที่ปรึกษา', 'ดูข้อมูล ผลการเรียน และภาพรวมเชิงวิเคราะห์ของนักเรียนในที่ปรึกษา'],
   adviserrisk: [
   'นักเรียนที่เสี่ยงติด 0, ร และ มส',
@@ -23940,6 +24259,982 @@ function applyMidtermSettings(){
   );
 }
 
+/* =====================================================
+   EXAM ELIGIBILITY SETTINGS
+   ===================================================== */
+
+function applyExamEligibilitySettings(){
+
+  const setting =
+    getMidtermSetting();
+
+  renderYearTermControl(
+    el('examEligibilityYear'),
+    setting.year_options,
+    setting.academic_year,
+    setting.lock,
+    null
+  );
+
+  renderYearTermControl(
+    el('examEligibilityTerm'),
+    setting.term_options,
+    setting.term,
+    setting.lock,
+    null
+  );
+}
+
+function renderExamEligibilityClassFilter(
+  rows,
+  preferredClassLevel = ''
+){
+
+  const select =
+    el('examEligibilityClassFilter');
+
+  if(!select){
+    return '';
+  }
+
+
+  const classLevels =
+    Array.from(
+      new Set(
+        (rows || [])
+          .map(row =>
+            safeText(
+              row.class_level,
+              ''
+            ).trim()
+          )
+          .filter(Boolean)
+      )
+    )
+    .sort((a, b) => {
+      return a.localeCompare(
+        b,
+        'th',
+        {
+          numeric:true,
+          sensitivity:'base'
+        }
+      );
+    });
+
+
+  select.innerHTML = `
+    <option value="">
+      ทุกชั้น
+    </option>
+
+    ${classLevels.map(classLevel => `
+      <option
+        value="${escapeHtml(classLevel)}"
+      >
+        ${escapeHtml(classLevel)}
+      </option>
+    `).join('')}
+  `;
+
+
+  const nextValue =
+    preferredClassLevel &&
+    classLevels.includes(
+      preferredClassLevel
+    )
+      ? preferredClassLevel
+      : '';
+
+
+  select.value =
+    nextValue;
+
+
+  return nextValue;
+}
+
+function renderExamEligibilitySubjectFilter(
+  rows,
+  preferredSubjectCode = ''
+){
+
+  const select =
+    el('examEligibilitySubjectFilter');
+
+  if(!select){
+    return '';
+  }
+
+
+  const subjectMap =
+    new Map();
+
+
+  (rows || []).forEach(row => {
+
+    const subjectCode =
+      safeText(
+        row.subject_code,
+        ''
+      ).trim();
+
+    const subjectName =
+      safeText(
+        row.subject_name,
+        ''
+      ).trim();
+
+
+    if(!subjectCode){
+      return;
+    }
+
+
+    if(!subjectMap.has(subjectCode)){
+
+      subjectMap.set(
+        subjectCode,
+        {
+          subject_code:
+            subjectCode,
+
+          subject_name:
+            subjectName
+        }
+      );
+
+    }
+
+  });
+
+
+  const subjects =
+    Array
+      .from(subjectMap.values())
+      .sort((a, b) => {
+
+        return a.subject_code
+          .localeCompare(
+            b.subject_code,
+            'th',
+            {
+              numeric:true
+            }
+          );
+
+      });
+
+
+  select.innerHTML = `
+    <option value="">
+      ทุกรายวิชา
+    </option>
+
+    ${subjects.map(subject => `
+      <option
+        value="${escapeHtml(
+          subject.subject_code
+        )}"
+      >
+        ${escapeHtml(
+          subject.subject_code
+        )} — ${escapeHtml(
+          subject.subject_name || '-'
+        )}
+      </option>
+    `).join('')}
+  `;
+
+
+  const hasPreferred =
+    preferredSubjectCode &&
+    subjectMap.has(
+      preferredSubjectCode
+    );
+
+
+  const nextValue =
+    hasPreferred
+      ? preferredSubjectCode
+      : '';
+
+
+  select.value =
+    nextValue;
+
+
+  return nextValue;
+}
+
+async function loadExamEligibilityTeachingList(){
+
+  try{
+
+    if(!state.currentUser?.id){
+
+      setStatus(
+        'examEligibilityStatus',
+        'กรุณาเข้าสู่ระบบก่อน',
+        'warn'
+      );
+
+      return;
+    }
+
+
+    const year =
+      safeNum(
+        el('examEligibilityYear')
+          ?.value
+      );
+
+
+    const term =
+      safeNum(
+        el('examEligibilityTerm')
+          ?.value
+      );
+
+
+    const previousClassLevel =
+      safeText(
+        el('examEligibilityClassFilter')
+          ?.value,
+        ''
+      ).trim();
+
+
+    const previousSubjectCode =
+      safeText(
+        el('examEligibilitySubjectFilter')
+          ?.value,
+        ''
+      ).trim();
+
+
+    if(!year || !term){
+
+      state.examEligibilityGroups =
+        [];
+
+
+      renderExamEligibilityClassFilter(
+        [],
+        ''
+      );
+
+
+      renderExamEligibilitySubjectFilter(
+        [],
+        ''
+      );
+
+
+      renderExamEligibilityTeachingRows(
+        []
+      );
+
+
+      setStatus(
+        'examEligibilityStatus',
+        'กรุณาเลือกปีการศึกษาและภาคเรียน',
+        'warn'
+      );
+
+      return;
+    }
+
+
+    setStatus(
+      'examEligibilityStatus',
+      'กำลังโหลดรายการสอน...',
+      'info'
+    );
+
+
+    /* =====================================================
+       โหลดรายการสอนเหมือนรายงานกลางภาค
+       ===================================================== */
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from('v_subject_offerings')
+      .select(`
+        subject_offering_id,
+        subject_id,
+        teacher_id,
+        academic_year,
+        term,
+        class_level,
+        room,
+        credit,
+        section_code,
+        is_active,
+        subject_code,
+        subject_name,
+        subject_type,
+        teacher_code,
+        teacher_name
+      `)
+      .eq(
+        'teacher_id',
+        state.currentUser.id
+      )
+      .eq(
+        'academic_year',
+        Number(year)
+      )
+      .eq(
+        'term',
+        Number(term)
+      )
+      .eq(
+        'is_active',
+        true
+      )
+      .order(
+        'class_level',
+        {
+          ascending:true
+        }
+      )
+      .order(
+        'room',
+        {
+          ascending:true
+        }
+      )
+      .order(
+        'subject_code',
+        {
+          ascending:true
+        }
+      );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    /*
+     * ตัดวิชากิจกรรม รหัสขึ้นต้น ก
+     * เหมือนรายงานกลางภาค
+     */
+    const reportableRows =
+      (data || [])
+        .filter(row => {
+
+          const subjectCode =
+            safeText(
+              row.subject_code,
+              ''
+            ).trim();
+
+
+          return (
+            subjectCode &&
+            !subjectCode.startsWith('ก')
+          );
+
+        });
+
+
+    /* =====================================================
+       ตัวกรองชั้น
+       ===================================================== */
+
+    const selectedClassLevel =
+      renderExamEligibilityClassFilter(
+        reportableRows,
+        previousClassLevel
+      );
+
+
+    const classRows =
+      selectedClassLevel
+        ? reportableRows.filter(row => {
+
+            return (
+              safeText(
+                row.class_level,
+                ''
+              ).trim() ===
+              selectedClassLevel
+            );
+
+          })
+        : reportableRows;
+
+
+    /* =====================================================
+       ตัวกรองรายวิชา
+       ===================================================== */
+
+    const selectedSubjectCode =
+      renderExamEligibilitySubjectFilter(
+        classRows,
+        previousSubjectCode
+      );
+
+
+    const visibleRows =
+      selectedSubjectCode
+        ? classRows.filter(row => {
+
+            return (
+              safeText(
+                row.subject_code,
+                ''
+              ).trim() ===
+              selectedSubjectCode
+            );
+
+          })
+        : classRows;
+
+
+    /* =====================================================
+       อ่านข้อมูลรายงานกลางภาค
+       เพราะหน้า มส ต้องมีต้นทางจาก midterm_reports
+       ===================================================== */
+
+    const midtermRows =
+      await fetchAllPages(
+        () => {
+
+          return supabaseClient
+            .from('midterm_reports')
+            .select(`
+              academic_year,
+              term,
+              subject_code,
+              class_level,
+              room,
+              student_code
+            `)
+            .eq(
+              'academic_year',
+              Number(year)
+            )
+            .eq(
+              'term',
+              Number(term)
+            )
+            .eq(
+              'teacher_code',
+              state.currentUser
+                .teacher_code
+            );
+
+        },
+        1000
+      );
+
+
+    /*
+     * เก็บนักเรียนแต่ละรายวิชา/ห้อง
+     */
+    const studentMap =
+      new Map();
+
+
+    (midtermRows || [])
+      .forEach(row => {
+
+        const key =
+          getMidtermReportGroupKey(
+            row
+          );
+
+
+        if(!studentMap.has(key)){
+
+          studentMap.set(
+            key,
+            new Set()
+          );
+
+        }
+
+
+        const studentCode =
+          normalizeMidtermRosterStudentCode(
+            row.student_code
+          );
+
+
+        if(studentCode){
+
+          studentMap
+            .get(key)
+            .add(studentCode);
+
+        }
+
+      });
+
+
+    /* =====================================================
+       ตรวจห้องที่เคยยืนยันว่าไม่มีนักเรียนเลือกเรียน
+       ===================================================== */
+
+    const declarationRows =
+      await fetchAllPages(
+        () => {
+
+          return supabaseClient
+            .from(
+              'midterm_report_declarations'
+            )
+            .select(`
+              academic_year,
+              term,
+              subject_code,
+              teacher_code,
+              class_level,
+              room,
+              report_status
+            `)
+            .eq(
+              'academic_year',
+              Number(year)
+            )
+            .eq(
+              'term',
+              Number(term)
+            )
+            .eq(
+              'teacher_code',
+              state.currentUser
+                .teacher_code
+            )
+            .eq(
+              'report_status',
+              'no_students'
+            );
+
+        },
+        1000
+      );
+
+
+    const noStudentsSet =
+      new Set();
+
+
+    (declarationRows || [])
+      .forEach(row => {
+
+        noStudentsSet.add(
+          getMidtermReportGroupKey(
+            row
+          )
+        );
+
+      });
+
+
+    /* =====================================================
+       จัดกลุ่มรายการสอน
+       ===================================================== */
+
+    const groups =
+      groupMidtermOfferings(
+        visibleRows
+      )
+      .map(group => {
+
+        const key =
+          getMidtermReportGroupKey(
+            group
+          );
+
+
+        const studentCodes =
+          studentMap.get(key) ||
+          new Set();
+
+
+        const reportCount =
+          studentCodes.size;
+
+
+        const hasMidtermReports =
+          reportCount > 0;
+
+
+        const hasNoStudents =
+          !hasMidtermReports &&
+          noStudentsSet.has(key);
+
+
+        return {
+          ...group,
+
+          midterm_report_count:
+            reportCount,
+
+          has_midterm_reports:
+            hasMidtermReports,
+
+          has_no_students_declaration:
+            hasNoStudents
+        };
+
+      });
+
+
+    state.examEligibilityGroups =
+      groups;
+
+
+    renderExamEligibilityTeachingRows(
+      groups
+    );
+
+
+    const filterText = [
+
+      selectedClassLevel
+        ? `ชั้น ${selectedClassLevel}`
+        : '',
+
+      selectedSubjectCode
+        ? `รหัสวิชา ${selectedSubjectCode}`
+        : ''
+
+    ]
+      .filter(Boolean)
+      .join(' / ');
+
+
+    setStatus(
+      'examEligibilityStatus',
+
+      `พบรายการสอน ${groups.length} รายการ` +
+      (
+        filterText
+          ? ` — ${filterText}`
+          : ''
+      ),
+
+      groups.length
+        ? 'success'
+        : 'warn'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'loadExamEligibilityTeachingList ERROR',
+      error
+    );
+
+
+    state.examEligibilityGroups =
+      [];
+
+
+    renderExamEligibilityTeachingRows(
+      []
+    );
+
+
+    setStatus(
+      'examEligibilityStatus',
+      error.message ||
+      'โหลดรายการสอนไม่สำเร็จ',
+      'error'
+    );
+
+  }
+}
+
+function renderExamEligibilityTeachingRows(
+  rows
+){
+
+  const tbody =
+    el('examEligibilityTeachingTbody');
+
+
+  if(!tbody){
+    return;
+  }
+
+
+  if(!rows?.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          class="empty-state"
+        >
+          ไม่พบรายการสอน
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  tbody.innerHTML =
+    rows.map((row, index) => {
+
+      const sectionCount =
+        Array.isArray(row.offerings)
+          ? row.offerings.length
+          : 1;
+
+
+      const hasMidtermReports =
+        row.has_midterm_reports === true;
+
+
+      const hasNoStudents =
+        row.has_no_students_declaration ===
+        true;
+
+
+      let actionHtml = '';
+
+
+      /*
+       * มีข้อมูลกลางภาคแล้ว
+       * พร้อมรายงาน มส
+       */
+      if(hasMidtermReports){
+
+        actionHtml = `
+          <button
+            class="exam-eligibility-report-btn"
+            type="button"
+            data-exam-eligibility-index="${index}"
+          >
+            🚫 รายงาน มส
+          </button>
+
+          <div
+            class="small"
+            style="margin-top:5px;"
+          >
+            ข้อมูลกลางภาค
+            ${escapeHtml(
+              String(
+                row.midterm_report_count ||
+                0
+              )
+            )}
+            คน
+          </div>
+        `;
+
+      }
+
+
+      /*
+       * ห้องนี้ไม่มีนักเรียนเลือกเรียน
+       */
+      else if(hasNoStudents){
+
+        actionHtml = `
+          <button
+            class="exam-eligibility-disabled-btn"
+            type="button"
+            disabled
+          >
+            ไม่มีนักเรียนเลือก
+          </button>
+        `;
+
+      }
+
+
+      /*
+       * ยังไม่เคยรายงานกลางภาค
+       * จึงยังไม่มีรายชื่อ/เวลาเรียนให้ดึง
+       */
+      else{
+
+        actionHtml = `
+          <button
+            class="exam-eligibility-disabled-btn"
+            type="button"
+            disabled
+          >
+            ยังไม่มีข้อมูลกลางภาค
+          </button>
+        `;
+
+      }
+
+
+      return `
+        <tr>
+
+          <td>
+
+            <div
+              class="grade-stats-subject-cell"
+            >
+
+              <div
+                class="grade-stats-subject-code"
+              >
+                ${escapeHtml(
+                  row.subject_code ||
+                  '-'
+                )}
+              </div>
+
+              <div
+                class="grade-stats-subject-name"
+              >
+                ${escapeHtml(
+                  row.subject_name ||
+                  '-'
+                )}
+              </div>
+
+            </div>
+
+          </td>
+
+
+          <td class="text-center">
+
+            ${escapeHtml(
+              String(
+                row.academic_year ||
+                '-'
+              )
+            )}/${
+              escapeHtml(
+                String(
+                  row.term ||
+                  '-'
+                )
+              )
+            }
+
+          </td>
+
+
+          <td class="text-center">
+
+            ${escapeHtml(
+              row.class_level ||
+              '-'
+            )}
+
+          </td>
+
+
+          <td class="text-center">
+
+            ${escapeHtml(
+              row.room ||
+              '-'
+            )}
+
+          </td>
+
+
+          <td class="text-center">
+
+            ${escapeHtml(
+              String(sectionCount)
+            )}
+
+          </td>
+
+
+          <td class="text-center">
+
+            ${actionHtml}
+
+          </td>
+
+        </tr>
+      `;
+
+    }).join('');
+
+
+  /*
+   * ปุ่มรายงาน มส
+   *
+   * รอบนี้เลือก Group ให้ได้ก่อน
+   * รอบถัดไปเราจะเปิด Overlay นักเรียน
+   */
+  tbody
+    .querySelectorAll(
+      '[data-exam-eligibility-index]'
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        'click',
+        () => {
+
+          const index =
+            Number(
+              button.dataset
+                .examEligibilityIndex
+            );
+
+
+          const group =
+            state.examEligibilityGroups[
+              index
+            ];
+
+
+          if(!group){
+            return;
+          }
+
+
+          state.selectedExamEligibilityGroup =
+            group;
+
+
+          setStatus(
+            'examEligibilityStatus',
+
+            `เลือกรายวิชา ${
+              group.subject_code || '-'
+            } ${
+              group.subject_name || ''
+            } ชั้น ${
+              group.class_level || '-'
+            }/${
+              group.room || '-'
+            } แล้ว`,
+
+            'success'
+          );
+
+
+          showToast(
+            'พร้อมรายงาน มส',
+            `${group.subject_code || '-'} | ชั้น ${group.class_level || '-'}/${group.room || '-'}`,
+            'success'
+          );
+
+        }
+      );
+
+    });
+}
+
 function getMidtermGroupKey(row){
   return [
     row.academic_year,
@@ -33486,8 +34781,14 @@ bindIfExists('menuGradeReportBtn', 'click', () => {
   const group = el('sidebarGradeReportGroup');
   const isOpen = group?.classList.contains('open');
   const isOnGradePage =
-    !el('pageImport')?.classList.contains('hidden') ||
-    !el('pageMidtermReport')?.classList.contains('hidden');
+  !el('pageImport')
+    ?.classList.contains('hidden') ||
+
+  !el('pageMidtermReport')
+    ?.classList.contains('hidden') ||
+
+  !el('pageExamEligibility')
+    ?.classList.contains('hidden');
 
   if(shell?.classList.contains('sidebar-collapsed')){
     shell.classList.remove('sidebar-collapsed');
@@ -33496,11 +34797,20 @@ bindIfExists('menuGradeReportBtn', 'click', () => {
   if(isOnGradePage && isOpen){
     group.classList.remove('open');
     el('menuGradeReportBtn')?.classList.add('active');
-    updateAppTopbarTitle(
-      !el('pageMidtermReport')?.classList.contains('hidden')
-        ? 'midtermReport'
-        : 'import'
-    );
+    const currentGradePage =
+  !el('pageMidtermReport')
+    ?.classList.contains('hidden')
+    ? 'midtermReport'
+
+    : !el('pageExamEligibility')
+        ?.classList.contains('hidden')
+      ? 'examEligibility'
+
+      : 'import';
+
+updateAppTopbarTitle(
+  currentGradePage
+);
     closeMobileSidebar();
     return;
   }
@@ -33512,6 +34822,16 @@ bindIfExists('menuGradeReportBtn', 'click', () => {
 bindIfExists('sideMidtermReportBtn', 'click', () => {
   openGradeReportFromSidebar('midtermReport');
 });
+
+  bindIfExists(
+  'sideExamEligibilityBtn',
+  'click',
+  () => {
+    openGradeReportFromSidebar(
+      'examEligibility'
+    );
+  }
+);
 
 bindIfExists('sideFinalReportBtn', 'click', () => {
   openGradeReportFromSidebar();
@@ -33714,6 +35034,36 @@ bindIfExists(
   'midtermSubjectFilter',
   'change',
   loadMidtermTeachingList
+);
+/* =====================================================
+   EXAM ELIGIBILITY FILTER EVENTS
+   ===================================================== */
+
+bindIfExists(
+  'examEligibilityYear',
+  'change',
+  loadExamEligibilityTeachingList
+);
+
+
+bindIfExists(
+  'examEligibilityTerm',
+  'change',
+  loadExamEligibilityTeachingList
+);
+
+
+bindIfExists(
+  'examEligibilityClassFilter',
+  'change',
+  loadExamEligibilityTeachingList
+);
+
+
+bindIfExists(
+  'examEligibilitySubjectFilter',
+  'change',
+  loadExamEligibilityTeachingList
 );
 
 function handleMidtermMaxInput(){
