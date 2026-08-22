@@ -11698,96 +11698,7 @@ td{
 <!-- =====================================================
      END PAGE : รายงานนักเรียนไม่มีสิทธิ์สอบ
      ===================================================== -->
-        
-<div id="pageMidtermReport" class="hidden">
-  <section class="card" style="margin-bottom:18px;">
-    <div class="preview-topbar">
-      <div>
-        <h2>รายงานผลกลางภาค</h2>
-        <div class="sub" style="margin-bottom:0;">
-          เลือกรายวิชาที่ครูผู้สอนรับผิดชอบ แล้วกรอกคะแนนเก็บ คะแนนกลางภาค และเวลาเรียน
-        </div>
-      </div>
-    </div>
-
-    <div class="toolbar-4">
-      <div class="field">
-        <span class="label-in-form">ปีการศึกษา</span>
-        <select id="midtermYear" class="std">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <span class="label-in-form">ภาคเรียน</span>
-        <select id="midtermTerm" class="std">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
-
-<div class="field">
-  <label
-    class="label-in-form"
-    for="midtermClassFilter"
-  >
-    ชั้น
-  </label>
-
-  <select
-    id="midtermClassFilter"
-    class="std"
-  >
-    <option value="">
-      ทุกชั้น
-    </option>
-  </select>
-</div>
-
-<div class="field">
-  <label
-    class="label-in-form"
-    for="midtermSubjectFilter"
-  >
-    รหัสวิชา / ชื่อวิชา
-  </label>
-
-  <select
-    id="midtermSubjectFilter"
-    class="std"
-  >
-    <option value="">
-      ทุกรายวิชา
-    </option>
-  </select>
-</div>
-    </div>
-
-    <div id="midtermListStatus" class="status info">
-      กำลังโหลดรายการสอน...
-    </div>
-
-<div class="table-wrap midterm-list-wrap">
-  <table class="midterm-list-table">
-        <thead>
-          <tr>
-            <th>รายวิชา</th>
-            <th style="width:120px;" class="text-center">ปี/เทอม</th>
-            <th style="width:110px;" class="text-center">ชั้น</th>
-            <th style="width:130px;" class="text-center">ห้อง</th>
-            <th style="width:150px;" class="text-center">จำนวน section</th>
-            <th style="width:170px;" class="text-center">จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="midtermTeachingTbody">
-          <tr>
-            <td colspan="6" class="empty-state">ยังไม่มีรายการสอน</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =====================================================
+<!-- =====================================================
      EXAM ELIGIBILITY OVERLAY
      รายงานนักเรียนไม่มีสิทธิ์สอบ (มส)
      ===================================================== -->
@@ -12010,7 +11921,96 @@ td{
 
 <!-- =====================================================
      END EXAM ELIGIBILITY OVERLAY
-     ===================================================== -->
+     ===================================================== -->       
+<div id="pageMidtermReport" class="hidden">
+  <section class="card" style="margin-bottom:18px;">
+    <div class="preview-topbar">
+      <div>
+        <h2>รายงานผลกลางภาค</h2>
+        <div class="sub" style="margin-bottom:0;">
+          เลือกรายวิชาที่ครูผู้สอนรับผิดชอบ แล้วกรอกคะแนนเก็บ คะแนนกลางภาค และเวลาเรียน
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar-4">
+      <div class="field">
+        <span class="label-in-form">ปีการศึกษา</span>
+        <select id="midtermYear" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label-in-form">ภาคเรียน</span>
+        <select id="midtermTerm" class="std">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+<div class="field">
+  <label
+    class="label-in-form"
+    for="midtermClassFilter"
+  >
+    ชั้น
+  </label>
+
+  <select
+    id="midtermClassFilter"
+    class="std"
+  >
+    <option value="">
+      ทุกชั้น
+    </option>
+  </select>
+</div>
+
+<div class="field">
+  <label
+    class="label-in-form"
+    for="midtermSubjectFilter"
+  >
+    รหัสวิชา / ชื่อวิชา
+  </label>
+
+  <select
+    id="midtermSubjectFilter"
+    class="std"
+  >
+    <option value="">
+      ทุกรายวิชา
+    </option>
+  </select>
+</div>
+    </div>
+
+    <div id="midtermListStatus" class="status info">
+      กำลังโหลดรายการสอน...
+    </div>
+
+<div class="table-wrap midterm-list-wrap">
+  <table class="midterm-list-table">
+        <thead>
+          <tr>
+            <th>รายวิชา</th>
+            <th style="width:120px;" class="text-center">ปี/เทอม</th>
+            <th style="width:110px;" class="text-center">ชั้น</th>
+            <th style="width:130px;" class="text-center">ห้อง</th>
+            <th style="width:150px;" class="text-center">จำนวน section</th>
+            <th style="width:170px;" class="text-center">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="midtermTeachingTbody">
+          <tr>
+            <td colspan="6" class="empty-state">ยังไม่มีรายการสอน</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  
 
   <!-- =====================================================
        MIDTERM SCORE OVERLAY
