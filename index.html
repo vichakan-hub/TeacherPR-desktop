@@ -5745,6 +5745,674 @@
   cursor:not-allowed;
 }
 
+/* =====================================================
+   EXAM ELIGIBILITY OVERLAY
+   ===================================================== */
+
+#examEligibilityOverlay{
+  z-index:10030;
+  padding:14px;
+  background:rgba(15,23,42,.48);
+}
+
+
+/* กล่องหลัก */
+#examEligibilityOverlay
+.exam-eligibility-overlay-card{
+
+  width:min(
+    1180px,
+    calc(100vw - 28px)
+  );
+
+  height:min(
+    820px,
+    calc(100vh - 28px)
+  );
+
+  max-height:calc(100vh - 28px);
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+
+  background:#ffffff;
+
+  border:1px solid #d8e4ef;
+  border-radius:26px;
+
+  box-shadow:
+    0 26px 70px
+    rgba(15,23,42,.28);
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.exam-eligibility-overlay-head{
+
+  flex:0 0 auto;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+
+  gap:16px;
+
+  padding:18px 20px;
+
+  border-bottom:1px solid #dce6f1;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff0ef 0%,
+      #fff8f8 52%,
+      #fff7ea 100%
+    );
+}
+
+
+.exam-eligibility-overlay-title-wrap{
+
+  display:flex;
+  align-items:flex-start;
+
+  gap:14px;
+
+  min-width:0;
+}
+
+
+.exam-eligibility-overlay-icon{
+
+  width:52px;
+  height:52px;
+
+  flex:0 0 52px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:17px;
+
+  background:#fff0ef;
+
+  color:#d92d20;
+
+  font-size:25px;
+}
+
+
+.exam-eligibility-overlay-title{
+
+  margin:0;
+
+  color:#17263c;
+
+  font-size:23px;
+  font-weight:900;
+
+  line-height:1.3;
+}
+
+
+.exam-eligibility-overlay-sub{
+
+  margin-top:5px;
+
+  color:#64748b;
+
+  font-size:13px;
+  font-weight:700;
+
+  line-height:1.5;
+}
+
+
+.exam-eligibility-close-btn{
+
+  width:42px;
+  height:42px;
+
+  flex:0 0 42px;
+
+  padding:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:0;
+  border-radius:13px;
+
+  background:#eef3f8;
+
+  color:#41536c;
+
+  font-family:inherit;
+
+  font-size:27px;
+
+  cursor:pointer;
+}
+
+
+.exam-eligibility-close-btn:hover{
+
+  background:#fff0ef;
+
+  color:#d92d20;
+}
+
+
+/* =====================================================
+   SUMMARY
+   ===================================================== */
+
+.exam-eligibility-summary{
+
+  flex:0 0 auto;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap:12px;
+
+  padding:14px 20px 0;
+}
+
+
+.exam-eligibility-summary-card{
+
+  padding:13px 16px;
+
+  border:1px solid #d8e4ef;
+  border-radius:17px;
+
+  background:#f8fbff;
+}
+
+
+.exam-eligibility-summary-card.attendance{
+
+  background:#fff7ea;
+
+  border-color:#ffe0aa;
+}
+
+
+.exam-eligibility-summary-card.danger{
+
+  background:#fff0ef;
+
+  border-color:#ffd2cf;
+}
+
+
+.exam-eligibility-summary-label{
+
+  color:#64748b;
+
+  font-size:12px;
+  font-weight:800;
+}
+
+
+.exam-eligibility-summary-value{
+
+  margin-top:4px;
+
+  color:#17324d;
+
+  font-size:25px;
+  font-weight:900;
+
+  line-height:1;
+}
+
+
+.exam-eligibility-summary-card.attendance
+.exam-eligibility-summary-value{
+
+  color:#b26a00;
+}
+
+
+.exam-eligibility-summary-card.danger
+.exam-eligibility-summary-value{
+
+  color:#d92d20;
+}
+
+
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.exam-eligibility-form-status{
+
+  flex:0 0 auto;
+
+  margin:12px 20px 10px !important;
+
+  min-height:38px;
+
+  display:flex;
+  align-items:center;
+
+  padding:7px 12px;
+
+  border:1px solid #cfe0ff;
+  border-radius:13px;
+
+  background:#eef4ff;
+}
+
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+
+.exam-eligibility-table-wrap{
+
+  flex:1 1 auto;
+
+  min-height:0;
+
+  margin:0 20px;
+
+  overflow:auto;
+
+  border:1px solid #d8e4ef;
+
+  border-radius:18px;
+
+  background:#ffffff;
+}
+
+
+#examEligibilityOverlay
+.exam-eligibility-student-table{
+
+  width:100%;
+
+  min-width:900px !important;
+
+  table-layout:fixed;
+
+  border-collapse:collapse;
+}
+
+
+#examEligibilityOverlay
+.exam-eligibility-student-table th,
+
+#examEligibilityOverlay
+.exam-eligibility-student-table td{
+
+  padding:12px 10px;
+
+  border-bottom:1px solid #edf2f7;
+
+  vertical-align:middle;
+
+  font-size:14px;
+}
+
+
+#examEligibilityOverlay
+.exam-eligibility-student-table th{
+
+  position:sticky;
+
+  top:0;
+
+  z-index:4;
+
+  text-align:center;
+
+  background:#fff3e2 !important;
+
+  color:#573a1f !important;
+
+  font-weight:800;
+}
+
+
+#examEligibilityOverlay
+.exam-eligibility-student-table
+tbody tr:hover td{
+
+  filter:brightness(.985);
+}
+
+
+/* นักเรียนเวลาเรียนต่ำกว่า 80 */
+#examEligibilityOverlay
+.exam-eligibility-low-attendance td{
+
+  background:#fffaf2;
+}
+
+
+/* นักเรียนที่เลือก มส */
+#examEligibilityOverlay
+.exam-eligibility-ms-row td{
+
+  background:#fff4f4 !important;
+}
+
+
+/* =====================================================
+   เวลาเรียน
+   ===================================================== */
+
+.exam-eligibility-attendance-value{
+
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  min-width:82px;
+
+  min-height:34px;
+
+  padding:5px 10px;
+
+  border:1px solid #d8e4ef;
+
+  border-radius:999px;
+
+  background:#f8fbff;
+
+  color:#17324d;
+
+  font-family:'Sarabun',sans-serif;
+
+  font-size:15px;
+  font-weight:800;
+}
+
+
+.exam-eligibility-attendance-percent{
+
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  min-width:82px;
+
+  min-height:34px;
+
+  padding:5px 10px;
+
+  border:1px solid #bfe6cb;
+
+  border-radius:999px;
+
+  background:#e9f8ef;
+
+  color:#0f9d58;
+
+  font-family:'Sarabun',sans-serif;
+
+  font-size:15px;
+  font-weight:900;
+}
+
+
+.exam-eligibility-attendance-percent.low{
+
+  border-color:#f4c66b;
+
+  background:#fff7ea;
+
+  color:#b26a00;
+}
+
+
+/* =====================================================
+   STATUS BADGE
+   ===================================================== */
+
+.exam-eligibility-status-badge{
+
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  min-width:96px;
+
+  min-height:32px;
+
+  padding:5px 11px;
+
+  border-radius:999px;
+
+  border:1px solid #bfe6cb;
+
+  background:#e9f8ef;
+
+  color:#0f9d58;
+
+  font-size:12px;
+  font-weight:900;
+}
+
+
+.exam-eligibility-status-badge.ms{
+
+  border-color:#fca5a5;
+
+  background:#fff0ef;
+
+  color:#d92d20;
+}
+
+
+/* =====================================================
+   BUTTON
+   ===================================================== */
+
+.exam-eligibility-send-ms-btn{
+
+  min-width:112px;
+
+  height:38px;
+
+  padding:0 13px;
+
+  border:1px solid #fca5a5;
+
+  border-radius:13px;
+
+  background:#fff0ef;
+
+  color:#b42318;
+
+  font-family:inherit;
+
+  font-size:13px;
+  font-weight:900;
+}
+
+
+.exam-eligibility-send-ms-btn:hover{
+
+  background:#fee2e2;
+}
+
+
+.exam-eligibility-send-ms-btn.cancel-ms{
+
+  border-color:#d6e2ee;
+
+  background:#eef3f8;
+
+  color:#41536c;
+}
+
+
+.exam-eligibility-send-ms-btn.cancel-ms:hover{
+
+  background:#e2e8f0;
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+
+.exam-eligibility-overlay-footer{
+
+  flex:0 0 auto;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:space-between;
+
+  gap:14px;
+
+  padding:14px 20px 16px;
+
+  border-top:1px solid #edf2f7;
+
+  background:#ffffff;
+}
+
+
+.exam-eligibility-footer-note{
+
+  max-width:680px;
+
+  color:#64748b;
+
+  font-size:12px;
+  font-weight:700;
+
+  line-height:1.5;
+}
+
+
+.exam-eligibility-footer-actions{
+
+  display:flex;
+
+  gap:10px;
+}
+
+
+.exam-eligibility-footer-actions button{
+
+  min-width:150px;
+
+  height:44px;
+
+  font-weight:900;
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width:720px){
+
+  #examEligibilityOverlay{
+
+    padding:0;
+
+    align-items:stretch;
+  }
+
+
+  #examEligibilityOverlay
+  .exam-eligibility-overlay-card{
+
+    width:100vw;
+
+    height:100vh;
+
+    max-height:100vh;
+
+    border:0;
+
+    border-radius:0;
+  }
+
+
+  .exam-eligibility-overlay-head{
+
+    padding:14px;
+  }
+
+
+  .exam-eligibility-overlay-title{
+
+    font-size:19px;
+  }
+
+
+  .exam-eligibility-summary{
+
+    grid-template-columns:1fr;
+
+    padding:12px 14px 0;
+  }
+
+
+  .exam-eligibility-form-status{
+
+    margin:10px 14px !important;
+  }
+
+
+  .exam-eligibility-table-wrap{
+
+    margin:0 14px;
+  }
+
+
+  .exam-eligibility-overlay-footer{
+
+    align-items:stretch;
+
+    flex-direction:column;
+
+    padding:12px 14px 14px;
+  }
+
+
+  .exam-eligibility-footer-actions{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    width:100%;
+  }
+
+
+  .exam-eligibility-footer-actions button{
+
+    width:100%;
+
+    min-width:0;
+  }
+
+}
+
 /* จัดการนักเรียน */
 #manageMidtermStudentsBtn{
   background:#f1edff !important;
@@ -11120,6 +11788,231 @@ td{
   </section>
 
   <!-- =====================================================
+     EXAM ELIGIBILITY OVERLAY
+     รายงานนักเรียนไม่มีสิทธิ์สอบ (มส)
+     ===================================================== -->
+
+<div
+  id="examEligibilityOverlay"
+  class="overlay"
+  aria-hidden="true"
+>
+
+  <div class="exam-eligibility-overlay-card">
+
+    <!-- ===== HEADER ===== -->
+
+    <div class="exam-eligibility-overlay-head">
+
+      <div class="exam-eligibility-overlay-title-wrap">
+
+        <div class="exam-eligibility-overlay-icon">
+          🚫
+        </div>
+
+        <div>
+
+          <h2
+            id="examEligibilitySelectedTitle"
+            class="exam-eligibility-overlay-title"
+          >
+            รายงานนักเรียนไม่มีสิทธิ์สอบ
+          </h2>
+
+          <div
+            id="examEligibilitySelectedSub"
+            class="exam-eligibility-overlay-sub"
+          >
+            -
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <button
+        id="examEligibilityCloseBtn"
+        class="exam-eligibility-close-btn"
+        type="button"
+        aria-label="ปิด"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- ===== SUMMARY ===== -->
+
+    <div class="exam-eligibility-summary">
+
+      <div class="exam-eligibility-summary-card">
+
+        <div class="exam-eligibility-summary-label">
+          นักเรียนทั้งหมด
+        </div>
+
+        <div
+          id="examEligibilityTotalCount"
+          class="exam-eligibility-summary-value"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="exam-eligibility-summary-card attendance">
+
+        <div class="exam-eligibility-summary-label">
+          เวลาเรียนต่ำกว่า 80%
+        </div>
+
+        <div
+          id="examEligibilityLowAttendanceCount"
+          class="exam-eligibility-summary-value"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="exam-eligibility-summary-card danger">
+
+        <div class="exam-eligibility-summary-label">
+          รายงาน มส
+        </div>
+
+        <div
+          id="examEligibilityMsCount"
+          class="exam-eligibility-summary-value"
+        >
+          0
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===== STATUS ===== -->
+
+    <div
+      id="examEligibilityFormStatus"
+      class="status info exam-eligibility-form-status"
+    >
+      กำลังรอข้อมูล
+    </div>
+
+
+    <!-- ===== TABLE ===== -->
+
+    <div class="exam-eligibility-table-wrap">
+
+      <table class="exam-eligibility-student-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width:65px;">
+              เลขที่
+            </th>
+
+            <th style="width:120px;">
+              เลขประจำตัว
+            </th>
+
+            <th>
+              ชื่อ - สกุล
+            </th>
+
+            <th style="width:130px;">
+              เวลาเรียน
+            </th>
+
+            <th style="width:125px;">
+              % เวลาเรียน
+            </th>
+
+            <th style="width:135px;">
+              สถานะ
+            </th>
+
+            <th style="width:150px;">
+              จัดการ
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="examEligibilityStudentTbody">
+
+          <tr>
+
+            <td
+              colspan="7"
+              class="empty-state"
+            >
+              ยังไม่ได้เลือกรายวิชา
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===== FOOTER ===== -->
+
+    <div class="exam-eligibility-overlay-footer">
+
+      <div class="exam-eligibility-footer-note">
+        ระบบแสดงข้อมูลเวลาเรียนจากรายงานผลกลางภาค
+        โดยไม่กำหนด มส ให้อัตโนมัติ ครูเป็นผู้พิจารณาและกดส่ง มส
+      </div>
+
+
+      <div class="exam-eligibility-footer-actions">
+
+        <button
+          id="examEligibilityCancelBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ยกเลิก
+        </button>
+
+
+        <button
+          id="saveExamEligibilityBtn"
+          class="btn-success"
+          type="button"
+          disabled
+        >
+          💾 บันทึกรายงาน มส
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =====================================================
+     END EXAM ELIGIBILITY OVERLAY
+     ===================================================== -->
+
+  <!-- =====================================================
        MIDTERM SCORE OVERLAY
        ตารางบันทึกคะแนนกลางภาค
        ===================================================== -->
@@ -14263,6 +15156,8 @@ midtermRows: [],
 /* ===== Exam Eligibility / มส ===== */
 examEligibilityGroups: [],
 selectedExamEligibilityGroup: null,
+examEligibilityRows: [],
+examEligibilityDirty: false,
 
 
 midtermActiveColumn: '',
@@ -25206,28 +26101,46 @@ function renderExamEligibilityTeachingRows(
             group;
 
 
-          setStatus(
-            'examEligibilityStatus',
+tbody
+  .querySelectorAll(
+    '[data-exam-eligibility-index]'
+  )
+  .forEach(button => {
 
-            `เลือกรายวิชา ${
-              group.subject_code || '-'
-            } ${
-              group.subject_name || ''
-            } ชั้น ${
-              group.class_level || '-'
-            }/${
-              group.room || '-'
-            } แล้ว`,
+    button.addEventListener(
+      'click',
+      () => {
 
-            'success'
+        const index =
+          Number(
+            button.dataset
+              .examEligibilityIndex
           );
 
 
-          showToast(
-            'พร้อมรายงาน มส',
-            `${group.subject_code || '-'} | ชั้น ${group.class_level || '-'}/${group.room || '-'}`,
-            'success'
-          );
+        const group =
+          state.examEligibilityGroups[
+            index
+          ];
+
+
+        if(!group){
+          return;
+        }
+
+
+        state.selectedExamEligibilityGroup =
+          group;
+
+
+        openExamEligibilityReport(
+          group
+        );
+
+      }
+    );
+
+  });
 
         }
       );
@@ -27577,6 +28490,937 @@ async function deleteRemovedMidtermReports(
 
 
   return codes.length;
+}
+
+/* =====================================================
+   EXAM ELIGIBILITY OVERLAY
+   ===================================================== */
+
+function isExamEligibilityOverlayOpen(){
+
+  return Boolean(
+    el('examEligibilityOverlay')
+      ?.classList.contains('show')
+  );
+
+}
+
+
+function openExamEligibilityOverlay(){
+
+  const overlay =
+    el('examEligibilityOverlay');
+
+
+  if(!overlay){
+    return;
+  }
+
+
+  overlay.classList.add(
+    'show'
+  );
+
+
+  overlay.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+
+  document.body.style.overflow =
+    '';
+
+
+  document.body.style.overflow =
+    'hidden';
+
+
+  const tableWrap =
+    overlay.querySelector(
+      '.exam-eligibility-table-wrap'
+    );
+
+
+  if(tableWrap){
+
+    tableWrap.scrollTop = 0;
+
+    tableWrap.scrollLeft = 0;
+
+  }
+
+}
+
+
+function closeExamEligibilityOverlay(){
+
+  const overlay =
+    el('examEligibilityOverlay');
+
+
+  if(!overlay){
+    return;
+  }
+
+
+  overlay.classList.remove(
+    'show'
+  );
+
+
+  overlay.setAttribute(
+    'aria-hidden',
+    'true'
+  );
+
+
+  document.body.style.overflow =
+    '';
+
+
+  state.examEligibilityRows =
+    [];
+
+
+  state.examEligibilityDirty =
+    false;
+
+
+  state.selectedExamEligibilityGroup =
+    null;
+
+}
+
+async function openExamEligibilityReport(
+  group
+){
+
+  try{
+
+    if(!group){
+      return;
+    }
+
+
+    state.selectedExamEligibilityGroup =
+      group;
+
+
+    state.examEligibilityRows =
+      [];
+
+
+    state.examEligibilityDirty =
+      false;
+
+
+    /* =====================================================
+       แสดงหัวข้อ
+       ===================================================== */
+
+    if(
+      el(
+        'examEligibilitySelectedTitle'
+      )
+    ){
+
+      el(
+        'examEligibilitySelectedTitle'
+      ).textContent =
+        `${group.subject_code || '-'} ` +
+        `${group.subject_name || '-'}`;
+
+    }
+
+
+    if(
+      el(
+        'examEligibilitySelectedSub'
+      )
+    ){
+
+      el(
+        'examEligibilitySelectedSub'
+      ).textContent =
+        `ชั้น ${group.class_level || '-'} ` +
+        `ห้อง ${group.room || '-'} | ` +
+        `ปี ${group.academic_year || '-'}/` +
+        `${group.term || '-'}`;
+
+    }
+
+
+    /*
+     * Reset summary
+     */
+    el(
+      'examEligibilityTotalCount'
+    ).textContent = '0';
+
+
+    el(
+      'examEligibilityLowAttendanceCount'
+    ).textContent = '0';
+
+
+    el(
+      'examEligibilityMsCount'
+    ).textContent = '0';
+
+
+    el(
+      'examEligibilityStudentTbody'
+    ).innerHTML = `
+      <tr>
+        <td
+          colspan="7"
+          class="empty-state"
+        >
+          กำลังโหลดข้อมูลนักเรียน...
+        </td>
+      </tr>
+    `;
+
+
+    setStatus(
+      'examEligibilityFormStatus',
+      'กำลังโหลดรายชื่อนักเรียนและเวลาเรียนจากรายงานผลกลางภาค...',
+      'info'
+    );
+
+
+    /*
+     * เปิด Overlay ก่อน
+     */
+    openExamEligibilityOverlay();
+
+
+    /*
+     * ปิด Save ไว้ก่อน
+     * รอบถัดไปเราจะเชื่อม Supabase
+     */
+    if(
+      el(
+        'saveExamEligibilityBtn'
+      )
+    ){
+
+      el(
+        'saveExamEligibilityBtn'
+      ).disabled =
+        true;
+
+    }
+
+
+    /* =====================================================
+       1. โหลดข้อมูลกลางภาค
+       ===================================================== */
+
+    const {
+      data: midtermReports,
+      error: midtermError
+    } =
+      await supabaseClient
+        .from(
+          'midterm_reports'
+        )
+        .select(`
+          student_id,
+          student_code,
+          student_no,
+          student_name,
+          attendance_score,
+          attendance_max,
+          attendance_percent
+        `)
+        .eq(
+          'academic_year',
+          Number(
+            group.academic_year
+          )
+        )
+        .eq(
+          'term',
+          Number(
+            group.term
+          )
+        )
+        .eq(
+          'subject_code',
+          group.subject_code
+        )
+        .eq(
+          'teacher_code',
+          state.currentUser
+            .teacher_code
+        )
+        .eq(
+          'class_level',
+          group.class_level
+        )
+        .eq(
+          'room',
+          group.room
+        )
+        .order(
+          'student_no',
+          {
+            ascending:true
+          }
+        )
+        .order(
+          'student_name',
+          {
+            ascending:true
+          }
+        );
+
+
+    if(midtermError){
+      throw midtermError;
+    }
+
+
+    const sourceRows =
+      midtermReports || [];
+
+
+    /*
+     * ไม่พบข้อมูลกลางภาค
+     */
+    if(!sourceRows.length){
+
+      state.examEligibilityRows =
+        [];
+
+
+      renderExamEligibilityStudentRows();
+
+
+      setStatus(
+        'examEligibilityFormStatus',
+        'ไม่พบข้อมูลรายงานผลกลางภาคของรายวิชานี้',
+        'warn'
+      );
+
+
+      return;
+
+    }
+
+
+    /* =====================================================
+       2. โหลดข้อมูล มส เดิม ถ้ามี
+       ===================================================== */
+
+    const {
+      data: oldEligibilityRows,
+      error: oldEligibilityError
+    } =
+      await supabaseClient
+        .from(
+          'exam_eligibility_reports'
+        )
+        .select(`
+          student_code,
+          exam_status
+        `)
+        .eq(
+          'academic_year',
+          Number(
+            group.academic_year
+          )
+        )
+        .eq(
+          'term',
+          Number(
+            group.term
+          )
+        )
+        .eq(
+          'subject_code',
+          group.subject_code
+        )
+        .eq(
+          'teacher_code',
+          state.currentUser
+            .teacher_code
+        )
+        .eq(
+          'class_level',
+          group.class_level
+        )
+        .eq(
+          'room',
+          group.room
+        );
+
+
+    if(oldEligibilityError){
+      throw oldEligibilityError;
+    }
+
+
+    /*
+     * Map สถานะเดิม
+     */
+    const oldStatusMap =
+      new Map(
+        (
+          oldEligibilityRows ||
+          []
+        ).map(row => [
+
+          normalizeMidtermRosterStudentCode(
+            row.student_code
+          ),
+
+          safeText(
+            row.exam_status,
+            'eligible'
+          )
+
+        ])
+      );
+
+
+    /* =====================================================
+       3. สร้างข้อมูลหน้า มส
+       ===================================================== */
+
+    state.examEligibilityRows =
+      sortMidtermRosterStudents(
+
+        sourceRows.map(report => {
+
+          const studentCode =
+            normalizeMidtermRosterStudentCode(
+              report.student_code
+            );
+
+
+          return {
+
+            student_id:
+              report.student_id ||
+              null,
+
+            student_code:
+              studentCode,
+
+            student_no:
+              safeNum(
+                report.student_no
+              ),
+
+            student_name:
+              safeText(
+                report.student_name,
+                '-'
+              ),
+
+            attendance_score:
+              safeNum(
+                report.attendance_score
+              ) ?? 0,
+
+            attendance_max:
+              safeNum(
+                report.attendance_max
+              ) ?? 0,
+
+            attendance_percent:
+              Number(
+                report.attendance_percent ||
+                0
+              ),
+
+            exam_status:
+              oldStatusMap.get(
+                studentCode
+              ) === 'ms'
+                ? 'ms'
+                : 'eligible'
+
+          };
+
+        })
+
+      );
+
+
+    renderExamEligibilityStudentRows();
+
+
+    const lowCount =
+      state.examEligibilityRows
+        .filter(row =>
+          Number(
+            row.attendance_percent
+          ) < 80
+        )
+        .length;
+
+
+    setStatus(
+      'examEligibilityFormStatus',
+
+      `โหลดข้อมูลนักเรียน ${
+        state.examEligibilityRows.length
+      } คนเรียบร้อย` +
+      (
+        lowCount
+          ? ` • เวลาเรียนต่ำกว่า 80% ${lowCount} คน`
+          : ''
+      ),
+
+      'success'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'openExamEligibilityReport ERROR',
+      error
+    );
+
+
+    state.examEligibilityRows =
+      [];
+
+
+    renderExamEligibilityStudentRows();
+
+
+    setStatus(
+      'examEligibilityFormStatus',
+      error.message ||
+      'โหลดข้อมูลนักเรียนไม่สำเร็จ',
+      'error'
+    );
+
+  }
+
+}
+
+function renderExamEligibilityStudentRows(){
+
+  const tbody =
+    el(
+      'examEligibilityStudentTbody'
+    );
+
+
+  if(!tbody){
+    return;
+  }
+
+
+  const rows =
+    state.examEligibilityRows ||
+    [];
+
+
+  if(!rows.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="7"
+          class="empty-state"
+        >
+          ไม่พบข้อมูลนักเรียน
+        </td>
+      </tr>
+    `;
+
+
+    updateExamEligibilitySummary();
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    rows.map(
+      (
+        row,
+        index
+      ) => {
+
+        const attendancePercent =
+          Number(
+            row.attendance_percent ||
+            0
+          );
+
+
+        const isLowAttendance =
+          attendancePercent < 80;
+
+
+        const isMs =
+          row.exam_status ===
+          'ms';
+
+
+        const rowClass = [
+
+          isLowAttendance
+            ? 'exam-eligibility-low-attendance'
+            : '',
+
+          isMs
+            ? 'exam-eligibility-ms-row'
+            : ''
+
+        ]
+          .filter(Boolean)
+          .join(' ');
+
+
+        const attendanceScore =
+          Number(
+            row.attendance_score ||
+            0
+          );
+
+
+        const attendanceMax =
+          Number(
+            row.attendance_max ||
+            0
+          );
+
+
+        return `
+          <tr
+            class="${rowClass}"
+          >
+
+            <td class="text-center">
+
+              ${
+                escapeHtml(
+                  String(
+                    row.student_no ??
+                    '-'
+                  )
+                )
+              }
+
+            </td>
+
+
+            <td class="text-center">
+
+              <span
+                class="mono"
+              >
+                ${
+                  escapeHtml(
+                    row.student_code ||
+                    '-'
+                  )
+                }
+              </span>
+
+            </td>
+
+
+            <td>
+
+              ${
+                escapeHtml(
+                  row.student_name ||
+                  '-'
+                )
+              }
+
+            </td>
+
+
+            <td class="text-center">
+
+              <span
+                class="exam-eligibility-attendance-value"
+              >
+
+                ${
+                  escapeHtml(
+                    formatPlainNumber(
+                      attendanceScore
+                    )
+                  )
+                }
+
+                /
+
+                ${
+                  escapeHtml(
+                    formatPlainNumber(
+                      attendanceMax
+                    )
+                  )
+                }
+
+              </span>
+
+            </td>
+
+
+            <td class="text-center">
+
+              <span
+                class="
+                  exam-eligibility-attendance-percent
+                  ${
+                    isLowAttendance
+                      ? 'low'
+                      : ''
+                  }
+                "
+              >
+
+                ${
+                  escapeHtml(
+                    formatDecimal(
+                      attendancePercent,
+                      2
+                    )
+                  )
+                }%
+
+              </span>
+
+            </td>
+
+
+            <td class="text-center">
+
+              ${
+                isMs
+                  ? `
+                    <span
+                      class="exam-eligibility-status-badge ms"
+                    >
+                      มส
+                    </span>
+                  `
+                  : `
+                    <span
+                      class="exam-eligibility-status-badge"
+                    >
+                      มีสิทธิ์สอบ
+                    </span>
+                  `
+              }
+
+            </td>
+
+
+            <td class="text-center">
+
+              <button
+                type="button"
+                class="
+                  exam-eligibility-send-ms-btn
+                  ${
+                    isMs
+                      ? 'cancel-ms'
+                      : ''
+                  }
+                "
+                data-exam-ms-index="${index}"
+              >
+
+                ${
+                  isMs
+                    ? 'ยกเลิก มส'
+                    : 'ส่ง มส'
+                }
+
+              </button>
+
+            </td>
+
+          </tr>
+        `;
+
+      }
+    )
+    .join('');
+
+
+  /*
+   * Event ปุ่ม ส่ง มส
+   */
+  tbody
+    .querySelectorAll(
+      '[data-exam-ms-index]'
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        'click',
+        () => {
+
+          const index =
+            Number(
+              button.dataset
+                .examMsIndex
+            );
+
+
+          toggleExamEligibilityMs(
+            index
+          );
+
+        }
+      );
+
+    });
+
+
+  updateExamEligibilitySummary();
+
+}
+
+function toggleExamEligibilityMs(
+  index
+){
+
+  const row =
+    state.examEligibilityRows[
+      index
+    ];
+
+
+  if(!row){
+    return;
+  }
+
+
+  if(
+    row.exam_status ===
+    'ms'
+  ){
+
+    row.exam_status =
+      'eligible';
+
+  }else{
+
+    row.exam_status =
+      'ms';
+
+  }
+
+
+  state.examEligibilityDirty =
+    true;
+
+
+  renderExamEligibilityStudentRows();
+
+
+  const msCount =
+    state.examEligibilityRows
+      .filter(row =>
+        row.exam_status ===
+        'ms'
+      )
+      .length;
+
+
+  setStatus(
+    'examEligibilityFormStatus',
+
+    msCount
+      ? `เลือกนักเรียนรายงาน มส แล้ว ${msCount} คน`
+      : 'ยังไม่มีนักเรียนที่เลือกส่ง มส',
+
+    msCount
+      ? 'warn'
+      : 'info'
+  );
+
+}
+
+function updateExamEligibilitySummary(){
+
+  const rows =
+    state.examEligibilityRows ||
+    [];
+
+
+  const total =
+    rows.length;
+
+
+  const lowAttendance =
+    rows.filter(row =>
+      Number(
+        row.attendance_percent ||
+        0
+      ) < 80
+    )
+    .length;
+
+
+  const msCount =
+    rows.filter(row =>
+      row.exam_status ===
+      'ms'
+    )
+    .length;
+
+
+  if(
+    el(
+      'examEligibilityTotalCount'
+    )
+  ){
+
+    el(
+      'examEligibilityTotalCount'
+    ).textContent =
+      String(total);
+
+  }
+
+
+  if(
+    el(
+      'examEligibilityLowAttendanceCount'
+    )
+  ){
+
+    el(
+      'examEligibilityLowAttendanceCount'
+    ).textContent =
+      String(lowAttendance);
+
+  }
+
+
+  if(
+    el(
+      'examEligibilityMsCount'
+    )
+  ){
+
+    el(
+      'examEligibilityMsCount'
+    ).textContent =
+      String(msCount);
+
+  }
+
 }
 
 /* =====================================================
@@ -36295,6 +38139,19 @@ bindIfExists(
         180
       );
   }
+);
+
+bindIfExists(
+  'examEligibilityCloseBtn',
+  'click',
+  closeExamEligibilityOverlay
+);
+
+
+bindIfExists(
+  'examEligibilityCancelBtn',
+  'click',
+  closeExamEligibilityOverlay
 );
 
 
