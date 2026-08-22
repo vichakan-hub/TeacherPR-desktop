@@ -10996,7 +10996,7 @@ td{
         <span class="sidebar-label">รายงานผลกลางภาค</span>
       </button>
 
-      <!-- ===== รายงานนักเรียนไม่มีสิทธิ์สอบ =====
+      <!-- ===== รายงานนักเรียนไม่มีสิทธิ์สอบ =====-->
 <button
   id="sideExamEligibilityBtn"
   class="sidebar-sublink"
@@ -11005,7 +11005,7 @@ td{
 >
   <span class="sidebar-subicon">🚫</span>
   <span class="sidebar-label">รายงานนักเรียนไม่มีสิทธิ์สอบ</span>
-</button> -->
+</button> 
 
       <button id="sideFinalReportBtn" class="sidebar-sublink" type="button" data-grade-side-page="import">
         <span class="sidebar-subicon">📥</span>
@@ -26062,13 +26062,10 @@ function renderExamEligibilityTeachingRows(
 
     }).join('');
 
+  /* =====================================================
+     ปุ่มรายงาน มส
+     ===================================================== */
 
-  /*
-   * ปุ่มรายงาน มส
-   *
-   * รอบนี้เลือก Group ให้ได้ก่อน
-   * รอบถัดไปเราจะเปิด Overlay นักเรียน
-   */
   tbody
     .querySelectorAll(
       '[data-exam-eligibility-index]'
@@ -26077,76 +26074,72 @@ function renderExamEligibilityTeachingRows(
 
       button.addEventListener(
         'click',
-        () => {
+        async () => {
 
-          const index =
-            Number(
-              button.dataset
-                .examEligibilityIndex
+          try{
+
+            const index =
+              Number(
+                button.dataset
+                  .examEligibilityIndex
+              );
+
+
+            const group =
+              state.examEligibilityGroups[
+                index
+              ];
+
+
+            if(!group){
+
+              console.error(
+                'ไม่พบ Exam Eligibility Group:',
+                index
+              );
+
+              showToast(
+                'เปิดรายงานไม่ได้',
+                'ไม่พบข้อมูลรายวิชาที่เลือก',
+                'error'
+              );
+
+              return;
+            }
+
+
+            state.selectedExamEligibilityGroup =
+              group;
+
+
+            await openExamEligibilityReport(
+              group
+            );
+
+          }catch(error){
+
+            console.error(
+              'examEligibility report button ERROR:',
+              error
             );
 
 
-          const group =
-            state.examEligibilityGroups[
-              index
-            ];
+            showToast(
+              'เปิดรายงาน มส ไม่สำเร็จ',
+              error.message ||
+              'เกิดข้อผิดพลาด',
+              'error'
+            );
 
-
-          if(!group){
-            return;
           }
-
-
-          state.selectedExamEligibilityGroup =
-            group;
-
-
-tbody
-  .querySelectorAll(
-    '[data-exam-eligibility-index]'
-  )
-  .forEach(button => {
-
-    button.addEventListener(
-      'click',
-      () => {
-
-        const index =
-          Number(
-            button.dataset
-              .examEligibilityIndex
-          );
-
-
-        const group =
-          state.examEligibilityGroups[
-            index
-          ];
-
-
-        if(!group){
-          return;
-        }
-
-
-        state.selectedExamEligibilityGroup =
-          group;
-
-
-        openExamEligibilityReport(
-          group
-        );
-
-      }
-    );
-
-  });
 
         }
       );
 
     });
+
 }
+ 
 
 function getMidtermGroupKey(row){
   return [
