@@ -41366,29 +41366,78 @@ if(!rows.length){
       });
 
 
-    /* =========================
-       UPSERT
-       ========================= */
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from(
-          'exam_eligibility_reports'
-        )
-        .upsert(
-          payload,
-          {
-            onConflict:
-              'academic_year,term,subject_code,teacher_code,class_level,room,student_code'
-          }
-        );
 
 
-    if(error){
-      throw error;
+
+/* =========================
+   SAVE ผ่าน Session-secured RPC
+   ========================= */
+
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+if(!token){
+
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+
+}
+
+
+const {
+  data: saveResult,
+  error: saveError
+} =
+  await supabaseClient.rpc(
+    'save_exam_eligibility_report_session',
+    {
+
+      p_token:
+        token,
+
+      p_rows:
+        payload
+
     }
+  );
+
+
+if(saveError){
+
+  throw saveError;
+
+}
+
+
+/*
+ * RPC คืน jsonb object
+ */
+const result =
+  Array.isArray(saveResult)
+    ? saveResult[0]
+    : saveResult;
+
+
+if(
+  !result ||
+  result.ok !== true
+){
+
+  throw new Error(
+    'ฐานข้อมูลไม่ยืนยันการบันทึกรายงาน มส'
+  );
+
+}
+
+
+console.log(
+  'save_exam_eligibility_report_session RESULT',
+  result
+);
 
 
     /* =========================
