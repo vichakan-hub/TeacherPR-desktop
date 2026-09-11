@@ -15460,6 +15460,9 @@ importSettings: null,
 retestSettings: null,
 adviserSettings: null,
 adviserRetestSettings: null,
+
+examEligibilitySettings: null, 
+  
 gradeReportDefaultPage: 'midtermReport',
 
   groupedOfferings: [],
@@ -16960,6 +16963,7 @@ const TEACHER_SETTING_KEYS = [
   'teacher_adviser_settings',
   'teacher_adviser_retest_settings',
   'teacher_free_period_settings',
+  'teacher_exam_eligibility_settings',
   'teacher_grade_report_default_page'
 ];
 
@@ -16993,7 +16997,10 @@ function buildDefaultTeacherSettings(){
     retest: { ...base },
     adviser: { ...base },
     adviser_retest: { ...base },
-    free_period: { ...base }
+    free_period: { ...base },
+
+    // รายงานนักเรียนไม่มีสิทธิ์สอบ
+    exam_eligibility: { ...base }
   };
 }
 
@@ -17135,10 +17142,15 @@ const settings = {
     defaults.adviser_retest
   ),
 
-  free_period: normalizeSettingObject(
-    map.teacher_free_period_settings,
-    defaults.free_period
-  )
+free_period: normalizeSettingObject(
+  map.teacher_free_period_settings,
+  defaults.free_period
+),
+
+exam_eligibility: normalizeSettingObject(
+  map.teacher_exam_eligibility_settings,
+  defaults.exam_eligibility
+)
 };
 
 state.importSettings =
@@ -17155,6 +17167,10 @@ state.adviserRetestSettings =
 
 state.freePeriodSettings =
   settings.free_period;
+
+  // รายงาน มส
+state.examEligibilitySettings =
+  settings.exam_eligibility;
 
   state.gradeReportDefaultPage = normalizeGradeReportDefaultPage(
   map.teacher_grade_report_default_page
@@ -29794,12 +29810,116 @@ async function downloadExamEligibilityTemplateExcel(){
   }
 
 }
+function getExamEligibilitySetting(){
 
+  return (
+    state.examEligibilitySettings ||
+    buildDefaultOneSetting()
+  );
+
+}
+
+
+/*
+ * ตรวจว่า period นี้ถูก Admin ปิดรับหรือไม่
+ */
+function isExamEligibilitySubmissionLocked(
+  target = null
+){
+
+  const setting =
+    getExamEligibilitySetting();
+
+
+  if(setting.lock !== true){
+    return false;
+  }
+
+
+  /*
+   * ถ้าไม่ได้ส่ง group เข้ามา
+   * ถือสถานะ lock ตาม setting โดยตรง
+   */
+  if(!target){
+    return true;
+  }
+
+
+  const targetYear =
+    safeNum(
+      target.academic_year
+    );
+
+
+  const targetTerm =
+    safeNum(
+      target.term
+    );
+
+
+  const settingYear =
+    safeNum(
+      setting.academic_year
+    );
+
+
+  const settingTerm =
+    safeNum(
+      setting.term
+    );
+
+
+  return (
+    targetYear === settingYear &&
+    targetTerm === settingTerm
+  );
+
+}
+
+async function refreshExamEligibilitySettingFromSupabase(){
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('app_settings')
+      .select('key, value')
+      .eq(
+        'key',
+        'teacher_exam_eligibility_settings'
+      )
+      .maybeSingle();
+
+
+  if(error){
+    throw error;
+  }
+
+
+  if(!data){
+    throw new Error(
+      'ไม่พบการตั้งค่า teacher_exam_eligibility_settings'
+    );
+  }
+
+
+  state.examEligibilitySettings =
+    normalizeSettingObject(
+      data.value,
+      state.examEligibilitySettings ||
+      buildDefaultOneSetting()
+    );
+
+
+  return state.examEligibilitySettings;
+
+}
     
 function applyExamEligibilitySettings(){
 
   const setting =
-    getMidtermSetting();
+    getExamEligibilitySetting();
 
   renderYearTermControl(
     el('examEligibilityYear'),
@@ -30822,11 +30942,22 @@ const eligibilityReportCount =
   );
 
 
-const eligibilityMsCount =
+
+
+  const eligibilityMsCount =
   Number(
     row.exam_eligibility_ms_count ||
     0
   );
+
+
+const submissionLocked =
+  isExamEligibilitySubmissionLocked(
+    row
+  );
+
+
+let actionHtml = '';
 
       let actionHtml = '';
 
@@ -30838,9 +30969,69 @@ const eligibilityMsCount =
 if(hasMidtermReports){
 
   /*
+   * Admin ปิดรับรายงาน มส แล้ว
+   */
+  if(submissionLocked){
+
+    actionHtml = `
+      <button
+        class="exam-eligibility-disabled-btn"
+        type="button"
+        disabled
+        title="งานทะเบียน-วัดผลปิดรับรายงาน มส แล้ว"
+      >
+        🔒 ปิดรับรายงานแล้ว
+      </button>
+
+      ${
+        hasEligibilityReport
+          ? `
+            <div
+              class="small"
+              style="
+                margin-top:5px;
+                color:#08783f;
+                font-weight:700;
+              "
+            >
+              รายงานแล้ว
+              ${escapeHtml(
+                String(
+                  eligibilityReportCount
+                )
+              )}
+              คน
+
+              • มส
+              ${escapeHtml(
+                String(
+                  eligibilityMsCount
+                )
+              )}
+              คน
+            </div>
+          `
+          : `
+            <div
+              class="small"
+              style="
+                margin-top:5px;
+                color:#b42318;
+                font-weight:700;
+              "
+            >
+              หมดเวลารายงาน
+            </div>
+          `
+      }
+    `;
+
+  }
+
+  /*
    * เคยบันทึกรายงาน มส แล้ว
    */
-  if(hasEligibilityReport){
+  else if(hasEligibilityReport){
 
     actionHtml = `
       <button
@@ -40774,6 +40965,37 @@ let rows =
       );
     }
 
+    /*
+ * ตรวจสถานะเปิด / ปิดรับล่าสุดก่อน Save จริง
+ * ป้องกันกรณี Admin ปิดรับขณะที่ครูเปิด Overlay ค้างอยู่
+ */
+await refreshExamEligibilitySettingFromSupabase();
+
+
+if(
+  isExamEligibilitySubmissionLocked(
+    group
+  )
+){
+
+  if(saveButton){
+
+    saveButton.disabled =
+      true;
+
+    saveButton.innerHTML =
+      '🔒 ปิดรับรายงานแล้ว';
+
+  }
+
+
+  throw new Error(
+    `งานทะเบียน-วัดผลปิดรับรายงาน มส ` +
+    `ภาคเรียน ${group.term}/${group.academic_year} แล้ว`
+  );
+
+}
+
 
     if(
       !state.currentUser ||
@@ -41176,19 +41398,28 @@ await loadExamEligibilityTeachingList();
 
   }finally{
 
-    if(saveButton){
+if(saveButton){
 
-      saveButton.disabled =
-        !(
-          state.examEligibilityRows ||
-          []
-        ).length;
+  const locked =
+    isExamEligibilitySubmissionLocked(
+      state.selectedExamEligibilityGroup
+    );
 
 
-      saveButton.innerHTML =
-        '💾 บันทึกรายงาน มส';
+  saveButton.disabled =
+    locked ||
+    !(
+      state.examEligibilityRows ||
+      []
+    ).length;
 
-    }
+
+  saveButton.innerHTML =
+    locked
+      ? '🔒 ปิดรับรายงานแล้ว'
+      : '💾 บันทึกรายงาน มส';
+
+}
 
   }
 
@@ -43081,13 +43312,35 @@ bindIfExists('sideMidtermReportBtn', 'click', () => {
   openGradeReportFromSidebar('midtermReport');
 });
 
-  bindIfExists(
+bindIfExists(
   'sideExamEligibilityBtn',
   'click',
-  () => {
+  async () => {
+
+    try{
+
+      await refreshExamEligibilitySettingFromSupabase();
+
+    }catch(error){
+
+      console.warn(
+        'refreshExamEligibilitySettingFromSupabase ERROR',
+        error
+      );
+
+      showToast(
+        'ตรวจสอบสถานะรายงาน มส ไม่สำเร็จ',
+        'กำลังใช้ค่าการตั้งค่าล่าสุดที่โหลดไว้',
+        'warn'
+      );
+
+    }
+
+
     openGradeReportFromSidebar(
       'examEligibility'
     );
+
   }
 );
 
