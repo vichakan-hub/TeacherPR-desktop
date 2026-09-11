@@ -18542,6 +18542,10 @@ async function loadAdviserMsRooms(
 
       renderAdviserMsRoomOptions([]);
 
+      resetAdviserMsDataView(
+        'ไม่พบข้อมูลครูผู้เข้าสู่ระบบ'
+      );
+
       setStatus(
         'adviserMsStatus',
         'ไม่พบข้อมูลครูผู้เข้าสู่ระบบ',
@@ -18576,6 +18580,10 @@ async function loadAdviserMsRooms(
       state.selectedAdviserMsRoomKey = '';
 
       renderAdviserMsRoomOptions([]);
+
+      resetAdviserMsDataView(
+        'กรุณาเลือกปีการศึกษาและภาคเรียน'
+      );
 
       setStatus(
         'adviserMsStatus',
@@ -18662,6 +18670,10 @@ async function loadAdviserMsRooms(
       !state.adviserMsRooms.length
     ){
 
+      resetAdviserMsDataView(
+        'ไม่พบห้องที่ปรึกษา'
+      );
+
       setStatus(
         'adviserMsStatus',
         `ไม่พบห้องที่ปรึกษา ปีการศึกษา ${year} ภาคเรียนที่ ${term}`,
@@ -18677,38 +18689,36 @@ async function loadAdviserMsRooms(
       getSelectedAdviserMsRoom();
 
 
-if(selectedRoom){
+    /*
+     * ถ้ามีห้องเดียว
+     * หรือสามารถกลับไปยังห้องเดิมได้
+     * ให้โหลดข้อมูล มส ต่อทันที
+     */
+    if(selectedRoom){
 
-  /*
-   * ถ้ามีห้องเดียว
-   * หรือกลับมาเลือกห้องเดิมได้
-   * โหลดข้อมูล มส ต่อทันที
-   */
-  await loadAdviserMsRows();
+      await loadAdviserMsRows();
 
-}else{
-
-  resetAdviserMsDataView(
-    'กรุณาเลือกห้องที่ปรึกษา'
-  );
-
-  setStatus(
-    'adviserMsStatus',
-    `พบห้องที่ปรึกษา ${
-      state.adviserMsRooms.length
-    } ห้อง กรุณาเลือกห้อง`,
-    'success'
-  );
-
-}
-
-      setStatus(
-        'adviserMsStatus',
-        `พบห้องที่ปรึกษา ${state.adviserMsRooms.length} ห้อง กรุณาเลือกห้อง`,
-        'success'
-      );
+      return;
 
     }
+
+
+    /*
+     * มีหลายห้อง
+     * แต่ยังไม่ได้เลือกห้อง
+     */
+    resetAdviserMsDataView(
+      'กรุณาเลือกห้องที่ปรึกษา'
+    );
+
+
+    setStatus(
+      'adviserMsStatus',
+      `พบห้องที่ปรึกษา ${
+        state.adviserMsRooms.length
+      } ห้อง กรุณาเลือกห้อง`,
+      'success'
+    );
 
 
   }catch(error){
@@ -18725,9 +18735,14 @@ if(selectedRoom){
     renderAdviserMsRoomOptions([]);
 
 
+    resetAdviserMsDataView(
+      'โหลดห้องที่ปรึกษาไม่สำเร็จ'
+    );
+
+
     setStatus(
       'adviserMsStatus',
-      error.message ||
+      error?.message ||
       'โหลดห้องที่ปรึกษาไม่สำเร็จ',
       'error'
     );
