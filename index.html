@@ -10976,6 +10976,409 @@ td{
   line-height:1.35;
 }
 
+/* =========================================================
+   ADVISER MS TRACKING
+   ติดตามนักเรียนติด มส เฉพาะห้องที่เป็นครูที่ปรึกษา
+   ========================================================= */
+
+.adviser-ms-context-toolbar{
+  display:grid;
+  grid-template-columns:1fr 1fr 1.4fr;
+  gap:10px 12px;
+  margin-bottom:16px;
+}
+
+.adviser-ms-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(170px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.adviser-ms-stat-card{
+  width:100%;
+  min-height:104px;
+  height:auto;
+  padding:16px 18px;
+  text-align:left;
+
+  border:1px solid #dbe7f3;
+  border-radius:20px;
+  background:linear-gradient(180deg,#fff,#f8fbff);
+
+  font-family:inherit;
+  cursor:pointer;
+
+  position:relative;
+
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+.adviser-ms-stat-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+
+.adviser-ms-stat-card .k{
+  font-size:13px;
+  color:#6b7a90;
+  font-weight:800;
+}
+
+.adviser-ms-stat-card .v{
+  margin-top:7px;
+  font-size:32px;
+  line-height:1;
+  font-weight:900;
+  color:#17324d;
+}
+
+.adviser-ms-stat-card .s{
+  margin-top:8px;
+  font-size:12px;
+  color:#6b7a90;
+  line-height:1.45;
+}
+
+.adviser-ms-stat-card.students .v{
+  color:#2563eb;
+}
+
+.adviser-ms-stat-card.total .v{
+  color:#7c3aed;
+}
+
+.adviser-ms-stat-card.eligible .v{
+  color:#0f9d58;
+}
+
+.adviser-ms-stat-card.ms .v{
+  color:#d92d20;
+}
+
+.adviser-ms-stat-card.active{
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.12),
+    0 10px 24px rgba(15,23,42,.08);
+}
+
+.adviser-ms-stat-card.eligible.active{
+  border-color:#86d49f;
+  box-shadow:
+    0 0 0 3px rgba(15,157,88,.12),
+    0 10px 24px rgba(15,23,42,.08);
+}
+
+.adviser-ms-stat-card.ms.active{
+  border-color:#f4aaa5;
+  box-shadow:
+    0 0 0 3px rgba(217,45,32,.12),
+    0 10px 24px rgba(15,23,42,.08);
+}
+
+
+/* ===== Filters ===== */
+
+.adviser-ms-filter-toolbar{
+  display:grid;
+  grid-template-columns:
+    1.3fr
+    1.3fr
+    1fr
+    1.5fr;
+  gap:10px 12px;
+  margin-bottom:14px;
+}
+
+
+.adviser-ms-active-filter{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+
+  margin-bottom:14px;
+  padding:12px 14px;
+
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+.adviser-ms-active-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.adviser-ms-active-pill{
+  display:inline-flex;
+  align-items:center;
+  min-height:34px;
+  padding:0 12px;
+
+  border-radius:999px;
+
+  background:#eef4ff;
+  color:#1d4ed8;
+  border:1px solid #cfe0ff;
+
+  font-size:13px;
+  font-weight:800;
+}
+
+
+/* ===== Student Cards ===== */
+
+.adviser-ms-student-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.adviser-ms-student-card{
+  background:#fff;
+  border:1px solid #dbe7f3;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(18,38,63,.06);
+}
+
+.adviser-ms-student-card.has-ms{
+  border-color:#f0aaa5;
+  box-shadow:
+    0 0 0 2px rgba(217,45,32,.05),
+    0 10px 28px rgba(217,45,32,.08);
+}
+
+.adviser-ms-student-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+
+  padding:16px 18px;
+
+  background:linear-gradient(
+    135deg,
+    rgba(37,99,235,.07),
+    rgba(59,130,246,.02)
+  );
+
+  border-bottom:1px solid #e8eef5;
+}
+
+.adviser-ms-student-card.has-ms
+.adviser-ms-student-head{
+  background:linear-gradient(
+    135deg,
+    rgba(217,45,32,.08),
+    rgba(255,255,255,.65)
+  );
+}
+
+.adviser-ms-student-main{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+}
+
+.adviser-ms-student-avatar{
+  width:50px;
+  height:50px;
+  border-radius:16px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:#dbeafe;
+  color:#2563eb;
+
+  font-size:24px;
+  flex:0 0 auto;
+}
+
+.adviser-ms-student-name{
+  font-size:18px;
+  font-weight:900;
+  color:#17324a;
+}
+
+.adviser-ms-student-meta{
+  margin-top:4px;
+  color:#6b7a90;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.adviser-ms-student-summary{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.adviser-ms-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  min-height:32px;
+  padding:5px 11px;
+
+  border-radius:999px;
+
+  font-size:12px;
+  font-weight:900;
+}
+
+.adviser-ms-pill.eligible{
+  color:#0f9d58;
+  background:#e9f8ef;
+  border:1px solid #bfe6cb;
+}
+
+.adviser-ms-pill.ms{
+  color:#d92d20;
+  background:#fff1f0;
+  border:1px solid #ffd2cf;
+}
+
+.adviser-ms-student-body{
+  padding:14px 16px 16px;
+}
+
+.adviser-ms-table-wrap{
+  overflow:auto;
+  border:1px solid #e4ebf3;
+  border-radius:16px;
+  background:#fff;
+}
+
+.adviser-ms-table{
+  width:100%;
+  min-width:850px;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+.adviser-ms-table th,
+.adviser-ms-table td{
+  padding:11px 13px;
+  vertical-align:middle;
+  border-bottom:1px solid #eef2f7;
+}
+
+.adviser-ms-table th{
+  background:#f8fbff;
+  color:#41536c;
+  font-weight:800;
+}
+
+.adviser-ms-table th:nth-child(1){
+  width:120px;
+}
+
+.adviser-ms-table th:nth-child(2){
+  width:240px;
+}
+
+.adviser-ms-table th:nth-child(3){
+  width:230px;
+}
+
+.adviser-ms-table th:nth-child(4){
+  width:130px;
+  text-align:center;
+}
+
+.adviser-ms-table th:nth-child(5){
+  width:180px;
+  text-align:center;
+}
+
+.adviser-ms-table td:nth-child(4),
+.adviser-ms-table td:nth-child(5){
+  text-align:center;
+}
+
+.adviser-ms-status-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  min-height:30px;
+  padding:5px 11px;
+
+  border-radius:999px;
+
+  font-size:12px;
+  font-weight:900;
+}
+
+.adviser-ms-status-badge.eligible{
+  color:#0f9d58;
+  background:#e9f8ef;
+  border:1px solid #bfe6cb;
+}
+
+.adviser-ms-status-badge.ms{
+  color:#d92d20;
+  background:#fff1f0;
+  border:1px solid #ffd2cf;
+}
+
+.adviser-ms-attendance-ok{
+  color:#0f9d58;
+  font-weight:900;
+}
+
+.adviser-ms-attendance-danger{
+  color:#d92d20;
+  font-weight:900;
+}
+
+@media (max-width:1100px){
+
+  .adviser-ms-stat-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .adviser-ms-context-toolbar,
+  .adviser-ms-filter-toolbar{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media (max-width:720px){
+
+  .adviser-ms-stat-grid,
+  .adviser-ms-context-toolbar,
+  .adviser-ms-filter-toolbar{
+    grid-template-columns:1fr;
+  }
+
+  .adviser-ms-student-head{
+    flex-direction:column;
+  }
+
+  .adviser-ms-student-summary{
+    justify-content:flex-start;
+  }
+
+  .adviser-ms-active-filter{
+    align-items:stretch;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -13079,49 +13482,403 @@ td{
 </div>
 
 <!-- =========================================================
-     PAGE ADVISER MS : ติดตามนักเรียน มส
+     PAGE ADVISER MS : ติดตามนักเรียนติด มส
      ========================================================= -->
 <div id="pageAdviserMs" class="hidden">
 
   <section class="card" style="margin-bottom:18px;">
 
+    <!-- ===============================
+         HEADER
+         =============================== -->
     <div class="preview-topbar">
 
       <div>
         <h2>ติดตามนักเรียนติด มส</h2>
 
-        <div class="sub" style="margin-bottom:0;">
+        <div
+          class="sub"
+          style="margin-bottom:0;"
+        >
           ติดตามสิทธิ์สอบและสถานะ มส
-          ของนักเรียนในห้องที่คุณครูเป็นครูที่ปรึกษา
+          เฉพาะนักเรียนในห้องที่คุณครูเป็นครูที่ปรึกษา
         </div>
       </div>
 
     </div>
 
 
+    <!-- ===============================
+         YEAR / TERM / ADVISER ROOM
+         =============================== -->
+    <div class="adviser-ms-context-toolbar">
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsYear"
+        >
+          ปีการศึกษา
+        </label>
+
+        <select
+          id="adviserMsYear"
+          class="std"
+        >
+          <option value="">
+            กำลังโหลด...
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsTerm"
+        >
+          ภาคเรียน
+        </label>
+
+        <select
+          id="adviserMsTerm"
+          class="std"
+        >
+          <option value="">
+            กำลังโหลด...
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsRoomSelect"
+        >
+          ห้องที่ปรึกษา
+        </label>
+
+        <select
+          id="adviserMsRoomSelect"
+          class="std"
+        >
+          <option value="">
+            กรุณาเลือกห้องที่ปรึกษา
+          </option>
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===============================
+         KPI
+         =============================== -->
+    <div class="adviser-ms-stat-grid">
+
+      <button
+        type="button"
+        class="adviser-ms-stat-card students"
+        data-adviser-ms-stat=""
+      >
+        <div class="k">
+          นักเรียนที่มีรายงาน
+        </div>
+
+        <div
+          id="adviserMsStudentCount"
+          class="v"
+        >
+          0
+        </div>
+
+        <div class="s">
+          จำนวนนักเรียนไม่ซ้ำที่มีการรายงานสิทธิ์สอบ
+        </div>
+      </button>
+
+
+      <button
+        type="button"
+        class="adviser-ms-stat-card total"
+        data-adviser-ms-stat=""
+      >
+        <div class="k">
+          รายการรายงานทั้งหมด
+        </div>
+
+        <div
+          id="adviserMsTotalCount"
+          class="v"
+        >
+          0
+        </div>
+
+        <div class="s">
+          จำนวนรายวิชาทั้งหมดที่มีการรายงาน
+        </div>
+      </button>
+
+
+      <button
+        type="button"
+        class="adviser-ms-stat-card eligible"
+        data-adviser-ms-stat="eligible"
+      >
+        <div class="k">
+          มีสิทธิ์สอบ
+        </div>
+
+        <div
+          id="adviserMsEligibleCount"
+          class="v"
+        >
+          0
+        </div>
+
+        <div class="s">
+          รายการที่ครูรายงานว่ามีสิทธิ์สอบ
+        </div>
+      </button>
+
+
+      <button
+        type="button"
+        class="adviser-ms-stat-card ms"
+        data-adviser-ms-stat="ms"
+      >
+        <div class="k">
+          มส (ไม่มีสิทธิ์สอบ)
+        </div>
+
+        <div
+          id="adviserMsMsCount"
+          class="v"
+        >
+          0
+        </div>
+
+        <div class="s">
+          รายการที่ครูรายงานว่าไม่มีสิทธิ์สอบ
+        </div>
+      </button>
+
+    </div>
+
+
+    <!-- ===============================
+         FILTERS
+         =============================== -->
+    <div class="adviser-ms-filter-toolbar">
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsFilterSubject"
+        >
+          รายวิชา
+        </label>
+
+        <select
+          id="adviserMsFilterSubject"
+          class="std"
+        >
+          <option value="">
+            ทั้งหมด
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsFilterTeacher"
+        >
+          ครูผู้สอน
+        </label>
+
+        <select
+          id="adviserMsFilterTeacher"
+          class="std"
+        >
+          <option value="">
+            ทั้งหมด
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsFilterStatus"
+        >
+          สถานะ
+        </label>
+
+        <select
+          id="adviserMsFilterStatus"
+          class="std"
+        >
+          <option value="">
+            ทั้งหมด
+          </option>
+
+          <option value="eligible">
+            มีสิทธิ์สอบ
+          </option>
+
+          <option value="ms">
+            มส (ไม่มีสิทธิ์สอบ)
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label
+          class="label-in-form"
+          for="adviserMsFilterKeyword"
+        >
+          ค้นหานักเรียน
+        </label>
+
+        <input
+          id="adviserMsFilterKeyword"
+          class="std"
+          type="text"
+          placeholder="รหัสนักเรียน / ชื่อ-สกุล"
+        >
+
+      </div>
+
+    </div>
+
+
+    <!-- ===============================
+         ACTIVE FILTER
+         =============================== -->
+    <div class="adviser-ms-active-filter">
+
+      <div class="adviser-ms-active-left">
+
+        <div class="adviser-ms-active-pill">
+          นักเรียนที่แสดง:
+          <span
+            id="adviserMsVisibleStudentCount"
+            style="margin-left:6px;"
+          >
+            0
+          </span>
+        </div>
+
+
+        <div class="adviser-ms-active-pill">
+          รายการที่แสดง:
+          <span
+            id="adviserMsVisibleRowCount"
+            style="margin-left:6px;"
+          >
+            0
+          </span>
+        </div>
+
+      </div>
+
+
+      <div
+        class="actions"
+        style="margin:0;"
+      >
+
+        <button
+          id="adviserMsClearFilterBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          ล้างตัวกรอง
+        </button>
+
+        <button
+          id="adviserMsReloadBtn"
+          class="btn-secondary"
+          type="button"
+        >
+          โหลดใหม่
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===============================
+         STATUS
+         =============================== -->
     <div
       id="adviserMsStatus"
       class="status info"
     >
-      กำลังเตรียมระบบติดตามนักเรียนติด มส
+      กรุณาเลือกห้องที่ปรึกษา
     </div>
 
 
+    <!-- ===============================
+         STUDENT LIST
+         =============================== -->
     <div
-      class="empty-state"
-      style="
-        margin-top:18px;
-        border:1px dashed #c8d8ea;
-        border-radius:20px;
-        background:#f8fbff;
-      "
+      id="adviserMsStudentList"
+      class="adviser-ms-student-list"
     >
-      🚫 หน้าติดตามนักเรียนติด มส พร้อมใช้งาน
-      <br>
-      <span class="small">
-        ขั้นถัดไปจะเพิ่มปีการศึกษา ภาคเรียน ห้องที่ปรึกษา
-        และข้อมูลรายงาน มส
-      </span>
+
+      <div class="empty-state">
+
+        <div>
+          <div
+            style="
+              font-size:40px;
+              margin-bottom:10px;
+            "
+          >
+            🚫
+          </div>
+
+          <div
+            style="
+              font-size:18px;
+              font-weight:800;
+              color:#17324d;
+            "
+          >
+            กรุณาเลือกห้องที่ปรึกษา
+          </div>
+
+          <div
+            class="small"
+            style="margin-top:6px;"
+          >
+            ระบบจะแสดงข้อมูลสิทธิ์สอบของนักเรียน
+            เฉพาะห้องที่คุณครูเป็นครูที่ปรึกษา
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
   </section>
@@ -15533,12 +16290,24 @@ adviserRooms: [],
 adviserStudents: [],
 selectedAdviserRoomKey: '',
 
+
+/* =====================================================
+ * Adviser MS Tracking
+ * ===================================================== */
+
+adviserMsRooms: [],
+selectedAdviserMsRoomKey: '',
+
+adviserMsRowsRaw: [],
+adviserMsRowsFiltered: [],
+
+
 /*
  * หน้าความเสี่ยงจากรายงานกลางภาค
- * แยกจากหน้าดูเกรดนักเรียนในที่ปรึกษา
  */
 adviserRiskRooms: [],
 selectedAdviserRiskRoomKey: '',
+  
 
 adviserRiskRows: [],
 adviserRiskStudents: [],
@@ -17524,7 +18293,448 @@ function applyAdviserRiskSettingsToDropdowns(){
   });
 }
 
+/* =========================================================
+   Adviser MS : App Setting
+   ========================================================= */
 
+function applyAdviserMsSettingsToDropdowns(){
+
+  const setting =
+    state.adviserSettings ||
+    buildDefaultOneSetting();
+
+
+  applySettingToYearTermControls({
+
+    setting,
+
+    yearId:
+      'adviserMsYear',
+
+    termId:
+      'adviserMsTerm',
+
+    statusId:
+      'adviserMsStatus',
+
+    lockedMessage: currentSetting =>
+      `ติดตามนักเรียนติด มส ปีการศึกษา ${
+        currentSetting.academic_year
+      } ภาคเรียนที่ ${
+        currentSetting.term
+      }`,
+
+    /*
+     * หน้า Adviser ต้องระบุปีและเทอมชัดเจน
+     * ไม่ใช้ตัวเลือก "ทั้งหมด"
+     */
+    allowAllYearText: '',
+    allowAllTermText: ''
+
+  });
+
+}
+
+function getAdviserMsRoomKey(row){
+
+  return [
+    safeText(
+      row?.academic_year,
+      ''
+    ),
+
+    safeText(
+      row?.term,
+      ''
+    ),
+
+    safeText(
+      row?.class_level,
+      ''
+    ),
+
+    safeText(
+      row?.room,
+      ''
+    )
+
+  ].join('|');
+
+}
+
+
+function getSelectedAdviserMsRoom(){
+
+  const key =
+    safeText(
+      el('adviserMsRoomSelect')
+        ?.value,
+      ''
+    );
+
+
+  if(!key){
+    return null;
+  }
+
+
+  return (
+    state.adviserMsRooms || []
+  ).find(
+    row =>
+      getAdviserMsRoomKey(row) ===
+      key
+  ) || null;
+
+}
+
+function renderAdviserMsRoomOptions(
+  rows,
+  preferredRoomKey = ''
+){
+
+  const select =
+    el('adviserMsRoomSelect');
+
+
+  if(!select){
+    return;
+  }
+
+
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+
+  if(!data.length){
+
+    select.innerHTML = `
+      <option value="">
+        ไม่พบห้องที่ปรึกษา
+      </option>
+    `;
+
+    state.selectedAdviserMsRoomKey =
+      '';
+
+    return;
+  }
+
+
+  select.innerHTML = `
+    <option value="">
+      กรุณาเลือกห้องที่ปรึกษา
+    </option>
+
+    ${
+      data.map(row => {
+
+        const key =
+          getAdviserMsRoomKey(
+            row
+          );
+
+
+        const roleText =
+          safeText(
+            row.adviser_role,
+            ''
+          );
+
+
+        const label =
+          `${
+            safeText(
+              row.class_level,
+              '-'
+            )
+          }/${
+            safeText(
+              row.room,
+              '-'
+            )
+          }${
+            roleText
+              ? ` (${roleText})`
+              : ''
+          }`;
+
+
+        return `
+          <option
+            value="${escapeHtml(key)}"
+          >
+            ${escapeHtml(label)}
+          </option>
+        `;
+
+      }).join('')
+    }
+  `;
+
+
+  /*
+   * ถ้ามีห้องเดียว
+   * ให้เลือกให้อัตโนมัติ
+   */
+  if(data.length === 1){
+
+    state.selectedAdviserMsRoomKey =
+      getAdviserMsRoomKey(
+        data[0]
+      );
+
+    select.value =
+      state.selectedAdviserMsRoomKey;
+
+    return;
+  }
+
+
+  /*
+   * ถ้ามีห้องที่เคยเลือกไว้
+   * พยายามกลับไปเลือกห้องเดิม
+   */
+  const preferred =
+    safeText(
+      preferredRoomKey ||
+      state.selectedAdviserMsRoomKey,
+      ''
+    );
+
+
+  if(
+    preferred &&
+    data.some(
+      row =>
+        getAdviserMsRoomKey(row) ===
+        preferred
+    )
+  ){
+
+    state.selectedAdviserMsRoomKey =
+      preferred;
+
+    select.value =
+      preferred;
+
+  }else{
+
+    state.selectedAdviserMsRoomKey =
+      '';
+
+  }
+
+}
+
+async function loadAdviserMsRooms(
+  options = {}
+){
+
+  try{
+
+    if(!state.currentUser?.id){
+
+      state.adviserMsRooms = [];
+      state.selectedAdviserMsRoomKey = '';
+
+      renderAdviserMsRoomOptions([]);
+
+      setStatus(
+        'adviserMsStatus',
+        'ไม่พบข้อมูลครูผู้เข้าสู่ระบบ',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    const year =
+      safeNum(
+        el('adviserMsYear')
+          ?.value
+      );
+
+
+    const term =
+      safeNum(
+        el('adviserMsTerm')
+          ?.value
+      );
+
+
+    if(
+      !year ||
+      !term
+    ){
+
+      state.adviserMsRooms = [];
+      state.selectedAdviserMsRoomKey = '';
+
+      renderAdviserMsRoomOptions([]);
+
+      setStatus(
+        'adviserMsStatus',
+        'กรุณาเลือกปีการศึกษาและภาคเรียน',
+        'warn'
+      );
+
+      return;
+
+    }
+
+
+    setStatus(
+      'adviserMsStatus',
+      'กำลังโหลดห้องที่ปรึกษา...',
+      'info'
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          'teacher_advisers'
+        )
+        .select(`
+          id,
+          teacher_id,
+          academic_year,
+          term,
+          class_level,
+          room,
+          adviser_role
+        `)
+        .eq(
+          'teacher_id',
+          state.currentUser.id
+        )
+        .eq(
+          'academic_year',
+          year
+        )
+        .eq(
+          'term',
+          term
+        )
+        .order(
+          'class_level',
+          {
+            ascending:true
+          }
+        )
+        .order(
+          'room',
+          {
+            ascending:true
+          }
+        );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    state.adviserMsRooms =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    renderAdviserMsRoomOptions(
+      state.adviserMsRooms,
+      safeText(
+        options.preferredRoomKey,
+        ''
+      )
+    );
+
+
+    if(
+      !state.adviserMsRooms.length
+    ){
+
+      setStatus(
+        'adviserMsStatus',
+        `ไม่พบห้องที่ปรึกษา ปีการศึกษา ${year} ภาคเรียนที่ ${term}`,
+        'warn'
+      );
+
+      return;
+
+    }
+
+
+    const selectedRoom =
+      getSelectedAdviserMsRoom();
+
+
+    if(selectedRoom){
+
+      /*
+       * ตอนนี้ยังไม่ดึงข้อมูล มส
+       * ขั้นถัดไปจะเรียก RPC ตรงนี้
+       */
+      setStatus(
+        'adviserMsStatus',
+        `เลือกห้องที่ปรึกษา ${
+          safeText(
+            selectedRoom.class_level,
+            '-'
+          )
+        }/${
+          safeText(
+            selectedRoom.room,
+            '-'
+          )
+        } แล้ว`,
+        'success'
+      );
+
+    }else{
+
+      setStatus(
+        'adviserMsStatus',
+        `พบห้องที่ปรึกษา ${state.adviserMsRooms.length} ห้อง กรุณาเลือกห้อง`,
+        'success'
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'loadAdviserMsRooms ERROR',
+      error
+    );
+
+
+    state.adviserMsRooms = [];
+    state.selectedAdviserMsRoomKey = '';
+
+    renderAdviserMsRoomOptions([]);
+
+
+    setStatus(
+      'adviserMsStatus',
+      error.message ||
+      'โหลดห้องที่ปรึกษาไม่สำเร็จ',
+      'error'
+    );
+
+  }
+
+}
+    
 /*
  * เมื่อเข้าจากหน้ารายชื่อนักเรียน
  * ให้ใช้ปีและภาคเรียนที่กำลังเลือกอยู่ก่อน
@@ -43617,14 +44827,73 @@ bindIfExists(
   }
 );
 
-/*
- * เปิดหน้าติดตามนักเรียน มส
- */
 bindIfExists(
   'menuAdviserMsBtn',
   'click',
-  () => {
-    setActivePage('adviserms');
+  async () => {
+
+    const pageChanged =
+      setActivePage(
+        'adviserms'
+      );
+
+
+    if(
+      pageChanged === false
+    ){
+      return;
+    }
+
+
+    try{
+
+      /*
+       * ใช้ App Setting เดียวกับ
+       * หน้าครูที่ปรึกษา
+       */
+      if(
+        !state.adviserSettings
+      ){
+
+        await loadImportSettingsFromSheet();
+
+      }
+
+
+      /*
+       * เติมปี / เทอม
+       */
+      applyAdviserMsSettingsToDropdowns();
+
+
+      /*
+       * โหลดเฉพาะห้องที่ครูคนนี้
+       * เป็นครูที่ปรึกษา
+       */
+      await loadAdviserMsRooms({
+        preferredRoomKey:
+          state.selectedAdviserMsRoomKey ||
+          ''
+      });
+
+
+    }catch(error){
+
+      console.error(
+        'menuAdviserMsBtn ERROR',
+        error
+      );
+
+
+      setStatus(
+        'adviserMsStatus',
+        error.message ||
+        'เปิดหน้าติดตามนักเรียนติด มส ไม่สำเร็จ',
+        'error'
+      );
+
+    }
+
   }
 );
 
@@ -44468,6 +45737,92 @@ bindIfExists(
     state.selectedAdviserRiskRoomKey = '';
 
     await loadAdviserRiskRooms();
+  }
+);
+
+/* =========================================================
+   Adviser MS Events
+   ========================================================= */
+
+bindIfExists(
+  'adviserMsYear',
+  'change',
+  async () => {
+
+    state.selectedAdviserMsRoomKey =
+      '';
+
+    await loadAdviserMsRooms();
+
+  }
+);
+
+
+bindIfExists(
+  'adviserMsTerm',
+  'change',
+  async () => {
+
+    state.selectedAdviserMsRoomKey =
+      '';
+
+    await loadAdviserMsRooms();
+
+  }
+);
+
+
+bindIfExists(
+  'adviserMsRoomSelect',
+  'change',
+  async () => {
+
+    state.selectedAdviserMsRoomKey =
+      safeText(
+        el('adviserMsRoomSelect')
+          ?.value,
+        ''
+      );
+
+
+    const selectedRoom =
+      getSelectedAdviserMsRoom();
+
+
+    if(!selectedRoom){
+
+      setStatus(
+        'adviserMsStatus',
+        'กรุณาเลือกห้องที่ปรึกษา',
+        'warn'
+      );
+
+      return;
+
+    }
+
+
+    setStatus(
+      'adviserMsStatus',
+      `เลือกห้อง ${
+        safeText(
+          selectedRoom.class_level,
+          '-'
+        )
+      }/${
+        safeText(
+          selectedRoom.room,
+          '-'
+        )
+      } แล้ว — พร้อมโหลดข้อมูล มส`,
+      'success'
+    );
+
+    /*
+     * ขั้นถัดไป:
+     * await loadAdviserMsRows();
+     */
+
   }
 );
 
