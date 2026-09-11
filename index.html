@@ -30957,79 +30957,115 @@ const submissionLocked =
   );
 
 
+let actionHtml = '';
 
 
-      let actionHtml = '';
+/*
+ * ห้องนี้ไม่มีนักเรียนเลือกเรียน
+ * ให้สถานะนี้สำคัญที่สุด
+ */
+if(hasNoStudents){
+
+  actionHtml = `
+    <button
+      class="exam-eligibility-disabled-btn"
+      type="button"
+      disabled
+    >
+      ไม่มีนักเรียนเลือก
+    </button>
+  `;
+
+}
 
 
-      /*
-       * มีข้อมูลกลางภาคแล้ว
-       * พร้อมรายงาน มส
-       */
-if(hasMidtermReports){
+/*
+ * มีข้อมูลกลางภาคแล้ว
+ */
+else if(hasMidtermReports){
 
   /*
-   * Admin ปิดรับรายงาน มส แล้ว
+   * Admin ปิดรับรายงานแล้ว
    */
   if(submissionLocked){
 
-    actionHtml = `
-      <button
-        class="exam-eligibility-disabled-btn"
-        type="button"
-        disabled
-        title="งานทะเบียน-วัดผลปิดรับรายงาน มส แล้ว"
-      >
-        🔒 ปิดรับรายงานแล้ว
-      </button>
+    /*
+     * เคยรายงานแล้ว
+     * ยังอนุญาตให้เปิดดูแบบ Read-only
+     */
+    if(hasEligibilityReport){
 
-      ${
-        hasEligibilityReport
-          ? `
-            <div
-              class="small"
-              style="
-                margin-top:5px;
-                color:#08783f;
-                font-weight:700;
-              "
-            >
-              รายงานแล้ว
-              ${escapeHtml(
-                String(
-                  eligibilityReportCount
-                )
-              )}
-              คน
+      actionHtml = `
+        <button
+          class="exam-eligibility-report-btn"
+          type="button"
+          data-exam-eligibility-index="${index}"
+        >
+          👁️ ดูรายงาน มส
+        </button>
 
-              • มส
-              ${escapeHtml(
-                String(
-                  eligibilityMsCount
-                )
-              )}
-              คน
-            </div>
-          `
-          : `
-            <div
-              class="small"
-              style="
-                margin-top:5px;
-                color:#b42318;
-                font-weight:700;
-              "
-            >
-              หมดเวลารายงาน
-            </div>
-          `
-      }
-    `;
+        <div
+          class="small"
+          style="
+            margin-top:5px;
+            color:#08783f;
+            font-weight:700;
+          "
+        >
+          รายงานแล้ว
+          ${escapeHtml(
+            String(
+              eligibilityReportCount
+            )
+          )}
+          คน
+
+          • มส
+          ${escapeHtml(
+            String(
+              eligibilityMsCount
+            )
+          )}
+          คน
+        </div>
+      `;
+
+    }
+
+    /*
+     * ปิดรับแล้ว และไม่เคยรายงาน
+     */
+    else{
+
+      actionHtml = `
+        <button
+          class="exam-eligibility-disabled-btn"
+          type="button"
+          disabled
+        >
+          🔒 ปิดรับรายงานแล้ว
+        </button>
+
+        <div
+          class="small"
+          style="
+            margin-top:5px;
+            color:#b42318;
+            font-weight:700;
+          "
+        >
+          ไม่ได้ส่งรายงาน
+        </div>
+      `;
+
+    }
 
   }
 
+
   /*
-   * เคยบันทึกรายงาน มส แล้ว
+   * ยังเปิดรับอยู่
+   * และเคยรายงานแล้ว
    */
   else if(hasEligibilityReport){
 
@@ -31075,8 +31111,8 @@ if(hasMidtermReports){
 
 
   /*
-   * มีรายชื่อนักเรียนแล้ว
-   * แต่ยังไม่เคยรายงาน มส
+   * ยังเปิดรับอยู่
+   * และยังไม่เคยรายงาน
    */
   else{
 
@@ -31109,41 +31145,26 @@ if(hasMidtermReports){
 }
 
 
-      /*
-       * ห้องนี้ไม่มีนักเรียนเลือกเรียน
-       */
-      else if(hasNoStudents){
+/*
+ * ยังไม่มีข้อมูลกลางภาค
+ */
+else{
 
-        actionHtml = `
-          <button
-            class="exam-eligibility-disabled-btn"
-            type="button"
-            disabled
-          >
-            ไม่มีนักเรียนเลือก
-          </button>
-        `;
+  actionHtml = `
+    <button
+      class="exam-eligibility-disabled-btn"
+      type="button"
+      disabled
+    >
+      ยังไม่มีข้อมูลกลางภาค
+    </button>
+  `;
 
-      }
+}
 
 
-      /*
-       * ยังไม่เคยรายงานกลางภาค
-       * จึงยังไม่มีรายชื่อ/เวลาเรียนให้ดึง
-       */
-      else{
 
-        actionHtml = `
-          <button
-            class="exam-eligibility-disabled-btn"
-            type="button"
-            disabled
-          >
-            ยังไม่มีข้อมูลกลางภาค
-          </button>
-        `;
 
-      }
 
 
       return `
@@ -34096,20 +34117,26 @@ setStatus(
      * ปิด Save ไว้ก่อน
      * รอบถัดไปเราจะเชื่อม Supabase
      */
-    if(
-      el(
-        'saveExamEligibilityBtn'
-      )
-    ){
+const readOnly =
+  isExamEligibilitySubmissionLocked(
+    group
+  );
 
-      el(
-        'saveExamEligibilityBtn'
-      ).disabled =
-        true;
 
-    }
+if(el('saveExamEligibilityBtn')){
 
-    if(
+  el('saveExamEligibilityBtn').disabled =
+    readOnly;
+
+  el('saveExamEligibilityBtn').innerHTML =
+    readOnly
+      ? '🔒 ปิดรับรายงานแล้ว'
+      : '💾 บันทึกรายงาน มส';
+
+}
+
+
+if(
   el(
     'downloadExamEligibilityTemplateBtn'
   )
@@ -34118,19 +34145,22 @@ setStatus(
   el(
     'downloadExamEligibilityTemplateBtn'
   ).disabled =
-    true;
+    readOnly;
 
 }
+
 
 if(
   el(
     'importExamEligibilityExcelBtn'
   )
 ){
+
   el(
     'importExamEligibilityExcelBtn'
   ).disabled =
-    true;
+    readOnly;
+
 }
 
 
@@ -34543,9 +34573,18 @@ if(
   el(
     'saveExamEligibilityBtn'
   ).disabled =
-    false;
+    readOnly;
+
+  el(
+    'saveExamEligibilityBtn'
+  ).innerHTML =
+    readOnly
+      ? '🔒 ปิดรับรายงานแล้ว'
+      : '💾 บันทึกรายงาน มส';
 
 }
+
+
 if(
   el(
     'downloadExamEligibilityTemplateBtn'
@@ -34555,19 +34594,22 @@ if(
   el(
     'downloadExamEligibilityTemplateBtn'
   ).disabled =
-    false;
+    readOnly;
 
 }
+
 
 if(
   el(
     'importExamEligibilityExcelBtn'
   )
 ){
+
   el(
     'importExamEligibilityExcelBtn'
   ).disabled =
-    false;
+    readOnly;
+
 }
 
 
@@ -34579,19 +34621,26 @@ const hasSavedAttendance =
       ) !== null
     );
 
-
 setStatus(
   'examEligibilityFormStatus',
 
-  hasSavedAttendance
-    ? `โหลดข้อมูลนักเรียน ${
+  readOnly
+    ? `ปิดรับรายงานแล้ว • แสดงข้อมูลที่ครูรายงานไว้ ${
         state.examEligibilityRows.length
-      } คน และข้อมูลเวลาเรียนล่าสุดที่เคยบันทึกแล้ว`
-    : `โหลดรายชื่อนักเรียน ${
-        state.examEligibilityRows.length
-      } คนเรียบร้อย กรุณากรอกเวลาเรียนล่าสุด`,
+      } คน • ดูได้อย่างเดียว`
+    : (
+        hasSavedAttendance
+          ? `โหลดข้อมูลนักเรียน ${
+              state.examEligibilityRows.length
+            } คน และข้อมูลเวลาเรียนล่าสุดที่เคยบันทึกแล้ว`
+          : `โหลดรายชื่อนักเรียน ${
+              state.examEligibilityRows.length
+            } คนเรียบร้อย กรุณากรอกเวลาเรียนล่าสุด`
+      ),
 
-  'success'
+  readOnly
+    ? 'warn'
+    : 'success'
 );
 
 
@@ -34706,6 +34755,11 @@ function syncExamEligibilityAttendanceMaxInput(){
   if(!input){
     return;
   }
+
+  input.disabled =
+  isExamEligibilitySubmissionLocked(
+    state.selectedExamEligibilityGroup
+  );
 
 
   const max =
@@ -35012,6 +35066,11 @@ function renderExamEligibilityStudentRows(){
     state.examEligibilityRows ||
     [];
 
+  const readOnly =
+  isExamEligibilitySubmissionLocked(
+    state.selectedExamEligibilityGroup
+  );
+
 
   if(!rows.length){
 
@@ -35166,7 +35225,7 @@ const attendanceMax =
           )
     }"
 
-    
+   ${readOnly ? 'disabled' : ''}
     autocomplete="off"
   >
 
@@ -35239,13 +35298,18 @@ ${
                   }
                 "
                 data-exam-ms-index="${index}"
+                ${readOnly ? 'disabled' : ''}
               >
 
-                ${
-                  isMs
-                    ? 'ยกเลิก มส'
-                    : 'ส่ง มส'
-                }
+              ${
+  readOnly
+    ? 'ดูอย่างเดียว'
+    : (
+        isMs
+          ? 'ยกเลิก มส'
+          : 'ส่ง มส'
+      )
+}
 
               </button>
 
