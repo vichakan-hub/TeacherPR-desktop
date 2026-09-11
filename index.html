@@ -34016,6 +34016,22 @@ async function openExamEligibilityReport(
       return;
     }
 
+    /*
+ * ตรวจสถานะเปิด / ปิดรับล่าสุดทุกครั้ง
+ * ก่อนเปิดรายงาน
+ */
+try{
+
+  await refreshExamEligibilitySettingFromSupabase();
+
+}catch(error){
+
+  console.warn(
+    'refreshExamEligibilitySettingFromSupabase before open ERROR',
+    error
+  );
+
+}
 
     state.selectedExamEligibilityGroup =
       group;
