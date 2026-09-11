@@ -11278,7 +11278,15 @@ td{
   <span class="sidebar-icon">⚠️</span>
   <span class="sidebar-label">นักเรียนเสี่ยงติด 0, ร  และ มส</span>
 </button>
-
+<button
+  id="menuAdviserMsBtn"
+  class="sidebar-link"
+  type="button"
+  data-side-page="adviserms"
+>
+  <span class="sidebar-icon">🚫</span>
+  <span class="sidebar-label">ติดตามนักเรียน มส</span>
+</button>
 <button
   id="menuAdviserRetestBtn"
   class="sidebar-link"
@@ -13064,6 +13072,56 @@ td{
 
       </table>
 
+    </div>
+
+  </section>
+
+</div>
+
+<!-- =========================================================
+     PAGE ADVISER MS : ติดตามนักเรียน มส
+     ========================================================= -->
+<div id="pageAdviserMs" class="hidden">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="preview-topbar">
+
+      <div>
+        <h2>ติดตามนักเรียน มส</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          ติดตามสิทธิ์สอบและสถานะ มส
+          ของนักเรียนในห้องที่คุณครูเป็นครูที่ปรึกษา
+        </div>
+      </div>
+
+    </div>
+
+
+    <div
+      id="adviserMsStatus"
+      class="status info"
+    >
+      กำลังเตรียมระบบติดตามนักเรียน มส
+    </div>
+
+
+    <div
+      class="empty-state"
+      style="
+        margin-top:18px;
+        border:1px dashed #c8d8ea;
+        border-radius:20px;
+        background:#f8fbff;
+      "
+    >
+      🚫 หน้าติดตามนักเรียน มส พร้อมใช้งาน
+      <br>
+      <span class="small">
+        ขั้นถัดไปจะเพิ่มปีการศึกษา ภาคเรียน ห้องที่ปรึกษา
+        และข้อมูลรายงาน มส
+      </span>
     </div>
 
   </section>
@@ -16557,6 +16615,7 @@ const isImport =
   page === 'import';
   const isAdviser = page === 'adviser';
   const isAdviserRisk = page === 'adviserrisk';
+  const isAdviserMs = page === 'adviserms';
   const isRetest = page === 'retest';
   const isFreePeriod = page === 'freeperiod';
   const isGradeStats = page === 'gradestats';
@@ -16599,6 +16658,9 @@ el('pageImport')
 
   el('pageAdviserMidtermRisk')
     ?.classList.toggle('hidden', !isAdviserRisk);
+
+  el('pageAdviserMs')
+  ?.classList.toggle('hidden', !isAdviserMs);
 
   el('pageAdviserRetest')
     ?.classList.toggle('hidden', !isAdviserRetest);
@@ -16702,6 +16764,7 @@ const map = {
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
   adviserrisk: 'menuAdviserRiskBtn',
+  adviserms: 'menuAdviserMsBtn',
   adviserretest: 'menuAdviserRetestBtn',
   gradestats: 'menuGradeStatsBtn',
   teacherstudent: 'menuTeacherStudentBtn',
@@ -16781,6 +16844,12 @@ import: [
   'นักเรียนที่เสี่ยงติด 0, ร และ มส',
   'วิเคราะห์ความเสี่ยงจากคะแนนและเวลาเรียนที่ครูผู้สอนรายงานกลางภาค'
 ],
+
+adviserms: [
+  'ติดตามนักเรียน มส',
+  'ติดตามสิทธิ์สอบและสถานะ มส ของนักเรียนในห้องที่เป็นครูที่ปรึกษา'
+],
+  
  adviserretest: [
   'ติดตามการสอบแก้ตัว',
   'ติดตามสถานะยังไม่แก้ รออนุมัติ และอนุมัติแล้วของนักเรียนในที่ปรึกษา'
@@ -43548,6 +43617,16 @@ bindIfExists(
   }
 );
 
+/*
+ * เปิดหน้าติดตามนักเรียน มส
+ */
+bindIfExists(
+  'menuAdviserMsBtn',
+  'click',
+  () => {
+    setActivePage('adviserms');
+  }
+);
 
 bindIfExists(
   'menuAdviserRetestBtn',
