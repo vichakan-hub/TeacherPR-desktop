@@ -18677,29 +18677,30 @@ async function loadAdviserMsRooms(
       getSelectedAdviserMsRoom();
 
 
-    if(selectedRoom){
+if(selectedRoom){
 
-      /*
-       * ตอนนี้ยังไม่ดึงข้อมูล มส
-       * ขั้นถัดไปจะเรียก RPC ตรงนี้
-       */
-      setStatus(
-        'adviserMsStatus',
-        `เลือกห้องที่ปรึกษา ${
-          safeText(
-            selectedRoom.class_level,
-            '-'
-          )
-        }/${
-          safeText(
-            selectedRoom.room,
-            '-'
-          )
-        } แล้ว`,
-        'success'
-      );
+  /*
+   * ถ้ามีห้องเดียว
+   * หรือกลับมาเลือกห้องเดิมได้
+   * โหลดข้อมูล มส ต่อทันที
+   */
+  await loadAdviserMsRows();
 
-    }else{
+}else{
+
+  resetAdviserMsDataView(
+    'กรุณาเลือกห้องที่ปรึกษา'
+  );
+
+  setStatus(
+    'adviserMsStatus',
+    `พบห้องที่ปรึกษา ${
+      state.adviserMsRooms.length
+    } ห้อง กรุณาเลือกห้อง`,
+    'success'
+  );
+
+}
 
       setStatus(
         'adviserMsStatus',
@@ -18728,6 +18729,1395 @@ async function loadAdviserMsRooms(
       'adviserMsStatus',
       error.message ||
       'โหลดห้องที่ปรึกษาไม่สำเร็จ',
+      'error'
+    );
+
+  }
+
+}
+
+/* =========================================================
+   ADVISER MS : DATA / FILTER / RENDER
+   ========================================================= */
+
+function getAdviserMsSubjectKey(row){
+
+  return (
+    safeText(row?.subject_id, '') ||
+    safeText(row?.subject_code, '') ||
+    safeText(row?.subject_name, '')
+  );
+
+}
+
+
+function getAdviserMsTeacherKey(row){
+
+  return (
+    safeText(row?.teacher_id, '') ||
+    safeText(row?.teacher_code, '') ||
+    safeText(row?.teacher_name, '')
+  );
+
+}
+
+
+function getAdviserMsStudentKey(row){
+
+  return (
+    safeText(row?.student_code, '') ||
+    safeText(row?.student_id, '')
+  );
+
+}
+
+
+function formatAdviserMsPercent(value){
+
+  const n =
+    Number(value);
+
+  if(!Number.isFinite(n)){
+    return '-';
+  }
+
+  return (
+    n.toLocaleString(
+      'th-TH',
+      {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }
+    ) + '%'
+  );
+
+}
+
+
+function formatAdviserMsTeacherName(name){
+
+  const text =
+    safeText(name, '-');
+
+  if(
+    !text ||
+    text === '-'
+  ){
+    return '-';
+  }
+
+  if(text.startsWith('ครู')){
+    return text;
+  }
+
+  return `ครู${text}`;
+
+}
+
+
+function resetAdviserMsDataView(
+  message = 'กรุณาเลือกห้องที่ปรึกษา'
+){
+
+  state.adviserMsRowsRaw = [];
+  state.adviserMsRowsFiltered = [];
+
+
+  if(el('adviserMsStudentCount')){
+    el('adviserMsStudentCount').textContent = '0';
+  }
+
+  if(el('adviserMsTotalCount')){
+    el('adviserMsTotalCount').textContent = '0';
+  }
+
+  if(el('adviserMsEligibleCount')){
+    el('adviserMsEligibleCount').textContent = '0';
+  }
+
+  if(el('adviserMsMsCount')){
+    el('adviserMsMsCount').textContent = '0';
+  }
+
+  if(el('adviserMsVisibleStudentCount')){
+    el('adviserMsVisibleStudentCount').textContent = '0';
+  }
+
+  if(el('adviserMsVisibleRowCount')){
+    el('adviserMsVisibleRowCount').textContent = '0';
+  }
+
+
+  if(el('adviserMsFilterSubject')){
+    el('adviserMsFilterSubject').innerHTML = `
+      <option value="">
+        ทั้งหมด
+      </option>
+    `;
+  }
+
+
+  if(el('adviserMsFilterTeacher')){
+    el('adviserMsFilterTeacher').innerHTML = `
+      <option value="">
+        ทั้งหมด
+      </option>
+    `;
+  }
+
+
+  if(el('adviserMsFilterStatus')){
+    el('adviserMsFilterStatus').value = '';
+  }
+
+
+  if(el('adviserMsFilterKeyword')){
+    el('adviserMsFilterKeyword').value = '';
+  }
+
+
+  document
+    .querySelectorAll(
+      '[data-adviser-ms-stat]'
+    )
+    .forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+
+  const list =
+    el('adviserMsStudentList');
+
+
+  if(list){
+
+    list.innerHTML = `
+      <div class="empty-state">
+
+        <div>
+
+          <div
+            style="
+              font-size:40px;
+              margin-bottom:10px;
+            "
+          >
+            🚫
+          </div>
+
+          <div
+            style="
+              font-size:18px;
+              font-weight:800;
+              color:#17324d;
+            "
+          >
+            ${escapeHtml(message)}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   KPI
+   ========================================================= */
+
+function updateAdviserMsKpi(rows){
+
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+
+  const studentKeys =
+    new Set(
+      data
+        .map(
+          row =>
+            getAdviserMsStudentKey(row)
+        )
+        .filter(Boolean)
+    );
+
+
+  const eligibleCount =
+    data.filter(
+      row =>
+        safeText(
+          row?.exam_status,
+          ''
+        ) === 'eligible'
+    ).length;
+
+
+  const msCount =
+    data.filter(
+      row =>
+        safeText(
+          row?.exam_status,
+          ''
+        ) === 'ms'
+    ).length;
+
+
+  if(el('adviserMsStudentCount')){
+
+    el(
+      'adviserMsStudentCount'
+    ).textContent =
+      String(
+        studentKeys.size
+      );
+
+  }
+
+
+  if(el('adviserMsTotalCount')){
+
+    el(
+      'adviserMsTotalCount'
+    ).textContent =
+      String(
+        data.length
+      );
+
+  }
+
+
+  if(el('adviserMsEligibleCount')){
+
+    el(
+      'adviserMsEligibleCount'
+    ).textContent =
+      String(
+        eligibleCount
+      );
+
+  }
+
+
+  if(el('adviserMsMsCount')){
+
+    el(
+      'adviserMsMsCount'
+    ).textContent =
+      String(
+        msCount
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   FILTER OPTIONS
+   ========================================================= */
+
+function populateAdviserMsFilters(rows){
+
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+
+  const subjectSelect =
+    el('adviserMsFilterSubject');
+
+
+  const teacherSelect =
+    el('adviserMsFilterTeacher');
+
+
+  const oldSubject =
+    safeText(
+      subjectSelect?.value,
+      ''
+    );
+
+
+  const oldTeacher =
+    safeText(
+      teacherSelect?.value,
+      ''
+    );
+
+
+  const subjectMap =
+    new Map();
+
+
+  const teacherMap =
+    new Map();
+
+
+  data.forEach(row => {
+
+    const subjectKey =
+      getAdviserMsSubjectKey(row);
+
+
+    if(subjectKey){
+
+      const subjectCode =
+        safeText(
+          row?.subject_code,
+          ''
+        );
+
+
+      const subjectName =
+        safeText(
+          row?.subject_name,
+          ''
+        );
+
+
+      subjectMap.set(
+        subjectKey,
+        {
+          value:
+            subjectKey,
+
+          label:
+            [
+              subjectCode,
+              subjectName
+            ]
+              .filter(Boolean)
+              .join(' ')
+        }
+      );
+
+    }
+
+
+    const teacherKey =
+      getAdviserMsTeacherKey(row);
+
+
+    if(teacherKey){
+
+      const teacherCode =
+        safeText(
+          row?.teacher_code,
+          ''
+        );
+
+
+      const teacherName =
+        formatAdviserMsTeacherName(
+          row?.teacher_name
+        );
+
+
+      teacherMap.set(
+        teacherKey,
+        {
+          value:
+            teacherKey,
+
+          label:
+            [
+              teacherName,
+              teacherCode
+                ? `(${teacherCode})`
+                : ''
+            ]
+              .filter(Boolean)
+              .join(' ')
+        }
+      );
+
+    }
+
+  });
+
+
+  const subjects =
+    Array
+      .from(
+        subjectMap.values()
+      )
+      .sort(
+        (a, b) =>
+          a.label.localeCompare(
+            b.label,
+            'th'
+          )
+      );
+
+
+  const teachers =
+    Array
+      .from(
+        teacherMap.values()
+      )
+      .sort(
+        (a, b) =>
+          a.label.localeCompare(
+            b.label,
+            'th'
+          )
+      );
+
+
+  if(subjectSelect){
+
+    subjectSelect.innerHTML = `
+      <option value="">
+        ทั้งหมด
+      </option>
+
+      ${
+        subjects
+          .map(
+            item => `
+              <option
+                value="${escapeHtml(item.value)}"
+              >
+                ${escapeHtml(item.label)}
+              </option>
+            `
+          )
+          .join('')
+      }
+    `;
+
+
+    if(
+      oldSubject &&
+      subjects.some(
+        item =>
+          item.value ===
+          oldSubject
+      )
+    ){
+      subjectSelect.value =
+        oldSubject;
+    }
+
+  }
+
+
+  if(teacherSelect){
+
+    teacherSelect.innerHTML = `
+      <option value="">
+        ทั้งหมด
+      </option>
+
+      ${
+        teachers
+          .map(
+            item => `
+              <option
+                value="${escapeHtml(item.value)}"
+              >
+                ${escapeHtml(item.label)}
+              </option>
+            `
+          )
+          .join('')
+      }
+    `;
+
+
+    if(
+      oldTeacher &&
+      teachers.some(
+        item =>
+          item.value ===
+          oldTeacher
+      )
+    ){
+      teacherSelect.value =
+        oldTeacher;
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   STUDENT CARDS
+   ========================================================= */
+
+function renderAdviserMsStudentCards(rows){
+
+  const list =
+    el('adviserMsStudentList');
+
+
+  if(!list){
+    return;
+  }
+
+
+  const data =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+
+  if(!data.length){
+
+    list.innerHTML = `
+      <div class="empty-state">
+
+        <div>
+
+          <div
+            style="
+              font-size:40px;
+              margin-bottom:10px;
+            "
+          >
+            🔎
+          </div>
+
+          <div
+            style="
+              font-size:18px;
+              font-weight:800;
+              color:#17324d;
+            "
+          >
+            ไม่พบข้อมูลตามตัวกรอง
+          </div>
+
+          <div
+            class="small"
+            style="margin-top:6px;"
+          >
+            ลองเปลี่ยนรายวิชา ครูผู้สอน
+            สถานะ หรือคำค้นหา
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const groups =
+    new Map();
+
+
+  data.forEach(row => {
+
+    const key =
+      getAdviserMsStudentKey(row);
+
+
+    if(!key){
+      return;
+    }
+
+
+    if(
+      !groups.has(key)
+    ){
+      groups.set(
+        key,
+        []
+      );
+    }
+
+
+    groups
+      .get(key)
+      .push(row);
+
+  });
+
+
+  const studentGroups =
+    Array
+      .from(
+        groups.values()
+      )
+      .sort(
+        (a, b) => {
+
+          const noA =
+            Number(
+              a[0]?.student_no
+            );
+
+          const noB =
+            Number(
+              b[0]?.student_no
+            );
+
+
+          if(
+            Number.isFinite(noA) &&
+            Number.isFinite(noB) &&
+            noA !== noB
+          ){
+            return noA - noB;
+          }
+
+
+          return safeText(
+            a[0]?.student_name,
+            ''
+          ).localeCompare(
+            safeText(
+              b[0]?.student_name,
+              ''
+            ),
+            'th'
+          );
+
+        }
+      );
+
+
+  list.innerHTML =
+    studentGroups
+      .map(studentRows => {
+
+        const first =
+          studentRows[0] || {};
+
+
+        const msCount =
+          studentRows.filter(
+            row =>
+              safeText(
+                row.exam_status,
+                ''
+              ) === 'ms'
+          ).length;
+
+
+        const eligibleCount =
+          studentRows.filter(
+            row =>
+              safeText(
+                row.exam_status,
+                ''
+              ) === 'eligible'
+          ).length;
+
+
+        const hasMs =
+          msCount > 0;
+
+
+        const bodyRows =
+          [...studentRows]
+            .sort(
+              (a, b) =>
+                safeText(
+                  a.subject_code,
+                  ''
+                ).localeCompare(
+                  safeText(
+                    b.subject_code,
+                    ''
+                  ),
+                  'th'
+                )
+            )
+            .map(row => {
+
+              const status =
+                safeText(
+                  row.exam_status,
+                  ''
+                );
+
+
+              const isMs =
+                status === 'ms';
+
+
+              const attendance =
+                Number(
+                  row.attendance_percent
+                );
+
+
+              const attendanceClass =
+                Number.isFinite(attendance) &&
+                attendance < 80
+                  ? 'adviser-ms-attendance-danger'
+                  : 'adviser-ms-attendance-ok';
+
+
+              const statusLabel =
+                isMs
+                  ? 'มส (ไม่มีสิทธิ์สอบ)'
+                  : status === 'eligible'
+                    ? 'มีสิทธิ์สอบ'
+                    : safeText(
+                        status,
+                        '-'
+                      );
+
+
+              const statusClass =
+                isMs
+                  ? 'ms'
+                  : 'eligible';
+
+
+              return `
+                <tr>
+
+                  <td>
+                    <span class="mono">
+                      ${escapeHtml(
+                        safeText(
+                          row.subject_code,
+                          '-'
+                        )
+                      )}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    ${escapeHtml(
+                      safeText(
+                        row.subject_name,
+                        '-'
+                      )
+                    )}
+                  </td>
+
+
+                  <td>
+
+                    <div
+                      style="
+                        font-weight:700;
+                        color:#17324d;
+                      "
+                    >
+                      ${escapeHtml(
+                        formatAdviserMsTeacherName(
+                          row.teacher_name
+                        )
+                      )}
+                    </div>
+
+                    ${
+                      safeText(
+                        row.teacher_code,
+                        ''
+                      )
+                        ? `
+                          <div class="small">
+                            ${escapeHtml(
+                              safeText(
+                                row.teacher_code,
+                                ''
+                              )
+                            )}
+                          </div>
+                        `
+                        : ''
+                    }
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="${attendanceClass}"
+                    >
+                      ${escapeHtml(
+                        formatAdviserMsPercent(
+                          row.attendance_percent
+                        )
+                      )}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="
+                        adviser-ms-status-badge
+                        ${statusClass}
+                      "
+                    >
+                      ${escapeHtml(
+                        statusLabel
+                      )}
+                    </span>
+
+                  </td>
+
+                </tr>
+              `;
+
+            })
+            .join('');
+
+
+        return `
+          <article
+            class="
+              adviser-ms-student-card
+              ${
+                hasMs
+                  ? 'has-ms'
+                  : ''
+              }
+            "
+          >
+
+            <div
+              class="adviser-ms-student-head"
+            >
+
+              <div
+                class="adviser-ms-student-main"
+              >
+
+                <div
+                  class="adviser-ms-student-avatar"
+                >
+                  👤
+                </div>
+
+
+                <div>
+
+                  <div
+                    class="adviser-ms-student-name"
+                  >
+                    ${escapeHtml(
+                      safeText(
+                        first.student_name,
+                        '-'
+                      )
+                    )}
+                  </div>
+
+
+                  <div
+                    class="adviser-ms-student-meta"
+                  >
+                    เลขประจำตัว
+                    ${escapeHtml(
+                      safeText(
+                        first.student_code,
+                        '-'
+                      )
+                    )}
+                    •
+                    เลขที่
+                    ${escapeHtml(
+                      safeText(
+                        first.student_no,
+                        '-'
+                      )
+                    )}
+                    •
+                    ชั้น
+                    ${escapeHtml(
+                      safeText(
+                        first.class_level,
+                        '-'
+                      )
+                    )}/${
+                      escapeHtml(
+                        safeText(
+                          first.room,
+                          '-'
+                        )
+                      )
+                    }
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                class="adviser-ms-student-summary"
+              >
+
+                <span
+                  class="
+                    adviser-ms-pill
+                    eligible
+                  "
+                >
+                  มีสิทธิ์สอบ
+                  ${eligibleCount}
+                </span>
+
+
+                ${
+                  msCount > 0
+                    ? `
+                      <span
+                        class="
+                          adviser-ms-pill
+                          ms
+                        "
+                      >
+                        มส ${msCount}
+                      </span>
+                    `
+                    : ''
+                }
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="adviser-ms-student-body"
+            >
+
+              <div
+                class="adviser-ms-table-wrap"
+              >
+
+                <table
+                  class="adviser-ms-table"
+                >
+
+                  <thead>
+                    <tr>
+                      <th>รหัสวิชา</th>
+                      <th>รายวิชา</th>
+                      <th>ครูผู้สอน</th>
+                      <th>%เวลาเรียน</th>
+                      <th>สถานะ</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    ${bodyRows}
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </article>
+        `;
+
+      })
+      .join('');
+
+}
+
+
+/* =========================================================
+   APPLY FILTER
+   ========================================================= */
+
+function applyAdviserMsFiltersAndRender(){
+
+  const subject =
+    safeText(
+      el(
+        'adviserMsFilterSubject'
+      )?.value,
+      ''
+    );
+
+
+  const teacher =
+    safeText(
+      el(
+        'adviserMsFilterTeacher'
+      )?.value,
+      ''
+    );
+
+
+  const status =
+    safeText(
+      el(
+        'adviserMsFilterStatus'
+      )?.value,
+      ''
+    );
+
+
+  const keyword =
+    safeText(
+      el(
+        'adviserMsFilterKeyword'
+      )?.value,
+      ''
+    )
+      .toLowerCase();
+
+
+  const filtered =
+    (
+      state.adviserMsRowsRaw ||
+      []
+    )
+      .filter(row => {
+
+        if(
+          subject &&
+          getAdviserMsSubjectKey(row) !==
+            subject
+        ){
+          return false;
+        }
+
+
+        if(
+          teacher &&
+          getAdviserMsTeacherKey(row) !==
+            teacher
+        ){
+          return false;
+        }
+
+
+        if(
+          status &&
+          safeText(
+            row.exam_status,
+            ''
+          ) !== status
+        ){
+          return false;
+        }
+
+
+        if(keyword){
+
+          const text =
+            [
+              row.student_code,
+              row.student_name,
+              row.student_no
+            ]
+              .map(
+                value =>
+                  safeText(
+                    value,
+                    ''
+                  )
+                    .toLowerCase()
+              )
+              .join(' ');
+
+
+          if(
+            !text.includes(
+              keyword
+            )
+          ){
+            return false;
+          }
+
+        }
+
+
+        return true;
+
+      });
+
+
+  state.adviserMsRowsFiltered =
+    filtered;
+
+
+  const studentCount =
+    new Set(
+      filtered
+        .map(
+          row =>
+            getAdviserMsStudentKey(row)
+        )
+        .filter(Boolean)
+    ).size;
+
+
+  if(
+    el(
+      'adviserMsVisibleStudentCount'
+    )
+  ){
+
+    el(
+      'adviserMsVisibleStudentCount'
+    ).textContent =
+      String(
+        studentCount
+      );
+
+  }
+
+
+  if(
+    el(
+      'adviserMsVisibleRowCount'
+    )
+  ){
+
+    el(
+      'adviserMsVisibleRowCount'
+    ).textContent =
+      String(
+        filtered.length
+      );
+
+  }
+
+
+  document
+    .querySelectorAll(
+      '[data-adviser-ms-stat]'
+    )
+    .forEach(btn => {
+
+      const key =
+        safeText(
+          btn.dataset
+            .adviserMsStat,
+          ''
+        );
+
+
+      btn.classList.toggle(
+        'active',
+        !!key &&
+        key === status
+      );
+
+    });
+
+
+  renderAdviserMsStudentCards(
+    filtered
+  );
+
+}
+
+
+/* =========================================================
+   LOAD RPC
+   ========================================================= */
+
+async function loadAdviserMsRows(){
+
+  const selectedRoom =
+    getSelectedAdviserMsRoom();
+
+
+  if(!selectedRoom){
+
+    resetAdviserMsDataView(
+      'กรุณาเลือกห้องที่ปรึกษา'
+    );
+
+
+    setStatus(
+      'adviserMsStatus',
+      'กรุณาเลือกห้องที่ปรึกษา',
+      'warn'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !state.teacherSessionToken
+  ){
+
+    resetAdviserMsDataView(
+      'ไม่พบ Teacher Session'
+    );
+
+
+    setStatus(
+      'adviserMsStatus',
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    setStatus(
+      'adviserMsStatus',
+      `กำลังโหลดข้อมูล ${
+        safeText(
+          selectedRoom.class_level,
+          '-'
+        )
+      }/${
+        safeText(
+          selectedRoom.room,
+          '-'
+        )
+      }...`,
+      'info'
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        'teacher_get_adviser_exam_eligibility_session',
+        {
+
+          p_token:
+            state.teacherSessionToken,
+
+          p_academic_year:
+            Number(
+              selectedRoom.academic_year
+            ),
+
+          p_term:
+            Number(
+              selectedRoom.term
+            ),
+
+          p_class_level:
+            String(
+              selectedRoom.class_level
+            ),
+
+          p_room:
+            String(
+              selectedRoom.room
+            )
+
+        }
+      );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    state.adviserMsRowsRaw =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    state.adviserMsRowsFiltered =
+      [
+        ...state.adviserMsRowsRaw
+      ];
+
+
+    updateAdviserMsKpi(
+      state.adviserMsRowsRaw
+    );
+
+
+    populateAdviserMsFilters(
+      state.adviserMsRowsRaw
+    );
+
+
+    applyAdviserMsFiltersAndRender();
+
+
+    if(
+      !state.adviserMsRowsRaw.length
+    ){
+
+      setStatus(
+        'adviserMsStatus',
+        `ยังไม่มีข้อมูลรายงานสิทธิ์สอบของห้อง ${
+          safeText(
+            selectedRoom.class_level,
+            '-'
+          )
+        }/${
+          safeText(
+            selectedRoom.room,
+            '-'
+          )
+        }`,
+        'warn'
+      );
+
+      return;
+
+    }
+
+
+    setStatus(
+      'adviserMsStatus',
+      `โหลดข้อมูลห้อง ${
+        safeText(
+          selectedRoom.class_level,
+          '-'
+        )
+      }/${
+        safeText(
+          selectedRoom.room,
+          '-'
+        )
+      } สำเร็จ ${
+        state.adviserMsRowsRaw.length
+      } รายการ`,
+      'success'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'loadAdviserMsRows ERROR',
+      error
+    );
+
+
+    resetAdviserMsDataView(
+      'โหลดข้อมูล มส ไม่สำเร็จ'
+    );
+
+
+    setStatus(
+      'adviserMsStatus',
+      error?.message ||
+      'โหลดข้อมูล มส ไม่สำเร็จ',
       'error'
     );
 
@@ -45752,6 +47142,10 @@ bindIfExists(
     state.selectedAdviserMsRoomKey =
       '';
 
+        resetAdviserMsDataView(
+      'กำลังเปลี่ยนปีการศึกษา'
+    );
+
     await loadAdviserMsRooms();
 
   }
@@ -45766,6 +47160,10 @@ bindIfExists(
     state.selectedAdviserMsRoomKey =
       '';
 
+        resetAdviserMsDataView(
+      'กำลังเปลี่ยนภาคเรียน'
+    );
+
     await loadAdviserMsRooms();
 
   }
@@ -45779,17 +47177,21 @@ bindIfExists(
 
     state.selectedAdviserMsRoomKey =
       safeText(
-        el('adviserMsRoomSelect')
-          ?.value,
+        el(
+          'adviserMsRoomSelect'
+        )?.value,
         ''
       );
 
 
-    const selectedRoom =
-      getSelectedAdviserMsRoom();
+    if(
+      !state.selectedAdviserMsRoomKey
+    ){
 
+      resetAdviserMsDataView(
+        'กรุณาเลือกห้องที่ปรึกษา'
+      );
 
-    if(!selectedRoom){
 
       setStatus(
         'adviserMsStatus',
@@ -45802,29 +47204,155 @@ bindIfExists(
     }
 
 
-    setStatus(
-      'adviserMsStatus',
-      `เลือกห้อง ${
-        safeText(
-          selectedRoom.class_level,
-          '-'
-        )
-      }/${
-        safeText(
-          selectedRoom.room,
-          '-'
-        )
-      } แล้ว — พร้อมโหลดข้อมูล มส`,
-      'success'
-    );
-
-    /*
-     * ขั้นถัดไป:
-     * await loadAdviserMsRows();
-     */
+    await loadAdviserMsRows();
 
   }
 );
+
+  bindIfExists(
+  'adviserMsFilterSubject',
+  'change',
+  () => {
+    applyAdviserMsFiltersAndRender();
+  }
+);
+
+
+bindIfExists(
+  'adviserMsFilterTeacher',
+  'change',
+  () => {
+    applyAdviserMsFiltersAndRender();
+  }
+);
+
+
+bindIfExists(
+  'adviserMsFilterStatus',
+  'change',
+  () => {
+    applyAdviserMsFiltersAndRender();
+  }
+);
+
+
+bindIfExists(
+  'adviserMsFilterKeyword',
+  'input',
+  () => {
+    applyAdviserMsFiltersAndRender();
+  }
+);
+
+
+bindIfExists(
+  'adviserMsClearFilterBtn',
+  'click',
+  () => {
+
+    if(
+      el(
+        'adviserMsFilterSubject'
+      )
+    ){
+      el(
+        'adviserMsFilterSubject'
+      ).value = '';
+    }
+
+
+    if(
+      el(
+        'adviserMsFilterTeacher'
+      )
+    ){
+      el(
+        'adviserMsFilterTeacher'
+      ).value = '';
+    }
+
+
+    if(
+      el(
+        'adviserMsFilterStatus'
+      )
+    ){
+      el(
+        'adviserMsFilterStatus'
+      ).value = '';
+    }
+
+
+    if(
+      el(
+        'adviserMsFilterKeyword'
+      )
+    ){
+      el(
+        'adviserMsFilterKeyword'
+      ).value = '';
+    }
+
+
+    applyAdviserMsFiltersAndRender();
+
+  }
+);
+
+
+bindIfExists(
+  'adviserMsReloadBtn',
+  'click',
+  async () => {
+
+    await loadAdviserMsRows();
+
+  }
+);
+
+
+/*
+ * KPI มีสิทธิ์สอบ / มส
+ * กดเพื่อกรองได้
+ */
+document
+  .querySelectorAll(
+    '[data-adviser-ms-stat]'
+  )
+  .forEach(btn => {
+
+    btn.addEventListener(
+      'click',
+      () => {
+
+        const status =
+          safeText(
+            btn.dataset
+              .adviserMsStat,
+            ''
+          );
+
+
+        if(
+          el(
+            'adviserMsFilterStatus'
+          )
+        ){
+
+          el(
+            'adviserMsFilterStatus'
+          ).value =
+            status;
+
+        }
+
+
+        applyAdviserMsFiltersAndRender();
+
+      }
+    );
+
+  });
 
 
 /*
