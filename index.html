@@ -18603,47 +18603,25 @@ async function loadAdviserMsRooms(
     );
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from(
-          'teacher_advisers'
-        )
-        .select(`
-          id,
-          teacher_id,
-          academic_year,
-          term,
-          class_level,
-          room,
-          adviser_role
-        `)
-        .eq(
-          'teacher_id',
-          state.currentUser.id
-        )
-        .eq(
-          'academic_year',
-          year
-        )
-        .eq(
-          'term',
-          term
-        )
-        .order(
-          'class_level',
-          {
-            ascending:true
-          }
-        )
-        .order(
-          'room',
-          {
-            ascending:true
-          }
-        );
+const {
+  data,
+  error
+} =
+  await supabaseClient.rpc(
+    'teacher_get_adviser_rooms_session',
+    {
+
+      p_token:
+        state.teacherSessionToken,
+
+      p_academic_year:
+        Number(year),
+
+      p_term:
+        Number(term)
+
+    }
+  );
 
 
     if(error){
@@ -47701,99 +47679,7 @@ bindIfExists('fpPrintMineSelectedBtn', 'click', () => {
   fpPrintSelectedMineReservations();
 });
 
-  /* ===== TEACHER MANAGEMENT BUTTONS : จัดการครู / ตาราง teachers ===== */
 
-  bindFirstExisting(
-    [
-      'saveTeacherBtn',
-      'teacherSaveBtn',
-      'saveTeacherDataBtn',
-      'btnSaveTeacher',
-      'saveTeacherFormBtn'
-    ],
-    'click',
-    async () => {
-      if(typeof saveTeacherData === 'function'){
-        await saveTeacherData();
-        return;
-      }
-
-      if(typeof saveTeacher === 'function'){
-        await saveTeacher();
-        return;
-      }
-
-      if(typeof handleSaveTeacher === 'function'){
-        await handleSaveTeacher();
-        return;
-      }
-
-      showToast?.(
-        'ยังไม่พบฟังก์ชันบันทึกข้อมูลครู',
-        'กรุณาตรวจสอบว่ามีฟังก์ชัน saveTeacherData / saveTeacher / handleSaveTeacher หรือไม่',
-        'error'
-      );
-    }
-  );
-
-  bindFirstExisting(
-    [
-      'downloadTeacherTemplateBtn',
-      'teacherTemplateBtn',
-      'btnDownloadTeacherTemplate',
-      'downloadTeachersTemplateBtn'
-    ],
-    'click',
-    () => {
-      if(typeof downloadTeacherTemplate === 'function'){
-        downloadTeacherTemplate();
-        return;
-      }
-
-      downloadTeacherTemplateFallback();
-    }
-  );
-
-  bindFirstExisting(
-    [
-      'chooseTeacherFileBtn',
-      'teacherChooseFileBtn',
-      'btnChooseTeacherFile',
-      'selectTeacherFileBtn'
-    ],
-    'click',
-    () => {
-      clickHiddenFileInput([
-        'teacherFileInput',
-        'teacherImportFileInput',
-        'importTeacherFileInput',
-        'teachersFileInput'
-      ]);
-    }
-  );
-
-  bindFirstExisting(
-    [
-      'teacherFileInput',
-      'teacherImportFileInput',
-      'importTeacherFileInput',
-      'teachersFileInput'
-    ],
-    'change',
-    async (e) => {
-      if(typeof handleTeacherFileChange === 'function'){
-        await handleTeacherFileChange(e);
-        return;
-      }
-
-      if(typeof handleTeacherImportFile === 'function'){
-        await handleTeacherImportFile(e);
-        return;
-      }
-
-      await handleTeacherImportFileFallback(e);
-    }
-  );
 
 bindIfExists('studentRiskClassFilter', 'change', () => {
   renderStudentRiskFilteredList();
