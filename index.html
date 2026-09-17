@@ -13047,10 +13047,14 @@ td{
           </div>
         </section>
 
-        <section class="card">
-          <div class="preview-topbar">
-            <div>
-              <h2>ตรวจสอบผลการเรียน</h2>
+<section
+  id="importPreviewSection"
+  class="card"
+  tabindex="-1"
+>
+  <div class="preview-topbar">
+    <div>
+      <h2>ตรวจสอบผลการเรียน</h2>
               <div class="sub" style="margin-bottom:0;">เมื่อเลือกไฟล์แล้ว ระบบจะอ่านข้อมูล ตรวจสอบ และ map นักเรียนก่อนบันทึกจริง</div>
             </div>
 
@@ -25086,11 +25090,40 @@ async function mapStudentsForPreview(rows){
         el('pvRooms').textContent = roomsInFile.length ? roomsInFile.join(', ') : '-';
         el('pvStatus').textContent = 'พร้อมตรวจสอบ';
 
-        setPreviewFilter('all');
-        summarizeValidation(previewRows);
-        el('saveImportBtn').disabled = previewRows.length === 0;
+setPreviewFilter('all');
+summarizeValidation(previewRows);
+el('saveImportBtn').disabled = previewRows.length === 0;
 
-        showToast('อ่านไฟล์สำเร็จ', `${file.name} พร้อมตรวจสอบก่อนบันทึก`, 'success');
+showToast(
+  'อ่านไฟล์สำเร็จ',
+  `${file.name} พร้อมตรวจสอบก่อนบันทึก`,
+  'success'
+);
+
+
+/*
+ * หลังอ่านไฟล์และสร้าง Preview สำเร็จ
+ * เลื่อนไปยังส่วนตรวจสอบผลการเรียนอัตโนมัติ
+ */
+requestAnimationFrame(() => {
+
+  const previewSection =
+    el('importPreviewSection');
+
+  if(!previewSection){
+    return;
+  }
+
+  previewSection.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+
+  previewSection.focus({
+    preventScroll: true
+  });
+
+});
       }catch(err){
         state.previewRows = [];
         state.previewMeta = null;
