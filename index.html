@@ -24636,38 +24636,336 @@ if(el('studentDetailOverviewCompareTbody')){
       };
     }
 
-    async function mapStudentsForPreview(rows){
-      if(!rows.length) return rows;
+async function mapStudentsForPreview(rows){
+  if(!rows.length) return rows;
 
-      const codes = [...new Set(rows.map(r => String(r.student_code || '').trim()).filter(Boolean))];
-      if(!codes.length) return rows;
+  /*
+   * =====================================================
+   * 1) หา cohort ที่ถูกต้องจากรายการสอนที่กำลังเลือก
+   *
+   * ตัวอย่าง:
+   * ม.4 / 2569
+   *   -> entry_academic_year = 2569
+   *   -> entry_level = ม.4
+   *
+   * ม.5 / 2569
+   *   -> entry_academic_year = 2568
+   *   -> entry_level = ม.4
+   * =====================================================
+   */
 
-      const { data, error } = await supabaseClient
-        .from('students')
-        .select('id, sid, raw_full_name, current_room, current_no')
-        .in('sid', codes);
+  const selectedGroup =
+    state.selectedTeachingGroup || {};
 
-      if(error) throw error;
+  const academicYear =
+    safeNum(
+      selectedGroup.academic_year
+    );
 
-      const sidMap = new Map((data || []).map(s => [String(s.sid).trim(), s]));
+  const classLevel =
+    safeText(
+      selectedGroup.class_level,
+      ''
+    );
 
-      return rows.map(row => {
-        const matched = sidMap.get(String(row.student_code || '').trim());
-        const next = { ...row };
+  if(
+    !academicYear ||
+    !classLevel
+  ){
+    throw new Error(
+      'ไม่พบปีการศึกษาหรือระดับชั้นของรายการสอนที่เลือก'
+    );
+  }
 
-        if(!matched){
-          next.student_id = null;
-          next.student_map_error = 'ไม่พบรหัสนักเรียนนี้ในตาราง students';
-          next.validation_severity = 'error';
-          next.validation_ok = false;
-          return next;
-        }
 
-        next.student_id = matched.id;
-        next.student_map_error = '';
+  const expectedEntry =
+    teacherStudentGetEntryFilterByClassLevel(
+      classLevel,
+      academicYear
+    );
+
+
+  if(!expectedEntry){
+    throw new Error(
+      `ไม่สามารถตรวจสอบรุ่นนักเรียนสำหรับ ${classLevel} ปีการศึกษา ${academicYear} ได้`
+    );
+  }
+
+
+  /*
+   * =====================================================
+   * 2) เตรียม SID จากไฟล์ Excel
+   * =====================================================
+   */
+
+  const codes = [
+    ...new Set(
+      rows
+        .map(
+          r =>
+            String(
+              r.student_code || ''
+            ).trim()
+        )
+        .filter(Boolean)
+    )
+  ];
+
+
+  if(!codes.length){
+    return rows;
+  }
+
+
+  /*
+   * =====================================================
+   * 3) โหลดข้อมูลนักเรียน
+   *
+   * เพิ่ม:
+   * - entry_academic_year
+   * - entry_level
+   *
+   * เพื่อใช้ตรวจว่าเป็นนักเรียนรุ่นเดียวกับ
+   * ชั้น/ปีการศึกษาที่กำลังรายงานหรือไม่
+   * =====================================================
+   */
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('students')
+      .select(`
+        id,
+        sid,
+        raw_full_name,
+        current_room,
+        current_no,
+        entry_academic_year,
+        entry_level
+      `)
+      .in(
+        'sid',
+        codes
+      );
+
+
+  if(error){
+    throw error;
+  }
+
+
+  const sidMap =
+    new Map(
+      (data || []).map(
+        student => [
+          String(
+            student.sid
+          ).trim(),
+          student
+        ]
+      )
+    );
+
+
+  /*
+   * เก็บนักเรียนที่เจอ SID
+   * แต่เป็นคนละ cohort
+   */
+  const wrongCohortStudents = [];
+
+
+  /*
+   * =====================================================
+   * 4) map นักเรียน + ตรวจรุ่น
+   * =====================================================
+   */
+
+  const mappedRows =
+    rows.map(row => {
+
+      const studentCode =
+        String(
+          row.student_code || ''
+        ).trim();
+
+
+      const matched =
+        sidMap.get(
+          studentCode
+        );
+
+
+      const next = {
+        ...row
+      };
+
+
+      /*
+       * SID ไม่มีใน students
+       *
+       * รักษาพฤติกรรมเดิมไว้
+       */
+      if(!matched){
+
+        next.student_id = null;
+
+        next.student_map_error =
+          'ไม่พบรหัสนักเรียนนี้ในตาราง students';
+
+        next.validation_severity =
+          'error';
+
+        next.validation_ok =
+          false;
+
         return next;
-      });
-    }
+      }
+
+
+      /*
+       * พบ SID
+       */
+      next.student_id =
+        matched.id;
+
+      next.student_map_error =
+        '';
+
+
+      /*
+       * เก็บข้อมูล cohort ไว้ใน row
+       * เผื่อใช้ตรวจสอบ/debug
+       */
+      next.student_entry_academic_year =
+        safeNum(
+          matched.entry_academic_year
+        );
+
+      next.student_entry_level =
+        safeText(
+          matched.entry_level,
+          ''
+        );
+
+
+      /*
+       * =================================================
+       * ตรวจว่าเป็นรุ่นที่กำลังรายงานจริงหรือไม่
+       * =================================================
+       */
+
+      const sameEntryYear =
+        safeNum(
+          matched.entry_academic_year
+        ) ===
+        safeNum(
+          expectedEntry.entry_academic_year
+        );
+
+
+      const sameEntryLevel =
+        safeText(
+          matched.entry_level,
+          ''
+        ) ===
+        safeText(
+          expectedEntry.entry_level,
+          ''
+        );
+
+
+      if(
+        !sameEntryYear ||
+        !sameEntryLevel
+      ){
+
+        next.student_map_error =
+          `นักเรียนไม่ตรงกับ ${classLevel} ปีการศึกษา ${academicYear}`;
+
+        next.validation_severity =
+          'error';
+
+        next.validation_ok =
+          false;
+
+
+        wrongCohortStudents.push({
+          student_code:
+            studentCode,
+
+          student_name:
+            safeText(
+              matched.raw_full_name,
+              row.student_name || ''
+            ),
+
+          entry_academic_year:
+            matched.entry_academic_year,
+
+          entry_level:
+            matched.entry_level
+        });
+
+      }
+
+
+      return next;
+    });
+
+
+  /*
+   * =====================================================
+   * 5) ถ้าพบแม้แต่ 1 คนเป็นคนละรุ่น
+   *    หยุดนำเข้าไฟล์ทั้งไฟล์ทันที
+   * =====================================================
+   */
+
+  if(
+    wrongCohortStudents.length
+  ){
+
+    const examples =
+      wrongCohortStudents
+        .slice(0, 5)
+        .map(
+          student =>
+            `${student.student_code} ${student.student_name}`
+        )
+        .join('\n');
+
+
+    const remaining =
+      wrongCohortStudents.length - 5;
+
+
+    const remainingText =
+      remaining > 0
+        ? `\nและอีก ${remaining} คน`
+        : '';
+
+
+    throw new Error(
+      [
+        'พบรายชื่อนักเรียนที่ไม่ตรงกับปีการศึกษาและระดับชั้นที่กำลังรายงาน',
+        '',
+        `รายการที่กำลังรายงาน: ${classLevel} ปีการศึกษา ${academicYear}`,
+        `จำนวนนักเรียนที่ไม่ตรง: ${wrongCohortStudents.length} คน`,
+        '',
+        'ไฟล์นี้อาจเป็นไฟล์จากปีการศึกษาอื่น',
+        'กรุณาตรวจสอบและใช้ไฟล์ของปีการศึกษาที่ถูกต้อง',
+        '',
+        'ตัวอย่างนักเรียน:',
+        examples + remainingText
+      ].join('\n')
+    );
+
+  }
+
+
+  return mappedRows;
+}
 
     function buildRoomMapForSelectedGroup(){
       const roomMap = {};
