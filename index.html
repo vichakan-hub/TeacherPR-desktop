@@ -40561,59 +40561,168 @@ async function saveMidtermReport(){
     validateMidtermRows();
     calculateAllMidtermRows();
 
-    const group = state.selectedMidtermGroup;
-    const user = state.currentUser || {};
+const group =
+  state.selectedMidtermGroup;
 
-    const firstOffering = (group.offerings || [])[0] || {};
+const firstOffering =
+  (group.offerings || [])[0] || {};
 
-    const payload = state.midtermRows.map(row => ({
-      academic_year: Number(group.academic_year),
-      term: Number(group.term),
 
-      subject_offering_id: firstOffering.subject_offering_id || null,
-      subject_id: group.subject_id || firstOffering.subject_id || null,
-      teacher_id: user.id || null,
+/* =====================================================
+ * Secure Teacher Session
+ * ===================================================== */
 
-      teacher_code: user.teacher_code || '',
-      teacher_name: user.full_name || '',
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
 
-      subject_code: group.subject_code || '',
-      subject_name: group.subject_name || '',
 
-      class_level: group.class_level || '',
-      room: group.room || '',
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
 
-      student_id: row.student_id || null,
-      student_code: row.student_code || '',
-      student_no: safeNum(row.student_no),
-      student_name: row.student_name || '',
 
-      keep_score: Number(row.keep_score || 0),
-      midterm_score: Number(row.midterm_score || 0),
-      total_score: Number(row.total_score || 0),
-      score_percent: Number(row.score_percent || 0),
+/* =====================================================
+ * Offering ที่กำลังบันทึก
+ *
+ * Server จะตรวจเองว่า offering นี้
+ * เป็นของครูที่ Login จริงหรือไม่
+ * ===================================================== */
 
-      attendance_score: Number(row.attendance_score || 0),
-      attendance_percent: Number(row.attendance_percent || 0),
+const subjectOfferingId =
+  String(
+    firstOffering.subject_offering_id || ''
+  ).trim();
 
-      keep_max: Number(state.midtermMax.keep || 0),
-      midterm_max: Number(state.midtermMax.midterm || 0),
-      attendance_max: Number(state.midtermMax.attendance || 0),
 
-      updated_at: new Date().toISOString()
-    }));
+if(!subjectOfferingId){
+  throw new Error(
+    'ไม่พบรายการสอน กรุณาเลือกรายวิชาใหม่อีกครั้ง'
+  );
+}
 
-    setStatus('midtermFormStatus', 'กำลังบันทึกคะแนนกลางภาค...', 'info');
 
-    const { error } = await supabaseClient
-      .from('midterm_reports')
-      .upsert(payload, {
-        onConflict: 'academic_year,term,subject_code,teacher_code,class_level,room,student_code'
-      });
+/* =====================================================
+ * ส่งเฉพาะข้อมูลที่ Browser จำเป็นต้องส่ง
+ *
+ * ไม่ส่ง:
+ * - teacher_id / teacher_code / teacher_name
+ * - subject_id / subject_code / subject_name
+ * - academic_year / term
+ * - class_level / room
+ * - student_id / student_name / student_no
+ * - total_score / percent
+ *
+ * Server เป็นผู้หา/คำนวณเองทั้งหมด
+ * ===================================================== */
+
+const payload =
+  state.midtermRows.map(row => ({
+
+    student_code:
+      String(
+        row.student_code || ''
+      ).trim(),
+
+    keep_score:
+      Number(
+        row.keep_score || 0
+      ),
+
+    midterm_score:
+      Number(
+        row.midterm_score || 0
+      ),
+
+    attendance_score:
+      Number(
+        row.attendance_score || 0
+      ),
+
+    keep_max:
+      Number(
+        state.midtermMax.keep || 0
+      ),
+
+    midterm_max:
+      Number(
+        state.midtermMax.midterm || 0
+      ),
+
+    attendance_max:
+      Number(
+        state.midtermMax.attendance || 0
+      )
+
+  }));
+
+
+setStatus(
+  'midtermFormStatus',
+  'กำลังบันทึกคะแนนกลางภาค...',
+  'info'
+);
+
+
+/* =====================================================
+ * Secure SAVE RPC
+ * ===================================================== */
+
+const {
+  data: saveResult,
+  error
+} =
+  await supabaseClient.rpc(
+    'teacher_save_midterm_reports_session',
+    {
+      p_token:
+        token,
+
+      p_subject_offering_id:
+        subjectOfferingId,
+
+      p_rows:
+        payload
+    }
+  );
+
 
 if(error){
   throw error;
 }
+
+
+/* =====================================================
+ * ตรวจผลจาก Server
+ * ===================================================== */
+
+if(
+  !saveResult ||
+  saveResult.ok !== true
+){
+  throw new Error(
+    'Server ไม่ยืนยันการบันทึกคะแนน'
+  );
+}
+
+
+if(
+  Number(saveResult.saved_count || 0) !==
+  payload.length
+){
+  throw new Error(
+    'จำนวนข้อมูลที่ Server บันทึกไม่ตรงกับรายการที่ส่ง'
+  );
+}
+
+
+console.log(
+  'SECURE MIDTERM SAVE =',
+  saveResult
+);
 
 
 /*
