@@ -39759,58 +39759,60 @@ openMidtermScoreOverlay();
     
 
 
-    /*
-     * โหลดเฉพาะนักเรียนที่มีอยู่ใน
-     * midterm_reports ของรายวิชานี้
-     */
-    const {
-      data: oldReports,
-      error: oldError
-    } = await supabaseClient
-      .from('midterm_reports')
-      .select('*')
-      .eq(
-        'academic_year',
-        Number(group.academic_year)
-      )
-      .eq(
-        'term',
-        Number(group.term)
-      )
-      .eq(
-        'subject_code',
-        group.subject_code
-      )
-      .eq(
-        'teacher_code',
-        state.currentUser.teacher_code
-      )
-      .eq(
-        'class_level',
-        group.class_level
-      )
-      .eq(
-        'room',
-        group.room
-      )
-      .order(
-        'student_no',
-        {
-          ascending: true
-        }
-      )
-      .order(
-        'student_name',
-        {
-          ascending: true
-        }
-      );
+ const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
 
 
-    if(oldError){
-      throw oldError;
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+
+const {
+  data: oldReports,
+  error: oldError
+} =
+  await supabaseClient.rpc(
+    'teacher_get_midterm_reports_session',
+    {
+      p_token:
+        token,
+
+      p_academic_year:
+        Number(
+          group.academic_year
+        ),
+
+      p_term:
+        Number(
+          group.term
+        ),
+
+      p_subject_code:
+        String(
+          group.subject_code || ''
+        ).trim(),
+
+      p_class_level:
+        String(
+          group.class_level || ''
+        ).trim(),
+
+      p_room:
+        String(
+          group.room || ''
+        ).trim()
     }
+  );
 
+
+if(oldError){
+  throw oldError;
+}
 
     const reportRows =
       oldReports ||
