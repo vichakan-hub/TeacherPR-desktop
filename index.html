@@ -36647,12 +36647,13 @@ function toggleAllVisibleMidtermRosterStudents(
 
 /*
  * ลบนักเรียนที่ถูกนำออกจากรายวิชา
- * ออกจาก midterm_reports จริง
+ * ผ่าน Secure Teacher Session
  */
 async function deleteRemovedMidtermReports(
   group,
   studentCodes
 ){
+
   const codes = [
     ...new Set(
       (studentCodes || [])
@@ -36663,43 +36664,72 @@ async function deleteRemovedMidtermReports(
     )
   ];
 
+
   if(!group || !codes.length){
     return 0;
   }
 
 
+  /* =====================================================
+   * Teacher Session
+   * ===================================================== */
+
+  const token =
+    String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
+
+
+  /* =====================================================
+   * Offering
+   *
+   * ใช้ offering เดียวกับตอนบันทึกคะแนน
+   * ===================================================== */
+
+  const firstOffering =
+    (group.offerings || [])[0] || {};
+
+
+  const subjectOfferingId =
+    String(
+      firstOffering.subject_offering_id || ''
+    ).trim();
+
+
+  if(!subjectOfferingId){
+    throw new Error(
+      'ไม่พบรายการสอน กรุณาเลือกรายวิชาใหม่อีกครั้ง'
+    );
+  }
+
+
+  /* =====================================================
+   * Secure DELETE RPC
+   * ===================================================== */
+
   const {
+    data,
     error
-  } = await supabaseClient
-    .from('midterm_reports')
-    .delete()
-    .eq(
-      'academic_year',
-      Number(group.academic_year)
-    )
-    .eq(
-      'term',
-      Number(group.term)
-    )
-    .eq(
-      'subject_code',
-      group.subject_code
-    )
-    .eq(
-      'teacher_code',
-      state.currentUser.teacher_code
-    )
-    .eq(
-      'class_level',
-      group.class_level
-    )
-    .eq(
-      'room',
-      group.room
-    )
-    .in(
-      'student_code',
-      codes
+  } =
+    await supabaseClient.rpc(
+      'teacher_delete_midterm_reports_session',
+      {
+        p_token:
+          token,
+
+        p_subject_offering_id:
+          subjectOfferingId,
+
+        p_student_codes:
+          codes
+      }
     );
 
 
@@ -36708,7 +36738,29 @@ async function deleteRemovedMidtermReports(
   }
 
 
-  return codes.length;
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      'Server ไม่ยืนยันการลบข้อมูล'
+    );
+  }
+
+
+  const deletedCount =
+    Number(
+      data.deleted_count || 0
+    );
+
+
+  console.log(
+    'SECURE MIDTERM DELETE =',
+    data
+  );
+
+
+  return deletedCount;
 }
 
 /* =====================================================
