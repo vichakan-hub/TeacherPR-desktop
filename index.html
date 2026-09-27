@@ -41425,83 +41425,69 @@ async function confirmMidtermNoStudents(){
     }
 
 
-    if(!state.currentUser?.teacher_code){
-      throw new Error(
-        'ไม่พบข้อมูลผู้ใช้งาน กรุณาเข้าสู่ระบบใหม่'
-      );
+/* =====================================================
+   Secure Teacher Session
+   ===================================================== */
+
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+if(!token){
+
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+
+}
+
+
+/* =====================================================
+   Offering
+
+   ไม่เชื่อปี / เทอม / ครู / วิชา / ชั้น / ห้อง
+   จาก Browser อีกแล้ว
+   ===================================================== */
+
+const firstOffering =
+  (group.offerings || [])[0] || {};
+
+
+const subjectOfferingId =
+  String(
+    firstOffering.subject_offering_id || ''
+  ).trim();
+
+
+if(!subjectOfferingId){
+
+  throw new Error(
+    'ไม่พบรายการสอน กรุณาเลือกรายวิชาใหม่อีกครั้ง'
+  );
+
+}
+
+
+/* =====================================================
+   Secure RPC
+   ===================================================== */
+
+const {
+  data,
+  error
+} =
+  await supabaseClient.rpc(
+    'teacher_declare_midterm_no_students_session',
+    {
+      p_token:
+        token,
+
+      p_subject_offering_id:
+        subjectOfferingId
     }
-
-
-    /* =====================================================
-       Loading
-       ===================================================== */
-
-    if(confirmBtn){
-
-      confirmBtn.disabled = true;
-
-      confirmBtn.dataset.normalText =
-        confirmBtn.textContent || '';
-
-      confirmBtn.textContent =
-        'กำลังบันทึก...';
-
-    }
-
-
-    /* =====================================================
-       เรียก RPC
-       ===================================================== */
-
-    const {
-      data,
-      error
-    } = await supabaseClient.rpc(
-      'declare_midterm_no_students',
-      {
-        p_academic_year:
-          Number(group.academic_year),
-
-        p_term:
-          Number(group.term),
-
-        p_subject_code:
-          safeText(
-            group.subject_code,
-            ''
-          ),
-
-        p_subject_name:
-          safeText(
-            group.subject_name,
-            ''
-          ),
-
-        p_teacher_code:
-          safeText(
-            state.currentUser.teacher_code,
-            ''
-          ),
-
-        p_teacher_name:
-          safeText(
-            state.currentUser.full_name,
-            ''
-          ),
-
-        p_class_level:
-          safeText(
-            group.class_level,
-            ''
-          ),
-
-        p_room:
-          safeText(
-            group.room,
-            ''
-          )
-      }
-    );
+  );
 
 
     if(error){
