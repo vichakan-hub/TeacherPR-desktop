@@ -24368,104 +24368,283 @@ if(el('studentDetailOverviewCompareTbody')){
       });
     }
 
-    async function attachImportStatus(groups){
-      if(!groups.length) return groups;
+async function attachImportStatus(groups){
 
-      const offeringIds = [
-        ...new Set(
-          groups
-            .flatMap(g => (g.offerings || []).map(o => o.subject_offering_id || o.id))
-            .map(x => String(x || '').trim())
-            .filter(Boolean)
+  if(!groups.length){
+    return groups;
+  }
+
+
+  const offeringIds = [
+    ...new Set(
+      groups
+        .flatMap(group =>
+          (group.offerings || [])
+            .map(offering =>
+              offering.subject_offering_id ||
+              offering.id
+            )
         )
-      ];
+        .map(value =>
+          String(value || '').trim()
+        )
+        .filter(Boolean)
+    )
+  ];
 
-      if(!offeringIds.length){
-        return groups.map(group => ({
-          ...group,
-          has_imported: false,
-          latest_imported_at: null,
-          reported_rooms: []
-        }));
-      }
 
-      /*
-        สำคัญ:
-        ใช้ grade_report_status เหมือนฝั่งงานทะเบียน
-        ไม่อ่าน grade_results ตรง ๆ แบบก้อนเดียว เพราะตอนดู "ทั้งหมด" อาจชน limit 1000
-        แล้วทำให้บางห้องหาย เช่น เห็นแค่ 4, 6, 7 ทั้งที่จริงรายงานครบแล้ว
-      */
-      const statusMap = new Map();
-      const chunkSize = 500;
+  if(!offeringIds.length){
 
-      for(let i = 0; i < offeringIds.length; i += chunkSize){
-        const chunk = offeringIds.slice(i, i + chunkSize);
+    return groups.map(group => ({
+      ...group,
 
-        const rows = await fetchAllPages(() => {
-          return supabaseClient
-            .from('grade_report_status')
-            .select('subject_offering_id, result_count, latest_imported_at, room')
-            .in('subject_offering_id', chunk);
-        }, 1000);
+      has_imported:
+        false,
 
-        (rows || []).forEach(row => {
-          const key = String(row.subject_offering_id || '').trim();
-          if(!key) return;
+      latest_imported_at:
+        null,
 
-          const count = Number(row.result_count || 0);
-          if(count <= 0) return;
+      reported_rooms:
+        []
+    }));
 
-          const prev = statusMap.get(key);
-          if(!prev){
-            statusMap.set(key, row);
-            return;
-          }
+  }
 
-          const oldTime = new Date(prev.latest_imported_at || 0).getTime();
-          const newTime = new Date(row.latest_imported_at || 0).getTime();
-          if(newTime >= oldTime){
-            statusMap.set(key, row);
-          }
-        });
-      }
 
-      return groups.map(group => {
-        const offerings = group.offerings || [];
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-        const expectedRooms = getUniqueSortedImportRooms(
-          offerings.map(o => o.room)
-        );
 
-        const reportedOfferings = offerings.filter(off =>
-          statusMap.has(String(off.subject_offering_id || off.id))
-        );
+  if(!token){
 
-        const reportedRooms = getUniqueSortedImportRooms(
-          reportedOfferings.map(off => off.room)
-        );
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
 
-        const latest = reportedOfferings
-          .map(off => {
-            const status = statusMap.get(String(off.subject_offering_id || off.id));
-            return status?.latest_imported_at || null;
-          })
-          .filter(Boolean)
-          .sort((a,b) => new Date(b) - new Date(a))[0] || null;
+  }
 
-        const hasImportedAllSections =
-          expectedRooms.length > 0 &&
-          expectedRooms.length === reportedRooms.length &&
-          expectedRooms.every(room => reportedRooms.includes(room));
 
-        return {
-          ...group,
-          // ใช้แค่ 2 สถานะ: รายงานแล้ว ต้องครบทุก section / ทุกห้องเท่านั้น
-          has_imported: hasImportedAllSections,
-          latest_imported_at: latest,
-          reported_rooms: reportedRooms
-        };
-      });
+  const statusMap =
+    new Map();
+
+
+  const chunkSize =
+    500;
+
+
+  for(
+    let i = 0;
+    i < offeringIds.length;
+    i += chunkSize
+  ){
+
+    const chunk =
+      offeringIds.slice(
+        i,
+        i + chunkSize
+      );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        'get_grade_report_status_session',
+        {
+          p_token:
+            token,
+
+          p_subject_offering_ids:
+            chunk
+        }
+      );
+
+
+    if(error){
+      throw error;
     }
+
+
+    const rows =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    rows.forEach(row => {
+
+      const key =
+        String(
+          row.subject_offering_id ||
+          ''
+        ).trim();
+
+
+      if(!key){
+        return;
+      }
+
+
+      const count =
+        Number(
+          row.result_count ||
+          0
+        );
+
+
+      if(count <= 0){
+        return;
+      }
+
+
+      const prev =
+        statusMap.get(
+          key
+        );
+
+
+      if(!prev){
+
+        statusMap.set(
+          key,
+          row
+        );
+
+        return;
+
+      }
+
+
+      const oldTime =
+        new Date(
+          prev.latest_imported_at ||
+          0
+        ).getTime();
+
+
+      const newTime =
+        new Date(
+          row.latest_imported_at ||
+          0
+        ).getTime();
+
+
+      if(
+        newTime >=
+        oldTime
+      ){
+
+        statusMap.set(
+          key,
+          row
+        );
+
+      }
+
+    });
+
+  }
+
+
+  return groups.map(group => {
+
+    const offerings =
+      group.offerings ||
+      [];
+
+
+    const expectedRooms =
+      getUniqueSortedImportRooms(
+        offerings.map(
+          offering =>
+            offering.room
+        )
+      );
+
+
+    const reportedOfferings =
+      offerings.filter(
+        offering =>
+          statusMap.has(
+            String(
+              offering.subject_offering_id ||
+              offering.id
+            )
+          )
+      );
+
+
+    const reportedRooms =
+      getUniqueSortedImportRooms(
+        reportedOfferings.map(
+          offering =>
+            offering.room
+        )
+      );
+
+
+    const latest =
+      reportedOfferings
+        .map(offering => {
+
+          const status =
+            statusMap.get(
+              String(
+                offering.subject_offering_id ||
+                offering.id
+              )
+            );
+
+
+          return (
+            status?.latest_imported_at ||
+            null
+          );
+
+        })
+        .filter(Boolean)
+        .sort(
+          (a, b) =>
+            new Date(b) -
+            new Date(a)
+        )[0] ||
+        null;
+
+
+    const hasImportedAllSections =
+      expectedRooms.length > 0 &&
+
+      expectedRooms.length ===
+        reportedRooms.length &&
+
+      expectedRooms.every(
+        room =>
+          reportedRooms.includes(
+            room
+          )
+      );
+
+
+    return {
+      ...group,
+
+      has_imported:
+        hasImportedAllSections,
+
+      latest_imported_at:
+        latest,
+
+      reported_rooms:
+        reportedRooms
+    };
+
+  });
+
+}
 
     function renderImportTeachingRows(rows){
       const tbody = el('importTeachingTbody');
