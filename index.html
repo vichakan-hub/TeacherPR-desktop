@@ -49473,93 +49473,202 @@ function renderAdviserRetestRows(rows){
   }).join('');
 }
 
-    async function fetchAdviserRetestRequestMap(gradeResultIds){
+async function fetchAdviserRetestRequestMap(
+  gradeResultIds
+){
+
   const ids = [
     ...new Set(
       (gradeResultIds || [])
         .filter(Boolean)
-        .map(id => String(id))
+        .map(id =>
+          String(id)
+        )
     )
   ];
 
-  const requestMap = new Map();
+
+  const requestMap =
+    new Map();
+
 
   if(!ids.length){
     return requestMap;
   }
 
-  const chunkSize = 80;
 
-  for(let index = 0; index < ids.length; index += chunkSize){
-    const idChunk = ids.slice(
-      index,
-      index + chunkSize
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
+
+
+  if(!token){
+
+    throw new Error(
+      'ไม่พบ Teacher Session Token กรุณาเข้าสู่ระบบใหม่'
     );
 
-    const requestRows = await fetchAllPages(() => {
-      return supabaseClient
-        .from('grade_retest_requests')
-        .select(`
-          id,
-          grade_result_id,
-          requested_retest_grade_code,
-          status,
-          submitted_at,
-          updated_at,
-          is_active
-        `)
-        .in('grade_result_id', idChunk)
-        .eq('status', 'pending_approval')
-        .eq('is_active', true)
-        .order('updated_at', {
-          ascending: false
-        });
-    }, 1000);
+  }
 
-    (requestRows || []).forEach(request => {
-      const gradeResultId = String(
-        request.grade_result_id || ''
+
+  const selectedRoom =
+    getSelectedAdviserRoom();
+
+
+  if(!selectedRoom){
+
+    throw new Error(
+      'ไม่พบห้องที่ปรึกษาที่เลือก'
+    );
+
+  }
+
+
+  const chunkSize =
+    80;
+
+
+  for(
+    let index = 0;
+    index < ids.length;
+    index += chunkSize
+  ){
+
+    const idChunk =
+      ids.slice(
+        index,
+        index + chunkSize
       );
 
-      if(!gradeResultId){
-        return;
-      }
 
-      const oldRequest =
-        requestMap.get(gradeResultId);
+    const requestRows =
+      await fetchAllPages(
+        () =>
+          supabaseClient
+            .rpc(
+              'teacher_get_adviser_retest_requests_session',
+              {
+                p_token:
+                  token,
 
-      if(!oldRequest){
-        requestMap.set(
-          gradeResultId,
-          request
-        );
+                p_academic_year:
+                  Number(
+                    selectedRoom.academic_year
+                  ),
 
-        return;
-      }
+                p_term:
+                  Number(
+                    selectedRoom.term
+                  ),
 
-      const oldTime = new Date(
-        oldRequest.updated_at ||
-        oldRequest.submitted_at ||
-        0
-      ).getTime();
+                p_class_level:
+                  String(
+                    selectedRoom.class_level ||
+                    ''
+                  ).trim(),
 
-      const newTime = new Date(
-        request.updated_at ||
-        request.submitted_at ||
-        0
-      ).getTime();
+                p_room:
+                  String(
+                    selectedRoom.room ||
+                    ''
+                  ).trim(),
 
-      /*
-       * ถ้ามีหลายรายการ ให้เลือกรายการล่าสุด
-       */
-      if(newTime >= oldTime){
-        requestMap.set(
-          gradeResultId,
-          request
-        );
-      }
-    });
+                p_grade_result_ids:
+                  idChunk
+              }
+            )
+            .order(
+              'updated_at',
+              {
+                ascending: false,
+                nullsFirst: false
+              }
+            )
+            .order(
+              'submitted_at',
+              {
+                ascending: false,
+                nullsFirst: false
+              }
+            )
+            .order(
+              'id',
+              {
+                ascending: true
+              }
+            ),
+
+        1000
+      );
+
+
+    (requestRows || [])
+      .forEach(request => {
+
+        const gradeResultId =
+          String(
+            request.grade_result_id ||
+            ''
+          );
+
+
+        if(!gradeResultId){
+          return;
+        }
+
+
+        const oldRequest =
+          requestMap.get(
+            gradeResultId
+          );
+
+
+        if(!oldRequest){
+
+          requestMap.set(
+            gradeResultId,
+            request
+          );
+
+          return;
+
+        }
+
+
+        const oldTime =
+          new Date(
+            oldRequest.updated_at ||
+            oldRequest.submitted_at ||
+            0
+          ).getTime();
+
+
+        const newTime =
+          new Date(
+            request.updated_at ||
+            request.submitted_at ||
+            0
+          ).getTime();
+
+
+        if(
+          newTime >=
+          oldTime
+        ){
+
+          requestMap.set(
+            gradeResultId,
+            request
+          );
+
+        }
+
+      });
+
   }
+
 
   return requestMap;
 }
