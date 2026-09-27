@@ -20975,6 +20975,7 @@ async function fetchAdviserMidtermReportsForRoom(
     return [];
   }
 
+
   const academicYear =
     safeNum(
       selectedRoom.academic_year
@@ -20989,70 +20990,61 @@ async function fetchAdviserMidtermReportsForRoom(
     safeText(
       selectedRoom.class_level,
       ''
-    );
+    ).trim();
 
   const room =
     safeText(
       selectedRoom.room,
       ''
+    ).trim();
+
+
+  const token =
+    String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
     );
+  }
+
 
   /*
-   * ใช้ fetchAllPages เพื่อป้องกันข้อมูลเกิน
-   * limit เริ่มต้นของ Supabase
+   * Secure Adviser Midterm READ
    *
-   * เช่น นักเรียน 40 คน × 25 วิชา
-   * อาจมีข้อมูลถึง 1,000 รายการ
+   * Server จะตรวจ:
+   * - Teacher Session
+   * - account_type
+   * - teacher_advisers
+   * - ปี / เทอม / ชั้น / ห้อง
+   * - cohort นักเรียน
    */
   const rows =
     await fetchAllPages(
       () => {
+
         return supabaseClient
-          .from('midterm_reports')
-          .select(`
-            id,
-            academic_year,
-            term,
-            class_level,
-            room,
+          .rpc(
+            'teacher_get_adviser_midterm_reports_session',
+            {
+              p_token:
+                token,
 
-            subject_id,
-            subject_code,
-            subject_name,
+              p_academic_year:
+                academicYear,
 
-            teacher_id,
-            teacher_code,
-            teacher_name,
+              p_term:
+                term,
 
-            student_id,
-            student_code,
-            student_no,
-            student_name,
+              p_class_level:
+                classLevel,
 
-            score_percent,
-            attendance_percent,
-
-            keep_max,
-            midterm_max,
-            attendance_max,
-
-            updated_at
-          `)
-          .eq(
-            'academic_year',
-            academicYear
-          )
-          .eq(
-            'term',
-            term
-          )
-          .eq(
-            'class_level',
-            classLevel
-          )
-          .eq(
-            'room',
-            room
+              p_room:
+                room
+            }
           )
           .order(
             'student_code',
@@ -21072,9 +21064,11 @@ async function fetchAdviserMidtermReportsForRoom(
               ascending: true
             }
           );
+
       },
       1000
     );
+
 
   return Array.isArray(rows)
     ? rows
