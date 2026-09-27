@@ -33339,37 +33339,40 @@ async function loadExamEligibilityTeachingList(){
        เพราะหน้า มส ต้องมีต้นทางจาก midterm_reports
        ===================================================== */
 
-    const midtermRows =
-      await fetchAllPages(
-        () => {
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
 
-          return supabaseClient
-            .from('midterm_reports')
-            .select(`
-              academic_year,
-              term,
-              subject_code,
-              class_level,
-              room,
-              student_code
-            `)
-            .eq(
-              'academic_year',
-              Number(year)
-            )
-            .eq(
-              'term',
-              Number(term)
-            )
-            .eq(
-              'teacher_code',
-              state.currentUser
-                .teacher_code
-            );
 
-        },
-        1000
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+
+const midtermRows =
+  await fetchAllPages(
+    () => {
+
+      return supabaseClient.rpc(
+        'teacher_get_midterm_report_keys_session',
+        {
+          p_token:
+            token,
+
+          p_academic_year:
+            Number(year),
+
+          p_term:
+            Number(term)
+        }
       );
+
+    },
+    1000
+  );
 
 /*
  * =====================================================
@@ -34747,31 +34750,37 @@ async function loadMidtermTeachingList(){
  * โหลดข้อมูลกลางภาคของครูคนนี้
  * เพื่อดูว่ารายวิชาใดเคยบันทึกคะแนนแล้ว
  */
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+
 const reportRows =
   await fetchAllPages(
     () => {
-      return supabaseClient
-        .from('midterm_reports')
-        .select(`
-          academic_year,
-          term,
-          subject_code,
-          class_level,
-          room,
-          student_code
-        `)
-        .eq(
-          'academic_year',
-          Number(year)
-        )
-        .eq(
-          'term',
-          Number(term)
-        )
-        .eq(
-          'teacher_code',
-          state.currentUser.teacher_code
-        );
+
+      return supabaseClient.rpc(
+        'teacher_get_midterm_report_keys_session',
+        {
+          p_token:
+            token,
+
+          p_academic_year:
+            Number(year),
+
+          p_term:
+            Number(term)
+        }
+      );
+
     },
     1000
   );
