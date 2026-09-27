@@ -23817,61 +23817,177 @@ async function fetchRetestBaseRows(
     : [];
 }
 
-async function fetchRetestRequestsByGradeResultIds(gradeResultIds){
-  const ids = [...new Set((gradeResultIds || []).filter(Boolean).map(id => String(id)))];
+async function fetchRetestRequestsByGradeResultIds(
+  gradeResultIds
+){
+
+  const ids = [
+    ...new Set(
+      (gradeResultIds || [])
+        .filter(Boolean)
+        .map(id =>
+          String(id)
+        )
+    )
+  ];
+
 
   if(!ids.length){
     return new Map();
   }
 
-  const data = [];
-  const chunkSize = 80;
 
-  for(let i = 0; i < ids.length; i += chunkSize){
-    const idChunk = ids.slice(i, i + chunkSize);
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-    const rows = await fetchAllPages(() => {
-      return supabaseClient
-        .from('grade_retest_requests')
-        .select(`
-          id,
-          grade_result_id,
-          requested_retest_grade_code,
-          status,
-          submitted_at,
-          updated_at,
-          approved_at,
-          rejected_at,
-          rejected_reason,
-          is_active
-        `)
-        .in('grade_result_id', idChunk)
-        .eq('is_active', true);
-    }, 1000);
 
-    data.push(...rows);
+  if(!token){
+
+    throw new Error(
+      'ไม่พบ Teacher Session Token กรุณาเข้าสู่ระบบใหม่'
+    );
+
   }
 
-  const map = new Map();
 
-  (data || []).forEach(req => {
-    const key = String(req.grade_result_id || '');
-    if(!key) return;
+  const data = [];
 
-    // ถ้ามีหลุดมาหลายแถว ให้เก็บแถวที่ updated ล่าสุด
-    const old = map.get(key);
-    if(!old){
-      map.set(key, req);
+  const chunkSize =
+    80;
+
+
+  for(
+    let i = 0;
+    i < ids.length;
+    i += chunkSize
+  ){
+
+    const idChunk =
+      ids.slice(
+        i,
+        i + chunkSize
+      );
+
+
+    const rows =
+      await fetchAllPages(
+        () =>
+          supabaseClient
+            .rpc(
+              'teacher_get_own_retest_requests_session',
+              {
+                p_token:
+                  token,
+
+                p_grade_result_ids:
+                  idChunk
+              }
+            )
+            .order(
+              'updated_at',
+              {
+                ascending: false,
+                nullsFirst: false
+              }
+            )
+            .order(
+              'submitted_at',
+              {
+                ascending: false,
+                nullsFirst: false
+              }
+            )
+            .order(
+              'id',
+              {
+                ascending: true
+              }
+            ),
+
+        1000
+      );
+
+
+    data.push(
+      ...(rows || [])
+    );
+
+  }
+
+
+  const map =
+    new Map();
+
+
+  data.forEach(req => {
+
+    const key =
+      String(
+        req.grade_result_id ||
+        ''
+      );
+
+
+    if(!key){
       return;
     }
 
-    const oldTime = new Date(old.updated_at || old.submitted_at || 0).getTime();
-    const newTime = new Date(req.updated_at || req.submitted_at || 0).getTime();
 
-    if(newTime >= oldTime){
-      map.set(key, req);
+    /*
+     * หากมีหลายรายการ
+     * ให้ใช้รายการล่าสุด
+     */
+    const old =
+      map.get(
+        key
+      );
+
+
+    if(!old){
+
+      map.set(
+        key,
+        req
+      );
+
+      return;
+
     }
+
+
+    const oldTime =
+      new Date(
+        old.updated_at ||
+        old.submitted_at ||
+        0
+      ).getTime();
+
+
+    const newTime =
+      new Date(
+        req.updated_at ||
+        req.submitted_at ||
+        0
+      ).getTime();
+
+
+    if(
+      newTime >=
+      oldTime
+    ){
+
+      map.set(
+        key,
+        req
+      );
+
+    }
+
   });
+
 
   return map;
 }
