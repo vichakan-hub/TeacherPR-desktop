@@ -29045,59 +29045,155 @@ function fpGetReservationFilters(includeClassRoom){
 }
 
 async function fpLoadSlots(){
+
   try{
+
     if(!state.currentUser){
-      throw new Error('กรุณาเข้าสู่ระบบก่อนใช้งาน');
+      throw new Error(
+        'กรุณาเข้าสู่ระบบก่อนใช้งาน'
+      );
     }
 
-    const selected = fpGetSelectedClassRoom();
+
+    const selected =
+      fpGetSelectedClassRoom();
+
 
     if(!selected){
+
       state.freePeriodSlots = [];
+
       fpRenderSlots([]);
+
       fpUpdateSummary();
-      setStatus('fpStatus', 'กรุณาเลือกชั้นและห้องก่อน', 'warn');
+
+      setStatus(
+        'fpStatus',
+        'กรุณาเลือกชั้นและห้องก่อน',
+        'warn'
+      );
+
       return;
     }
 
-    fpSetSubPage('search');
-    setStatus('fpStatus', 'กำลังโหลดคาบว่าง...', 'info');
 
-    let query = supabaseClient
-      .from('emptysec')
-      .select('id, academic_year, term, slot_code, class_level, room, class_room, day_of_week, period_no, note, is_active')
-      .eq('academic_year', Number(selected.academic_year))
-      .eq('term', Number(selected.term))
-      .eq('class_level', selected.class_level)
-      .eq('room', selected.room)
-      .eq('is_active', true)
-      .order('class_level', { ascending:true })
-      .order('room', { ascending:true })
-      .order('day_of_week', { ascending:true })
-      .order('period_no', { ascending:true });
+    const token =
+      String(
+        state.teacherSessionToken ||
+        ''
+      ).trim();
 
-    const { data, error } = await query;
-    if(error) throw error;
 
-    state.freePeriodSlots = data || [];
-    fpRenderSlots(state.freePeriodSlots);
-    fpUpdateSummary();
+    if(!token){
+      throw new Error(
+        'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+      );
+    }
+
+
+    fpSetSubPage(
+      'search'
+    );
+
 
     setStatus(
       'fpStatus',
+      'กำลังโหลดคาบว่าง...',
+      'info'
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        'teacher_get_emptysec_slots_session',
+        {
+          p_token:
+            token,
+
+          p_academic_year:
+            Number(
+              selected.academic_year
+            ),
+
+          p_term:
+            Number(
+              selected.term
+            ),
+
+          p_class_level:
+            selected.class_level,
+
+          p_room:
+            selected.room
+        }
+      );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    state.freePeriodSlots =
+      data || [];
+
+
+    fpRenderSlots(
+      state.freePeriodSlots
+    );
+
+
+    fpUpdateSummary();
+
+
+    setStatus(
+      'fpStatus',
+
       state.freePeriodSlots.length
         ? `พบคาบว่าง ${state.freePeriodSlots.length} รายการ`
         : 'ไม่พบคาบว่างตามเงื่อนไขที่เลือก',
-      state.freePeriodSlots.length ? 'success' : 'warn'
+
+      state.freePeriodSlots.length
+        ? 'success'
+        : 'warn'
     );
+
+
   }catch(err){
-    console.error('fpLoadSlots ERROR', err);
+
+    console.error(
+      'fpLoadSlots ERROR',
+      err
+    );
+
+
     state.freePeriodSlots = [];
+
     fpRenderSlots([]);
+
     fpUpdateSummary();
-    setStatus('fpStatus', err.message || 'โหลดคาบว่างไม่สำเร็จ', 'error');
-    showToast('โหลดคาบว่างไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+
+
+    setStatus(
+      'fpStatus',
+      err.message ||
+      'โหลดคาบว่างไม่สำเร็จ',
+      'error'
+    );
+
+
+    showToast(
+      'โหลดคาบว่างไม่สำเร็จ',
+      err.message ||
+      'เกิดข้อผิดพลาด',
+      'error'
+    );
+
   }
+
 }
 
 
@@ -29350,25 +29446,88 @@ function fpNormalizeDayOfWeek(value){
   return s.startsWith('วัน') ? s : `วัน${s}`;
 }
 
-function fpBuildReservationQuery(filters = {}){
-  let query = supabaseClient
-    .from('free_period_reservations')
-    .select('id, slot_id, slot_code, teacher_id, teacher_code, teacher_full_name, academic_year, term, class_level, room, class_room, day_of_week, period_no, reserve_date, status, created_at, cancelled_at, cancelled_by_teacher_code')
-    .eq('status', 'reserved')
-    .order('reserve_date', { ascending:false })
-    .order('class_level', { ascending:true })
-    .order('room', { ascending:true })
-    .order('period_no', { ascending:true });
+async function fpBuildReservationQuery(
+  filters = {}
+){
 
-  if(filters.academic_year) query = query.eq('academic_year', Number(filters.academic_year));
-  if(filters.term) query = query.eq('term', Number(filters.term));
-  if(filters.reserve_date) query = query.eq('reserve_date', filters.reserve_date);
-  if(filters.teacher_code) query = query.eq('teacher_code', normalizeTeacherCode(filters.teacher_code));
-  if(filters.class_level) query = query.eq('class_level', filters.class_level);
-  if(filters.room) query = query.eq('room', String(filters.room));
-  if(filters.class_room) query = query.eq('class_room', filters.class_room);
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-  return query;
+
+  if(!token){
+
+    return {
+      data: null,
+
+      error:
+        new Error(
+          'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+        )
+    };
+
+  }
+
+
+  /*
+   * ถ้ามี teacher_code
+   * แปลว่าหน้า "รายการจองของฉัน"
+   *
+   * Server จะใช้ teacher_code
+   * จาก Session จริง ไม่เชื่อค่าจาก Browser
+   */
+  const scope =
+    filters.teacher_code
+      ? 'mine'
+      : 'all';
+
+
+  return await supabaseClient.rpc(
+    'teacher_get_free_period_reservations_session',
+    {
+      p_token:
+        token,
+
+      p_scope:
+        scope,
+
+      p_academic_year:
+        filters.academic_year
+          ? Number(
+              filters.academic_year
+            )
+          : null,
+
+      p_term:
+        filters.term
+          ? Number(
+              filters.term
+            )
+          : null,
+
+      p_reserve_date:
+        filters.reserve_date ||
+        null,
+
+      p_class_level:
+        filters.class_level ||
+        null,
+
+      p_room:
+        filters.room
+          ? String(
+              filters.room
+            )
+          : null,
+
+      p_class_room:
+        filters.class_room ||
+        null
+    }
+  );
+
 }
 
 function fpFormatReservationForClient(row){
