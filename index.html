@@ -34178,33 +34178,28 @@ const eligibilityRows =
   await fetchAllPages(
     () => {
 
-      return supabaseClient
-        .from(
-          'exam_eligibility_reports'
-        )
-        .select(`
-          academic_year,
-          term,
-          subject_code,
-          teacher_code,
-          class_level,
-          room,
-          student_code,
-          exam_status
-        `)
-        .eq(
-          'academic_year',
-          Number(year)
-        )
-        .eq(
-          'term',
-          Number(term)
-        )
-        .eq(
-          'teacher_code',
-          state.currentUser
-            .teacher_code
-        );
+      return supabaseClient.rpc(
+        'teacher_get_exam_eligibility_reports_session',
+        {
+          p_token:
+            token,
+
+          p_academic_year:
+            Number(year),
+
+          p_term:
+            Number(term),
+
+          p_subject_code:
+            null,
+
+          p_class_level:
+            null,
+
+          p_room:
+            null
+        }
+      );
 
     },
     1000
