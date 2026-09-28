@@ -33465,6 +33465,64 @@ function renderExamEligibilitySubjectFilter(
   return nextValue;
 }
 
+async function fetchTeacherMidtermDeclarations(
+  year,
+  term
+){
+
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
+
+
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_get_midterm_declarations_session',
+    {
+      p_token:
+        token,
+
+      p_academic_year:
+        Number(year),
+
+      p_term:
+        Number(term)
+    }
+  );
+
+
+  if(error){
+    throw error;
+  }
+
+
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      data?.message ||
+      'โหลดสถานะไม่มีนักเรียนเลือกเรียนไม่สำเร็จ'
+    );
+  }
+
+
+  return Array.isArray(data.rows)
+    ? data.rows
+    : [];
+}
+
 async function loadExamEligibilityTeachingList(){
 
   try{
@@ -33847,44 +33905,11 @@ await fetchTeacherStudentMasterBySids(
        ตรวจห้องที่เคยยืนยันว่าไม่มีนักเรียนเลือกเรียน
        ===================================================== */
 
-    const declarationRows =
-      await fetchAllPages(
-        () => {
-
-          return supabaseClient
-            .from(
-              'midterm_report_declarations'
-            )
-            .select(`
-              academic_year,
-              term,
-              subject_code,
-              teacher_code,
-              class_level,
-              room,
-              report_status
-            `)
-            .eq(
-              'academic_year',
-              Number(year)
-            )
-            .eq(
-              'term',
-              Number(term)
-            )
-            .eq(
-              'teacher_code',
-              state.currentUser
-                .teacher_code
-            )
-            .eq(
-              'report_status',
-              'no_students'
-            );
-
-        },
-        1000
-      );
+const declarationRows =
+  await fetchTeacherMidtermDeclarations(
+    year,
+    term
+  );
 
 
     const noStudentsSet =
@@ -35184,38 +35209,9 @@ const reportStudentMap =
  * =====================================================
  */
 const declarationRows =
-  await fetchAllPages(
-    () => {
-      return supabaseClient
-        .from('midterm_report_declarations')
-        .select(`
-          academic_year,
-          term,
-          subject_code,
-          teacher_code,
-          class_level,
-          room,
-          report_status,
-          declared_at
-        `)
-        .eq(
-          'academic_year',
-          Number(year)
-        )
-        .eq(
-          'term',
-          Number(term)
-        )
-        .eq(
-          'teacher_code',
-          state.currentUser.teacher_code
-        )
-        .eq(
-          'report_status',
-          'no_students'
-        );
-    },
-    1000
+  await fetchTeacherMidtermDeclarations(
+    year,
+    term
   );
 
 
