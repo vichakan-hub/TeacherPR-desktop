@@ -51186,34 +51186,106 @@ function getSignerFullName(row){
   return [prefix, name].filter(Boolean).join('').trim();
 }
 
-async function loadAcademicReportSignersForTeacherReport(academicYear, term, subjectCode){
-  const learningArea = getReportLearningAreaFromSubjectCode(subjectCode);
+async function loadAcademicReportSignersForTeacherReport(
+  academicYear,
+  term,
+  subjectCode
+){
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-  const { data, error } = await supabaseClient
-    .from('academic_report_signers')
-    .select(`
-      id,
-      academic_year,
-      term,
-      learning_area,
-      position_key,
-      position_title,
-      person_prefix,
-      person_name,
-      sort_order,
-      is_active
-    `)
-    .eq('academic_year', academicYear)
-    .eq('term', term)
-    .eq('is_active', true)
-    .in('learning_area', ['ALL', learningArea])
-    .order('sort_order', { ascending:true });
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
 
-  if(error) throw error;
+  const year =
+    Number(academicYear);
+
+  const termNo =
+    Number(term);
+
+  const code =
+    String(
+      subjectCode ||
+      ''
+    ).trim();
+
+
+  if(!year){
+    throw new Error(
+      'กรุณาระบุปีการศึกษา'
+    );
+  }
+
+  if(
+    termNo !== 1 &&
+    termNo !== 2
+  ){
+    throw new Error(
+      'ภาคเรียนไม่ถูกต้อง'
+    );
+  }
+
+  if(!code){
+    throw new Error(
+      'กรุณาระบุรหัสวิชา'
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_get_academic_report_signers_session',
+    {
+      p_token:
+        token,
+
+      p_academic_year:
+        year,
+
+      p_term:
+        termNo,
+
+      p_subject_code:
+        code
+    }
+  );
+
+
+  if(error){
+    throw error;
+  }
+
+
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      data?.message ||
+      'โหลดรายชื่อผู้อนุมัติไม่สำเร็จ'
+    );
+  }
+
 
   return {
-    learning_area: learningArea,
-    rows: data || []
+    learning_area:
+      String(
+        data.learning_area ||
+        ''
+      ).trim(),
+
+    rows:
+      Array.isArray(data.rows)
+        ? data.rows
+        : []
   };
 }
 
