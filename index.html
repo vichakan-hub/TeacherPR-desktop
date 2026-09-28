@@ -17888,22 +17888,58 @@ function normalizeSettingObject(raw, fallback){
 }
 
 async function loadTeacherSettingsMap(){
-  const { data, error } = await supabaseClient
-    .from('app_settings')
-    .select('key, value')
-    .in('key', TEACHER_SETTING_KEYS);
 
-  if(error) throw error;
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-  const map = {};
 
-  (data || []).forEach(row => {
-    if(row.key){
-      map[row.key] = row.value;
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_get_app_settings_session',
+    {
+      p_token:
+        token,
+
+      p_keys:
+        TEACHER_SETTING_KEYS
     }
-  });
+  );
 
-  return map;
+
+  if(error){
+    throw error;
+  }
+
+
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      data?.message ||
+      'โหลดการตั้งค่าครูไม่สำเร็จ'
+    );
+  }
+
+
+  return (
+    data.settings &&
+    typeof data.settings === 'object'
+  )
+    ? data.settings
+    : {};
 }
 
 function normalizeGradeReportDefaultPage(raw){
