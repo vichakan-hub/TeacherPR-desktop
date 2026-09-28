@@ -29392,37 +29392,69 @@ async function fpGetReservationMapByDate(filters){
   return map;
 }
 
-async function fpInsertReservation(slot, reserveDate){
-  const payload = {
-    slot_id: slot.id,
-    slot_code: slot.slot_code,
+async function fpInsertReservation(
+  slot,
+  reserveDate
+){
 
-    teacher_id: state.currentUser?.id || null,
-    teacher_code: state.currentUser?.teacher_code || '',
-    teacher_full_name: state.currentUser?.full_name || '',
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
 
-    academic_year: Number(slot.academic_year),
-    term: Number(slot.term),
 
-    class_level: slot.class_level,
-    room: String(slot.room),
-    class_room: slot.class_room,
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
 
-    day_of_week: fpNormalizeDayOfWeek(slot.day_of_week),
-    period_no: Number(slot.period_no),
 
-    reserve_date: reserveDate,
-    status: 'reserved'
-  };
+  if(!slot?.id){
+    throw new Error(
+      'ไม่พบคาบว่างที่เลือก'
+    );
+  }
 
-  const { data, error } = await supabaseClient
-    .from('free_period_reservations')
-    .insert(payload)
-    .select()
-    .single();
 
-  if(error) throw error;
-  return fpFormatReservationForClient(data);
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_reserve_free_period_session',
+    {
+      p_token:
+        token,
+
+      p_slot_id:
+        slot.id,
+
+      p_reserve_date:
+        reserveDate
+    }
+  );
+
+
+  if(error){
+    throw error;
+  }
+
+
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      data?.message ||
+      'จองคาบว่างไม่สำเร็จ'
+    );
+  }
+
+
+  return fpFormatReservationForClient(
+    data.reservation
+  );
 }
 
 async function fpConfirmReserve(){
@@ -29882,56 +29914,108 @@ function fpRenderReservationTable(tbodyId, rows, allowCancel){
   }
 }
 
-async function fpCancelReservation(reservationId){
+async function fpCancelReservation(
+  reservationId
+){
+
   try{
+
     if(!reservationId){
-      throw new Error('ไม่พบรหัสรายการจอง');
+      throw new Error(
+        'ไม่พบรหัสรายการจอง'
+      );
     }
 
-    const ok = confirm('ต้องการยกเลิกรายการจองนี้หรือไม่');
-    if(!ok) return;
 
-    const { data: rows, error: readError } = await supabaseClient
-      .from('free_period_reservations')
-      .select('id, teacher_code, status')
-      .eq('id', reservationId)
-      .limit(1);
+    const ok =
+      confirm(
+        'ต้องการยกเลิกรายการจองนี้หรือไม่'
+      );
 
-    if(readError) throw readError;
 
-    const current = rows?.[0];
-    if(!current){
-      throw new Error('ไม่พบรายการจองนี้');
+    if(!ok){
+      return;
     }
 
-    if(String(current.status || '') !== 'reserved'){
-      throw new Error('รายการนี้ไม่ได้อยู่ในสถานะจองแล้ว');
+
+    const token =
+      String(
+        state.teacherSessionToken ||
+        ''
+      ).trim();
+
+
+    if(!token){
+      throw new Error(
+        'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+      );
     }
 
-    if(String(current.teacher_code || '').toUpperCase() !== String(state.currentUser?.teacher_code || '').toUpperCase()){
-      throw new Error('ยกเลิกได้เฉพาะรายการที่คุณครูเป็นผู้จองเท่านั้น');
+
+    const {
+      data,
+      error
+    } = await supabaseClient.rpc(
+      'teacher_cancel_free_period_reservation_session',
+      {
+        p_token:
+          token,
+
+        p_reservation_id:
+          reservationId
+      }
+    );
+
+
+    if(error){
+      throw error;
     }
 
-    const { error } = await supabaseClient
-      .from('free_period_reservations')
-      .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-        cancelled_by_teacher_code: state.currentUser.teacher_code
-      })
-      .eq('id', reservationId);
 
-    if(error) throw error;
+    if(
+      !data ||
+      data.ok !== true
+    ){
+      throw new Error(
+        data?.message ||
+        'ยกเลิกรายการจองไม่สำเร็จ'
+      );
+    }
 
-    showToast('ยกเลิกรายการจองแล้ว', 'ระบบยกเลิกรายการจองเรียบร้อย', 'success');
+
+    showToast(
+      'ยกเลิกรายการจองแล้ว',
+      'ระบบยกเลิกรายการจองเรียบร้อย',
+      'success'
+    );
+
 
     await fpLoadMyReservations();
-    await fpLoadAllReservations(false);
+
+    await fpLoadAllReservations(
+      false
+    );
+
     fpUpdateSummary();
+
+
   }catch(err){
-    console.error('fpCancelReservation ERROR', err);
-    showToast('ยกเลิกไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
+
+    console.error(
+      'fpCancelReservation ERROR',
+      err
+    );
+
+
+    showToast(
+      'ยกเลิกไม่สำเร็จ',
+      err.message ||
+      'เกิดข้อผิดพลาด',
+      'error'
+    );
+
   }
+
 }
 
 
