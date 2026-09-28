@@ -33187,18 +33187,34 @@ function isExamEligibilitySubmissionLocked(
 
 async function refreshExamEligibilitySettingFromSupabase(){
 
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
+
+
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
+
+
   const {
     data,
     error
-  } =
-    await supabaseClient
-      .from('app_settings')
-      .select('key, value')
-      .eq(
-        'key',
+  } = await supabaseClient.rpc(
+    'teacher_get_app_settings_session',
+    {
+      p_token:
+        token,
+
+      p_keys: [
         'teacher_exam_eligibility_settings'
-      )
-      .maybeSingle();
+      ]
+    }
+  );
 
 
   if(error){
@@ -33206,7 +33222,27 @@ async function refreshExamEligibilitySettingFromSupabase(){
   }
 
 
-  if(!data){
+  if(
+    !data ||
+    data.ok !== true
+  ){
+    throw new Error(
+      data?.message ||
+      'โหลดการตั้งค่ารายงาน มส ไม่สำเร็จ'
+    );
+  }
+
+
+  const rawSetting =
+    data.settings?.[
+      'teacher_exam_eligibility_settings'
+    ];
+
+
+  if(
+    rawSetting === undefined ||
+    rawSetting === null
+  ){
     throw new Error(
       'ไม่พบการตั้งค่า teacher_exam_eligibility_settings'
     );
@@ -33215,7 +33251,7 @@ async function refreshExamEligibilitySettingFromSupabase(){
 
   state.examEligibilitySettings =
     normalizeSettingObject(
-      data.value,
+      rawSetting,
       state.examEligibilitySettings ||
       buildDefaultOneSetting()
     );
