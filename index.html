@@ -25302,23 +25302,39 @@ async function attachImportStatus(groups){
 </td>
 
 <td class="text-center">
-  <button
-    class="btn-secondary"
-    data-quality-index="${idx}"
-    type="button"
-  >
-    🔍 ตรวจไฟล์
-  </button>
+  ${
+    String(r.subject_code || '')
+      .trim()
+      .startsWith('ก')
+      ? '-'
+      : `
+        <button
+          class="btn-secondary"
+          data-quality-index="${idx}"
+          type="button"
+        >
+          🔍 ตรวจไฟล์
+        </button>
+      `
+  }
 </td>
 
 <td class="text-center">
-  <button
-    class="btn-secondary"
-    data-literacy-index="${idx}"
-    type="button"
-  >
-    🔍 ตรวจไฟล์
-  </button>
+  ${
+    String(r.subject_code || '')
+      .trim()
+      .startsWith('ก')
+      ? '-'
+      : `
+        <button
+          class="btn-secondary"
+          data-literacy-index="${idx}"
+          type="button"
+        >
+          🔍 ตรวจไฟล์
+        </button>
+      `
+  }
 </td>
 
 <td>
@@ -26139,6 +26155,43 @@ function moveAssessmentError(direction){
   focusAssessmentError(
     assessmentErrorNavigationIndex
   );
+
+}
+
+function openAssessmentSuccessModal(expectedType){
+
+  const modal =
+    el('assessmentSuccessModal');
+
+  const message =
+    el('assessmentSuccessMessage');
+
+  if(!modal || !message){
+    return;
+  }
+
+  const typeLabel =
+    expectedType === 'quality'
+      ? 'คุณลักษณะอันพึงประสงค์'
+      : ' อ่าน คิดวิเคราะห์ และเขียน ';
+
+  message.innerHTML =
+    `<b style="color:#15803d;">ข้อมูล${typeLabel}ถูกต้อง</b><br>` +
+    `ไม่พบข้อผิดพลาด<br>` +
+    `สามารถส่งไฟล์ Bookmark ได้`;
+
+  modal.style.display = 'flex';
+}
+
+
+function closeAssessmentSuccessModal(){
+
+  const modal =
+    el('assessmentSuccessModal');
+
+  if(modal){
+    modal.style.display = 'none';
+  }
 
 }
 
@@ -27343,11 +27396,7 @@ async function handleAssessmentValidationFile(
     );
 
 
-    showToast(
-      'ตรวจชื่อไฟล์ผ่าน',
-      `${typeLabel} • ${fileSubject}`,
-      'success'
-    );
+
 
     // -------------------------------------------------
 // 6) อ่านและตรวจโครงสร้างภายใน Excel
@@ -27371,11 +27420,7 @@ console.log(
 );
 
 
-showToast(
-  'ตรวจโครงสร้างไฟล์ผ่าน',
-  `${typeLabel} • ${workbookData.dataRows.length} คน`,
-  'success'
-);
+
 
 // -------------------------------------------------
 // 7) ตรวจคะแนนทุกช่อง
@@ -27450,27 +27495,21 @@ openAssessmentValidationModal({
 });
 
 
-if(!combinedValidation.isValid){
-
-  console.error(
-    '[Assessment Validation] Invalid scores',
-    combinedValidation.errors
-  );
 
 
-const firstError =
-  combinedValidation.errors[0];
 
 
-  throw new Error(
-    `พบข้อมูลคะแนนไม่ถูกต้อง ${combinedValidation.errorCount} จุด\n` +
-    `จุดแรก: ${firstError.cell} ` +
-    `แถว Excel ${firstError.excelRow}\n` +
-    `${firstError.message}\n\n` +
-    `ให้ครูกลับไปแก้ bookmark ทันที และส่งออก Excel กลับมาตรวจใหม่`
+if(combinedValidation.isValid){
+
+  openAssessmentSuccessModal(
+    expectedType
   );
 
 }
+
+
+
+
 
 
 // -------------------------------------------------
@@ -27488,13 +27527,6 @@ console.log(
 );
 
 
-showToast(
-  'ตรวจคะแนนผ่าน',
-  `${scoreValidation.studentCount} คน • ` +
-  `${scoreValidation.checkedCellCount} ช่อง • ` +
-  `คะแนนถูกต้องทั้งหมด`,
-  'success'
-);
 
 
     /*
@@ -27510,11 +27542,7 @@ showToast(
     );
 
 
-    showToast(
-      'ไม่สามารถตรวจไฟล์ได้',
-      error.message || String(error),
-      'error'
-    );
+
 
   }
 
@@ -55813,6 +55841,88 @@ document.getElementById('unsavedDiscardBtn')?.addEventListener('click', () => {
   }
 
   </script>
+  <!-- =====================================================
+     Assessment Validation Success Modal
+===================================================== -->
+<div
+  id="assessmentSuccessModal"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:rgba(15,23,42,.35);
+    align-items:center;
+    justify-content:center;
+  "
+>
+  <div
+    style="
+      width:min(440px,calc(100vw - 32px));
+      background:#ffffff;
+      border-radius:22px;
+      padding:30px 28px 24px;
+      box-shadow:0 24px 70px rgba(15,23,42,.28);
+      text-align:center;
+    "
+  >
+
+    <div style="
+      width:68px;
+      height:68px;
+      margin:0 auto 16px;
+      border-radius:50%;
+      background:#dcfce7;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:38px;
+    ">
+      ✓
+    </div>
+
+    <div
+      id="assessmentSuccessTitle"
+      style="
+        font-size:21px;
+        font-weight:800;
+        color:#0f172a;
+        margin-bottom:10px;
+      "
+    >
+      ตรวจสอบข้อมูลเรียบร้อย
+    </div>
+
+    <div
+      id="assessmentSuccessMessage"
+      style="
+        font-size:15px;
+        line-height:1.8;
+        color:#475569;
+      "
+    ></div>
+
+    <button
+      type="button"
+      onclick="closeAssessmentSuccessModal()"
+      style="
+        margin-top:22px;
+        min-width:120px;
+        border:0;
+        border-radius:12px;
+        padding:11px 24px;
+        background:#16a34a;
+        color:#ffffff;
+        font-size:15px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      ตกลง
+    </button>
+
+  </div>
+</div>
   
 </body>
 </html>
