@@ -839,6 +839,293 @@
     flex-wrap:wrap;
   }
 
+  /* =====================================================
+   Assessment Validation Overlay
+   ===================================================== */
+
+.assessment-validation-overlay{
+  padding:24px;
+  z-index:12000;
+}
+
+
+.assessment-validation-card{
+  width:min(1500px, 98vw);
+  max-width:1500px;
+
+  height:min(900px, 94vh);
+  max-height:94vh;
+
+  padding:0;
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+}
+
+
+/* ---------- Header ---------- */
+
+.assessment-validation-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+
+  padding:22px 24px 16px;
+
+  border-bottom:1px solid #e5e7eb;
+}
+
+
+.assessment-validation-head h2{
+  margin:0 0 4px;
+  font-size:24px;
+  font-weight:800;
+}
+
+
+/* ---------- Summary ---------- */
+
+.assessment-validation-summary{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+
+  padding:16px 24px 8px;
+}
+
+
+.assessment-summary-box{
+  min-width:150px;
+
+  padding:12px 16px;
+
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+
+  background:#f8fafc;
+}
+
+
+.assessment-summary-box strong{
+  display:inline-block;
+
+  margin-top:3px;
+  margin-right:4px;
+
+  font-size:22px;
+  font-weight:800;
+}
+
+
+/* ---------- Status ---------- */
+
+#assessmentValidationStatus{
+  margin:8px 24px 14px;
+}
+
+
+/* ---------- Table area ---------- */
+
+.assessment-validation-table-wrap{
+  flex:1;
+
+  margin:0 24px;
+
+  overflow:auto;
+
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+
+  background:#fff;
+}
+
+
+.assessment-validation-table{
+  width:max-content;
+  min-width:100%;
+
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+
+.assessment-validation-table th,
+.assessment-validation-table td{
+  padding:9px 10px;
+
+  border-right:1px solid #e5e7eb;
+  border-bottom:1px solid #e5e7eb;
+
+  white-space:nowrap;
+  text-align:center;
+  vertical-align:middle;
+}
+
+
+.assessment-validation-table th{
+  position:sticky;
+  top:0;
+  z-index:5;
+
+  background:#f8fafc;
+
+  font-size:13px;
+  font-weight:800;
+}
+
+
+/* ชื่อนักเรียนชิดซ้าย */
+
+.assessment-validation-table td.assessment-student-name{
+  text-align:left;
+  min-width:190px;
+}
+
+.assessment-error-navigator{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:10px 0 12px;
+  padding:9px 12px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  border-radius:12px;
+}
+
+.assessment-error-navigator.hidden{
+  display:none !important;
+}
+
+.assessment-error-position{
+  min-width:110px;
+  text-align:center;
+  font-weight:800;
+  color:#9a3412;
+}
+
+.assessment-error-current{
+  position:relative;
+  z-index:2;
+  outline:4px solid rgba(220,38,38,.28) !important;
+  outline-offset:2px;
+  box-shadow:
+    0 0 0 2px #dc2626,
+    0 0 18px rgba(220,38,38,.35) !important;
+}
+
+
+/* ---------- Error cell ---------- */
+
+.assessment-validation-table td.assessment-cell-error{
+  background:#fee2e2;
+  color:#991b1b;
+
+  font-weight:800;
+
+  box-shadow:
+    inset 0 0 0 2px #ef4444;
+}
+
+
+/* ---------- Valid score ---------- */
+
+.assessment-validation-table td.assessment-cell-valid{
+  background:#f0fdf4;
+}
+
+
+/* ---------- Error row ---------- */
+
+.assessment-validation-table tr.assessment-row-error
+td:first-child{
+  border-left:4px solid #ef4444;
+}
+
+
+/* ---------- Instruction ---------- */
+
+.assessment-validation-instruction{
+  margin:14px 24px 0;
+
+  padding:13px 16px;
+
+  border:1px solid #fecaca;
+  border-radius:14px;
+
+  background:#fff1f2;
+  color:#991b1b;
+
+  font-weight:700;
+  line-height:1.6;
+}
+
+
+/* ---------- Footer ---------- */
+
+.assessment-validation-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+
+  padding:16px 24px 20px;
+}
+
+
+/* ---------- Mobile ---------- */
+
+@media (max-width:700px){
+
+  .assessment-validation-overlay{
+    padding:8px;
+  }
+
+  .assessment-validation-card{
+    width:100%;
+    height:96vh;
+    max-height:96vh;
+
+    border-radius:18px;
+  }
+
+  .assessment-validation-head{
+    padding:16px;
+  }
+
+  .assessment-validation-summary{
+    padding:12px 16px 6px;
+  }
+
+  .assessment-summary-box{
+    min-width:120px;
+    flex:1;
+  }
+
+  #assessmentValidationStatus{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .assessment-validation-table-wrap{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .assessment-validation-instruction{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .assessment-validation-actions{
+    padding:14px 16px;
+  }
+
+}
+
   .preview-table{
     width:100%;
     min-width:1280px;
@@ -13031,18 +13318,33 @@ td{
 
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>รายวิชา</th>
-                  <th>ปี/เทอม</th>
-                  <th>ชั้น</th>
-                  <th>ห้อง</th>
-                  <th>จำนวน section</th>
-                  <th>นำเข้า</th>
-                  <th>สถานะการรายงาน</th>
-                </tr>
-              </thead>
-              <tbody id="importTeachingTbody"></tbody>
+<thead>
+  <tr>
+    <th>รายวิชา</th>
+    <th>ปี/เทอม</th>
+    <th>ชั้น</th>
+    <th>ห้อง</th>
+    <th>จำนวน section</th>
+
+    <th class="text-center">
+      ผลการเรียน
+    </th>
+
+    <th class="text-center">
+      คุณลักษณะฯ
+    </th>
+
+    <th class="text-center">
+      อ่านคิดวิเคราะห์
+    </th>
+
+    <th>
+      สถานะการรายงาน
+    </th>
+  </tr>
+</thead>
+
+<tbody id="importTeachingTbody"></tbody>
             </table>
           </div>
         </section>
@@ -13067,6 +13369,22 @@ td{
           </div>
 
           <input id="fileInput" type="file" accept=".xlsx,.xls" class="hidden">
+
+<!-- ตรวจไฟล์คุณลักษณะอันพึงประสงค์ -->
+<input
+  id="qualityFileInput"
+  type="file"
+  accept=".xlsx,.xls"
+  class="hidden"
+>
+
+<!-- ตรวจไฟล์อ่าน คิดวิเคราะห์ และเขียน -->
+<input
+  id="literacyFileInput"
+  type="file"
+  accept=".xlsx,.xls"
+  class="hidden"
+>
 
           <div class="preview-head">
             <div class="mini-card">
@@ -15289,6 +15607,156 @@ td{
   </div>
 </div>
 
+<!-- ==================================================
+     ASSESSMENT VALIDATION OVERLAY
+     Quality / Literacy
+=================================================== -->
+<div
+  id="assessmentValidationOverlay"
+  class="overlay assessment-validation-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="assessmentValidationTitle"
+>
+  <div class="overlay-card assessment-validation-card">
+
+    <!-- Header -->
+    <div class="assessment-validation-head">
+
+      <div>
+        <h2 id="assessmentValidationTitle">
+          ตรวจสอบข้อมูล
+        </h2>
+
+        <div
+          id="assessmentValidationSubtitle"
+          class="sub"
+        >
+          -
+        </div>
+      </div>
+
+      <button
+        id="closeAssessmentValidationBtn"
+        class="btn-secondary"
+        type="button"
+      >
+        ✕ ปิด
+      </button>
+
+    </div>
+
+
+    <!-- Summary -->
+    <div class="assessment-validation-summary">
+
+      <div class="assessment-summary-box">
+        <div class="small">นักเรียน</div>
+        <strong id="assessmentValidationStudentCount">
+          0
+        </strong>
+        <span class="small">คน</span>
+      </div>
+
+      <div class="assessment-summary-box">
+        <div class="small">ตรวจทั้งหมด</div>
+        <strong id="assessmentValidationCellCount">
+          0
+        </strong>
+        <span class="small">ช่อง</span>
+      </div>
+
+      <div
+        id="assessmentValidationErrorBox"
+        class="assessment-summary-box"
+      >
+        <div class="small">ข้อผิดพลาด</div>
+        <strong id="assessmentValidationErrorCount">
+          0
+        </strong>
+        <span class="small">จุด</span>
+      </div>
+
+      <div
+  id="assessmentErrorNavigator"
+  class="assessment-error-navigator hidden"
+>
+  <button
+    id="assessmentPrevErrorBtn"
+    type="button"
+    class="btn-secondary"
+  >
+    ← จุดก่อนหน้า
+  </button>
+
+  <div
+    id="assessmentErrorPosition"
+    class="assessment-error-position"
+  >
+    จุดที่ 1 / 1
+  </div>
+
+  <button
+    id="assessmentNextErrorBtn"
+    type="button"
+    class="btn-secondary"
+  >
+    จุดถัดไป →
+  </button>
+</div>
+
+    </div>
+
+
+    <!-- Result message -->
+    <div
+      id="assessmentValidationStatus"
+      class="status info"
+    >
+      กำลังตรวจสอบข้อมูล...
+    </div>
+
+
+    <!-- Table -->
+    <div class="assessment-validation-table-wrap">
+
+      <table
+        id="assessmentValidationTable"
+        class="assessment-validation-table"
+      >
+        <thead id="assessmentValidationThead"></thead>
+        <tbody id="assessmentValidationTbody"></tbody>
+      </table>
+
+    </div>
+
+
+    <!-- Instruction when errors exist -->
+    <div
+      id="assessmentValidationInstruction"
+      class="assessment-validation-instruction hidden"
+    >
+      ให้ครูกลับไปแก้ bookmark ทันที
+      และส่งออก Excel กลับมาตรวจใหม่
+    </div>
+
+
+    <!-- Footer -->
+    <div class="assessment-validation-actions">
+
+      <button
+        id="closeAssessmentValidationBtnBottom"
+        class="btn-secondary"
+        type="button"
+      >
+        ปิดหน้าต่าง
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
   <!-- CHANGE TEACHER PASSWORD OVERLAY -->
 <div
   id="changePasswordOverlay"
@@ -16286,6 +16754,9 @@ gradeReportDefaultPage: 'midtermReport',
 
   groupedOfferings: [],
   selectedTeachingGroup: null,
+  // สำหรับตรวจไฟล์คุณลักษณะฯ / อ่านคิดวิเคราะห์
+  selectedQualityGroup: null,
+  selectedLiteracyGroup: null,
   previewRows: [],
   previewMeta: null,
   previewFilter: 'all',
@@ -24802,7 +25273,7 @@ async function attachImportStatus(groups){
       const tbody = el('importTeachingTbody');
 
       if(!rows.length){
-        tbody.innerHTML = '<tr><td colspan="7" class="small">ไม่พบรายการสอน</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="small">ไม่พบรายการสอน</td></tr>';
         return;
       }
 
@@ -24820,16 +25291,82 @@ async function attachImportStatus(groups){
           <td>${escapeHtml(r.class_level || '-')}</td>
           <td>${escapeHtml(r.room_text || '-')}</td>
           <td><span class="badge">${r.offerings.length} ห้อง</span></td>
-          <td>
-            <button class="btn-primary" data-import-index="${idx}">นำเข้าผลการเรียน</button>
-          </td>
-          <td>
-            ${
-              r.has_imported
-                ? `<div><span class="badge-success">รายงานแล้ว</span></div><div class="small" style="margin-top:6px;">ล่าสุด ${escapeHtml(formatThaiDateTime(r.latest_imported_at))}</div>`
-                : `<div><span class="badge-warn">ยังไม่รายงาน</span></div>${(r.reported_rooms || []).length ? `<div class="small" style="margin-top:6px;">พบข้อมูลแล้ว: ${escapeHtml((r.reported_rooms || []).join(', '))}</div>` : ''}`
-            }
-          </td>
+<td class="text-center">
+  <button
+    class="btn-primary"
+    data-import-index="${idx}"
+    type="button"
+  >
+    นำเข้า
+  </button>
+</td>
+
+<td class="text-center">
+  <button
+    class="btn-secondary"
+    data-quality-index="${idx}"
+    type="button"
+  >
+    🔍 ตรวจไฟล์
+  </button>
+</td>
+
+<td class="text-center">
+  <button
+    class="btn-secondary"
+    data-literacy-index="${idx}"
+    type="button"
+  >
+    🔍 ตรวจไฟล์
+  </button>
+</td>
+
+<td>
+  ${
+    r.has_imported
+      ? `
+        <div>
+          <span class="badge-success">
+            รายงานแล้ว
+          </span>
+        </div>
+
+        <div
+          class="small"
+          style="margin-top:6px;"
+        >
+          ล่าสุด ${escapeHtml(
+            formatThaiDateTime(
+              r.latest_imported_at
+            )
+          )}
+        </div>
+      `
+      : `
+        <div>
+          <span class="badge-warn">
+            ยังไม่รายงาน
+          </span>
+        </div>
+
+        ${
+          (r.reported_rooms || []).length
+            ? `
+              <div
+                class="small"
+                style="margin-top:6px;"
+              >
+                พบข้อมูลแล้ว:
+                ${escapeHtml(
+                  (r.reported_rooms || []).join(', ')
+                )}
+              </div>
+            `
+            : ''
+        }
+      `
+  }
+</td>
         </tr>
       `).join('');
 
@@ -24841,6 +25378,90 @@ async function attachImportStatus(groups){
           el('fileInput').click();
         });
       });
+      // =====================================================
+// ตรวจไฟล์คุณลักษณะอันพึงประสงค์
+// =====================================================
+tbody.querySelectorAll('[data-quality-index]').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    const idx =
+      Number(btn.dataset.qualityIndex);
+
+    const group =
+      state.groupedOfferings[idx];
+
+    if(!group){
+      showToast(
+        'ไม่พบรายการสอน',
+        'กรุณาโหลดรายการสอนใหม่อีกครั้ง',
+        'error'
+      );
+      return;
+    }
+
+    state.selectedQualityGroup = group;
+
+    const input =
+      el('qualityFileInput');
+
+    if(!input){
+      console.error(
+        'ไม่พบ qualityFileInput'
+      );
+      return;
+    }
+
+    // reset เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    input.value = '';
+
+    input.click();
+
+  });
+
+});
+// =====================================================
+// ตรวจไฟล์อ่าน คิดวิเคราะห์ และเขียน
+// =====================================================
+tbody.querySelectorAll('[data-literacy-index]').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    const idx =
+      Number(btn.dataset.literacyIndex);
+
+    const group =
+      state.groupedOfferings[idx];
+
+    if(!group){
+      showToast(
+        'ไม่พบรายการสอน',
+        'กรุณาโหลดรายการสอนใหม่อีกครั้ง',
+        'error'
+      );
+      return;
+    }
+
+    state.selectedLiteracyGroup = group;
+
+    const input =
+      el('literacyFileInput');
+
+    if(!input){
+      console.error(
+        'ไม่พบ literacyFileInput'
+      );
+      return;
+    }
+
+    // reset เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    input.value = '';
+
+    input.click();
+
+  });
+
+});
     }
 
     async function loadImportTeachingList(){
@@ -24901,6 +25522,2049 @@ async function attachImportStatus(groups){
         teacher_code_raw: teacherRaw
       };
     }
+
+    // =====================================================
+// ตรวจชื่อไฟล์ Quality / Literacy
+// แยกจาก parseFilename() ของระบบนำเข้าเกรด
+// =====================================================
+function parseAssessmentValidationFilename(
+  filename,
+  expectedType
+){
+
+  const originalName =
+    String(filename || '').trim();
+
+  if(!originalName){
+    throw new Error(
+      'ไม่พบชื่อไฟล์'
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // 1) ตรวจนามสกุล
+  // ---------------------------------------------------
+  if(!/\.(xlsx|xls)$/i.test(originalName)){
+    throw new Error(
+      'รองรับเฉพาะไฟล์ Excel .xlsx หรือ .xls'
+    );
+  }
+
+
+  // ตัดนามสกุลออก
+  const base =
+    originalName.replace(/\.(xlsx|xls)$/i, '');
+
+
+  /*
+   * รองรับกรณีไฟล์ถูกดาวน์โหลดซ้ำ เช่น
+   *
+   * ว30103-quality-323(1).xlsx
+   * ว30103-quality-323(2).xlsx
+   *
+   * โดยถือว่า teacher code จริงคือ 323
+   */
+  const normalizedBase =
+    base.replace(/\s*\(\d+\)\s*$/, '');
+
+
+  const parts =
+    normalizedBase.split('-');
+
+
+  // ---------------------------------------------------
+  // 2) ต้องมี 3 ส่วน
+  //    subject-type-teacher
+  // ---------------------------------------------------
+  if(parts.length !== 3){
+
+    throw new Error(
+      expectedType === 'quality'
+        ? 'ชื่อไฟล์ไม่ถูกต้อง ต้องเป็น รหัสวิชา-quality-รหัสครู.xlsx'
+        : 'ชื่อไฟล์ไม่ถูกต้อง ต้องเป็น รหัสวิชา-literacy-รหัสครู.xlsx'
+    );
+
+  }
+
+
+  const subjectCode =
+    String(parts[0] || '').trim();
+
+  const fileType =
+    String(parts[1] || '')
+      .trim()
+      .toLowerCase();
+
+  const teacherRaw =
+    String(parts[2] || '').trim();
+
+
+  // ---------------------------------------------------
+  // 3) ตรวจรหัสวิชา
+  // ---------------------------------------------------
+  if(!subjectCode){
+
+    throw new Error(
+      'ไม่พบรหัสวิชาในชื่อไฟล์'
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // 4) ตรวจประเภทไฟล์
+  // ---------------------------------------------------
+  if(
+    fileType !== 'quality' &&
+    fileType !== 'literacy'
+  ){
+
+    throw new Error(
+      'ประเภทไฟล์ไม่ถูกต้อง ต้องเป็น quality หรือ literacy'
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // 5) ต้องตรงกับปุ่มที่ครูกด
+  // ---------------------------------------------------
+  if(fileType !== expectedType){
+
+    if(expectedType === 'quality'){
+
+      throw new Error(
+        'เลือกไฟล์ไม่ถูกประเภท กรุณาเลือกไฟล์คุณลักษณะอันพึงประสงค์ (quality)'
+      );
+
+    }
+
+    throw new Error(
+      'เลือกไฟล์ไม่ถูกประเภท กรุณาเลือกไฟล์อ่าน คิดวิเคราะห์ และเขียน (literacy)'
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // 6) ตรวจรหัสครู
+  // ---------------------------------------------------
+  if(!teacherRaw){
+
+    throw new Error(
+      'ไม่พบรหัสครูในชื่อไฟล์'
+    );
+
+  }
+
+
+  return {
+
+    subject_code: subjectCode,
+
+    type: fileType,
+
+    teacher_code:
+      normalizeTeacherCode(teacherRaw),
+
+    teacher_code_raw:
+      teacherRaw,
+
+    original_filename:
+      originalName
+
+  };
+
+}
+
+// =====================================================
+// อ่านและตรวจโครงสร้างไฟล์ Quality / Literacy
+// =====================================================
+async function readAssessmentValidationWorkbook(
+  file,
+  expectedType
+){
+
+  // ---------------------------------------------------
+  // 1) อ่านไฟล์ Excel
+  // ---------------------------------------------------
+  const buffer =
+    await file.arrayBuffer();
+
+  const workbook =
+    XLSX.read(buffer, {
+      type: 'array'
+    });
+
+
+  // ---------------------------------------------------
+  // 2) ต้องมี worksheet
+  // ---------------------------------------------------
+  if(
+    !workbook.SheetNames ||
+    !workbook.SheetNames.length
+  ){
+    throw new Error(
+      'ไม่พบ Worksheet ภายในไฟล์ Excel'
+    );
+  }
+
+
+  // ใช้ sheet แรก
+  const sheetName =
+    workbook.SheetNames[0];
+
+  const worksheet =
+    workbook.Sheets[sheetName];
+
+
+  if(!worksheet){
+    throw new Error(
+      'ไม่สามารถอ่าน Worksheet ภายในไฟล์ Excel ได้'
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // 3) แปลงเป็น Array
+  //    เก็บช่องว่างไว้เพื่อรักษาตำแหน่ง column
+  // ---------------------------------------------------
+  const rows =
+    XLSX.utils.sheet_to_json(
+      worksheet,
+      {
+        header: 1,
+        defval: '',
+        raw: true
+      }
+    );
+
+
+  if(rows.length < 3){
+    throw new Error(
+      'ไฟล์ Excel ไม่มีข้อมูลนักเรียน หรือโครงสร้างไฟล์ไม่ถูกต้อง'
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // 4) Header อยู่ Excel แถวที่ 2
+  // ---------------------------------------------------
+  const headerRow =
+    rows[1].map(value =>
+      String(value ?? '').trim()
+    );
+
+
+  // ---------------------------------------------------
+  // 5) กำหนด Header ที่ Bookmark ต้องส่งออกมา
+  // ---------------------------------------------------
+  const expectedHeaders =
+    expectedType === 'quality'
+
+      ? [
+          'เลขประจำตัว',
+          'ชื่อสกุล',
+          'ห้อง',
+          'เลขที่',
+
+          'QM1-1',
+          'QM1-2',
+          'QM1-3',
+          'QM1-4',
+          'QM1',
+
+          'QM2-1',
+          'QM2-2',
+          'QM2',
+
+          'QM3-1',
+          'QM3',
+
+          'QM4-1',
+          'QM4-2',
+          'QM4',
+
+          'QM5-1',
+          'QM5-2',
+          'QM5',
+
+          'QM6-1',
+          'QM6-2',
+          'QM6',
+
+          'QM7-1',
+          'QM7-2',
+          'QM7-3',
+          'QM7',
+
+          'QM8-1',
+          'QM8-2',
+          'QM8',
+
+          'Qgrade'
+        ]
+
+      : [
+          'เลขประจำตัว',
+          'ชื่อสกุล',
+          'ห้อง',
+          'เลขที่',
+
+          'คะแนน1',
+          'คะแนน2',
+          'คะแนน3',
+          'คะแนน4',
+          'คะแนน5',
+
+          'รวม'
+        ];
+
+
+  // ---------------------------------------------------
+  // 6) ตรวจจำนวน Column
+  // ---------------------------------------------------
+  if(
+    headerRow.length < expectedHeaders.length
+  ){
+
+    throw new Error(
+      `โครงสร้างไฟล์ไม่ถูกต้อง\n` +
+      `ควรมีอย่างน้อย ${expectedHeaders.length} คอลัมน์ ` +
+      `แต่พบ ${headerRow.length} คอลัมน์`
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // 7) ตรวจชื่อ Header ทีละ Column
+  // ---------------------------------------------------
+  for(
+    let columnIndex = 0;
+    columnIndex < expectedHeaders.length;
+    columnIndex++
+  ){
+
+    const expected =
+      expectedHeaders[columnIndex];
+
+    const actual =
+      headerRow[columnIndex] || '';
+
+
+    if(actual !== expected){
+
+      const cellAddress =
+        XLSX.utils.encode_cell({
+          r: 1,
+          c: columnIndex
+        });
+
+
+      throw new Error(
+        `โครงสร้างไฟล์ไม่ถูกต้องที่ ${cellAddress}\n` +
+        `ควรเป็น "${expected}"\n` +
+        `แต่พบ "${actual || '(ว่าง)'}"`
+      );
+
+    }
+
+  }
+
+
+  // ---------------------------------------------------
+  // 8) ต้องมีข้อมูลนักเรียนตั้งแต่ Excel แถว 3
+  // ---------------------------------------------------
+  const dataRows =
+    rows
+      .slice(2)
+      .filter(row => {
+
+        // พิจารณาว่ามี SID หรือไม่
+        return String(
+          row?.[0] ?? ''
+        ).trim() !== '';
+
+      });
+
+
+  if(!dataRows.length){
+
+    throw new Error(
+      'ไม่พบข้อมูลนักเรียนตั้งแต่ Excel แถวที่ 3'
+    );
+
+  }
+
+
+  console.log(
+    '[Assessment Validation] Workbook structure passed',
+    {
+      type: expectedType,
+      sheetName,
+      students: dataRows.length,
+      columns: expectedHeaders.length
+    }
+  );
+
+
+  // ---------------------------------------------------
+  // ส่งข้อมูลกลับไปใช้ในจุดถัดไป
+  // ---------------------------------------------------
+  return {
+    workbook,
+    worksheet,
+    sheetName,
+    rows,
+    headerRow,
+    expectedHeaders,
+    dataRows
+  };
+
+}
+
+let assessmentErrorNavigationIndex = -1;
+
+
+function getAssessmentErrorCells(){
+
+  const overlay =
+    el('assessmentValidationOverlay');
+
+  if(!overlay){
+    return [];
+  }
+
+  return Array.from(
+    overlay.querySelectorAll(
+      '[data-excel-cell].assessment-cell-error'
+    )
+  );
+
+}
+
+
+function updateAssessmentErrorNavigator(){
+
+  const cells =
+    getAssessmentErrorCells();
+
+  const navigator =
+    el('assessmentErrorNavigator');
+
+  const position =
+    el('assessmentErrorPosition');
+
+  if(!navigator || !position){
+    return;
+  }
+
+
+  if(!cells.length){
+
+    navigator.classList.add('hidden');
+
+    assessmentErrorNavigationIndex = -1;
+
+    return;
+  }
+
+
+  navigator.classList.remove('hidden');
+
+
+  if(
+    assessmentErrorNavigationIndex < 0 ||
+    assessmentErrorNavigationIndex >= cells.length
+  ){
+    assessmentErrorNavigationIndex = 0;
+  }
+
+
+  position.textContent =
+    `จุดที่ ${
+      assessmentErrorNavigationIndex + 1
+    } / ${cells.length}`;
+
+}
+
+
+function focusAssessmentError(index){
+
+  const cells =
+    getAssessmentErrorCells();
+
+  if(!cells.length){
+    return;
+  }
+
+
+  let nextIndex =
+    Number(index);
+
+
+  if(nextIndex < 0){
+    nextIndex =
+      cells.length - 1;
+  }
+
+
+  if(nextIndex >= cells.length){
+    nextIndex = 0;
+  }
+
+
+  assessmentErrorNavigationIndex =
+    nextIndex;
+
+
+  cells.forEach(cell => {
+
+    cell.classList.remove(
+      'assessment-error-current'
+    );
+
+  });
+
+
+  const target =
+    cells[
+      assessmentErrorNavigationIndex
+    ];
+
+
+  if(!target){
+    return;
+  }
+
+
+  target.classList.add(
+    'assessment-error-current'
+  );
+
+
+const tableScroller =
+  target.closest(
+    '.assessment-validation-table-wrap'
+  ) ||
+  target.closest(
+    '.table-wrap'
+  );
+
+
+if(tableScroller){
+
+  const targetRect =
+    target.getBoundingClientRect();
+
+  const scrollerRect =
+    tableScroller.getBoundingClientRect();
+
+
+  const targetCenterX =
+    targetRect.left -
+    scrollerRect.left +
+    tableScroller.scrollLeft +
+    (targetRect.width / 2);
+
+
+  const targetCenterY =
+    targetRect.top -
+    scrollerRect.top +
+    tableScroller.scrollTop +
+    (targetRect.height / 2);
+
+
+  tableScroller.scrollTo({
+
+    left:
+      Math.max(
+        0,
+        targetCenterX -
+        (tableScroller.clientWidth / 2)
+      ),
+
+    top:
+      Math.max(
+        0,
+        targetCenterY -
+        (tableScroller.clientHeight / 2)
+      ),
+
+    behavior: 'smooth'
+
+  });
+
+}else{
+
+  // fallback กรณีหา container ไม่เจอ
+  target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+    inline: 'center'
+  });
+
+}
+
+
+  updateAssessmentErrorNavigator();
+
+}
+
+
+function moveAssessmentError(direction){
+
+  const cells =
+    getAssessmentErrorCells();
+
+  if(!cells.length){
+    return;
+  }
+
+
+  if(assessmentErrorNavigationIndex < 0){
+
+    assessmentErrorNavigationIndex = 0;
+
+  }else{
+
+    assessmentErrorNavigationIndex +=
+      direction;
+
+  }
+
+
+  focusAssessmentError(
+    assessmentErrorNavigationIndex
+  );
+
+}
+
+// =====================================================
+// เปิดหน้าต่างผลตรวจ Quality / Literacy
+// =====================================================
+function openAssessmentValidationModal({
+  workbookData,
+  validation,
+  expectedType,
+  selectedGroup
+}){
+
+  const overlay =
+    el('assessmentValidationOverlay');
+
+  if(!overlay){
+    console.error(
+      'ไม่พบ assessmentValidationOverlay'
+    );
+    return;
+  }
+
+
+  const rows =
+    workbookData?.rows || [];
+
+  const headers =
+    workbookData?.expectedHeaders || [];
+
+  const errors =
+    validation?.errors || [];
+
+
+  // ---------------------------------------------------
+  // 1) สร้าง Map ของ Cell ที่ผิด
+  //    เช่น G17 -> error object
+  // ---------------------------------------------------
+  const errorByCell =
+    new Map();
+
+  errors.forEach(error => {
+
+    if(error?.cell){
+      errorByCell.set(
+        String(error.cell).toUpperCase(),
+        error
+      );
+    }
+
+  });
+
+
+  // ---------------------------------------------------
+  // 2) หา Excel Row ที่มี Error
+  // ---------------------------------------------------
+  const errorRows =
+    new Set(
+      errors
+        .map(error => Number(error.excelRow))
+        .filter(Number.isFinite)
+    );
+
+
+  // ---------------------------------------------------
+  // 3) ชื่อประเภท
+  // ---------------------------------------------------
+  const typeLabel =
+    expectedType === 'quality'
+      ? 'คุณลักษณะอันพึงประสงค์'
+      : 'อ่าน คิดวิเคราะห์ และเขียน';
+
+
+  const subjectCode =
+    String(
+      selectedGroup?.subject_code || '-'
+    ).trim();
+
+
+  const classLevel =
+    String(
+      selectedGroup?.class_level || ''
+    ).trim();
+
+
+  const roomText =
+    String(
+      selectedGroup?.room_text || ''
+    ).trim();
+
+
+  // ---------------------------------------------------
+  // 4) Header ของ Modal
+  // ---------------------------------------------------
+  el('assessmentValidationTitle').textContent =
+    typeLabel;
+
+
+  const subtitleParts = [
+    subjectCode,
+    classLevel,
+    roomText
+  ].filter(Boolean);
+
+
+  el('assessmentValidationSubtitle').textContent =
+    subtitleParts.join(' • ');
+
+
+  // ---------------------------------------------------
+  // 5) Summary
+  // ---------------------------------------------------
+  el('assessmentValidationStudentCount').textContent =
+    String(validation.studentCount || 0);
+
+
+  el('assessmentValidationCellCount').textContent =
+    String(validation.checkedCellCount || 0);
+
+
+  el('assessmentValidationErrorCount').textContent =
+    String(validation.errorCount || 0);
+
+
+  // ---------------------------------------------------
+  // 6) สถานะ
+  // ---------------------------------------------------
+  const statusEl =
+    el('assessmentValidationStatus');
+
+
+  const instructionEl =
+    el('assessmentValidationInstruction');
+
+
+  if(validation.isValid){
+
+    statusEl.className =
+      'status success';
+
+    statusEl.textContent =
+      `🟢 ตรวจสอบผ่าน • ` +
+      `${validation.studentCount} คน • ` +
+      `ข้อมูลครบทุกช่อง • ` +
+      `คะแนนทั้งหมดอยู่ในช่วง 1–3`;
+
+
+    instructionEl.classList.add(
+      'hidden'
+    );
+
+  }else{
+
+    statusEl.className =
+      'status error';
+
+    statusEl.textContent =
+      `🔴 พบข้อผิดพลาด ` +
+      `${validation.errorCount} จุด ` +
+      `ใน ${errorRows.size} แถว`;
+
+
+    instructionEl.classList.remove(
+      'hidden'
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // 7) สร้างหัวตาราง
+  // ---------------------------------------------------
+  const thead =
+    el('assessmentValidationThead');
+
+
+  thead.innerHTML = `
+    <tr>
+
+
+      ${headers.map(header => `
+        <th>
+          ${escapeHtml(String(header || '-'))}
+        </th>
+      `).join('')}
+    </tr>
+  `;
+
+
+  // ---------------------------------------------------
+  // 8) สร้างข้อมูลนักเรียน
+  // ---------------------------------------------------
+  const tbody =
+    el('assessmentValidationTbody');
+
+
+  const bodyHtml = [];
+
+
+  /*
+   * rows[0] = Excel แถว 1
+   * rows[1] = Excel แถว 2
+   * rows[2] = Excel แถว 3
+   */
+  for(
+    let rowIndex = 2;
+    rowIndex < rows.length;
+    rowIndex++
+  ){
+
+    const row =
+      rows[rowIndex] || [];
+
+
+    const sid =
+      String(row[0] ?? '').trim();
+
+
+    // ไม่มี SID = ไม่ใช่แถวนักเรียน
+    if(!sid){
+      continue;
+    }
+
+
+    const excelRow =
+      rowIndex + 1;
+
+
+    const rowHasError =
+      errorRows.has(excelRow);
+
+
+    const cellsHtml =
+      headers.map(
+        (header, columnIndex) => {
+
+          const value =
+            row[columnIndex] ?? '';
+
+
+          const cellAddress =
+            XLSX.utils.encode_cell({
+              r: rowIndex,
+              c: columnIndex
+            }).toUpperCase();
+
+
+          const error =
+            errorByCell.get(
+              cellAddress
+            );
+
+
+          // A-D เป็นข้อมูลนักเรียน
+          const isScoreColumn =
+            columnIndex >= 4;
+
+
+          let cellClass = '';
+
+
+          if(error){
+
+            cellClass =
+              'assessment-cell-error';
+
+          }else if(isScoreColumn){
+
+            cellClass =
+              'assessment-cell-valid';
+
+          }
+
+
+          if(columnIndex === 1){
+
+            cellClass +=
+              ' assessment-student-name';
+
+          }
+
+
+          // Tooltip สำหรับช่องที่ผิด
+          const title =
+            error
+              ? ` title="${escapeHtml(
+                  error.message || ''
+                )}"`
+              : '';
+
+
+          return `
+            <td
+              class="${cellClass.trim()}"
+              ${title}
+              data-excel-cell="${cellAddress}"
+            >
+              ${
+                String(value ?? '').trim() === ''
+                  ? (
+                      error
+                        ? '<strong>ว่าง</strong>'
+                        : ''
+                    )
+                  : escapeHtml(
+                      String(value)
+                    )
+              }
+            </td>
+          `;
+
+        }
+      )
+      .join('');
+
+
+    bodyHtml.push(`
+      <tr
+        class="${
+          rowHasError
+            ? 'assessment-row-error'
+            : ''
+        }"
+        data-excel-row="${excelRow}"
+      >
+
+
+        ${cellsHtml}
+      </tr>
+    `);
+
+  }
+
+
+  tbody.innerHTML =
+    bodyHtml.join('');
+
+
+  // ---------------------------------------------------
+  // 9) แสดง Overlay
+  // ---------------------------------------------------
+  overlay.classList.add(
+    'show'
+  );
+
+assessmentErrorNavigationIndex = -1;
+
+updateAssessmentErrorNavigator();
+
+
+// ถ้าพบข้อผิดพลาด
+// ให้เลื่อนไปโฟกัสจุดแรกทันที
+if(getAssessmentErrorCells().length > 0){
+
+  requestAnimationFrame(() => {
+
+    focusAssessmentError(0);
+
+  });
+
+}
+
+
+
+
+}
+
+// =====================================================
+// ตรวจข้อมูลนักเรียนในไฟล์ Quality / Literacy
+// =====================================================
+function validateAssessmentStudents(
+  workbookData,
+  selectedGroup
+){
+
+  const rows =
+    workbookData?.rows || [];
+
+  const errors = [];
+
+  const seenSid =
+    new Map();
+
+
+  // ---------------------------------------------------
+  // ข้อมูลรายการสอนที่ครูกด
+  // ---------------------------------------------------
+  const academicYear =
+    safeNum(
+      selectedGroup?.academic_year
+    );
+
+  const classLevel =
+    safeText(
+      selectedGroup?.class_level,
+      ''
+    );
+
+
+  // ห้องที่รายการสอนนี้ครอบคลุม
+  const expectedRooms =
+    new Set(
+      (selectedGroup?.offerings || [])
+        .map(item =>
+          safeText(
+            item?.room,
+            ''
+          )
+        )
+        .filter(Boolean)
+    );
+
+
+  // fallback กรณีโครงสร้าง group ไม่มี offerings
+  if(
+    !expectedRooms.size &&
+    selectedGroup?.room
+  ){
+    expectedRooms.add(
+      safeText(
+        selectedGroup.room,
+        ''
+      )
+    );
+  }
+
+
+  // ---------------------------------------------------
+  // รุ่นนักเรียนที่ควรเป็น
+  // ใช้ logic เดียวกับระบบนำเข้าเกรดเดิม
+  // ---------------------------------------------------
+  const expectedEntry =
+    (
+      academicYear &&
+      classLevel
+    )
+      ? teacherStudentGetEntryFilterByClassLevel(
+          classLevel,
+          academicYear
+        )
+      : null;
+
+      console.log(
+  '[Assessment Student Check]',
+  {
+    academicYear,
+    classLevel,
+    expectedEntry,
+    expectedRooms
+  }
+);
+
+
+  // ---------------------------------------------------
+  // Excel เริ่มข้อมูลที่แถว 3
+  // ---------------------------------------------------
+  for(
+    let rowIndex = 2;
+    rowIndex < rows.length;
+    rowIndex++
+  ){
+
+    const row =
+      rows[rowIndex] || [];
+
+
+    const sid =
+      teacherNormalizeStudentSid(
+        row[0]
+      );
+
+
+    if(!sid){
+      continue;
+    }
+
+
+    const excelRow =
+      rowIndex + 1;
+
+
+    const studentName =
+      String(
+        row[1] ?? ''
+      ).trim();
+
+
+    const excelRoom =
+      safeText(
+        row[2],
+        ''
+      );
+
+
+    const studentNo =
+      safeText(
+        row[3],
+        ''
+      );
+
+
+    // =================================================
+    // 1) SID ซ้ำใน Excel
+    // =================================================
+    if(seenSid.has(sid)){
+
+      const firstRow =
+        seenSid.get(sid);
+
+
+      errors.push({
+
+        type:
+          'duplicate_sid',
+
+        excelRow,
+
+        cell:
+          `A${excelRow}`,
+
+        sid,
+        studentName,
+        room:
+          excelRoom,
+        studentNo,
+
+        header:
+          'เลขประจำตัว',
+
+        value:
+          sid,
+
+        message:
+          `A${excelRow} พบเลขประจำตัว ${sid} ซ้ำ ` +
+          `(พบครั้งแรกที่แถว Excel ${firstRow})`
+
+      });
+
+    }else{
+
+      seenSid.set(
+        sid,
+        excelRow
+      );
+
+    }
+
+
+    // =================================================
+    // 2) ค้นใน Student Master
+    // =================================================
+    const student =
+      getTeacherStudentMasterBySid(
+        sid
+      );
+
+      if(rowIndex === 2){
+
+  console.log(
+    '[Assessment First Student]',
+    {
+      sid,
+      excelRoom,
+
+      student,
+
+      student_status:
+        student?.student_status,
+
+      current_room:
+        student?.current_room,
+
+      entry_academic_year:
+        student?.entry_academic_year,
+
+      entry_level:
+        student?.entry_level,
+
+      expectedEntry,
+
+      isCurrentStudent:
+        student
+          ? teacherIsCurrentStudent(student)
+          : false
+    }
+  );
+
+}
+
+
+    if(!student){
+
+      errors.push({
+
+        type:
+          'student_not_found',
+
+        excelRow,
+
+        cell:
+          `A${excelRow}`,
+
+        sid,
+        studentName,
+        room:
+          excelRoom,
+        studentNo,
+
+        header:
+          'เลขประจำตัว',
+
+        value:
+          sid,
+
+        message:
+          `A${excelRow} ไม่พบเลขประจำตัว ${sid} ` +
+          `ในข้อมูลนักเรียนของโรงเรียน`
+
+      });
+
+
+      // ไม่มี Student Master
+      // จึงตรวจข้ออื่นต่อไม่ได้
+      continue;
+
+    }
+
+
+    // =================================================
+    // 3) สถานะนักเรียน
+    // =================================================
+    if(
+      !teacherIsCurrentStudent(
+        student
+      )
+    ){
+
+      errors.push({
+
+        type:
+          'student_not_current',
+
+        excelRow,
+
+        cell:
+          `A${excelRow}`,
+
+        sid,
+        studentName,
+        room:
+          excelRoom,
+        studentNo,
+
+        header:
+          'เลขประจำตัว',
+
+        value:
+          sid,
+
+        message:
+          `A${excelRow} นักเรียน ${sid} ` +
+          `ไม่ได้อยู่ในสถานะ "เรียนอยู่"`
+
+      });
+
+    }
+
+
+    // =================================================
+    // 4) ตรวจรุ่น / ระดับชั้น
+    // =================================================
+    if(expectedEntry){
+
+      const studentEntryYear =
+        safeNum(
+          student.entry_academic_year
+        );
+
+
+      const studentEntryLevel =
+        safeText(
+          student.entry_level,
+          ''
+        );
+
+
+      if(
+        studentEntryYear !==
+          safeNum(
+            expectedEntry.entry_academic_year
+          ) ||
+
+        studentEntryLevel !==
+          safeText(
+            expectedEntry.entry_level,
+            ''
+          )
+      ){
+
+        errors.push({
+
+          type:
+            'wrong_cohort',
+
+          excelRow,
+
+          cell:
+            `A${excelRow}`,
+
+          sid,
+          studentName,
+          room:
+            excelRoom,
+          studentNo,
+
+          header:
+            'เลขประจำตัว',
+
+          value:
+            sid,
+
+          message:
+            `A${excelRow} นักเรียน ${sid} ` +
+            `ไม่ใช่นักเรียนรุ่นของ ${classLevel} ` +
+            `ปีการศึกษา ${academicYear}`
+
+        });
+
+      }
+
+    }
+
+
+    // =================================================
+    // 5) ตรวจห้องจาก Student Master
+    // =================================================
+    const masterRoom =
+      safeText(
+        student.current_room,
+        ''
+      );
+
+
+    if(
+      expectedRooms.size &&
+      !expectedRooms.has(
+        masterRoom
+      )
+    ){
+
+      errors.push({
+
+        type:
+          'wrong_room',
+
+        excelRow,
+
+        // Highlight ช่อง "ห้อง"
+        cell:
+          `C${excelRow}`,
+
+        sid,
+        studentName,
+
+        room:
+          excelRoom,
+
+        studentNo,
+
+        header:
+          'ห้อง',
+
+        value:
+          excelRoom,
+
+        message:
+          `C${excelRow} นักเรียน ${sid} ` +
+          `อยู่ห้อง ${masterRoom || '-'} ` +
+          `ซึ่งไม่อยู่ในรายการสอนที่เลือก`
+
+      });
+
+    }
+
+
+    // =================================================
+    // 6) ห้องใน Excel ต้องตรง Student Master
+    // =================================================
+    if(
+      masterRoom &&
+      excelRoom &&
+      masterRoom !== excelRoom
+    ){
+
+      errors.push({
+
+        type:
+          'excel_room_mismatch',
+
+        excelRow,
+
+        cell:
+          `C${excelRow}`,
+
+        sid,
+        studentName,
+
+        room:
+          excelRoom,
+
+        studentNo,
+
+        header:
+          'ห้อง',
+
+        value:
+          excelRoom,
+
+        message:
+          `C${excelRow} ห้องในไฟล์เป็น ${excelRoom} ` +
+          `แต่ข้อมูลปัจจุบันของนักเรียน ${sid} ` +
+          `อยู่ห้อง ${masterRoom}`
+
+      });
+
+    }
+
+  }
+
+
+  console.log(
+    '[Assessment Validation] Student validation',
+    {
+      students:
+        seenSid.size,
+
+      errors:
+        errors.length,
+
+      errorDetails:
+        errors
+    }
+  );
+
+
+  return {
+    isValid:
+      errors.length === 0,
+
+    studentCount:
+      seenSid.size,
+
+    errorCount:
+      errors.length,
+
+    errors
+  };
+
+}
+
+// =====================================================
+// ตรวจคะแนน Quality / Literacy
+// - ห้ามว่าง
+// - ต้องเป็น 1, 2 หรือ 3 เท่านั้น
+// =====================================================
+function validateAssessmentScores(
+  workbookData,
+  expectedType
+){
+
+  const rows =
+    workbookData?.rows || [];
+
+  const headerRow =
+    workbookData?.headerRow || [];
+
+
+  const errors = [];
+
+  let studentCount = 0;
+  let checkedCellCount = 0;
+
+
+  // ---------------------------------------------------
+  // คอลัมน์คะแนน
+  //
+  // Quality  : E ถึง AE = index 4 ถึง 30
+  // Literacy : E ถึง J  = index 4 ถึง 9
+  // ---------------------------------------------------
+  const scoreStartColumn = 4;
+
+  const scoreEndColumn =
+    expectedType === 'quality'
+      ? 30
+      : 9;
+
+
+  // ---------------------------------------------------
+  // เริ่มจาก Excel แถว 3
+  // rows[0] = Excel row 1
+  // rows[1] = Excel row 2
+  // rows[2] = Excel row 3
+  // ---------------------------------------------------
+  for(
+    let rowIndex = 2;
+    rowIndex < rows.length;
+    rowIndex++
+  ){
+
+    const row =
+      rows[rowIndex] || [];
+
+
+    // SID อยู่ column A
+    const sid =
+      String(row[0] ?? '').trim();
+
+
+    // ถ้าไม่มี SID ถือว่าไม่ใช่แถวนักเรียน
+    if(!sid){
+      continue;
+    }
+
+
+    studentCount++;
+
+
+    const studentName =
+      String(row[1] ?? '').trim();
+
+    const room =
+      String(row[2] ?? '').trim();
+
+    const studentNo =
+      String(row[3] ?? '').trim();
+
+
+    // เลขแถวจริงใน Excel
+    const excelRow =
+      rowIndex + 1;
+
+
+    // -------------------------------------------------
+    // ตรวจทุกช่องคะแนน
+    // -------------------------------------------------
+    for(
+      let columnIndex = scoreStartColumn;
+      columnIndex <= scoreEndColumn;
+      columnIndex++
+    ){
+
+      checkedCellCount++;
+
+
+      const rawValue =
+        row[columnIndex];
+
+
+      const textValue =
+        String(
+          rawValue ?? ''
+        ).trim();
+
+
+      const cell =
+        XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: columnIndex
+        });
+
+
+      const header =
+        String(
+          headerRow[columnIndex] ?? ''
+        ).trim();
+
+
+      // -------------------------------------------------
+      // 1) ช่องว่าง
+      // -------------------------------------------------
+      if(textValue === ''){
+
+        errors.push({
+
+          type: 'blank',
+
+          excelRow,
+          cell,
+
+          sid,
+          studentName,
+          room,
+          studentNo,
+
+          header,
+
+          value: '',
+
+          message:
+            `${cell} (${header}) ไม่มีคะแนน`
+
+        });
+
+        continue;
+
+      }
+
+
+      // -------------------------------------------------
+      // 2) ต้องเป็น 1 / 2 / 3 เท่านั้น
+      //
+      // รับทั้งตัวเลข 1 และข้อความ "1"
+      // -------------------------------------------------
+      const numericValue =
+        Number(textValue);
+
+
+      const isAllowed =
+        (
+          numericValue === 1 ||
+          numericValue === 2 ||
+          numericValue === 3
+        );
+
+
+      /*
+       * ป้องกันค่าประหลาด เช่น
+       * "1abc"
+       * "2 คะแนน"
+       *
+       * Number() จะต้องแปลงได้จริง
+       */
+      if(
+        !Number.isFinite(numericValue) ||
+        !isAllowed
+      ){
+
+        errors.push({
+
+          type: 'invalid_score',
+
+          excelRow,
+          cell,
+
+          sid,
+          studentName,
+          room,
+          studentNo,
+
+          header,
+
+          value: rawValue,
+
+          message:
+            `${cell} (${header}) พบค่า "${textValue}" — ต้องเป็น 1, 2 หรือ 3 เท่านั้น`
+
+        });
+
+      }
+
+    }
+
+  }
+
+
+  // ---------------------------------------------------
+  // ผลการตรวจ
+  // ---------------------------------------------------
+  const result = {
+
+    isValid:
+      errors.length === 0,
+
+    studentCount,
+
+    checkedCellCount,
+
+    errorCount:
+      errors.length,
+
+    errors
+
+  };
+
+
+  console.log(
+    '[Assessment Validation] Score validation',
+    result
+  );
+
+
+  return result;
+
+}
+
+// =====================================================
+// ตรวจไฟล์ Quality / Literacy ก่อนอ่านข้อมูล Excel
+// =====================================================
+async function handleAssessmentValidationFile(
+  file,
+  expectedType,
+  selectedGroup
+){
+
+  try{
+
+    if(!file){
+      return;
+    }
+
+
+    // -------------------------------------------------
+    // 1) ต้องมีรายการสอนที่ครูกดเลือกไว้
+    // -------------------------------------------------
+    if(!selectedGroup){
+
+      throw new Error(
+        'ไม่พบรายการสอนที่ต้องการตรวจ กรุณากดปุ่มตรวจไฟล์ใหม่อีกครั้ง'
+      );
+
+    }
+
+
+    // -------------------------------------------------
+    // 2) อ่านข้อมูลจากชื่อไฟล์
+    // -------------------------------------------------
+    const fileMeta =
+      parseAssessmentValidationFilename(
+        file.name,
+        expectedType
+      );
+
+
+    // -------------------------------------------------
+    // 3) ตรวจรหัสวิชา
+    // -------------------------------------------------
+    const expectedSubject =
+      String(
+        selectedGroup.subject_code || ''
+      ).trim();
+
+    const fileSubject =
+      String(
+        fileMeta.subject_code || ''
+      ).trim();
+
+
+    if(fileSubject !== expectedSubject){
+
+      throw new Error(
+        `รหัสวิชาในไฟล์ไม่ตรงกับรายวิชาที่เลือก\n` +
+        `รายวิชาที่เลือก: ${expectedSubject}\n` +
+        `ไฟล์ที่เลือก: ${fileSubject}`
+      );
+
+    }
+
+
+    // -------------------------------------------------
+    // 4) ตรวจรหัสครู
+    // -------------------------------------------------
+    const expectedTeacher =
+      normalizeTeacherCode(
+        state.currentUser?.teacher_code || ''
+      );
+
+    const fileTeacher =
+      normalizeTeacherCode(
+        fileMeta.teacher_code || ''
+      );
+
+
+    if(fileTeacher !== expectedTeacher){
+
+      throw new Error(
+        `รหัสครูในไฟล์ไม่ตรงกับผู้ใช้งานปัจจุบัน\n` +
+        `รหัสครูปัจจุบัน: ${expectedTeacher || '-'}\n` +
+        `รหัสครูในไฟล์: ${fileTeacher || '-'}`
+      );
+
+    }
+
+
+    // -------------------------------------------------
+    // 5) ผ่านการตรวจชื่อไฟล์
+    // -------------------------------------------------
+    const typeLabel =
+      expectedType === 'quality'
+        ? 'คุณลักษณะอันพึงประสงค์'
+        : 'อ่าน คิดวิเคราะห์ และเขียน';
+
+
+    console.log(
+      '[Assessment Validation] Filename passed',
+      {
+        type: expectedType,
+        file: file.name,
+        subject: fileSubject,
+        teacher: fileTeacher,
+        group: selectedGroup
+      }
+    );
+
+
+    showToast(
+      'ตรวจชื่อไฟล์ผ่าน',
+      `${typeLabel} • ${fileSubject}`,
+      'success'
+    );
+
+    // -------------------------------------------------
+// 6) อ่านและตรวจโครงสร้างภายใน Excel
+// -------------------------------------------------
+const workbookData =
+  await readAssessmentValidationWorkbook(
+    file,
+    expectedType
+  );
+
+
+console.log(
+  '[Assessment Validation] File ready',
+  {
+    type: expectedType,
+    subject: fileSubject,
+    teacher: fileTeacher,
+    sheet: workbookData.sheetName,
+    students: workbookData.dataRows.length
+  }
+);
+
+
+showToast(
+  'ตรวจโครงสร้างไฟล์ผ่าน',
+  `${typeLabel} • ${workbookData.dataRows.length} คน`,
+  'success'
+);
+
+// -------------------------------------------------
+// 7) ตรวจคะแนนทุกช่อง
+// -------------------------------------------------
+const scoreValidation =
+  validateAssessmentScores(
+    workbookData,
+    expectedType
+  );
+
+  // -------------------------------------------------
+// โหลด Student Master ของนักเรียนใน Excel
+// ก่อนตรวจ SID / ห้อง / cohort
+// -------------------------------------------------
+const assessmentStudentSids =
+  (workbookData?.rows || [])
+    .slice(2)
+    .map(row =>
+      teacherNormalizeStudentSid(
+        row?.[0]
+      )
+    )
+    .filter(Boolean);
+
+
+await fetchTeacherStudentMasterBySids(
+  assessmentStudentSids
+);
+
+  // -------------------------------------------------
+// ตรวจข้อมูลนักเรียน
+// -------------------------------------------------
+const studentValidation =
+  validateAssessmentStudents(
+    workbookData,
+    selectedGroup
+  );
+
+
+// -------------------------------------------------
+// รวม Error คะแนน + Error นักเรียน
+// -------------------------------------------------
+const combinedErrors = [
+  ...studentValidation.errors,
+  ...scoreValidation.errors
+];
+
+
+const combinedValidation = {
+
+  ...scoreValidation,
+
+  isValid:
+    combinedErrors.length === 0,
+
+  errorCount:
+    combinedErrors.length,
+
+  errors:
+    combinedErrors
+
+};
+
+  // -------------------------------------------------
+// แสดงผลการตรวจใน Overlay
+// -------------------------------------------------
+openAssessmentValidationModal({
+  workbookData,
+  validation: combinedValidation,
+  expectedType,
+  selectedGroup
+});
+
+
+if(!combinedValidation.isValid){
+
+  console.error(
+    '[Assessment Validation] Invalid scores',
+    combinedValidation.errors
+  );
+
+
+const firstError =
+  combinedValidation.errors[0];
+
+
+  throw new Error(
+    `พบข้อมูลคะแนนไม่ถูกต้อง ${combinedValidation.errorCount} จุด\n` +
+    `จุดแรก: ${firstError.cell} ` +
+    `แถว Excel ${firstError.excelRow}\n` +
+    `${firstError.message}\n\n` +
+    `ให้ครูกลับไปแก้ bookmark ทันที และส่งออก Excel กลับมาตรวจใหม่`
+  );
+
+}
+
+
+// -------------------------------------------------
+// 8) คะแนนทั้งหมดผ่าน
+// -------------------------------------------------
+console.log(
+  '[Assessment Validation] Scores passed',
+  {
+    students:
+      scoreValidation.studentCount,
+
+    checkedCells:
+      scoreValidation.checkedCellCount
+  }
+);
+
+
+showToast(
+  'ตรวจคะแนนผ่าน',
+  `${scoreValidation.studentCount} คน • ` +
+  `${scoreValidation.checkedCellCount} ช่อง • ` +
+  `คะแนนถูกต้องทั้งหมด`,
+  'success'
+);
+
+
+    /*
+     * จุดที่ 7 เราจะเริ่มอ่าน Workbook
+     * และตรวจโครงสร้างภายใน Excel จากตรงนี้
+     */
+
+  }catch(error){
+
+    console.error(
+      'handleAssessmentValidationFile ERROR',
+      error
+    );
+
+
+    showToast(
+      'ไม่สามารถตรวจไฟล์ได้',
+      error.message || String(error),
+      'error'
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// Quality File Input
+// =====================================================
+el('qualityFileInput')?.addEventListener(
+  'change',
+  (event) => {
+
+    const file =
+      event.target.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+    handleAssessmentValidationFile(
+      file,
+      'quality',
+      state.selectedQualityGroup
+    );
+
+  }
+);
+// =====================================================
+// Literacy File Input
+// =====================================================
+el('literacyFileInput')?.addEventListener(
+  'change',
+  (event) => {
+
+    const file =
+      event.target.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+    handleAssessmentValidationFile(
+      file,
+      'literacy',
+      state.selectedLiteracyGroup
+    );
+
+  }
+);
 
     function ensureSelectedTeachingGroupReady(){
       if(!state.selectedTeachingGroup) throw new Error('ยังไม่ได้เลือกรายการสอน');
@@ -48155,6 +50819,69 @@ bindIfExists('midtermExcelInput', 'change', (e) => {
   });
 
   bindIfExists('fileInput', 'change', handleFileChange);
+  bindIfExists('qualityFileInput', 'change', (event) => {
+  const file = event.target.files?.[0];
+  if(!file) return;
+
+  handleAssessmentValidationFile(
+    file,
+    'quality',
+    state.selectedQualityGroup
+  );
+});
+
+bindIfExists('literacyFileInput', 'change', (event) => {
+  const file = event.target.files?.[0];
+  if(!file) return;
+
+  handleAssessmentValidationFile(
+    file,
+    'literacy',
+    state.selectedLiteracyGroup
+  );
+});
+
+// =====================================================
+// Assessment Validation Overlay
+// =====================================================
+
+bindIfExists(
+  'assessmentPrevErrorBtn',
+  'click',
+  () => {
+    moveAssessmentError(-1);
+  }
+);
+
+
+bindIfExists(
+  'assessmentNextErrorBtn',
+  'click',
+  () => {
+    moveAssessmentError(1);
+  }
+);
+
+bindIfExists(
+  'closeAssessmentValidationBtn',
+  'click',
+  () => {
+    el('assessmentValidationOverlay')
+      ?.classList.remove('show');
+  }
+);
+
+
+bindIfExists(
+  'closeAssessmentValidationBtnBottom',
+  'click',
+  () => {
+    el('assessmentValidationOverlay')
+      ?.classList.remove('show');
+  }
+);
+
+
   bindIfExists('saveImportBtn', 'click', saveImportedPreview);
   bindIfExists('clearPreviewBtn', 'click', clearPreview);
 
