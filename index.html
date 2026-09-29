@@ -28065,9 +28065,19 @@ async function mapStudentsForPreview(rows){
         setStatus('previewStatus','กำลังอ่านไฟล์...','info');
 
         const parsedName = parseFilename(file.name);
-        if(parsedName.subject_code !== state.selectedTeachingGroup.subject_code){
-          throw new Error(`รหัสวิชาในไฟล์ (${parsedName.subject_code}) ไม่ตรงกับรายการที่เลือก (${state.selectedTeachingGroup.subject_code})`);
-        }
+// เปรียบเทียบรหัสวิชาแบบไม่สนตัวพิมพ์เล็ก/ใหญ่
+// เพื่อรองรับรายวิชา IS เช่น i30201 และ I30201
+const fileSubjectCode =
+  String(parsedName.subject_code || '').trim().toUpperCase();
+
+const selectedSubjectCode =
+  String(state.selectedTeachingGroup.subject_code || '').trim().toUpperCase();
+
+if(fileSubjectCode !== selectedSubjectCode){
+  throw new Error(
+    `รหัสวิชาในไฟล์ (${parsedName.subject_code}) ไม่ตรงกับรายการที่เลือก (${state.selectedTeachingGroup.subject_code})`
+  );
+}
         if(parsedName.teacher_code !== state.currentUser.teacher_code){
           throw new Error(`ไฟล์นี้เป็นของ ${parsedName.teacher_code} แต่ผู้ใช้ที่เข้าสู่ระบบคือ ${state.currentUser.teacher_code}`);
         }
