@@ -27889,6 +27889,81 @@ function validateAssessmentScores(
 }
 
 // =====================================================
+// บันทึกสถานะ Quality / Literacy ว่า "ตรวจผ่านแล้ว"
+// =====================================================
+async function saveAssessmentCheckPassed(
+  selectedGroup,
+  checkType
+){
+
+  if(!selectedGroup){
+    throw new Error('ไม่พบรายการสอน');
+  }
+
+  const offeringIds =
+    (selectedGroup.offerings || [])
+      .map(offering =>
+        offering.subject_offering_id ||
+        offering.id
+      )
+      .map(value =>
+        String(value || '').trim()
+      )
+      .filter(Boolean);
+
+
+  if(!offeringIds.length){
+    throw new Error(
+      'ไม่พบ subject_offering_id สำหรับบันทึกผลตรวจ'
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_save_assessment_check_session',
+    {
+      p_token:
+        state.teacherSessionToken,
+
+      p_subject_offering_ids:
+        offeringIds,
+
+      p_check_type:
+        checkType
+    }
+  );
+
+
+  if(error){
+    console.error(
+      '[Assessment Check] Save failed',
+      error
+    );
+
+    throw error;
+  }
+
+
+  if(!data?.ok){
+    throw new Error(
+      'ไม่สามารถบันทึกสถานะการตรวจไฟล์ได้'
+    );
+  }
+
+
+  console.log(
+    '[Assessment Check] Saved',
+    data
+  );
+
+
+  return data;
+}
+
+// =====================================================
 // ตรวจไฟล์ Quality / Literacy ก่อนอ่านข้อมูล Excel
 // =====================================================
 async function handleAssessmentValidationFile(
@@ -28102,6 +28177,14 @@ openAssessmentValidationModal({
 
 if(combinedValidation.isValid){
 
+  // บันทึกสถานะ "ตรวจผ่านแล้ว" ลง Supabase ก่อน
+  await saveAssessmentCheckPassed(
+    selectedGroup,
+    expectedType
+  );
+
+
+  // บันทึกสำเร็จแล้วจึงแสดง Success Modal
   openAssessmentSuccessModal(
     expectedType
   );
