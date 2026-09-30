@@ -11667,6 +11667,21 @@ td{
 }
 
 </style>
+<style>
+@keyframes bookmarkUploadSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bookmark-upload-spinner {
+  animation: bookmarkUploadSpin .8s linear infinite;
+}
+</style>
 </head>
 <body>
   <div id="loginView" class="login-screen">
@@ -13314,6 +13329,54 @@ td{
             </div>
           </div>
 
+          <div
+  id="bookmarkSubmitBar"
+  style="
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  "
+>
+  <span
+    id="bookmarkSubmitStatus"
+    class="small"
+    style="color:#64748b;"
+  >
+    กำลังตรวจสอบความครบถ้วน...
+  </span>
+
+  <button
+    id="bookmarkSubmitBtn"
+    class="btn-primary"
+    type="button"
+    disabled
+    style="
+      min-width:190px;
+      opacity:.55;
+      cursor:not-allowed;
+    "
+  >
+    🔒 ยังส่งไม่ได้
+  </button>
+</div>
+
+<div
+  id="bookmarkIncompleteList"
+  style="
+    display:none;
+    margin-bottom:10px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#9a3412;
+    font-size:13px;
+    line-height:1.6;
+  "
+></div>
+
           <div id="importListStatus" class="status info">กำลังโหลดรายการสอน...</div>
 
           <div class="table-wrap">
@@ -13349,6 +13412,8 @@ td{
           </div>
         </section>
 
+
+
 <section
   id="importPreviewSection"
   class="card"
@@ -13383,6 +13448,157 @@ td{
   id="literacyFileInput"
   type="file"
   accept=".xlsx,.xls"
+  class="hidden"
+>
+
+<!-- Bookmark Upload Loading Modal -->
+<div
+  id="bookmarkUploadLoadingModal"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:99998;
+    align-items:center;
+    justify-content:center;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(2px);
+  "
+>
+  <div
+    style="
+      background:#ffffff;
+      border-radius:18px;
+      padding:28px 36px;
+      text-align:center;
+      box-shadow:0 20px 50px rgba(15,23,42,.20);
+      min-width:280px;
+    "
+  >
+
+    <div
+      class="bookmark-upload-spinner"
+      style="
+        width:46px;
+        height:46px;
+        margin:0 auto 18px;
+        border:5px solid #dbeafe;
+        border-top-color:#2563eb;
+        border-radius:50%;
+      "
+    ></div>
+
+    <div
+      style="
+        font-size:18px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:6px;
+      "
+    >
+      กำลังส่งไฟล์ Bookmark
+    </div>
+
+    <div
+      style="
+        font-size:14px;
+        color:#64748b;
+      "
+    >
+      กรุณารอสักครู่...
+    </div>
+
+  </div>
+</div>
+
+<!-- Bookmark Upload Success Modal -->
+<div
+  id="bookmarkUploadSuccessModal"
+  class="modal-overlay"
+  style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(2px);
+"
+>
+  <div
+class="modal-card"
+style="
+  width:min(420px,92vw);
+  text-align:center;
+  padding:28px 24px 22px;
+
+  background:#ffffff;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(15,23,42,.22);
+  border:1px solid rgba(226,232,240,.9);
+"
+  >
+    <div
+      style="
+        width:64px;
+        height:64px;
+        margin:0 auto 16px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#dcfce7;
+        color:#15803d;
+        font-size:34px;
+        font-weight:700;
+      "
+    >
+      ✓
+    </div>
+
+    <div
+      style="
+        font-size:20px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:8px;
+      "
+    >
+      ส่งไฟล์สำเร็จ
+    </div>
+
+    <div
+      id="bookmarkUploadSuccessMessage"
+      style="
+        font-size:14px;
+        color:#64748b;
+        line-height:1.7;
+        margin-bottom:22px;
+      "
+    >
+      ส่งไฟล์ Bookmark เรียบร้อยแล้ว
+    </div>
+
+    <button
+      id="bookmarkUploadSuccessOkBtn"
+      type="button"
+      class="btn-primary"
+      style="
+        min-width:120px;
+      "
+    >
+      OK
+    </button>
+  </div>
+</div>
+
+<!-- ไฟล์ Bookmark ทั้งโฟลเดอร์ที่บีบอัดแล้ว -->
+<input
+  id="bookmarkArchiveInput"
+  type="file"
+  accept=".zip,.rar,application/zip,application/vnd.rar"
   class="hidden"
 >
 
@@ -16753,6 +16969,7 @@ examEligibilitySettings: null,
 gradeReportDefaultPage: 'midtermReport',
 
   groupedOfferings: [],
+  bookmarkSubmission: null,
   selectedTeachingGroup: null,
   // สำหรับตรวจไฟล์คุณลักษณะฯ / อ่านคิดวิเคราะห์
   selectedQualityGroup: null,
@@ -24991,6 +25208,148 @@ if(el('studentDetailOverviewCompareTbody')){
       });
     }
 
+    // =====================================================
+// โหลดสถานะการตรวจ Quality / Literacy จาก Supabase
+// =====================================================
+async function attachAssessmentCheckStatus(groups){
+
+  if(!Array.isArray(groups) || !groups.length){
+    return groups;
+  }
+
+
+  const token =
+    String(
+      state.teacherSessionToken ||
+      ''
+    ).trim();
+
+
+  if(!token){
+    throw new Error(
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+    );
+  }
+
+
+  // grouped list ชุดนี้มาจากตัวกรองปี/เทอมเดียวกัน
+  const firstGroup = groups[0];
+
+  const academicYear =
+    Number(firstGroup.academic_year);
+
+  const term =
+    Number(firstGroup.term);
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient.rpc(
+    'teacher_get_assessment_checks_session',
+    {
+      p_token:
+        token,
+
+      p_academic_year:
+        academicYear,
+
+      p_term:
+        term
+    }
+  );
+
+
+  if(error){
+    console.error(
+      '[Assessment Check] Load failed',
+      error
+    );
+
+    throw error;
+  }
+
+
+  const checkRows =
+    Array.isArray(data?.rows)
+      ? data.rows
+      : [];
+
+
+  const checkMap =
+    new Map();
+
+
+  checkRows.forEach(row => {
+
+    const key = [
+      String(row.subject_code || '').trim(),
+      String(row.class_level || '').trim(),
+      String(row.check_type || '').trim()
+    ].join('|');
+
+
+    checkMap.set(
+      key,
+      row
+    );
+
+  });
+
+
+  return groups.map(group => {
+
+    const subjectCode =
+      String(
+        group.subject_code || ''
+      ).trim();
+
+    const classLevel =
+      String(
+        group.class_level || ''
+      ).trim();
+
+
+    const quality =
+      checkMap.get(
+        [
+          subjectCode,
+          classLevel,
+          'quality'
+        ].join('|')
+      ) || null;
+
+
+    const literacy =
+      checkMap.get(
+        [
+          subjectCode,
+          classLevel,
+          'literacy'
+        ].join('|')
+      ) || null;
+
+
+    return {
+      ...group,
+
+      quality_checked:
+        Boolean(quality),
+
+      quality_checked_at:
+        quality?.checked_at || null,
+
+      literacy_checked:
+        Boolean(literacy),
+
+      literacy_checked_at:
+        literacy?.checked_at || null
+    };
+
+  });
+
+}
+
 async function attachImportStatus(groups){
 
   if(!groups.length){
@@ -25269,8 +25628,352 @@ async function attachImportStatus(groups){
 
 }
 
+// =====================================================
+// ตรวจความครบถ้วนของ Bookmark แต่ละรายวิชา
+//
+// วิชาปกติ:
+//   Total + Quality + Literacy
+//
+// วิชา ก...:
+//   Total เท่านั้น
+// =====================================================
+function getBookmarkCourseCompletion(group){
+
+  const subjectCode =
+    String(
+      group?.subject_code || ''
+    ).trim();
+
+
+  const isActivity =
+    subjectCode.startsWith('ก');
+
+
+  const totalComplete =
+    group?.has_imported === true;
+
+
+  const qualityComplete =
+    isActivity
+      ? true
+      : group?.quality_checked === true;
+
+
+  const literacyComplete =
+    isActivity
+      ? true
+      : group?.literacy_checked === true;
+
+
+  const complete =
+    totalComplete &&
+    qualityComplete &&
+    literacyComplete;
+
+
+  return {
+    complete,
+
+    isActivity,
+
+    totalComplete,
+
+    qualityComplete,
+
+    literacyComplete
+  };
+}
+
+// =====================================================
+// ตรวจความครบถ้วนของ Bookmark ทุกวิชาของครู
+// =====================================================
+function getBookmarkOverallCompletion(groups){
+
+  const courseGroups =
+    Array.isArray(groups)
+      ? groups
+      : [];
+
+
+  const courseStatuses =
+    courseGroups.map(group => {
+
+      const status =
+        getBookmarkCourseCompletion(group);
+
+      return {
+        subject_code:
+          String(
+            group.subject_code || ''
+          ).trim(),
+
+        subject_name:
+          String(
+            group.subject_name || ''
+          ).trim(),
+
+        class_level:
+          String(
+            group.class_level || ''
+          ).trim(),
+
+        ...status
+      };
+
+    });
+
+
+  const totalCourses =
+    courseStatuses.length;
+
+
+  const completedCourses =
+    courseStatuses.filter(
+      course => course.complete
+    ).length;
+
+
+  const incompleteCourses =
+    courseStatuses.filter(
+      course => !course.complete
+    );
+
+
+  const complete =
+    totalCourses > 0 &&
+    completedCourses === totalCourses;
+
+
+  return {
+    complete,
+
+    totalCourses,
+
+    completedCourses,
+
+    incompleteCount:
+      incompleteCourses.length,
+
+    courses:
+      courseStatuses,
+
+    incompleteCourses
+  };
+}
+
+async function loadBookmarkSubmissionStatus(groups){
+
+  state.bookmarkSubmission = null;
+
+  const courseGroups =
+    Array.isArray(groups)
+      ? groups
+      : [];
+
+  if(!courseGroups.length){
+    return null;
+  }
+
+  const academicYears =
+    [
+      ...new Set(
+        courseGroups
+          .map(group =>
+            Number(group.academic_year)
+          )
+          .filter(Number.isFinite)
+      )
+    ];
+
+  const terms =
+    [
+      ...new Set(
+        courseGroups
+          .map(group =>
+            Number(group.term)
+          )
+          .filter(Number.isFinite)
+      )
+    ];
+
+  if(
+    academicYears.length !== 1 ||
+    terms.length !== 1
+  ){
+
+    console.warn(
+      '[Bookmark] ไม่สามารถโหลดสถานะการส่งได้',
+      {
+        academicYears,
+        terms
+      }
+    );
+
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      'teacher_get_bookmark_submission_session',
+      {
+        p_token:
+          state.teacherSessionToken,
+
+        p_academic_year:
+          academicYears[0],
+
+        p_term:
+          terms[0]
+      }
+    );
+
+  if(error){
+
+    console.warn(
+      '[Bookmark] โหลดสถานะการส่งไม่สำเร็จ',
+      error
+    );
+
+    return null;
+  }
+
+  state.bookmarkSubmission =
+    data || null;
+
+  return state.bookmarkSubmission;
+}
+
+function updateBookmarkSubmitUI(){
+
+  const button =
+    document.getElementById('bookmarkSubmitBtn');
+
+  const statusEl =
+    document.getElementById('bookmarkSubmitStatus');
+
+  const incompleteEl =
+    document.getElementById('bookmarkIncompleteList');
+
+
+  if(!button || !statusEl){
+    return;
+  }
+
+
+  const status =
+    getBookmarkOverallCompletion(
+      state.groupedOfferings
+    );
+
+
+// ==============================
+// ครบทุกวิชา
+// ==============================
+if(status.complete){
+
+  button.disabled = false;
+  button.style.opacity = '1';
+  button.style.cursor = 'pointer';
+
+
+  const submission =
+    state.bookmarkSubmission;
+
+
+  // --------------------------------
+  // เคยส่ง Bookmark แล้ว
+  // --------------------------------
+  if(
+    submission?.submitted === true &&
+    submission?.submitted_at
+  ){
+
+    button.innerHTML =
+      '📦 ส่งใหม่';
+
+
+    statusEl.innerHTML =
+      `
+      <span
+        style="
+          color:#15803d;
+          font-weight:700;
+        "
+      >
+        ✓ ส่ง Bookmark แล้ว
+      </span>
+
+      <span
+        style="
+          color:#64748b;
+          margin-left:6px;
+        "
+      >
+        • ${escapeHtml(
+          formatThaiDateTime(
+            submission.submitted_at
+          )
+        )}
+      </span>
+      `;
+
+  }else{
+
+    // --------------------------------
+    // ครบแล้ว แต่ยังไม่เคยส่ง
+    // --------------------------------
+    button.innerHTML =
+      '📦 ส่งไฟล์ Bookmark';
+
+
+    statusEl.innerHTML =
+      `<span style="color:#15803d;font-weight:700;">
+        ✓ ครบ ${status.completedCourses}/${status.totalCourses} วิชา
+      </span>`;
+
+  }
+
+
+  if(incompleteEl){
+    incompleteEl.style.display = 'none';
+    incompleteEl.innerHTML = '';
+  }
+
+  return;
+}
+
+
+  // ==============================
+  // ยังไม่ครบ
+  // ==============================
+  button.disabled = true;
+
+  button.innerHTML =
+    '🔒 ยังส่งไม่ได้';
+
+  button.style.opacity = '.55';
+
+  button.style.cursor = 'not-allowed';
+
+
+  statusEl.innerHTML =
+    `ครบแล้ว ${status.completedCourses}/${status.totalCourses} วิชา`;
+
+
+  if(incompleteEl){
+
+    incompleteEl.style.display = 'none';
+    incompleteEl.innerHTML = '';
+
+  }
+}
+
     function renderImportTeachingRows(rows){
       const tbody = el('importTeachingTbody');
+      updateBookmarkSubmitUI();
 
       if(!rows.length){
         tbody.innerHTML = '<tr><td colspan="9" class="small">ไม่พบรายการสอน</td></tr>';
@@ -25333,12 +26036,36 @@ async function attachImportStatus(groups){
       .startsWith('ก')
       ? '-'
       : `
+        ${
+          r.quality_checked
+            ? `
+              <div style="margin-bottom:6px;">
+                <span class="badge-success">
+                  ✓ ผ่านแล้ว
+                </span>
+              </div>
+
+              <div class="small" style="margin-bottom:6px;">
+                ${escapeHtml(
+                  formatThaiDateTime(
+                    r.quality_checked_at
+                  )
+                )}
+              </div>
+            `
+            : ''
+        }
+
         <button
           class="btn-secondary"
           data-quality-index="${idx}"
           type="button"
         >
-          🔍 ตรวจไฟล์
+          ${
+            r.quality_checked
+              ? '🔍 ตรวจใหม่'
+              : '🔍 ตรวจไฟล์'
+          }
         </button>
       `
   }
@@ -25351,12 +26078,36 @@ async function attachImportStatus(groups){
       .startsWith('ก')
       ? '-'
       : `
+        ${
+          r.literacy_checked
+            ? `
+              <div style="margin-bottom:6px;">
+                <span class="badge-success">
+                  ✓ ผ่านแล้ว
+                </span>
+              </div>
+
+              <div class="small" style="margin-bottom:6px;">
+                ${escapeHtml(
+                  formatThaiDateTime(
+                    r.literacy_checked_at
+                  )
+                )}
+              </div>
+            `
+            : ''
+        }
+
         <button
           class="btn-secondary"
           data-literacy-index="${idx}"
           type="button"
         >
-          🔍 ตรวจไฟล์
+          ${
+            r.literacy_checked
+              ? '🔍 ตรวจใหม่'
+              : '🔍 ตรวจไฟล์'
+          }
         </button>
       `
   }
@@ -26110,9 +26861,23 @@ tbody.querySelectorAll('[data-literacy-index]').forEach(btn => {
         }, 1000);
 
         const grouped = groupTeachingRows(data || []);
-        state.groupedOfferings = await attachImportStatus(grouped);
+
+        state.groupedOfferings = await attachImportStatus(grouped);const groupsWithImportStatus =
+  await attachImportStatus(
+    grouped
+  );
+
+state.groupedOfferings =
+  await attachAssessmentCheckStatus(
+    groupsWithImportStatus
+  );
+
+await loadBookmarkSubmissionStatus(
+  state.groupedOfferings
+);
 
         renderImportTeachingRows(state.groupedOfferings);
+
         setStatus('importListStatus', `พบ ${state.groupedOfferings.length || 0} รายการ`, 'success');
       }catch(error){
         console.error('loadImportTeachingList ERROR', error);
@@ -28177,14 +28942,77 @@ openAssessmentValidationModal({
 
 if(combinedValidation.isValid){
 
-  // บันทึกสถานะ "ตรวจผ่านแล้ว" ลง Supabase ก่อน
-  await saveAssessmentCheckPassed(
-    selectedGroup,
-    expectedType
+  // -------------------------------------------------
+  // บันทึกสถานะ "ตรวจผ่านแล้ว" ลง Supabase
+  // -------------------------------------------------
+  const savedCheck =
+    await saveAssessmentCheckPassed(
+      selectedGroup,
+      expectedType
+    );
+
+
+  // -------------------------------------------------
+  // อัปเดตสถานะใน groupedOfferings ทันที
+  // ไม่ต้อง Refresh หน้า
+  // -------------------------------------------------
+  const targetGroup =
+    state.groupedOfferings.find(group =>
+      String(group.subject_code || '').trim() ===
+        String(selectedGroup.subject_code || '').trim()
+      &&
+      String(group.class_level || '').trim() ===
+        String(selectedGroup.class_level || '').trim()
+      &&
+      Number(group.academic_year) ===
+        Number(selectedGroup.academic_year)
+      &&
+      Number(group.term) ===
+        Number(selectedGroup.term)
+    );
+
+
+  if(targetGroup){
+
+    const checkedAt =
+      new Date().toISOString();
+
+
+    if(expectedType === 'quality'){
+
+      targetGroup.quality_checked =
+        true;
+
+      targetGroup.quality_checked_at =
+        checkedAt;
+
+    }
+
+
+    if(expectedType === 'literacy'){
+
+      targetGroup.literacy_checked =
+        true;
+
+      targetGroup.literacy_checked_at =
+        checkedAt;
+
+    }
+
+  }
+
+
+  // -------------------------------------------------
+  // วาดตารางใหม่
+  // -------------------------------------------------
+  renderImportTeachingRows(
+    state.groupedOfferings
   );
 
 
-  // บันทึกสำเร็จแล้วจึงแสดง Success Modal
+  // -------------------------------------------------
+  // แสดง Success Modal
+  // -------------------------------------------------
   openAssessmentSuccessModal(
     expectedType
   );
@@ -28232,6 +29060,624 @@ console.log(
 
 }
 
+function showBookmarkUploadLoading(){
+
+  const modal =
+    document.getElementById(
+      'bookmarkUploadLoadingModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'flex';
+}
+
+
+function hideBookmarkUploadLoading(){
+
+  const modal =
+    document.getElementById(
+      'bookmarkUploadLoadingModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'none';
+}
+
+
+
+// =====================================================
+// Bookmark Archive
+// =====================================================
+function openBookmarkUploadSuccessModal(filename){
+
+  const modal =
+    document.getElementById(
+      'bookmarkUploadSuccessModal'
+    );
+
+  const message =
+    document.getElementById(
+      'bookmarkUploadSuccessMessage'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  if(message){
+    message.textContent =
+      filename
+        ? `ส่งไฟล์ ${filename} เรียบร้อยแล้ว`
+        : 'ส่งไฟล์ Bookmark เรียบร้อยแล้ว';
+  }
+
+  modal.style.display = 'flex';
+}
+
+
+function closeBookmarkUploadSuccessModal(){
+
+  const modal =
+    document.getElementById(
+      'bookmarkUploadSuccessModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'none';
+}
+
+async function waitForBookmarkSubmissionConfirmation(
+  academicYear,
+  term,
+  previousSubmittedAt,
+  maxAttempts = 15
+){
+
+  for(
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ){
+
+    await new Promise(
+      resolve =>
+        setTimeout(resolve, 1500)
+    );
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        'teacher_get_bookmark_submission_session',
+        {
+          p_token:
+            state.teacherSessionToken,
+
+          p_academic_year:
+            academicYear,
+
+          p_term:
+            term
+        }
+      );
+
+    if(error){
+
+      console.warn(
+        '[Bookmark] ตรวจสถานะการส่งไม่สำเร็จ',
+        error
+      );
+
+      continue;
+    }
+
+    if(
+      data?.submitted === true &&
+      data?.submitted_at &&
+      data.submitted_at !== previousSubmittedAt
+    ){
+
+      return data;
+
+    }
+
+  }
+
+  return null;
+}
+
+
+document
+  .getElementById(
+    'bookmarkUploadSuccessOkBtn'
+  )
+  ?.addEventListener(
+    'click',
+    closeBookmarkUploadSuccessModal
+  );
+
+function bookmarkFileToBase64(file){
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+
+        try{
+
+          const result =
+            String(
+              reader.result || ''
+            );
+
+          const commaIndex =
+            result.indexOf(',');
+
+          if(commaIndex < 0){
+            throw new Error(
+              'ไม่สามารถแปลงไฟล์ Bookmark ได้'
+            );
+          }
+
+          resolve(
+            result.slice(
+              commaIndex + 1
+            )
+          );
+
+        }catch(error){
+
+          reject(error);
+
+        }
+
+      };
+
+
+      reader.onerror = () => {
+
+        reject(
+          reader.error ||
+          new Error(
+            'ไม่สามารถอ่านไฟล์ Bookmark ได้'
+          )
+        );
+
+      };
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
+
+document
+  .getElementById('bookmarkSubmitBtn')
+  ?.addEventListener('click', () => {
+
+    const completion =
+      getBookmarkOverallCompletion(
+        state.groupedOfferings
+      );
+
+    // ตรวจซ้ำอีกครั้ง
+    // ไม่เชื่อสถานะ disabled ของปุ่มเพียงอย่างเดียว
+    if(!completion.complete){
+
+      showToast(
+        'ยังส่งไฟล์ไม่ได้',
+        'กรุณารายงานข้อมูลให้ครบทุกวิชาก่อน',
+        'warning'
+      );
+
+      return;
+    }
+
+
+    const input =
+      document.getElementById(
+        'bookmarkArchiveInput'
+      );
+
+    if(!input){
+      console.error(
+        '[Bookmark] ไม่พบ bookmarkArchiveInput'
+      );
+      return;
+    }
+
+
+    // เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    input.value = '';
+
+    input.click();
+  });
+
+  document
+  .getElementById('bookmarkArchiveInput')
+  ?.addEventListener('change', async event => {
+
+    const file =
+      event.target.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+
+    const filename =
+      String(file.name || '').trim();
+
+    const lowerName =
+      filename.toLowerCase();
+
+    const teacherCode =
+  String(
+    state.currentUser?.teacher_code || ''
+  )
+  .trim()
+  .toUpperCase();
+
+
+if(!teacherCode){
+
+  showToast(
+    'ไม่พบรหัสครู',
+    'กรุณาเข้าสู่ระบบใหม่อีกครั้ง',
+    'error'
+  );
+
+  event.target.value = '';
+
+  return;
+}
+
+
+const expectedZip =
+  `${teacherCode}.zip`.toLowerCase();
+
+const expectedRar =
+  `${teacherCode}.rar`.toLowerCase();
+
+
+const filenameCorrect =
+  lowerName === expectedZip ||
+  lowerName === expectedRar;
+
+
+if(!filenameCorrect){
+
+  showToast(
+    'ชื่อไฟล์ไม่ถูกต้อง',
+    `กรุณาเลือกไฟล์ ${teacherCode}.zip หรือ ${teacherCode}.rar`,
+    'error'
+  );
+
+  event.target.value = '';
+
+  return;
+}
+
+
+    const isArchive =
+      lowerName.endsWith('.zip') ||
+      lowerName.endsWith('.rar');
+
+
+    if(!isArchive){
+
+      showToast(
+        'ไฟล์ไม่ถูกต้อง',
+        'กรุณาเลือกไฟล์ Bookmark ที่เป็น ZIP หรือ RAR',
+        'error'
+      );
+
+      event.target.value = '';
+
+      return;
+    }
+
+    // -------------------------------------------------
+// หา ปีการศึกษา / ภาคเรียน จากรายการสอนปัจจุบัน
+// -------------------------------------------------
+const teachingGroups =
+  Array.isArray(state.groupedOfferings)
+    ? state.groupedOfferings
+    : [];
+
+
+const academicYears =
+  [
+    ...new Set(
+      teachingGroups
+        .map(group =>
+          Number(group.academic_year)
+        )
+        .filter(Number.isFinite)
+    )
+  ];
+
+
+const terms =
+  [
+    ...new Set(
+      teachingGroups
+        .map(group =>
+          Number(group.term)
+        )
+        .filter(Number.isFinite)
+    )
+  ];
+
+
+if(
+  academicYears.length !== 1 ||
+  terms.length !== 1
+){
+
+  console.error(
+    '[Bookmark] ปี/เทอมไม่ชัดเจน',
+    {
+      academicYears,
+      terms
+    }
+  );
+
+  showToast(
+    'ไม่สามารถระบุปีการศึกษา/ภาคเรียนได้',
+    'กรุณาโหลดรายการสอนใหม่อีกครั้ง',
+    'error'
+  );
+
+  event.target.value = '';
+
+  return;
+}
+
+
+const academicYear =
+  academicYears[0];
+
+const term =
+  terms[0];
+
+
+console.log(
+  '[Bookmark Upload Target]',
+  {
+    teacherCode,
+    academicYear,
+    term,
+    filename
+  }
+);
+
+
+    console.log(
+      '[Bookmark Archive]',
+      {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }
+    );
+
+    // -------------------------------------------------
+// ส่งไฟล์ Bookmark ไป Google Drive
+// -------------------------------------------------
+try{
+
+  showBookmarkUploadLoading();
+
+  showToast(
+    'กำลังส่งไฟล์ Bookmark',
+    `${filename} กรุณารอสักครู่`,
+    'info'
+  );
+
+
+  const base64 =
+    await bookmarkFileToBase64(file);
+
+
+  console.log(
+    '[Bookmark Upload] เตรียมส่ง',
+    {
+      filename,
+      academicYear,
+      term,
+      fileSize: file.size,
+      base64Length: base64.length
+    }
+  );
+
+  let previousSubmittedAt = null;
+
+try{
+
+  const {
+    data: previousSubmission,
+    error: previousSubmissionError
+  } =
+    await supabaseClient.rpc(
+      'teacher_get_bookmark_submission_session',
+      {
+        p_token:
+          state.teacherSessionToken,
+
+        p_academic_year:
+          academicYear,
+
+        p_term:
+          term
+      }
+    );
+
+  if(previousSubmissionError){
+
+    console.warn(
+      '[Bookmark] อ่านสถานะเดิมไม่สำเร็จ',
+      previousSubmissionError
+    );
+
+  }else{
+
+    previousSubmittedAt =
+      previousSubmission?.submitted_at ||
+      null;
+
+  }
+
+}catch(error){
+
+  console.warn(
+    '[Bookmark] อ่านสถานะเดิมเกิดข้อผิดพลาด',
+    error
+  );
+
+}
+
+
+  const uploadUrl =
+    'https://script.google.com/macros/s/AKfycbyDi12rXCNP2_xRCjJvVApuLkNRatdJHKK3XTp2p4nBSXeI6UJ-5In3cD_UeFF13D-joQ/exec';
+
+
+  await fetch(
+    uploadUrl,
+    {
+      method: 'POST',
+
+      mode: 'no-cors',
+
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+
+body: JSON.stringify({
+  filename,
+
+  mimeType:
+    file.type ||
+    'application/octet-stream',
+
+  base64,
+
+  academic_year:
+    academicYear,
+
+  term,
+
+  teacher_session_token:
+    state.teacherSessionToken
+})
+    }
+  );
+
+
+  console.log(
+    '[Bookmark Upload] ส่งคำขอแล้ว',
+    {
+      filename,
+      academicYear,
+      term
+    }
+  );
+
+
+const confirmedSubmission =
+  await waitForBookmarkSubmissionConfirmation(
+    academicYear,
+    term,
+    previousSubmittedAt
+  );
+
+if(confirmedSubmission){
+
+  hideBookmarkUploadLoading();
+    state.bookmarkSubmission =
+    confirmedSubmission;
+
+  updateBookmarkSubmitUI();
+
+  console.log(
+    '[Bookmark] ยืนยันการส่งสำเร็จ',
+    {
+      filename:
+        confirmedSubmission.filename,
+
+      submitted_at:
+        confirmedSubmission.submitted_at,
+
+      drive_file_id:
+        confirmedSubmission.drive_file_id
+    }
+  );
+
+  openBookmarkUploadSuccessModal(
+    confirmedSubmission.filename ||
+    filename
+  );
+
+}else{
+
+  hideBookmarkUploadLoading();
+
+  showToast(
+    'กำลังตรวจสอบการส่งไฟล์',
+    'ระบบยังไม่สามารถยืนยันการส่งไฟล์ได้ กรุณาตรวจสอบอีกครั้ง',
+    'warning'
+  );
+
+}
+
+
+}catch(error){
+
+  hideBookmarkUploadLoading();
+
+  console.error(
+    '[Bookmark Upload] ERROR',
+    error
+  );
+
+
+  showToast(
+    'ส่งไฟล์ไม่สำเร็จ',
+    String(
+      error?.message ||
+      error
+    ),
+    'error'
+  );
+
+
+  event.target.value = '';
+
+  return;
+}
+
+
+    showToast(
+      'เลือกไฟล์เรียบร้อย',
+      filename,
+      'success'
+    );
+
+  });
 
 // =====================================================
 // Quality File Input
@@ -33310,6 +34756,7 @@ function fpBuildReservationPrintHtml(rows){
 
     
   </style>
+
 </head>
 <body>
   <section class="sheet">
