@@ -28805,7 +28805,10 @@ async function handleAssessmentValidationFile(
       ).trim();
 
 
-    if(fileSubject !== expectedSubject){
+    if(
+  fileSubject.toUpperCase() !==
+  expectedSubject.toUpperCase()
+){
 
       throw new Error(
         `รหัสวิชาในไฟล์ไม่ตรงกับรายวิชาที่เลือก\n` +
