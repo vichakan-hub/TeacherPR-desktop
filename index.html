@@ -25292,14 +25292,39 @@ async function attachImportStatus(groups){
           <td>${escapeHtml(r.room_text || '-')}</td>
           <td><span class="badge">${r.offerings.length} ห้อง</span></td>
 <td class="text-center">
-  <button
-    class="btn-primary"
-    data-import-index="${idx}"
-    type="button"
+  <div
+    style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    "
   >
-    นำเข้า
-  </button>
+    <button
+      class="btn-primary"
+      data-import-index="${idx}"
+      type="button"
+    >
+      นำเข้า
+    </button>
+
+    <button
+      class="btn-secondary"
+      data-view-grade-index="${idx}"
+      type="button"
+      title="ดูคะแนนที่ส่งแล้ว"
+      aria-label="ดูคะแนนที่ส่งแล้ว"
+      style="
+        padding-left:10px;
+        padding-right:10px;
+      "
+    >
+      🔍ดูผล
+    </button>
+  </div>
 </td>
+
+
 
 <td class="text-center">
   ${
@@ -25394,6 +25419,582 @@ async function attachImportStatus(groups){
           el('fileInput').click();
         });
       });
+
+// =====================================================
+// Modal : คะแนนผลการเรียนที่ส่งแล้ว
+// =====================================================
+
+let submittedGradesModalData = {
+  group: null,
+  rows: []
+};
+
+
+function closeSubmittedGradesModal(){
+
+  const modal =
+    document.getElementById(
+      'submittedGradesModal'
+    );
+
+  if(modal){
+    modal.style.display = 'none';
+  }
+
+}
+
+
+function renderSubmittedGradesTable(){
+
+  const tbody =
+    document.getElementById(
+      'submittedGradesTableBody'
+    );
+
+  const roomFilter =
+    document.getElementById(
+      'submittedGradesRoomFilter'
+    );
+
+  const countEl =
+    document.getElementById(
+      'submittedGradesCount'
+    );
+
+  if(!tbody || !roomFilter){
+    return;
+  }
+
+
+  const selectedRoom =
+    String(roomFilter.value || '').trim();
+
+
+  const allRows =
+    Array.isArray(
+      submittedGradesModalData.rows
+    )
+      ? submittedGradesModalData.rows
+      : [];
+
+
+  const rows =
+    selectedRoom
+      ? allRows.filter(row =>
+          String(row.room || '').trim()
+            === selectedRoom
+        )
+      : allRows;
+
+
+  if(countEl){
+    countEl.textContent =
+      `แสดง ${rows.length} จาก ${allRows.length} คน`;
+  }
+
+
+  if(!rows.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="9"
+          style="
+            padding:32px;
+            text-align:center;
+            color:#64748b;
+          "
+        >
+          ไม่พบข้อมูลผลการเรียน
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  const group =
+    submittedGradesModalData.group || {};
+
+
+  const isActivity =
+    String(group.subject_code || '')
+      .trim()
+      .startsWith('ก');
+
+  // =====================================================
+// สีของผลการเรียน
+// =====================================================
+function getGradeDisplayStyle(grade){
+
+  const value =
+    String(grade ?? '').trim();
+
+  const dangerGrades =
+    ['0', 'ร', 'มส', 'มผ'];
+
+  if(dangerGrades.includes(value)){
+    return `
+      color:#dc2626;
+      background:#fee2e2;
+      font-weight:700;
+    `;
+  }
+
+  if(value){
+    return `
+      color:#15803d;
+      background:#dcfce7;
+      font-weight:700;
+    `;
+  }
+
+  return `
+    color:#64748b;
+    background:#f8fafc;
+    font-weight:600;
+  `;
+}
+
+
+  tbody.innerHTML =
+    rows.map(row => {
+
+      /*
+       * วิชากิจกรรม ก...
+       * คะแนนที่บันทึกเป็น 0
+       * จึงแสดง "-" แทน
+       * และแสดงเฉพาะผล ผ / มผ
+       */
+      const studyUnit =
+        isActivity
+          ? '-'
+          : (row.study_unit_score ?? '-');
+
+      const midterm =
+        isActivity
+          ? '-'
+          : (row.midterm_score ?? '-');
+
+      const finalScore =
+        isActivity
+          ? '-'
+          : (row.final_score ?? '-');
+
+      const total =
+        isActivity
+          ? '-'
+          : (row.total_score ?? '-');
+
+
+      const grade =
+  String(row.grade_code || '').trim();
+
+const gradeStyle =
+  getGradeDisplayStyle(grade);
+
+
+      return `
+        <tr
+          style="
+            border-bottom:1px solid #e5e7eb;
+          "
+        >
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(row.room ?? '-'))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(row.student_no ?? '-'))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(row.student_code ?? '-'))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:left;
+              white-space:nowrap;
+            "
+          >
+            ${escapeHtml(String(row.student_name ?? '-'))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(studyUnit))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(midterm))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+            "
+          >
+            ${escapeHtml(String(finalScore))}
+          </td>
+
+          <td
+            style="
+              padding:9px 10px;
+              text-align:center;
+              font-weight:600;
+            "
+          >
+            ${escapeHtml(String(total))}
+          </td>
+
+<td
+  style="
+    padding:9px 10px;
+    text-align:center;
+    ${gradeStyle}
+  "
+>
+  ${escapeHtml(
+    grade || '-'
+  )}
+</td>
+
+        </tr>
+      `;
+
+    }).join('');
+
+}
+
+
+function openSubmittedGradesModal(
+  group,
+  rows
+){
+
+  const modal =
+    document.getElementById(
+      'submittedGradesModal'
+    );
+
+  const subtitle =
+    document.getElementById(
+      'submittedGradesSubtitle'
+    );
+
+  const roomFilter =
+    document.getElementById(
+      'submittedGradesRoomFilter'
+    );
+
+
+  if(
+    !modal ||
+    !subtitle ||
+    !roomFilter
+  ){
+    console.error(
+      '[Submitted Grades Modal] ไม่พบ element'
+    );
+    return;
+  }
+
+
+  submittedGradesModalData = {
+    group,
+    rows:
+      Array.isArray(rows)
+        ? rows
+        : []
+  };
+
+
+  // -----------------------------------------------
+  // หัว Modal
+  // -----------------------------------------------
+  subtitle.textContent =
+    `${group.subject_code || ''} ` +
+    `${group.subject_name || ''} • ` +
+    `${group.class_level || ''} • ` +
+    `ปีการศึกษา ${group.academic_year || ''} ` +
+    `ภาคเรียน ${group.term || ''}`;
+
+
+  // -----------------------------------------------
+  // สร้างรายการห้อง
+  // -----------------------------------------------
+  const rooms =
+    [
+      ...new Set(
+        submittedGradesModalData.rows
+          .map(row =>
+            String(row.room || '').trim()
+          )
+          .filter(Boolean)
+      )
+    ].sort((a, b) =>
+      a.localeCompare(
+        b,
+        'th',
+        {
+          numeric: true
+        }
+      )
+    );
+
+
+  roomFilter.innerHTML =
+    '<option value="">ทุกห้อง</option>' +
+    rooms.map(room => `
+      <option value="${escapeHtml(room)}">
+        ห้อง ${escapeHtml(room)}
+      </option>
+    `).join('');
+
+
+  roomFilter.value = '';
+
+
+  // -----------------------------------------------
+  // Render
+  // -----------------------------------------------
+  renderSubmittedGradesTable();
+
+
+  modal.style.display = 'flex';
+
+}
+
+
+// =====================================================
+// Event ของ Modal คะแนนที่ส่งแล้ว
+// =====================================================
+
+const submittedGradesRoomFilter =
+  document.getElementById(
+    'submittedGradesRoomFilter'
+  );
+
+if(
+  submittedGradesRoomFilter &&
+  !submittedGradesRoomFilter.dataset.bound
+){
+  submittedGradesRoomFilter.dataset.bound = '1';
+
+  submittedGradesRoomFilter.addEventListener(
+    'change',
+    renderSubmittedGradesTable
+  );
+}
+
+
+[
+  'submittedGradesCloseBtn',
+  'submittedGradesCloseFooterBtn'
+].forEach(id => {
+
+  const button =
+    document.getElementById(id);
+
+  if(
+    button &&
+    !button.dataset.bound
+  ){
+    button.dataset.bound = '1';
+
+    button.addEventListener(
+      'click',
+      closeSubmittedGradesModal
+    );
+  }
+
+});
+
+
+// =====================================================
+// ดูคะแนนผลการเรียนที่ส่งแล้ว
+// =====================================================
+tbody.querySelectorAll('[data-view-grade-index]').forEach(btn => {
+
+  btn.addEventListener('click', async () => {
+
+    try{
+
+      const idx =
+        Number(btn.dataset.viewGradeIndex);
+
+      const group =
+        state.groupedOfferings[idx];
+
+      if(!group){
+        throw new Error(
+          'ไม่พบข้อมูลรายวิชาที่เลือก'
+        );
+      }
+
+
+      // -----------------------------------------------
+      // ตรวจ Session
+      // -----------------------------------------------
+      if(!state.teacherSessionToken){
+        throw new Error(
+          'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+        );
+      }
+
+
+      // -----------------------------------------------
+      // subject_offering_id ทุกห้องในกลุ่มนี้
+      // -----------------------------------------------
+      const offeringIds =
+        (group.offerings || [])
+          .map(item =>
+            item.subject_offering_id
+          )
+          .filter(Boolean);
+
+
+      if(!offeringIds.length){
+        throw new Error(
+          'ไม่พบรายการสอนสำหรับรายวิชานี้'
+        );
+      }
+
+
+      // -----------------------------------------------
+      // ป้องกันการกดซ้ำระหว่างโหลด
+      // -----------------------------------------------
+      const oldHtml =
+        btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳';
+
+
+      try{
+
+        const { data, error } =
+          await supabaseClient.rpc(
+            'teacher_get_submitted_grades_session',
+            {
+              p_token:
+                state.teacherSessionToken,
+
+              p_subject_offering_ids:
+                offeringIds
+            }
+          );
+
+
+        if(error){
+          throw error;
+        }
+
+
+        if(
+          !data ||
+          data.ok !== true
+        ){
+          throw new Error(
+            data?.message ||
+            'ไม่สามารถอ่านข้อมูลผลการเรียนได้'
+          );
+        }
+
+
+        console.log(
+          '[Submitted Grades Result]',
+          {
+            group,
+            count:
+              Number(data.count) || 0,
+            rows:
+              Array.isArray(data.rows)
+                ? data.rows
+                : []
+          }
+        );
+
+
+        // ยังไม่มีคะแนน
+        if(
+          !Array.isArray(data.rows) ||
+          !data.rows.length
+        ){
+          showToast(
+            'ยังไม่มีข้อมูล',
+            'ยังไม่มีข้อมูลผลการเรียนที่ส่งแล้ว',
+            'info'
+          );
+          return;
+        }
+
+
+// -----------------------------------------------
+// เปิด Modal แสดงคะแนนที่ส่งแล้ว
+// -----------------------------------------------
+openSubmittedGradesModal(
+  group,
+  data.rows
+);
+
+      }finally{
+
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+
+      }
+
+    }catch(error){
+
+      console.error(
+        '[View Submitted Grades]',
+        error
+      );
+
+      showToast(
+        'ไม่สามารถดูคะแนนได้',
+        error?.message ||
+          'เกิดข้อผิดพลาดในการอ่านข้อมูล',
+        'error'
+      );
+
+    }
+
+  });
+
+});
+
+
       // =====================================================
 // ตรวจไฟล์คุณลักษณะอันพึงประสงค์
 // =====================================================
@@ -55930,6 +56531,177 @@ document.getElementById('unsavedDiscardBtn')?.addEventListener('click', () => {
     >
       ตกลง
     </button>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     Modal : ดูคะแนนผลการเรียนที่ส่งแล้ว
+===================================================== -->
+<div
+  id="submittedGradesModal"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:99990;
+    background:rgba(15,23,42,.55);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  "
+>
+  <div
+    style="
+      width:min(1200px,96vw);
+      max-height:92vh;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 24px 60px rgba(0,0,0,.25);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    "
+  >
+
+    <!-- Header -->
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:16px;
+        padding:18px 22px;
+        border-bottom:1px solid #e5e7eb;
+      "
+    >
+      <div>
+        <div
+          style="
+            font-size:20px;
+            font-weight:700;
+          "
+        >
+          คะแนนผลการเรียนที่ส่งแล้ว
+        </div>
+
+        <div
+          id="submittedGradesSubtitle"
+          style="
+            margin-top:4px;
+            font-size:14px;
+            color:#64748b;
+          "
+        ></div>
+      </div>
+
+      <button
+        id="submittedGradesCloseBtn"
+        type="button"
+        class="btn-secondary"
+      >
+        ✕
+      </button>
+    </div>
+
+
+    <!-- Filter -->
+    <div
+      style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+        padding:12px 22px;
+        border-bottom:1px solid #e5e7eb;
+        background:#f8fafc;
+      "
+    >
+      <strong>ห้อง</strong>
+
+      <select
+        id="submittedGradesRoomFilter"
+        style="
+          min-width:130px;
+          padding:7px 10px;
+          border:1px solid #cbd5e1;
+          border-radius:8px;
+          background:#fff;
+        "
+      >
+        <option value="">ทุกห้อง</option>
+      </select>
+
+      <span
+        id="submittedGradesCount"
+        style="
+          margin-left:auto;
+          color:#64748b;
+          font-size:14px;
+        "
+      ></span>
+    </div>
+
+
+    <!-- Table -->
+    <div
+      style="
+        overflow:auto;
+        flex:1;
+      "
+    >
+      <table
+        style="
+          width:100%;
+          border-collapse:collapse;
+          min-width:900px;
+        "
+      >
+        <thead
+          style="
+            position:sticky;
+            top:0;
+            z-index:2;
+            background:#f1f5f9;
+          "
+        >
+          <tr>
+            <th style="padding:10px;">ห้อง</th>
+            <th style="padding:10px;">เลขที่</th>
+            <th style="padding:10px;">รหัสนักเรียน</th>
+            <th style="padding:10px;text-align:left;">ชื่อ-นามสกุล</th>
+            <th style="padding:10px;">คะแนนเก็บ</th>
+            <th style="padding:10px;">กลางภาค</th>
+            <th style="padding:10px;">ปลายภาค</th>
+            <th style="padding:10px;">รวม</th>
+            <th style="padding:10px;">ผลการเรียน</th>
+          </tr>
+        </thead>
+
+        <tbody id="submittedGradesTableBody">
+        </tbody>
+
+      </table>
+    </div>
+
+
+    <!-- Footer -->
+    <div
+      style="
+        display:flex;
+        justify-content:flex-end;
+        padding:14px 22px;
+        border-top:1px solid #e5e7eb;
+      "
+    >
+      <button
+        id="submittedGradesCloseFooterBtn"
+        type="button"
+        class="btn-secondary"
+      >
+        ปิด
+      </button>
+    </div>
 
   </div>
 </div>
