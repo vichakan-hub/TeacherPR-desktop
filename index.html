@@ -11682,11 +11682,6 @@ td{
   animation: bookmarkUploadSpin .8s linear infinite;
 }
 </style>
-  <style>
-#bookmarkSubmitBtn{
-  display:none !important;
-}
-</style>
 </head>
 <body>
   <div id="loginView" class="login-screen">
@@ -13351,6 +13346,22 @@ td{
   >
     กำลังตรวจสอบความครบถ้วน...
   </span>
+
+  <button
+  id="bookmarkViewBtn"
+  class="btn-secondary"
+  type="button"
+  onclick="window.open(
+    'https://drive.google.com/drive/folders/1X1jI2Kq3UifPRXsAxSRXmWNGvKEuDFEy?usp=sharing',
+    '_blank',
+    'noopener,noreferrer'
+  )"
+  style="
+    min-width:190px;
+  "
+>
+  🔍 ดูไฟล์ Bookmark
+</button>
 
   <button
     id="bookmarkSubmitBtn"
