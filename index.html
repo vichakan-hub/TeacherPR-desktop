@@ -11682,11 +11682,6 @@ td{
   animation: bookmarkUploadSpin .8s linear infinite;
 }
 </style>
-  <style>
-#bookmarkSubmitBtn{
-  display:none !important;
-}
-</style>
 </head>
 <body>
   <div id="loginView" class="login-screen">
@@ -13410,9 +13405,7 @@ td{
     <th>ห้อง</th>
     <th>จำนวน section</th>
 
-    <th class="text-center">
-      ผลการเรียน
-    </th>
+
 
     <th class="text-center">
       คุณลักษณะฯ
@@ -13420,6 +13413,10 @@ td{
 
     <th class="text-center">
       อ่านคิดวิเคราะห์
+    </th>
+
+    <th class="text-center">
+      ผลการเรียน
     </th>
 
     <th>
@@ -26015,38 +26012,7 @@ if(status.complete){
           <td>${escapeHtml(r.class_level || '-')}</td>
           <td>${escapeHtml(r.room_text || '-')}</td>
           <td><span class="badge">${r.offerings.length} ห้อง</span></td>
-<td class="text-center">
-  <div
-    style="
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-    "
-  >
-    <button
-      class="btn-primary"
-      data-import-index="${idx}"
-      type="button"
-    >
-      นำเข้า
-    </button>
 
-    <button
-      class="btn-secondary"
-      data-view-grade-index="${idx}"
-      type="button"
-      title="ดูคะแนนที่ส่งแล้ว"
-      aria-label="ดูคะแนนที่ส่งแล้ว"
-      style="
-        padding-left:10px;
-        padding-right:10px;
-      "
-    >
-      🔍ดูผล
-    </button>
-  </div>
-</td>
 
 
 
@@ -26132,6 +26098,39 @@ if(status.complete){
         </button>
       `
   }
+</td>
+
+<td class="text-center">
+  <div
+    style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    "
+  >
+    <button
+      class="btn-primary"
+      data-import-index="${idx}"
+      type="button"
+    >
+      นำเข้า
+    </button>
+
+    <button
+      class="btn-secondary"
+      data-view-grade-index="${idx}"
+      type="button"
+      title="ดูคะแนนที่ส่งแล้ว"
+      aria-label="ดูคะแนนที่ส่งแล้ว"
+      style="
+        padding-left:10px;
+        padding-right:10px;
+      "
+    >
+      🔍ดูผล
+    </button>
+  </div>
 </td>
 
 <td>
