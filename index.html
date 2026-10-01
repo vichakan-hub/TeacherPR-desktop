@@ -13654,10 +13654,30 @@ style="
 
           <div id="previewStatus" class="status info">ยังไม่ได้เลือกไฟล์</div>
 
-          <div class="actions" style="margin-bottom:14px;">
-            <button id="saveImportBtn" class="btn-success" disabled>บันทึกผลการเรียน</button>
-            <button id="clearPreviewBtn" class="btn-secondary">ล้างตัวอย่าง</button>
-          </div>
+<div
+  class="actions"
+  style="
+    margin-bottom:14px;
+    justify-content:flex-end;
+  "
+>
+  <button
+    id="clearPreviewBtn"
+    class="btn-secondary"
+    type="button"
+  >
+    ล้างตัวอย่าง
+  </button>
+
+  <button
+    id="saveImportBtn"
+    class="btn-success"
+    type="button"
+    disabled
+  >
+    บันทึกผลการเรียน
+  </button>
+</div>
 
           <div class="table-wrap preview-table-wrap">
             <table class="preview-table">
@@ -13675,15 +13695,41 @@ style="
                   <th class="col-check">การตรวจสอบ</th>
                 </tr>
               </thead>
-              <tbody id="previewTbody">
-                <tr><td colspan="10" class="small">ยังไม่มีข้อมูล preview</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
+<tbody id="previewTbody">
+  <tr><td colspan="10" class="small">ยังไม่มีข้อมูล preview</td></tr>
+</tbody>
+</table>
+</div>
 
-      <!-- PAGE ADVISER : เพิ่มใหม่ แต่ไม่แตะหน้า import เดิม -->
+<div
+  class="actions"
+  style="
+    margin-top:14px;
+    justify-content:flex-end;
+  "
+>
+  <button
+    id="clearPreviewBtnBottom"
+    class="btn-secondary"
+    type="button"
+  >
+    ล้างตัวอย่าง
+  </button>
+
+  <button
+    id="saveImportBtnBottom"
+    class="btn-success"
+    type="button"
+    disabled
+  >
+    บันทึกผลการเรียน
+  </button>
+</div>
+
+</section>
+</div>
+
+<!-- PAGE ADVISER : เพิ่มใหม่ แต่ไม่แตะหน้า import เดิม -->
       <div id="pageAdviser" class="hidden">
         <section class="card" style="margin-bottom:18px;">
       <h2>นักเรียนในที่ปรึกษา</h2>
@@ -27114,13 +27160,32 @@ async function readAssessmentValidationWorkbook(
   // ---------------------------------------------------
   // 1) อ่านไฟล์ Excel
   // ---------------------------------------------------
-  const buffer =
+let buffer;
+let workbook;
+
+try{
+
+  buffer =
     await file.arrayBuffer();
 
-  const workbook =
+  workbook =
     XLSX.read(buffer, {
       type: 'array'
     });
+
+}catch(error){
+
+  console.error(
+    '[Assessment Validation] Excel read failed',
+    error
+  );
+
+  throw new Error(
+    'ไม่สามารถอ่านไฟล์ Excel ได้\n' +
+    'กรุณาตรวจสอบว่าไฟล์ไม่ได้เสียหาย และให้ส่งออกไฟล์จาก Bookmark ใหม่แล้วลองอีกครั้ง'
+  );
+
+}
 
 
   // ---------------------------------------------------
@@ -30302,6 +30367,8 @@ if(fileSubjectCode !== selectedSubjectCode){
 setPreviewFilter('all');
 summarizeValidation(previewRows);
 el('saveImportBtn').disabled = previewRows.length === 0;
+el('saveImportBtnBottom').disabled =
+  previewRows.length === 0;
 
 showToast(
   'อ่านไฟล์สำเร็จ',
@@ -30339,6 +30406,7 @@ requestAnimationFrame(() => {
         renderPreview([]);
         updatePreviewCountButtons([]);
         el('saveImportBtn').disabled = true;
+        el('saveImportBtnBottom').disabled = true;
         el('pvStatus').textContent = 'อ่านไฟล์ไม่สำเร็จ';
         setStatus('previewStatus', err.message || 'อ่านไฟล์ไม่สำเร็จ', 'error');
         showToast('อ่านไฟล์ไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
@@ -30352,6 +30420,7 @@ requestAnimationFrame(() => {
       state.previewFilter = 'all';
       el('fileInput').value = '';
       el('saveImportBtn').disabled = true;
+      el('saveImportBtnBottom').disabled = true;
       el('pvSubject').textContent = '-';
       el('pvTeacherCode').textContent = '-';
       el('pvCount').textContent = '0';
@@ -36125,6 +36194,91 @@ let students =
   }
 }
 
+function teacherStudentFilterGradeStage(
+  student,
+  rows
+){
+
+  const allRows =
+    Array.isArray(rows)
+      ? rows
+      : [];
+
+  const currentClassLevel =
+    safeText(
+      student?.computed_class_level,
+      ''
+    );
+
+  /*
+   * ถ้ายังเป็น ม.1–ม.3
+   * ใช้ข้อมูลเดิมทั้งหมด
+   */
+  if(
+    !isUpperClassLevel(
+      currentClassLevel
+    )
+  ){
+    return allRows;
+  }
+
+
+  /*
+   * ตรวจว่ามีผลการเรียนช่วง ม.4–ม.6
+   * รายงานเข้ามาแล้วหรือยัง
+   *
+   * เช่น นักเรียนเพิ่งขึ้น ม.4
+   * ถ้ายังไม่มีเกรด ม.4
+   * เรายังเก็บ ม.1–ม.3 ไว้แสดงก่อน
+   */
+  const hasUpperSecondaryGrade =
+    allRows.some(row => {
+
+      const rowClassLevel =
+        safeText(
+          row?.class_level,
+          ''
+        );
+
+      const grade =
+        safeText(
+          getEffectiveGrade(row),
+          ''
+        );
+
+      return (
+        isUpperClassLevel(
+          rowClassLevel
+        ) &&
+        grade !== ''
+      );
+
+    });
+
+
+  /*
+   * ยังไม่มีเกรด ม.4–ม.6
+   * คงประวัติเดิมไว้ก่อน
+   */
+  if(!hasUpperSecondaryGrade){
+    return allRows;
+  }
+
+
+  /*
+   * เมื่อมีเกรด ม.4 เป็นต้นไปแล้ว
+   * แสดงเฉพาะช่วงมัธยมปลาย
+   *
+   * ไม่ได้ลบข้อมูลจากฐานข้อมูล
+   */
+  return allRows.filter(row =>
+    isUpperClassLevel(
+      row?.class_level
+    )
+  );
+
+}
+
 function teacherStudentBuildTermGroups(rows){
   const map = new Map();
 
@@ -36696,11 +36850,19 @@ async function openTeacherStudentGradeOverlay(student){
   `;
 }
 
-    const rows =
+const fetchedRows =
   await fetchTeacherStudentGradesTaughtSecure(
     student
   );
-    state.teacherStudentCurrentGrades = rows || [];
+
+const rows =
+  teacherStudentFilterGradeStage(
+    student,
+    fetchedRows
+  );
+
+state.teacherStudentCurrentGrades =
+  rows || [];
 
     const courseSummary = buildStudentCourseSummary(rows || []);
     state.teacherStudentCurrentSummary = courseSummary;
@@ -53105,6 +53267,17 @@ bindIfExists(
 
   bindIfExists('saveImportBtn', 'click', saveImportedPreview);
   bindIfExists('clearPreviewBtn', 'click', clearPreview);
+  bindIfExists(
+  'saveImportBtnBottom',
+  'click',
+  saveImportedPreview
+);
+
+bindIfExists(
+  'clearPreviewBtnBottom',
+  'click',
+  clearPreview
+);
 
   bindIfExists('adviserYear', 'change', async () => {
     await loadAdviserRooms();
@@ -56388,7 +56561,13 @@ function buildSignatureHtml(label, name){
 }
 
 function getReportLearningAreaFromSubjectCode(subjectCode){
-  const ch = String(subjectCode || '').trim().charAt(0);
+  const ch =
+  String(
+    subjectCode || ''
+  )
+  .trim()
+  .charAt(0)
+  .toUpperCase();
 
   const map = {
     'ท': 'ภาษาไทย',
@@ -56403,7 +56582,7 @@ function getReportLearningAreaFromSubjectCode(subjectCode){
     'จ': 'ภาษาต่างประเทศ',
     'ญ': 'ภาษาต่างประเทศ',
     'ต': 'ภาษาต่างประเทศ',
-    'ก': 'ภาษาต่างประเทศ'
+    'I': 'IS'
   };
 
   return map[ch] || 'ALL';
@@ -56420,10 +56599,11 @@ function getAreaHeadSignerKey(learningArea){
     'สุขศึกษาและพลศึกษา': 'AREA_HEAD_HEALTH',
     'ศิลปะ': 'AREA_HEAD_ART',
     'การงานอาชีพ': 'AREA_HEAD_CAREER',
-    'ภาษาต่างประเทศ': 'AREA_HEAD_FOREIGN'
+    'ภาษาต่างประเทศ': 'AREA_HEAD_FOREIGN',
+    'IS': 'AREA_HEAD_IS'
   };
 
-  return map[area] || 'AREA_HEAD_FOREIGN';
+  return map[area] || '';
 }
 
 function getSignerFullName(row){
@@ -56521,18 +56701,23 @@ async function loadAcademicReportSignersForTeacherReport(
   }
 
 
-  return {
-    learning_area:
-      String(
-        data.learning_area ||
-        ''
-      ).trim(),
+return {
+  learning_area:
+    String(
+      data.learning_area ||
+      ''
+    ).trim(),
 
-    rows:
-      Array.isArray(data.rows)
-        ? data.rows
-        : []
-  };
+  rows:
+    Array.isArray(data.rows)
+      ? data.rows
+      : [],
+
+  subject_teachers:
+    Array.isArray(data.subject_teachers)
+      ? data.subject_teachers
+      : []
+};
 }
 
 function getReportSignerByKeys(signers, keys){
@@ -56606,11 +56791,76 @@ const signatureTeacherNames = Array.isArray(extras?.subject_teachers)
   const roomAverageLabels = roomAverages.map(r => r.room_label || '-');
   const roomAverageDataset = roomAverages.map(r => Number(r.average || 0));
 
-const teacherSlots = [
-  signatureTeacherNames[0] || '',
-  signatureTeacherNames[1] || '',
-  signatureTeacherNames[2] || ''
-];
+const teacherSignatureNames =
+  signatureTeacherNames.filter(Boolean);
+
+const teacherCount =
+  teacherSignatureNames.length;
+
+let teacherColumn1 = [];
+let teacherColumn2 = [];
+let signatureLayoutClass = 'signature-layout-2';
+
+/*
+ * ครู 1–4 คน
+ * ใช้ 2 คอลัมน์
+ *
+ * คอลัมน์ 1 = ครูทั้งหมด
+ * คอลัมน์ 2 = ผู้ลงนามฝ่ายวิชาการ
+ */
+if(teacherCount <= 4){
+
+  teacherColumn1 =
+    teacherSignatureNames;
+
+  teacherColumn2 = [];
+
+  signatureLayoutClass =
+    'signature-layout-2';
+
+}
+
+/*
+ * ครู 5–6 คน
+ *
+ * 5 คน = 3 + 2
+ * 6 คน = 3 + 3
+ */
+else if(teacherCount <= 6){
+
+  teacherColumn1 =
+    teacherSignatureNames.slice(0, 3);
+
+  teacherColumn2 =
+    teacherSignatureNames.slice(3);
+
+  signatureLayoutClass =
+    'signature-layout-3';
+
+}
+
+/*
+ * ครู 7–8 คน
+ *
+ * 7 คน = 4 + 3
+ * 8 คน = 4 + 4
+ *
+ * ถ้ามากกว่า 8 ในอนาคต
+ * จะยังไม่ตัดชื่อทิ้ง
+ * แต่รายการที่เหลือจะต่อในคอลัมน์ 2
+ */
+else{
+
+  teacherColumn1 =
+    teacherSignatureNames.slice(0, 4);
+
+  teacherColumn2 =
+    teacherSignatureNames.slice(4);
+
+  signatureLayoutClass =
+    'signature-layout-3';
+
+}
 
 // ข้อมูลนักเรียนที่ RPC ส่งมา
 const allTopStudents = Array.isArray(extras.top_score_students)
@@ -56659,6 +56909,32 @@ const topStudents = highestScore === null
         <td colspan="4" class="empty-cell">ไม่พบข้อมูลคะแนนสูงสุด</td>
       </tr>
     `;
+
+function buildTeacherSignatureColumn(
+  names
+){
+
+  const list =
+    Array.isArray(names)
+      ? names.filter(Boolean)
+      : [];
+
+  if(!list.length){
+    return '';
+  }
+
+  return `
+    <div class="signature-column teacher-signature-column">
+      ${list
+        .map(name =>
+          buildTeacherSignature(name)
+        )
+        .join('')
+      }
+    </div>
+  `;
+
+}
 
 function buildTeacherSignature(name){
   const cleanName = safeText(name, '');
@@ -57011,13 +57287,34 @@ function buildOfficialSignature(positionTitle, personName){
       min-height:75mm;
     }
 
-    .signature-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      column-gap:28mm;
-      row-gap:6.5mm;
-      align-items:start;
-    }
+.signature-grid{
+  display:grid;
+  align-items:start;
+}
+
+.signature-layout-2{
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  column-gap:28mm;
+}
+
+.signature-layout-3{
+  grid-template-columns:
+    minmax(0, 35fr)
+    minmax(0, 35fr)
+    minmax(0, 30fr);
+
+  column-gap:8mm;
+}
+
+.signature-column{
+  display:flex;
+  flex-direction:column;
+  gap:4mm;
+  min-width:0;
+}
 
     .sig-item{
       text-align:center;
@@ -57224,25 +57521,70 @@ function buildOfficialSignature(positionTitle, personName){
       </div>
     </section>
 
-    <section class="signature-card">
-      <div class="signature-grid">
-        ${buildTeacherSignature(teacherSlots[0])}
-       ${buildOfficialSignature(learningAreaHead.position_title || 'ประธานกลุ่มสาระการเรียนรู้', getSignerFullName(learningAreaHead))}
+<section class="signature-card">
 
-        ${buildTeacherSignature(teacherSlots[1])}
-        ${buildOfficialSignature(measurementHead.position_title || 'หัวหน้างานวัดผล', getSignerFullName(measurementHead))}
+  <div class="signature-grid ${signatureLayoutClass}">
 
-        ${buildTeacherSignature(teacherSlots[2])}
-        ${buildOfficialSignature(academicHead.position_title || 'หัวหน้างานฝ่ายบริหารงานวิชาการ', getSignerFullName(academicHead))}
-      </div>
+    ${buildTeacherSignatureColumn(
+      teacherColumn1
+    )}
 
-      <div class="approval-box">
-        <div class="approval-text">อนุมัติ</div>
-        <div class="director-box">
-          ${buildOfficialSignature(director.position_title || 'ผู้อำนวยการโรงเรียน', getSignerFullName(director))}
-        </div>
-      </div>
-    </section>
+    ${
+      signatureLayoutClass ===
+      'signature-layout-3'
+        ? buildTeacherSignatureColumn(
+            teacherColumn2
+          )
+        : ''
+    }
+
+    <div class="signature-column official-signature-column">
+
+      ${buildOfficialSignature(
+        learningAreaHead.position_title ||
+          'ประธานกลุ่มสาระการเรียนรู้',
+        getSignerFullName(
+          learningAreaHead
+        )
+      )}
+
+      ${buildOfficialSignature(
+        measurementHead.position_title ||
+          'หัวหน้างานวัดผล',
+        getSignerFullName(
+          measurementHead
+        )
+      )}
+
+      ${buildOfficialSignature(
+        academicHead.position_title ||
+          'หัวหน้างานฝ่ายบริหารงานวิชาการ',
+        getSignerFullName(
+          academicHead
+        )
+      )}
+
+    </div>
+
+  </div>
+
+  <div class="approval-box">
+    <div class="approval-text">
+      อนุมัติ
+    </div>
+
+    <div class="director-box">
+      ${buildOfficialSignature(
+        director.position_title ||
+          'ผู้อำนวยการโรงเรียน',
+        getSignerFullName(
+          director
+        )
+      )}
+    </div>
+  </div>
+
+</section>
   </main>
 
   <script>
@@ -57591,6 +57933,13 @@ async function exportTeacherGradeStatsPdf(){
     extras.report_signers = signerResult.rows;
     extras.report_learning_area =
       signerResult.learning_area;
+      extras.subject_teachers =
+  Array.isArray(
+    signerResult.subject_teachers
+  ) &&
+  signerResult.subject_teachers.length
+    ? signerResult.subject_teachers
+    : extras.subject_teachers;
 
     const gradeTotals =
       getReportGradeTotals(summary);
