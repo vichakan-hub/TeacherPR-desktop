@@ -11682,7 +11682,7 @@ td{
   animation: bookmarkUploadSpin .8s linear infinite;
 }
 </style>
-  <style>
+<style>
 #bookmarkSubmitBtn{
   display:none !important;
 }
@@ -18443,10 +18443,28 @@ function updateSidebarUserInfo(){
       el(id)?.classList.remove('show');
     }
 
-    function showStopOverlay(message){
-      el('stopOverlayText').textContent = message;
-      openOverlay('stopOverlay');
-    }
+function showStopOverlay(
+  message,
+  title = 'ไม่สามารถบันทึกได้'
+){
+
+  const overlay =
+    el('stopOverlay');
+
+  const titleEl =
+    overlay?.querySelector(
+      '.overlay-title'
+    );
+
+  if(titleEl){
+    titleEl.textContent = title;
+  }
+
+  el('stopOverlayText').textContent =
+    message;
+
+  openOverlay('stopOverlay');
+}
 
     function closeStopOverlay(){
       closeOverlay('stopOverlay');
@@ -29080,6 +29098,12 @@ console.log(
       'handleAssessmentValidationFile ERROR',
       error
     );
+
+    showStopOverlay(
+  error?.message ||
+    'ไม่สามารถเปิดไฟล์ที่เลือกได้',
+  'เปิดไฟล์ไม่ถูกต้อง'
+);
 
 
 
