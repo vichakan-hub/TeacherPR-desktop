@@ -11682,12 +11682,11 @@ td{
   animation: bookmarkUploadSpin .8s linear infinite;
 }
 </style>
-<!-- <style>
+<!--<style>
 #bookmarkSubmitBtn{
   display:none !important;
 }
-</style> 
-  -->
+</style>-->
 </head>
 <body>
   <div id="loginView" class="login-screen">
@@ -26201,6 +26200,16 @@ if(status.complete){
   }
 }
 
+// =====================================================
+// State ของ Modal คะแนนผลการเรียนที่ส่งแล้ว
+// ต้องอยู่นอก renderImportTeachingRows()
+// เพื่อไม่ให้ถูก reset ทุกครั้งที่ render ตาราง
+// =====================================================
+let submittedGradesModalData = {
+  group: null,
+  rows: []
+};
+
     function renderImportTeachingRows(rows){
       const tbody = el('importTeachingTbody');
       updateBookmarkSubmitUI();
@@ -26407,10 +26416,7 @@ if(status.complete){
 // Modal : คะแนนผลการเรียนที่ส่งแล้ว
 // =====================================================
 
-let submittedGradesModalData = {
-  group: null,
-  rows: []
-};
+
 
 
 function closeSubmittedGradesModal(){
@@ -57561,51 +57567,51 @@ function buildOfficialSignature(positionTitle, personName){
       margin-bottom:3.5mm;
     }
     .summary-table th{ font-size:12px;}
-    .summary-table th,
-    .summary-table td{
-      border-right:1px solid #d9e8ff;
-      border-bottom:1px solid #d9e8ff;
-      padding:3.5px 1.5px;
-      text-align:center;
-      vertical-align:middle;
-      height:20px;
-      color:#ff0000;
-      background:#ffffff;
-      font-weight:600;
-    }
+.summary-table th,
+.summary-table td{
+  border-right:1px solid #d9e8ff;
+  border-bottom:1px solid #d9e8ff;
+  padding:3.5px 1.5px;
+  text-align:center;
+  vertical-align:middle;
+  height:20px;
+  color:#000000;
+  background:#ffffff;
+  font-weight:600;
+}
 
-    .summary-table th{
-      background:#f8fbff;
-      color:#17324d;
-      font-weight:800;
-    }
+.summary-table th{
+  background:#f8fbff;
+  color:#17324d;
+  font-weight:800;
+}
 
-    .summary-table tr:nth-child(even) td{
-      background:#fffaf0;
-    }
+.summary-table tr:nth-child(even) td{
+  background:#fffaf0;
+}
 
-    .summary-table .room-cell,
-    .summary-table td:first-child{
-      text-align:left;
-      padding-left:3px;
-      font-weight:800;
-      color:#ff0000;
-    }
+.summary-table .room-cell,
+.summary-table td:first-child{
+  text-align:left;
+  padding-left:3px;
+  font-weight:800;
+  color:#000000;
+}
 
 .summary-table .teacher-cell{
-  color:#0f172a;
+  color:#000000;
   font-size:11px;
   line-height:1.28;
   word-break:break-word;
   font-weight:600;
 }
 
-    .summary-table .total-row td{
-      background:#ffffff !important;
-      border-top:1.4px solid #17324d;
-      font-weight:800;
-      color:#ff0000;
-    }
+.summary-table .total-row td{
+  background:#ffffff !important;
+  border-top:1.4px solid #17324d;
+  font-weight:800;
+  color:#000000;
+}
 
     .summary-table .percent-row td{
       background:#ffffff !important;
