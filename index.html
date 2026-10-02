@@ -57322,20 +57322,221 @@ const topStudents = highestScore === null
       ) < 0.000001
     );
 
-  const topStudentsRowsHtml = topStudents.length
-    ? topStudents.map(st => `
+/*
+ * =====================================================
+ * กฎการแสดงนักเรียนคะแนนสูงสุด
+ *
+ * จำนวนห้อง + จำนวนนักเรียนคะแนนสูงสุด
+ *
+ * ไม่เกิน 10 แถว
+ *   → แสดงรายชื่อนักเรียนในหน้าเดิม
+ *
+ * มากกว่า 10 แถว
+ *   → หน้าเดิมแสดง "ดังเอกสารแนบ"
+ *      แล้วไปสร้างรายชื่อเต็มในหน้าเอกสารแนบ
+ * =====================================================
+ */
+
+const roomRowCount =
+  Array.isArray(rows)
+    ? rows.length
+    : 0;
+
+const topStudentCount =
+  topStudents.length;
+
+const topSectionRowCount =
+  roomRowCount +
+  topStudentCount;
+
+const useTopStudentAttachment =
+  topSectionRowCount > 10;
+
+
+const topStudentsRowsHtml =
+  !topStudents.length
+    ? `
       <tr>
-        <td>${escapeHtml(st.student_code || '-')}</td>
-        <td class="student-name-cell">${escapeHtml(st.student_name || '-')}</td>
-        <td>${escapeHtml(st.class_level || '-')}/${escapeHtml(st.room || '-')}</td>
-        <td>${escapeHtml(st.total_score ?? '-')}</td>
+        <td
+          colspan="4"
+          class="empty-cell"
+        >
+          ไม่พบข้อมูลคะแนนสูงสุด
+        </td>
       </tr>
-    `).join('')
-    : `
-      <tr>
-        <td colspan="4" class="empty-cell">ไม่พบข้อมูลคะแนนสูงสุด</td>
-      </tr>
-    `;
+    `
+    : useTopStudentAttachment
+      ? `
+        <tr>
+          <td
+            colspan="4"
+            style="
+              text-align:center;
+              font-weight:800;
+              padding:10px 4px;
+            "
+          >
+            ดังเอกสารแนบ
+          </td>
+        </tr>
+      `
+      : topStudents.map(st => `
+          <tr>
+            <td>
+              ${escapeHtml(
+                st.student_code || '-'
+              )}
+            </td>
+
+            <td class="student-name-cell">
+              ${escapeHtml(
+                st.student_name || '-'
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                st.class_level || '-'
+              )}/${escapeHtml(
+                st.room || '-'
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                st.total_score ?? '-'
+              )}
+            </td>
+          </tr>
+        `).join('');
+
+  /*
+ * =====================================================
+ * หน้าเอกสารแนบ
+ * รายชื่อนักเรียนที่ทำคะแนนได้สูงสุด
+ * =====================================================
+ */
+
+const topStudentsAttachmentRowsHtml =
+  topStudents.map(st => `
+    <tr>
+      <td>
+        ${escapeHtml(
+          st.student_code || '-'
+        )}
+      </td>
+
+      <td class="student-name-cell">
+        ${escapeHtml(
+          st.student_name || '-'
+        )}
+      </td>
+
+      <td>
+        ${escapeHtml(
+          st.class_level || '-'
+        )}/${escapeHtml(
+          st.room || '-'
+        )}
+      </td>
+
+      <td>
+        ${escapeHtml(
+          st.total_score ?? '-'
+        )}
+      </td>
+    </tr>
+  `).join('');
+
+
+const topStudentsAttachmentHtml =
+  (
+    useTopStudentAttachment &&
+    topStudents.length
+  )
+    ? `
+      <main class="report-page attachment-page">
+
+        <div class="attachment-label">
+          เอกสารแนบ
+        </div>
+
+        <div class="attachment-title">
+          รายชื่อนักเรียนที่ทำคะแนนได้สูงสุด
+        </div>
+
+        <div class="attachment-subtitle">
+          รายวิชา
+          <strong>
+            ${escapeHtml(subjectName)}
+          </strong>
+
+          รหัสวิชา
+          <strong>
+            ${escapeHtml(subjectCode)}
+          </strong>
+        </div>
+
+        <div class="attachment-subtitle">
+          ชั้น
+          <strong>
+            ${escapeHtml(classLabel)}
+          </strong>
+
+          ปีการศึกษา
+          <strong>
+            ${escapeHtml(
+              data.academic_year || '-'
+            )}
+          </strong>
+
+          ภาคเรียนที่
+          <strong>
+            ${escapeHtml(
+              data.term || '-'
+            )}
+          </strong>
+        </div>
+
+        <div class="attachment-score">
+          คะแนนสูงสุด
+          <strong>
+            ${
+              highestScore !== null
+                ? escapeHtml(highestScore)
+                : '-'
+            }
+          </strong>
+          คะแนน
+        </div>
+
+        <table class="top-student-table attachment-table">
+
+          <colgroup>
+            <col style="width:18%;">
+            <col style="width:50%;">
+            <col style="width:17%;">
+            <col style="width:15%;">
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th>เลขประจำตัว</th>
+              <th>ชื่อ - สกุล</th>
+              <th>ชั้น/ห้อง</th>
+              <th>คะแนน</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${topStudentsAttachmentRowsHtml}
+          </tbody>
+
+        </table>
+
+      </main>
+    `
+    : '';
 
 function buildTeacherSignatureColumn(
   names
@@ -57803,22 +58004,80 @@ function buildOfficialSignature(positionTitle, personName){
       height:100% !important;
     }
 
+    /* =====================================================
+   เอกสารแนบรายชื่อนักเรียนคะแนนสูงสุด
+   ===================================================== */
+
+.attachment-page{
+  padding:8mm 8mm 0;
+  color:#111827;
+}
+
+.attachment-label{
+  text-align:right;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:7mm;
+  color:#111827;
+}
+
+.attachment-title{
+  text-align:center;
+  font-size:18px;
+  font-weight:800;
+  color:#102a43;
+  margin-bottom:3mm;
+}
+
+.attachment-subtitle{
+  text-align:center;
+  font-size:13px;
+  line-height:1.6;
+  color:#304761;
+}
+
+.attachment-score{
+  text-align:center;
+  font-size:13px;
+  margin:3mm 0 5mm;
+  color:#111827;
+}
+
+.attachment-table{
+  font-size:13px;
+}
+
+.attachment-table th,
+.attachment-table td{
+  height:26px;
+  padding:6px 4px;
+  color:#111827;
+}
+
     @media print{
       .print-actions{
         display:none !important;
       }
 
-      html,
-      body{
-        width:210mm;
-        height:297mm;
-        overflow:hidden;
-      }
+html,
+body{
+  width:210mm;
+  height:auto;
+  min-height:297mm;
+  overflow:visible;
+}
 
       .report-page{
         page-break-after:avoid;
         page-break-inside:avoid;
       }
+        .attachment-page{
+  page-break-before:always;
+  break-before:page;
+
+  page-break-inside:avoid;
+  break-inside:avoid;
+}
     }
   </style>
 </head>
@@ -58013,7 +58272,7 @@ function buildOfficialSignature(positionTitle, personName){
 
 </section>
   </main>
-
+  ${topStudentsAttachmentHtml}
   <script>
     const gradeLabels = ${JSON.stringify(gradeLabels)};
     const gradeCountDataset = ${JSON.stringify(gradeCountDataset)};
@@ -58316,7 +58575,7 @@ async function exportTeacherGradeStatsPdf(){
       })),
 
       top_score_students: topStudents
-        .slice(0, 10)
+
         .map(student => ({
           student_code: safeText(
             student.student_code,
