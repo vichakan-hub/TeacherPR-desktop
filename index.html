@@ -13617,6 +13617,148 @@ style="
   </div>
 </div>
 
+<!-- Grade Save Loading Modal -->
+<div
+  id="gradeSaveLoadingModal"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100000;
+    align-items:center;
+    justify-content:center;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(2px);
+  "
+>
+  <div
+    style="
+      background:#ffffff;
+      border-radius:18px;
+      padding:28px 36px;
+      text-align:center;
+      box-shadow:0 20px 50px rgba(15,23,42,.20);
+      min-width:300px;
+    "
+  >
+
+    <div
+      class="bookmark-upload-spinner"
+      style="
+        width:46px;
+        height:46px;
+        margin:0 auto 18px;
+        border:5px solid #dbeafe;
+        border-top-color:#2563eb;
+        border-radius:50%;
+      "
+    ></div>
+
+    <div
+      style="
+        font-size:20px;
+        font-weight:800;
+        color:#0f172a;
+        margin-bottom:6px;
+      "
+    >
+      กำลังบันทึกผลการเรียน
+    </div>
+
+    <div
+      style="
+        font-size:14px;
+        color:#64748b;
+      "
+    >
+      กรุณารอสักครู่...
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Grade Save Success Modal -->
+<div
+  id="gradeSaveSuccessModal"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100001;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(2px);
+  "
+>
+  <div
+    style="
+      width:min(420px,92vw);
+      text-align:center;
+      padding:28px 24px 22px;
+      background:#ffffff;
+      border-radius:20px;
+      box-shadow:0 20px 60px rgba(15,23,42,.22);
+      border:1px solid rgba(226,232,240,.9);
+    "
+  >
+
+    <div
+      style="
+        width:64px;
+        height:64px;
+        margin:0 auto 16px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#dcfce7;
+        color:#15803d;
+        font-size:34px;
+        font-weight:800;
+      "
+    >
+      ✓
+    </div>
+
+    <div
+      style="
+        font-size:22px;
+        font-weight:800;
+        color:#0f172a;
+        margin-bottom:8px;
+      "
+    >
+      บันทึกเรียบร้อย
+    </div>
+
+    <div
+      id="gradeSaveSuccessMessage"
+      style="
+        font-size:14px;
+        color:#64748b;
+        line-height:1.7;
+        margin-bottom:22px;
+      "
+    >
+      บันทึกผลการเรียนเรียบร้อยแล้ว
+    </div>
+
+    <button
+      id="gradeSaveSuccessOkBtn"
+      type="button"
+      class="btn-primary"
+      style="min-width:120px;"
+      onclick="closeGradeSaveSuccessModal()"
+    >
+      ตกลง
+    </button>
+
+  </div>
+</div>
+
 <!-- ไฟล์ Bookmark ทั้งโฟลเดอร์ที่บีบอัดแล้ว -->
 <input
   id="bookmarkArchiveInput"
@@ -26975,9 +27117,32 @@ await loadBookmarkSubmissionStatus(
       }
     }
 
-    function parseFilename(filename){
-      const base = String(filename || '').replace(/\.(xlsx|xls)$/i, '');
-      const parts = base.split('-');
+function parseFilename(filename){
+
+  const cleanName =
+    String(filename || '').trim();
+
+  if(!cleanName){
+    throw new Error(
+      'ไม่พบชื่อไฟล์ที่เลือก'
+    );
+  }
+
+  if(!/\.(xlsx|xls)$/i.test(cleanName)){
+    throw new Error(
+      'ไฟล์ที่เลือกไม่ใช่ไฟล์ Excel\n' +
+      'กรุณาเลือกไฟล์ .xlsx หรือ .xls'
+    );
+  }
+
+  const base =
+    cleanName.replace(
+      /\.(xlsx|xls)$/i,
+      ''
+    );
+
+  const parts =
+    base.split('-');
       if(parts.length < 3) throw new Error('ชื่อไฟล์ไม่ถูกต้อง ต้องเป็น รหัสวิชา-total-รหัสครู.xlsx');
 
       const subjectCode = String(parts[0] || '').trim();
@@ -29252,6 +29417,81 @@ function closeBookmarkUploadSuccessModal(){
   modal.style.display = 'none';
 }
 
+function showGradeSaveLoading(){
+
+  const modal =
+    document.getElementById(
+      'gradeSaveLoadingModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'flex';
+}
+
+
+function hideGradeSaveLoading(){
+
+  const modal =
+    document.getElementById(
+      'gradeSaveLoadingModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'none';
+}
+
+
+function openGradeSaveSuccessModal(
+  savedCount
+){
+
+  const modal =
+    document.getElementById(
+      'gradeSaveSuccessModal'
+    );
+
+  const message =
+    document.getElementById(
+      'gradeSaveSuccessMessage'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  if(message){
+
+    message.textContent =
+      Number(savedCount) > 0
+        ? `บันทึกผลการเรียน ${savedCount} รายการ และอัปเดต StudentPR เรียบร้อยแล้ว`
+        : 'บันทึกผลการเรียนเรียบร้อยแล้ว';
+
+  }
+
+  modal.style.display = 'flex';
+}
+
+
+function closeGradeSaveSuccessModal(){
+
+  const modal =
+    document.getElementById(
+      'gradeSaveSuccessModal'
+    );
+
+  if(!modal){
+    return;
+  }
+
+  modal.style.display = 'none';
+}
+
 async function waitForBookmarkSubmissionConfirmation(
   academicYear,
   term,
@@ -30329,11 +30569,67 @@ if(fileSubjectCode !== selectedSubjectCode){
           throw new Error(`ไฟล์นี้เป็นของ ${parsedName.teacher_code} แต่ผู้ใช้ที่เข้าสู่ระบบคือ ${state.currentUser.teacher_code}`);
         }
 
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const ws = workbook.Sheets[firstSheetName];
-        const parsedSheet = extractRowsFromSheet(ws);
+let buffer;
+let workbook;
+
+try{
+
+  buffer =
+    await file.arrayBuffer();
+
+  workbook =
+    XLSX.read(
+      buffer,
+      {
+        type: 'array'
+      }
+    );
+
+}catch(readError){
+
+  console.error(
+    '[Total Import] Excel read failed',
+    readError
+  );
+
+  throw new Error(
+    'ไม่สามารถอ่านไฟล์ Excel ได้\n' +
+    'กรุณาตรวจสอบว่าไฟล์ไม่เสียหาย และส่งออกไฟล์ผลการเรียนใหม่แล้วลองอีกครั้ง'
+  );
+
+}
+
+
+/*
+ * ต้องมี Worksheet อย่างน้อย 1 แผ่น
+ */
+if(
+  !Array.isArray(workbook.SheetNames) ||
+  workbook.SheetNames.length === 0
+){
+  throw new Error(
+    'ไม่พบ Worksheet ภายในไฟล์ Excel\n' +
+    'กรุณาส่งออกไฟล์ผลการเรียนใหม่แล้วลองอีกครั้ง'
+  );
+}
+
+
+const firstSheetName =
+  workbook.SheetNames[0];
+
+const ws =
+  workbook.Sheets[firstSheetName];
+
+if(!ws){
+  throw new Error(
+    'ไม่สามารถอ่าน Worksheet ภายในไฟล์ Excel ได้\n' +
+    'กรุณาส่งออกไฟล์ผลการเรียนใหม่แล้วลองอีกครั้ง'
+  );
+}
+
+
+const parsedSheet =
+  extractRowsFromSheet(ws);
 
         let previewRows = parsedSheet.rows;
 
@@ -30400,17 +30696,49 @@ requestAnimationFrame(() => {
   });
 
 });
-      }catch(err){
-        state.previewRows = [];
-        state.previewMeta = null;
-        renderPreview([]);
-        updatePreviewCountButtons([]);
-        el('saveImportBtn').disabled = true;
-        el('saveImportBtnBottom').disabled = true;
-        el('pvStatus').textContent = 'อ่านไฟล์ไม่สำเร็จ';
-        setStatus('previewStatus', err.message || 'อ่านไฟล์ไม่สำเร็จ', 'error');
-        showToast('อ่านไฟล์ไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาด', 'error');
-      }
+}catch(err){
+
+  console.error(
+    'handleFileChange TOTAL ERROR',
+    err
+  );
+
+  state.previewRows = [];
+  state.previewMeta = null;
+
+  renderPreview([]);
+  updatePreviewCountButtons([]);
+
+  el('saveImportBtn').disabled = true;
+  el('saveImportBtnBottom').disabled = true;
+
+  el('pvStatus').textContent =
+    'เปิดไฟล์ไม่ถูกต้อง';
+
+  const message =
+    err?.message ||
+    'ไม่สามารถเปิดไฟล์ที่เลือกได้';
+
+  setStatus(
+    'previewStatus',
+    message,
+    'error'
+  );
+
+  /*
+   * ให้ครูสามารถเลือกไฟล์เดิมซ้ำได้
+   * หลังจากแก้ไข/ส่งออกไฟล์ใหม่
+   */
+  if(evt?.target){
+    evt.target.value = '';
+  }
+
+  showStopOverlay(
+    message,
+    'เปิดไฟล์ไม่ถูกต้อง'
+  );
+
+}
     }
 
     function clearPreview(){
@@ -30564,7 +30892,7 @@ async function doSaveImportedPreview(){
       );
     }
 
-
+showGradeSaveLoading();
     setStatus(
       'previewStatus',
       'กำลังบันทึกผลการเรียนเข้า Supabase...',
@@ -30637,15 +30965,17 @@ async function doSaveImportedPreview(){
     );
 
 
-    showToast(
-      'บันทึกสำเร็จ',
-      `เพิ่มหรืออัปเดตผลการเรียน ${savedCount} รายการเรียบร้อยแล้ว`,
-      'success'
-    );
+
 
 
     el('pvStatus').textContent =
       'รายงานแล้ว';
+
+      hideGradeSaveLoading();
+
+openGradeSaveSuccessModal(
+  savedCount
+);
 
 
     /*
@@ -30655,6 +30985,8 @@ async function doSaveImportedPreview(){
 
 
   }catch(err){
+
+      hideGradeSaveLoading();
 
     console.error(
       'SAVE GRADE RESULTS ERROR',
@@ -56664,30 +56996,118 @@ async function loadAcademicReportSignersForTeacherReport(
   }
 
 
-  const {
-    data,
-    error
-  } = await supabaseClient.rpc(
-    'teacher_get_academic_report_signers_session',
+  let data = null;
+let error = null;
+
+
+/*
+ * โหลดข้อมูลผู้ลงนาม
+ *
+ * ถ้า PostgreSQL ชน statement timeout
+ * ให้รอเล็กน้อยแล้วลองใหม่อีก 1 ครั้ง
+ *
+ * error ประเภทอื่นไม่ retry
+ */
+for(
+  let attempt = 1;
+  attempt <= 2;
+  attempt++
+){
+
+  const result =
+    await supabaseClient.rpc(
+      'teacher_get_academic_report_signers_session',
+      {
+        p_token:
+          token,
+
+        p_academic_year:
+          year,
+
+        p_term:
+          termNo,
+
+        p_subject_code:
+          code
+      }
+    );
+
+
+  data =
+    result.data;
+
+  error =
+    result.error;
+
+
+  /*
+   * สำเร็จแล้ว
+   */
+  if(!error){
+    break;
+  }
+
+
+  const errorCode =
+    String(
+      error?.code || ''
+    ).trim();
+
+  const errorMessage =
+    String(
+      error?.message || ''
+    ).toLowerCase();
+
+
+  const isStatementTimeout =
+    errorCode === '57014' ||
+    errorMessage.includes(
+      'statement timeout'
+    );
+
+
+  /*
+   * ถ้าไม่ใช่ timeout
+   * หรือเป็นครั้งที่ 2 แล้ว
+   * ไม่ต้อง retry
+   */
+  if(
+    !isStatementTimeout ||
+    attempt >= 2
+  ){
+    break;
+  }
+
+
+  console.warn(
+    '[Report Signers] statement timeout, retrying once...',
     {
-      p_token:
-        token,
-
-      p_academic_year:
-        year,
-
-      p_term:
-        termNo,
-
-      p_subject_code:
-        code
+      attempt,
+      subjectCode: code,
+      academicYear: year,
+      term: termNo
     }
   );
 
 
-  if(error){
-    throw error;
-  }
+  /*
+   * เว้นช่วงสั้น ๆ
+   * ป้องกันยิงซ้ำทันทีตอน DB ยัง busy
+   */
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        500
+      )
+  );
+
+}
+
+
+if(error){
+  throw error;
+}
 
 
   if(
