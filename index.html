@@ -29,6 +29,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 
 <!-- QR CODE GENERATOR -->
@@ -11682,11 +11683,11 @@ td{
   animation: bookmarkUploadSpin .8s linear infinite;
 }
 </style>
-<style>
+<!--<style>
 #bookmarkSubmitBtn{
   display:none !important;
 }
-</style>
+</style>-->
 </head>
 <body>
   <div id="loginView" class="login-screen">
@@ -13511,25 +13512,65 @@ td{
       "
     ></div>
 
-    <div
-      style="
-        font-size:18px;
-        font-weight:700;
-        color:#0f172a;
-        margin-bottom:6px;
-      "
-    >
-      กำลังส่งไฟล์ Bookmark
-    </div>
+<div
+  id="bookmarkUploadLoadingTitle"
+  style="
+    font-size:18px;
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:6px;
+  "
+>
+  กำลังส่งไฟล์ Bookmark
+</div>
 
-    <div
-      style="
-        font-size:14px;
-        color:#64748b;
-      "
-    >
-      กรุณารอสักครู่...
-    </div>
+<div
+  id="bookmarkUploadLoadingMessage"
+  style="
+    font-size:14px;
+    color:#64748b;
+    margin-bottom:18px;
+  "
+>
+  กำลังเตรียมไฟล์...
+</div>
+
+
+<div
+  style="
+    width:100%;
+    height:12px;
+    overflow:hidden;
+    border-radius:999px;
+    background:#e2e8f0;
+    margin-bottom:8px;
+  "
+>
+  <div
+    id="bookmarkUploadProgressBar"
+    style="
+      width:0%;
+      height:100%;
+      border-radius:999px;
+      background:#2563eb;
+      transition:
+        width .35s ease,
+        background-color .25s ease;
+    "
+  ></div>
+</div>
+
+
+<div
+  id="bookmarkUploadProgressText"
+  style="
+    font-size:14px;
+    font-weight:700;
+    color:#2563eb;
+  "
+>
+  0%
+</div>
 
   </div>
 </div>
@@ -13598,6 +13639,7 @@ style="
         font-size:14px;
         color:#64748b;
         line-height:1.7;
+        white-space:pre-line;
         margin-bottom:22px;
       "
     >
@@ -13763,7 +13805,7 @@ style="
 <input
   id="bookmarkArchiveInput"
   type="file"
-  accept=".zip,.rar,application/zip,application/vnd.rar"
+  accept=".zip,application/zip"
   class="hidden"
 >
 
@@ -29349,6 +29391,122 @@ console.log(
 
 }
 
+function updateBookmarkUploadProgress(
+  percent,
+  message = '',
+  status = 'normal'
+){
+
+  const value =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(percent) || 0
+      )
+    );
+
+
+  const bar =
+    document.getElementById(
+      'bookmarkUploadProgressBar'
+    );
+
+  const text =
+    document.getElementById(
+      'bookmarkUploadProgressText'
+    );
+
+  const messageEl =
+    document.getElementById(
+      'bookmarkUploadLoadingMessage'
+    );
+
+  const title =
+    document.getElementById(
+      'bookmarkUploadLoadingTitle'
+    );
+
+
+  let color =
+    '#2563eb';
+
+
+  if(status === 'success'){
+    color = '#16a34a';
+  }
+
+
+  if(status === 'error'){
+    color = '#dc2626';
+  }
+
+
+  if(bar){
+
+    bar.style.width =
+      `${value}%`;
+
+    bar.style.backgroundColor =
+      color;
+
+  }
+
+
+  if(text){
+
+    text.textContent =
+      `${Math.round(value)}%`;
+
+    text.style.color =
+      color;
+
+  }
+
+
+  if(
+    messageEl &&
+    message
+  ){
+
+    messageEl.textContent =
+      message;
+
+  }
+
+
+  if(title){
+
+    if(status === 'success'){
+
+      title.textContent =
+        'ตรวจสอบไฟล์สำเร็จ';
+
+      title.style.color =
+        '#166534';
+
+    }else if(status === 'error'){
+
+      title.textContent =
+        'ตรวจสอบไฟล์ไม่ผ่าน';
+
+      title.style.color =
+        '#b91c1c';
+
+    }else{
+
+      title.textContent =
+        'กำลังส่งไฟล์ Bookmark';
+
+      title.style.color =
+        '#0f172a';
+
+    }
+
+  }
+
+}
+
 function showBookmarkUploadLoading(){
 
   const modal =
@@ -29361,6 +29519,10 @@ function showBookmarkUploadLoading(){
   }
 
   modal.style.display = 'flex';
+  updateBookmarkUploadProgress(
+  0,
+  'กำลังเตรียมไฟล์...'
+);
 }
 
 
@@ -29383,7 +29545,11 @@ function hideBookmarkUploadLoading(){
 // =====================================================
 // Bookmark Archive
 // =====================================================
-function openBookmarkUploadSuccessModal(filename){
+function openBookmarkUploadSuccessModal(
+  filename,
+  receivedFileCount = null,
+  expectedFileCount = null
+){
 
   const modal =
     document.getElementById(
@@ -29399,12 +29565,48 @@ function openBookmarkUploadSuccessModal(filename){
     return;
   }
 
+
+  const receivedCount =
+    Number(
+      receivedFileCount
+    );
+
+  const expectedCount =
+    Number(
+      expectedFileCount
+    );
+
+
+  const hasFileCount =
+    Number.isFinite(receivedCount) &&
+    Number.isFinite(expectedCount) &&
+    expectedCount > 0;
+
+
   if(message){
-    message.textContent =
-      filename
-        ? `ส่งไฟล์ ${filename} เรียบร้อยแล้ว`
-        : 'ส่งไฟล์ Bookmark เรียบร้อยแล้ว';
+
+    if(hasFileCount){
+
+      message.textContent =
+        `Google Drive ได้รับและตรวจสอบครบ ` +
+        `${receivedCount}/${expectedCount} ไฟล์` +
+        (
+          filename
+            ? `\n${filename}`
+            : ''
+        );
+
+    }else{
+
+      message.textContent =
+        filename
+          ? `ส่งไฟล์ ${filename} เรียบร้อยแล้ว`
+          : 'ส่งไฟล์ Bookmark เรียบร้อยแล้ว';
+
+    }
+
   }
+
 
   modal.style.display = 'flex';
 }
@@ -29499,53 +29701,154 @@ function closeGradeSaveSuccessModal(){
   modal.style.display = 'none';
 }
 
-async function waitForBookmarkSubmissionConfirmation(
-  academicYear,
-  term,
-  previousSubmittedAt,
-  maxAttempts = 15
+async function waitForBookmarkUploadVerification(
+  uploadId,
+  maxAttempts = 30
 ){
 
+  let lastAttempt = null;
+
+
   for(
-    let attempt = 1;
-    attempt <= maxAttempts;
-    attempt++
+    let attemptNo = 1;
+    attemptNo <= maxAttempts;
+    attemptNo++
   ){
 
     await new Promise(
       resolve =>
-        setTimeout(resolve, 1500)
+        setTimeout(
+          resolve,
+          1500
+        )
     );
 
-    const { data, error } =
+
+    const {
+      data,
+      error
+    } =
       await supabaseClient.rpc(
-        'teacher_get_bookmark_submission_session',
+        'teacher_get_bookmark_upload_attempt_session',
         {
           p_token:
             state.teacherSessionToken,
 
-          p_academic_year:
-            academicYear,
-
-          p_term:
-            term
+          p_upload_id:
+            uploadId
         }
       );
+
 
     if(error){
 
       console.warn(
-        '[Bookmark] ตรวจสถานะการส่งไม่สำเร็จ',
+        '[Bookmark] ตรวจ Upload Attempt ไม่สำเร็จ',
         error
       );
 
       continue;
     }
 
+
+    if(!data){
+      continue;
+    }
+
+
+    lastAttempt =
+      data;
+
+      if(
+  data.upload_status ===
+  'uploading'
+){
+
+  updateBookmarkUploadProgress(
+    40,
+    'กำลังส่งไฟล์ไปยัง Google Drive...'
+  );
+
+}
+
+
+if(
+  data.upload_status ===
+  'received'
+){
+
+  updateBookmarkUploadProgress(
+    75,
+    'Google Drive ได้รับไฟล์แล้ว'
+  );
+
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        300
+      )
+  );
+
+
+  updateBookmarkUploadProgress(
+    85,
+    'กำลังตรวจสอบไฟล์ภายใน ZIP และ SHA-256...'
+  );
+
+}
+
+
+if(
+  data.upload_status ===
+  'verified'
+){
+
+  updateBookmarkUploadProgress(
+    100,
+    'Google Drive ได้รับและตรวจสอบไฟล์ครบถ้วนแล้ว',
+    'success'
+  );
+
+}
+
+
+if(
+  data.upload_status ===
+  'rejected'
+){
+
+  updateBookmarkUploadProgress(
+    90,
+    'ตรวจไม่ผ่าน กรุณาตรวจสอบไฟล์แล้วส่งใหม่',
+    'error'
+  );
+
+}
+
+
+    console.log(
+      '[Bookmark Upload Status]',
+      {
+        uploadId,
+        attemptNo,
+
+        status:
+          data.upload_status,
+
+        progress:
+          data.progress_percent,
+
+        message:
+          data.verification_message
+      }
+    );
+
+
     if(
-      data?.submitted === true &&
-      data?.submitted_at &&
-      data.submitted_at !== previousSubmittedAt
+      data.upload_status === 'verified' ||
+      data.upload_status === 'rejected'
     ){
 
       return data;
@@ -29554,7 +29857,9 @@ async function waitForBookmarkSubmissionConfirmation(
 
   }
 
-  return null;
+
+  return lastAttempt;
+
 }
 
 
@@ -29626,6 +29931,703 @@ function bookmarkFileToBase64(file){
 
     }
   );
+
+}
+
+// =========================================================
+// Bookmark ZIP Validation
+// ตรวจไฟล์ภายใน ZIP ก่อนส่งไป Google Drive
+// =========================================================
+
+function normalizeBookmarkInnerFilename(value){
+
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+
+}
+
+
+function getBookmarkClassFilePrefix(classLevel){
+
+  const classNo =
+    Number(
+      String(classLevel || '')
+        .replace(/\D/g, '')
+    );
+
+
+  if(
+    !Number.isInteger(classNo) ||
+    classNo < 1 ||
+    classNo > 6
+  ){
+
+    throw new Error(
+      `ระดับชั้นไม่ถูกต้อง: ${classLevel || '-'}`
+    );
+
+  }
+
+
+  const band =
+    classNo <= 3
+      ? '3'
+      : '4';
+
+
+  return `${band}${classNo}`;
+
+}
+
+
+function getBookmarkTeacherNumber(){
+
+  const teacherCode =
+    String(
+      state.currentUser?.teacher_code || ''
+    ).trim();
+
+
+  const teacherNumber =
+    teacherCode.replace(
+      /\D/g,
+      ''
+    );
+
+
+  if(!teacherNumber){
+
+    throw new Error(
+      'ไม่สามารถอ่านรหัสครูสำหรับไฟล์ฐานข้อมูลได้'
+    );
+
+  }
+
+
+  return teacherNumber;
+
+}
+
+
+function getBookmarkTeacherTxtFilename(){
+
+  const teacherName =
+    String(
+      state.currentUser?.full_name ||
+      state.currentUser?.teacher_name ||
+      ''
+    )
+      .trim()
+      .replace(/\s+/g, ' ');
+
+
+  if(!teacherName){
+
+    throw new Error(
+      'ไม่พบชื่อครูสำหรับตรวจไฟล์ Bookmark'
+    );
+
+  }
+
+
+  return `${teacherName}.txt`;
+
+}
+
+
+// =========================================================
+// โหลดรายการสอนทั้งหมดของครูในปี/เทอม
+// ไม่ใช้เฉพาะรายการที่กำลัง Filter บนหน้าจอ
+// =========================================================
+async function getBookmarkExpectedFiles(
+  academicYear,
+  term
+){
+
+  const teacherId =
+    state.currentUser?.id;
+
+
+  if(!teacherId){
+
+    throw new Error(
+      'ไม่พบข้อมูลครู กรุณาเข้าสู่ระบบใหม่'
+    );
+
+  }
+
+  // =========================================================
+// อ่าน Bookmark Identity จาก Supabase
+// ไม่สร้างชื่อครูเองใน Browser
+// =========================================================
+
+const token =
+  String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+if(!token){
+
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+
+}
+
+
+const {
+  data: bookmarkIdentity,
+  error: bookmarkIdentityError
+} =
+  await supabaseClient.rpc(
+    'teacher_get_bookmark_identity_session',
+    {
+      p_token:
+        token
+    }
+  );
+
+
+if(bookmarkIdentityError){
+
+  throw bookmarkIdentityError;
+
+}
+
+
+if(
+  !bookmarkIdentity ||
+  bookmarkIdentity.ok !== true
+){
+
+  throw new Error(
+    'ไม่สามารถอ่านข้อมูลครูสำหรับ Bookmark ได้'
+  );
+
+}
+
+
+const teacherTxtFilename =
+  String(
+    bookmarkIdentity.teacher_filename || ''
+  ).trim();
+
+
+const teacherNumber =
+  String(
+    bookmarkIdentity.teacher_number || ''
+  ).trim();
+
+
+if(!teacherTxtFilename){
+
+  throw new Error(
+    'ไม่พบชื่อไฟล์ครูจากระบบ'
+  );
+
+}
+
+
+if(!teacherNumber){
+
+  throw new Error(
+    'ไม่พบรหัสครูสำหรับไฟล์ฐานข้อมูล'
+  );
+
+}
+
+
+  const rows =
+    await fetchAllPages(
+      () => {
+
+        return supabaseClient
+          .from('v_subject_offerings')
+          .select(`
+            subject_code,
+            class_level,
+            academic_year,
+            term
+          `)
+          .eq(
+            'teacher_id',
+            teacherId
+          )
+          .eq(
+            'academic_year',
+            Number(academicYear)
+          )
+          .eq(
+            'term',
+            Number(term)
+          )
+          .eq(
+            'is_active',
+            true
+          );
+
+      },
+      1000
+    );
+
+
+  if(
+    !Array.isArray(rows) ||
+    !rows.length
+  ){
+
+    throw new Error(
+      'ไม่พบรายการสอนสำหรับปีการศึกษา/ภาคเรียนนี้'
+    );
+
+  }
+
+
+
+const requiredFiles =
+  new Set([
+    'Amporn.txt',
+    'BookMark.txt',
+    'SchoolLicense.txt',
+    teacherTxtFilename
+  ]);
+
+
+  rows.forEach(row => {
+
+    const subjectCode =
+      String(
+        row.subject_code || ''
+      ).trim();
+
+
+    if(!subjectCode){
+
+      throw new Error(
+        'พบรายการสอนที่ไม่มีรหัสวิชา'
+      );
+
+    }
+
+
+    const classPrefix =
+      getBookmarkClassFilePrefix(
+        row.class_level
+      );
+
+
+    const accdbFilename =
+      `${subjectCode}` +
+      `#${classPrefix}${academicYear}` +
+      `#${term}` +
+      `#${teacherNumber}.accdb`;
+
+
+    requiredFiles.add(
+      accdbFilename
+    );
+
+  });
+
+
+  return [
+    ...requiredFiles
+  ];
+
+}
+
+// =========================================================
+// อนุญาต ZIP ได้ 2 รูปแบบ
+//
+// 1) ไฟล์อยู่ root โดยตรง
+//
+// 2) มี wrapper folder เพียง 1 ชั้น เช่น
+//    T323/Amporn.txt
+//    T323/BookMark.txt
+//
+// ไม่อนุญาต:
+//    T323/subfolder/Amporn.txt
+// =========================================================
+function normalizeBookmarkZipLayout(
+  rawFileNames
+){
+
+  const paths =
+    (rawFileNames || [])
+      .map(name =>
+        String(name || '')
+          .trim()
+          .replace(/\\/g, '/')
+          .replace(/^\/+/, '')
+          .replace(/^\.\//, '')
+      )
+      .filter(Boolean);
+
+
+  if(!paths.length){
+
+    return {
+      valid: false,
+      files: [],
+      wrapperFolder: '',
+      invalidFiles: []
+    };
+
+  }
+
+
+  const parsed =
+    paths.map(path => ({
+      original: path,
+      parts:
+        path
+          .split('/')
+          .filter(Boolean)
+    }));
+
+
+  // =====================================================
+  // แบบที่ 1:
+  // ทุกไฟล์อยู่ root
+  // =====================================================
+
+  const allAtRoot =
+    parsed.every(
+      item =>
+        item.parts.length === 1
+    );
+
+
+  if(allAtRoot){
+
+    return {
+      valid: true,
+      files:
+        parsed.map(
+          item => item.parts[0]
+        ),
+      wrapperFolder: '',
+      invalidFiles: []
+    };
+
+  }
+
+
+  // =====================================================
+  // แบบที่ 2:
+  // ทุกไฟล์อยู่ใต้ folder เดียวกัน 1 ชั้น
+  //
+  // เช่น:
+  // T323/Amporn.txt
+  // T323/BookMark.txt
+  // =====================================================
+
+  const topFolders =
+    new Set(
+      parsed.map(
+        item =>
+          item.parts[0] || ''
+      )
+    );
+
+
+  const oneWrapperFolder =
+    topFolders.size === 1;
+
+
+  const exactlyOneFolderDeep =
+    parsed.every(
+      item =>
+        item.parts.length === 2
+    );
+
+
+  if(
+    oneWrapperFolder &&
+    exactlyOneFolderDeep
+  ){
+
+    const wrapperFolder =
+      [
+        ...topFolders
+      ][0];
+
+
+    return {
+
+      valid: true,
+
+      wrapperFolder,
+
+      files:
+        parsed.map(
+          item =>
+            item.parts[1]
+        ),
+
+      invalidFiles: []
+
+    };
+
+  }
+
+
+  // =====================================================
+  // มีหลาย folder
+  // หรือมี folder ซ้อนเกิน 1 ชั้น
+  // =====================================================
+
+  return {
+
+    valid: false,
+
+    files: [],
+
+    wrapperFolder: '',
+
+    invalidFiles:
+      paths
+
+  };
+
+}
+
+
+// =========================================================
+// เปิด ZIP และตรวจรายชื่อไฟล์
+// =========================================================
+async function inspectBookmarkZip(
+  file,
+  academicYear,
+  term
+){
+
+  if(
+    typeof JSZip !== 'function'
+  ){
+
+    throw new Error(
+      'ไม่พบระบบอ่านไฟล์ ZIP กรุณารีเฟรชหน้าแล้วลองใหม่'
+    );
+
+  }
+
+
+  const expectedFiles =
+    await getBookmarkExpectedFiles(
+      academicYear,
+      term
+    );
+
+
+  let zip;
+
+  try{
+
+    zip =
+      await JSZip.loadAsync(
+        file
+      );
+
+  }catch(error){
+
+    throw new Error(
+      'ไม่สามารถเปิดไฟล์ ZIP ได้ ไฟล์อาจเสียหายหรือไม่ใช่ ZIP ที่ถูกต้อง'
+    );
+
+  }
+
+
+  const rawReceivedFiles = [];
+
+
+Object.values(
+  zip.files || {}
+).forEach(entry => {
+
+  if(
+    !entry ||
+    entry.dir
+  ){
+    return;
+  }
+
+
+  const name =
+    String(
+      entry.name || ''
+    ).trim();
+
+
+  if(!name){
+    return;
+  }
+
+
+  rawReceivedFiles.push(
+    name
+  );
+
+});
+
+
+// =========================================================
+// ตรวจ layout ของ ZIP
+// =========================================================
+
+const zipLayout =
+  normalizeBookmarkZipLayout(
+    rawReceivedFiles
+  );
+
+
+const receivedFiles =
+  zipLayout.valid
+    ? zipLayout.files
+    : rawReceivedFiles;
+
+
+const nestedFiles =
+  zipLayout.valid
+    ? []
+    : zipLayout.invalidFiles;
+
+
+console.log(
+  '[Bookmark ZIP Layout]',
+  {
+    wrapperFolder:
+      zipLayout.wrapperFolder || '(root)',
+
+    valid:
+      zipLayout.valid,
+
+    rawReceivedFiles,
+
+    normalizedReceivedFiles:
+      receivedFiles
+  }
+);
+
+
+  const expectedMap =
+    new Map(
+      expectedFiles.map(name => [
+        normalizeBookmarkInnerFilename(name),
+        name
+      ])
+    );
+
+
+  const receivedMap =
+    new Map(
+      receivedFiles.map(name => [
+        normalizeBookmarkInnerFilename(name),
+        name
+      ])
+    );
+
+
+  const missingFiles =
+    expectedFiles.filter(
+      expectedName => {
+
+        return !receivedMap.has(
+          normalizeBookmarkInnerFilename(
+            expectedName
+          )
+        );
+
+      }
+    );
+
+
+  const unexpectedFiles =
+    receivedFiles.filter(
+      receivedName => {
+
+        return !expectedMap.has(
+          normalizeBookmarkInnerFilename(
+            receivedName
+          )
+        );
+
+      }
+    );
+
+
+  const unexpectedAccdbFiles =
+    unexpectedFiles.filter(name =>
+      String(name || '')
+        .toLowerCase()
+        .endsWith('.accdb')
+    );
+
+
+  const valid =
+    missingFiles.length === 0 &&
+    unexpectedAccdbFiles.length === 0 &&
+    nestedFiles.length === 0;
+
+
+  return {
+
+    valid,
+
+    expectedFiles,
+
+    receivedFiles,
+
+    missingFiles,
+
+    unexpectedFiles,
+
+    unexpectedAccdbFiles,
+
+    nestedFiles
+
+  };
+
+}
+
+async function bookmarkFileSha256(file){
+
+  if(
+    !window.crypto ||
+    !window.crypto.subtle
+  ){
+
+    throw new Error(
+      'Browser นี้ไม่รองรับการตรวจสอบ SHA-256'
+    );
+
+  }
+
+
+  const buffer =
+    await file.arrayBuffer();
+
+
+  const digest =
+    await window.crypto.subtle.digest(
+      'SHA-256',
+      buffer
+    );
+
+
+  return Array
+    .from(
+      new Uint8Array(digest)
+    )
+    .map(byte =>
+      byte
+        .toString(16)
+        .padStart(2, '0')
+    )
+    .join('');
 
 }
 
@@ -29714,20 +30716,16 @@ if(!teacherCode){
 const expectedZip =
   `${teacherCode}.zip`.toLowerCase();
 
-const expectedRar =
-  `${teacherCode}.rar`.toLowerCase();
-
 
 const filenameCorrect =
-  lowerName === expectedZip ||
-  lowerName === expectedRar;
+  lowerName === expectedZip;
 
 
 if(!filenameCorrect){
 
   showToast(
     'ชื่อไฟล์ไม่ถูกต้อง',
-    `กรุณาเลือกไฟล์ ${teacherCode}.zip หรือ ${teacherCode}.rar`,
+    `กรุณาเลือกไฟล์ ${teacherCode}.zip`,
     'error'
   );
 
@@ -29737,23 +30735,22 @@ if(!filenameCorrect){
 }
 
 
-    const isArchive =
-      lowerName.endsWith('.zip') ||
-      lowerName.endsWith('.rar');
+const isZip =
+  lowerName.endsWith('.zip');
 
 
-    if(!isArchive){
+if(!isZip){
 
-      showToast(
-        'ไฟล์ไม่ถูกต้อง',
-        'กรุณาเลือกไฟล์ Bookmark ที่เป็น ZIP หรือ RAR',
-        'error'
-      );
+  showToast(
+    'ไฟล์ไม่ถูกต้อง',
+    'กรุณาเลือกไฟล์ Bookmark ที่เป็น ZIP เท่านั้น',
+    'error'
+  );
 
-      event.target.value = '';
+  event.target.value = '';
 
-      return;
-    }
+  return;
+}
 
     // -------------------------------------------------
 // หา ปีการศึกษา / ภาคเรียน จากรายการสอนปัจจุบัน
@@ -29819,6 +30816,134 @@ const academicYear =
 const term =
   terms[0];
 
+// =========================================================
+// ตรวจ ZIP ก่อนส่งขึ้น Google Drive
+// =========================================================
+
+let zipInspection;
+
+
+try{
+
+  showBookmarkUploadLoading();
+
+updateBookmarkUploadProgress(
+  10,
+  'กำลังตรวจสอบไฟล์ภายใน ZIP...'
+);
+
+  showToast(
+    'กำลังตรวจสอบไฟล์ ZIP',
+    'กำลังตรวจสอบว่าไฟล์ภายในครบตามรายการสอนหรือไม่',
+    'info'
+  );
+
+
+  zipInspection =
+    await inspectBookmarkZip(
+      file,
+      academicYear,
+      term
+    );
+
+
+}catch(error){
+
+  hideBookmarkUploadLoading();
+
+  showStopOverlay(
+    String(
+      error?.message ||
+      error
+    ),
+    'ตรวจสอบ ZIP ไม่สำเร็จ'
+  );
+
+
+  event.target.value = '';
+
+  return;
+
+}
+
+
+if(!zipInspection.valid){
+
+  hideBookmarkUploadLoading();
+
+  const problems = [];
+
+
+  if(
+    zipInspection.missingFiles.length
+  ){
+
+    problems.push(
+      'ไฟล์ที่ขาด:\n' +
+      zipInspection.missingFiles
+        .map(name => `• ${name}`)
+        .join('\n')
+    );
+
+  }
+
+
+  if(
+    zipInspection.unexpectedAccdbFiles.length
+  ){
+
+    problems.push(
+      'พบไฟล์ฐานข้อมูลที่ไม่ตรงกับรายการสอน:\n' +
+      zipInspection.unexpectedAccdbFiles
+        .map(name => `• ${name}`)
+        .join('\n')
+    );
+
+  }
+
+
+  if(
+    zipInspection.nestedFiles.length
+  ){
+
+    problems.push(
+      'พบไฟล์อยู่ในโฟลเดอร์ย่อย:\n' +
+      zipInspection.nestedFiles
+        .map(name => `• ${name}`)
+        .join('\n')
+    );
+
+  }
+
+
+  showStopOverlay(
+    problems.join('\n\n') +
+    '\n\nกรุณาแก้ไขไฟล์ ZIP แล้วส่งใหม่',
+    'ไฟล์ Bookmark ไม่ครบ'
+  );
+
+
+  event.target.value = '';
+
+  return;
+
+}
+
+
+console.log(
+  '[Bookmark ZIP Validation]',
+  {
+    expectedFiles:
+      zipInspection.expectedFiles,
+
+    receivedFiles:
+      zipInspection.receivedFiles,
+
+    unexpectedFiles:
+      zipInspection.unexpectedFiles
+  }
+);
+
 
 console.log(
   '[Bookmark Upload Target]',
@@ -29845,7 +30970,7 @@ console.log(
 // -------------------------------------------------
 try{
 
-  showBookmarkUploadLoading();
+
 
   showToast(
     'กำลังส่งไฟล์ Bookmark',
@@ -29854,8 +30979,112 @@ try{
   );
 
 
+  // =========================================================
+// 1) คำนวณ SHA-256 จากไฟล์จริงที่กำลังจะส่ง
+// =========================================================
+updateBookmarkUploadProgress(
+  25,
+  'กำลังเตรียมพื้นที่รับไฟล์'
+);
+
+
+const fileSha256 =
+  await bookmarkFileSha256(
+    file
+  );
+
+
+console.log(
+  '[Bookmark SHA-256]',
+  fileSha256
+);
+
+
+// =========================================================
+// 2) เปิด Upload Attempt ที่ Supabase
+// Supabase เป็นผู้สร้าง expected_files ที่แท้จริง
+// =========================================================
+
+const {
+  data: beginUpload,
+  error: beginUploadError
+} =
+  await supabaseClient.rpc(
+    'teacher_begin_bookmark_upload_session',
+    {
+      p_token:
+        state.teacherSessionToken,
+
+      p_academic_year:
+        academicYear,
+
+      p_term:
+        term,
+
+      p_filename:
+        filename,
+
+      p_file_size:
+        file.size,
+
+      p_file_sha256:
+        fileSha256
+    }
+  );
+
+
+if(beginUploadError){
+
+  throw beginUploadError;
+
+}
+
+
+if(
+  !beginUpload ||
+  beginUpload.ok !== true ||
+  !beginUpload.upload_id
+){
+
+  throw new Error(
+    beginUpload?.message ||
+    'ไม่สามารถสร้างรอบการส่ง Bookmark ได้'
+  );
+
+}
+
+
+const uploadId =
+  String(
+    beginUpload.upload_id
+  ).trim();
+
+  updateBookmarkUploadProgress(
+  30,
+  'เตรียมพื้นที่รับไฟล์บนระบบแล้ว'
+);
+
+console.log(
+  '[Bookmark Upload Attempt]',
+  {
+    uploadId,
+    status:
+      beginUpload.upload_status,
+    expectedFileCount:
+      beginUpload.expected_file_count,
+    expectedFiles:
+      beginUpload.expected_files
+  }
+);
+
+
   const base64 =
     await bookmarkFileToBase64(file);
+
+    updateBookmarkUploadProgress(
+  40,
+  'กำลังส่งไฟล์ไปยัง Google Drive...'
+);
 
 
   console.log(
@@ -29869,51 +31098,7 @@ try{
     }
   );
 
-  let previousSubmittedAt = null;
-
-try{
-
-  const {
-    data: previousSubmission,
-    error: previousSubmissionError
-  } =
-    await supabaseClient.rpc(
-      'teacher_get_bookmark_submission_session',
-      {
-        p_token:
-          state.teacherSessionToken,
-
-        p_academic_year:
-          academicYear,
-
-        p_term:
-          term
-      }
-    );
-
-  if(previousSubmissionError){
-
-    console.warn(
-      '[Bookmark] อ่านสถานะเดิมไม่สำเร็จ',
-      previousSubmissionError
-    );
-
-  }else{
-
-    previousSubmittedAt =
-      previousSubmission?.submitted_at ||
-      null;
-
-  }
-
-}catch(error){
-
-  console.warn(
-    '[Bookmark] อ่านสถานะเดิมเกิดข้อผิดพลาด',
-    error
-  );
-
-}
+ 
 
 
   const uploadUrl =
@@ -29932,7 +31117,11 @@ try{
       },
 
 body: JSON.stringify({
+    upload_id:
+    uploadId,
   filename,
+
+
 
   mimeType:
     file.type ||
@@ -29954,60 +31143,196 @@ body: JSON.stringify({
 
   console.log(
     '[Bookmark Upload] ส่งคำขอแล้ว',
-    {
-      filename,
-      academicYear,
-      term
-    }
+{
+  uploadId,
+  filename,
+  academicYear,
+  term
+}
   );
 
 
-const confirmedSubmission =
-  await waitForBookmarkSubmissionConfirmation(
-    academicYear,
-    term,
-    previousSubmittedAt
+const uploadAttempt =
+  await waitForBookmarkUploadVerification(
+    uploadId
   );
 
-if(confirmedSubmission){
+
+// =========================================================
+// VERIFIED
+// Google Drive ได้ไฟล์ครบ + SHA ตรง
+// =========================================================
+
+if(
+  uploadAttempt?.upload_status ===
+  'verified'
+){
+
+  await new Promise(
+  resolve =>
+    setTimeout(
+      resolve,
+      700
+    )
+);
 
   hideBookmarkUploadLoading();
-    state.bookmarkSubmission =
-    confirmedSubmission;
+
+
+  // โหลดสถานะ submission ตัวจริงกลับมา
+  // Server จะสร้าง/อัปเดต row นี้เฉพาะเมื่อ verified เท่านั้น
+  const confirmedSubmission =
+    await loadBookmarkSubmissionStatus(
+      state.groupedOfferings
+    );
+
 
   updateBookmarkSubmitUI();
 
+
   console.log(
-    '[Bookmark] ยืนยันการส่งสำเร็จ',
+    '[Bookmark] VERIFIED',
     {
-      filename:
-        confirmedSubmission.filename,
+      uploadId,
 
-      submitted_at:
-        confirmedSubmission.submitted_at,
+      expectedFileCount:
+        uploadAttempt.expected_file_count,
 
-      drive_file_id:
-        confirmedSubmission.drive_file_id
+      receivedFileCount:
+        uploadAttempt.received_file_count,
+
+      hashMatched:
+        uploadAttempt.hash_matched,
+
+      driveFileId:
+        uploadAttempt.drive_file_id
     }
   );
 
-  openBookmarkUploadSuccessModal(
-    confirmedSubmission.filename ||
-    filename
+
+openBookmarkUploadSuccessModal(
+  confirmedSubmission?.filename ||
+  filename,
+
+  uploadAttempt.received_file_count,
+
+  uploadAttempt.expected_file_count
+);
+
+}
+
+
+// =========================================================
+// REJECTED
+// =========================================================
+
+else if(
+  uploadAttempt?.upload_status ===
+  'rejected'
+){
+
+  updateBookmarkUploadProgress(
+    90,
+    uploadAttempt.verification_message ||
+    'ตรวจสอบไฟล์ไม่ผ่าน กรุณาตรวจสอบแล้วส่งใหม่',
+    'error'
   );
 
-}else{
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        1200
+      )
+  );
+
 
   hideBookmarkUploadLoading();
 
+
+  const missingFiles =
+    Array.isArray(
+      uploadAttempt.missing_files
+    )
+      ? uploadAttempt.missing_files
+      : [];
+
+
+  const unexpectedFiles =
+    Array.isArray(
+      uploadAttempt.unexpected_files
+    )
+      ? uploadAttempt.unexpected_files
+      : [];
+
+
+  const details = [];
+
+
+  if(missingFiles.length){
+
+    details.push(
+      'ไฟล์ที่ขาด:\n' +
+      missingFiles
+        .map(name => `• ${name}`)
+        .join('\n')
+    );
+
+  }
+
+
+  if(unexpectedFiles.length){
+
+    details.push(
+      'ไฟล์ที่ไม่ตรงกับรายการ:\n' +
+      unexpectedFiles
+        .map(name => `• ${name}`)
+        .join('\n')
+    );
+
+  }
+
+
+  showStopOverlay(
+    [
+      uploadAttempt.verification_message ||
+      'Google Drive ตรวจสอบไฟล์ไม่ผ่าน',
+
+      ...details,
+
+      'กรุณาตรวจสอบไฟล์แล้วส่งใหม่'
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+
+    'ตรวจสอบ Bookmark ไม่ผ่าน'
+  );
+
+
+  event.target.value = '';
+
+  return;
+
+}
+
+
+// =========================================================
+// TIMEOUT / ยังตรวจไม่เสร็จ
+// =========================================================
+
+else{
+
+  hideBookmarkUploadLoading();
+
+
   showToast(
     'กำลังตรวจสอบการส่งไฟล์',
-    'ระบบยังไม่สามารถยืนยันการส่งไฟล์ได้ กรุณาตรวจสอบอีกครั้ง',
+    'Google Drive ยังตรวจสอบไฟล์ไม่เสร็จ กรุณาตรวจสอบสถานะอีกครั้ง',
     'warning'
   );
 
 }
-
 
 }catch(error){
 
@@ -56519,18 +57844,49 @@ function renderTeacherGradeStatsSubjectOptions(){
 
   select.innerHTML = `
     <option value="">--กรุณาเลือก--</option>
-    ${subjects.map(s => {
-      const code = safeText(s.subject_code, '');
-      const name = safeText(s.subject_name, '-');
-      const roomCount = Number(s.room_count || 0);
-      const resultCount = Number(s.result_count || 0);
+${subjects.map(s => {
 
-      return `
-        <option value="${escapeHtml(code)}">
-          ${escapeHtml(code)} · ${escapeHtml(name)} (${roomCount} ห้อง / ${resultCount} รายการ)
-        </option>
-      `;
-    }).join('')}
+  const code =
+    safeText(
+      s.subject_code,
+      ''
+    );
+
+  const name =
+    safeText(
+      s.subject_name,
+      '-'
+    );
+
+  const classLevel =
+    safeText(
+      s.class_level,
+      ''
+    );
+
+  const roomCount =
+    Number(
+      s.room_count || 0
+    );
+
+  const resultCount =
+    Number(
+      s.result_count || 0
+    );
+
+  return `
+    <option
+      value="${escapeHtml(code)}"
+      data-class-level="${escapeHtml(classLevel)}"
+    >
+      ${escapeHtml(code)}
+      · ${escapeHtml(name)}
+      · ${escapeHtml(classLevel)}
+      (${roomCount} ห้อง / ${resultCount} รายการ)
+    </option>
+  `;
+
+}).join('')}
   `;
 }
 
@@ -56552,6 +57908,8 @@ async function loadTeacherGradeStats(){
     const academicYear = safeNum(el('gradeStatsYear')?.value);
     const term = safeNum(el('gradeStatsTerm')?.value);
     const subjectCode = safeText(el('gradeStatsSubject')?.value, '');
+    const classLevel =
+  getSelectedGradeStatsClassLevel();
 
     if(!academicYear){
       throw new Error('กรุณาเลือกปีการศึกษา');
@@ -56568,6 +57926,12 @@ async function loadTeacherGradeStats(){
     if(!subjectCode){
       throw new Error('กรุณาเลือกรายวิชาที่ต้องการแสดงสถิติ');
     }
+
+    if(!classLevel){
+  throw new Error(
+    'ไม่พบระดับชั้นของรายวิชาที่เลือก'
+  );
+}
 
     const subjectCodes = [subjectCode];
 
@@ -56592,16 +57956,29 @@ if(!state.teacherSessionToken){
   );
 }
 
-const { data, error } = await supabaseClient.rpc(
-  'get_teacher_grade_stat_summary_session',
-  {
-    p_token: state.teacherSessionToken,
-    p_academic_year: academicYear,
-    p_term: term,
-    p_subject_codes: subjectCodes,
-    p_top_limit: 20
-  }
-);
+const { data, error } =
+  await supabaseClient.rpc(
+    'get_teacher_grade_stat_summary_by_class_session',
+    {
+      p_token:
+        state.teacherSessionToken,
+
+      p_academic_year:
+        academicYear,
+
+      p_term:
+        term,
+
+      p_subject_codes:
+        subjectCodes,
+
+      p_class_level:
+        classLevel,
+
+      p_top_limit:
+        20
+    }
+  );
 
     if(error){
       throw error;
@@ -56719,6 +58096,24 @@ function renderTeacherGradeStatsDashboard(data){
     
 function getSelectedGradeStatsSubjectCode(){
   return safeText(el('gradeStatsSubject')?.value, '');
+}
+
+function getSelectedGradeStatsClassLevel(){
+
+  const select =
+    el('gradeStatsSubject');
+
+  if(!select){
+    return '';
+  }
+
+  const option =
+    select.selectedOptions?.[0];
+
+  return safeText(
+    option?.dataset?.classLevel,
+    ''
+  );
 }
 
 function setGradeStatsExportButtonEnabled(enabled){
@@ -58421,9 +59816,18 @@ async function exportTeacherGradeStatsPdf(){
 
     const subjectCode = getSelectedGradeStatsSubjectCode();
 
+    const selectedClassLevel =
+  getSelectedGradeStatsClassLevel();
+
     if(!subjectCode){
       throw new Error('กรุณาเลือกรายวิชา 1 รายวิชาก่อน Export PDF');
     }
+
+    if(!selectedClassLevel){
+  throw new Error(
+    'ไม่พบระดับชั้นของรายวิชาที่เลือก'
+  );
+}
 
     const academicYear = safeNum(el('gradeStatsYear')?.value);
     const term = safeNum(el('gradeStatsTerm')?.value);
@@ -58534,22 +59938,12 @@ async function exportTeacherGradeStatsPdf(){
 
     const teacherNames = [...teacherNameSet];
 
-    /*
-      หาระดับชั้นสำหรับหัวรายงาน
-    */
-    const firstRoomLabel = safeText(
-      rows[0]?.room_label,
-      ''
-    );
-
-    const classLevelFromRoom = firstRoomLabel.includes('/')
-      ? firstRoomLabel.split('/')[0]
-      : firstRoomLabel;
-
-    const classLevel =
-      safeText(topStudents[0]?.class_level, '') ||
-      classLevelFromRoom ||
-      '';
+/*
+  ระดับชั้นของรายงาน
+  ใช้ค่าจากตัวเลือกที่ผู้ใช้เลือกโดยตรง
+*/
+const classLevel =
+  selectedClassLevel;
 
     /*
       สร้าง extras จากข้อมูลเดิม
@@ -58616,15 +60010,72 @@ async function exportTeacherGradeStatsPdf(){
         subjectCode
       );
 
-    extras.report_signers = signerResult.rows;
-    extras.report_learning_area =
-      signerResult.learning_area;
-      extras.subject_teachers =
+extras.report_signers =
+  signerResult.rows;
+
+extras.report_learning_area =
+  signerResult.learning_area;
+
+
+/*
+ * =====================================================
+ * รายชื่อครูผู้สอนใน PDF
+ *
+ * signer RPC อาจส่งครูของรหัสวิชาเดียวกัน
+ * จากหลายระดับชั้นมาได้
+ *
+ * จึงใช้รายชื่อจาก rows ที่ถูกกรองระดับชั้นแล้ว
+ * เป็นตัวตัดสินว่าใครควรอยู่ในรายงานนี้
+ *
+ * แต่ยังใช้ signature_name จาก signer RPC
+ * เพื่อเก็บคำนำหน้าชื่อไว้
+ * =====================================================
+ */
+
+const normalizedReportTeacherNames =
+  teacherNames.map(name =>
+    String(name || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+  );
+
+
+const filteredSignerTeachers =
   Array.isArray(
     signerResult.subject_teachers
-  ) &&
-  signerResult.subject_teachers.length
-    ? signerResult.subject_teachers
+  )
+    ? signerResult.subject_teachers.filter(
+        teacher => {
+
+          const teacherName =
+            String(
+              teacher?.teacher_name || ''
+            )
+              .trim()
+              .replace(/\s+/g, ' ');
+
+          return (
+            teacherName &&
+            normalizedReportTeacherNames.includes(
+              teacherName
+            )
+          );
+
+        }
+      )
+    : [];
+
+
+/*
+ * ถ้าจับคู่กับ signer RPC ได้
+ * ใช้ข้อมูลนั้นเพื่อให้มีคำนำหน้าชื่อ
+ *
+ * ถ้าจับคู่ไม่ได้
+ * ใช้รายชื่อจาก rows ตามเดิม
+ */
+extras.subject_teachers =
+  filteredSignerTeachers.length
+    ? filteredSignerTeachers
     : extras.subject_teachers;
 
     const gradeTotals =
