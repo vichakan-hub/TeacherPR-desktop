@@ -17202,6 +17202,7 @@ adviserSettings: null,
 adviserRetestSettings: null,
 
 examEligibilitySettings: null, 
+examEligibilityVisibilitySetting: null,
   
 gradeReportDefaultPage: 'midtermReport',
 
@@ -18291,7 +18292,28 @@ function enrichTeacherRowsWithStudentMaster(
   el('sidebarGradeReportGroup')?.classList.remove('open');
 }
 
-function setActivePage(page){
+ function setActivePage(page){
+
+// =========================================
+// ป้องกันการเข้าหน้ารายงานไม่มีสิทธิ์สอบ
+// เมื่อ Admin กำหนดให้ซ่อนเมนู
+// =========================================
+
+if(
+  page === 'examEligibility' &&
+  state.examEligibilityVisibilitySetting?.visible !== true
+){
+
+  showToast(
+    'ไม่สามารถเข้าถึงรายงานได้',
+    'ผู้ดูแลระบบปิดการเข้าถึงรายงานนักเรียนไม่มีสิทธิ์สอบ',
+    'warn'
+  );
+
+  return false;
+
+}
+
   if(
     page !== 'midtermReport' &&
     !shouldLeaveMidtermPage('เปลี่ยนหน้า', () => {
@@ -18749,6 +18771,10 @@ const TEACHER_SETTING_KEYS = [
   'teacher_adviser_retest_settings',
   'teacher_free_period_settings',
   'teacher_exam_eligibility_settings',
+
+  // ควบคุมการแสดง/ซ่อนเมนูรายงานไม่มีสิทธิ์สอบ
+  'teacher_exam_eligibility_visibility',
+
   'teacher_grade_report_default_page'
 ];
 
@@ -18884,6 +18910,144 @@ async function loadTeacherSettingsMap(){
     ? data.settings
     : {};
 }
+// =====================================================
+// รีเฟรชสถานะการแสดงเมนูรายงานไม่มีสิทธิ์สอบ
+// =====================================================
+
+async function refreshExamEligibilityVisibilityFromSupabase(){
+
+  let rawVisibility = null;
+
+  try{
+
+    const map = await loadTeacherSettingsMap();
+
+    rawVisibility =
+      map.teacher_exam_eligibility_visibility;
+
+  }catch(error){
+
+    console.warn(
+      'โหลดสถานะการแสดงรายงาน มส ไม่สำเร็จ',
+      error
+    );
+
+  }
+
+  // รับเฉพาะค่า Boolean ที่ถูกต้อง
+  state.examEligibilityVisibilitySetting =
+    rawVisibility &&
+    typeof rawVisibility === 'object' &&
+    !Array.isArray(rawVisibility) &&
+    typeof rawVisibility.visible === 'boolean'
+      ? { visible: rawVisibility.visible }
+      : null;
+
+  const canShow =
+    state.examEligibilityVisibilitySetting?.visible === true;
+
+  // อัปเดตปุ่ม Sidebar
+  el('sideExamEligibilityBtn')
+    ?.classList.toggle('hidden', !canShow);
+
+  // =========================================
+  // ปิดหน้ารายงาน หาก Admin ไม่อนุญาต
+  // =========================================
+
+  const reportPage = el('pageExamEligibility');
+
+  if(
+    !canShow &&
+    reportPage &&
+    !reportPage.classList.contains('hidden')
+  ){
+
+    // กลับไปหน้าแรก
+    setActivePage('home');
+
+    showToast(
+      'ปิดการเข้าถึงรายงาน',
+      'ผู้ดูแลระบบปิดรายงานนี้ หรือไม่สามารถตรวจสอบสถานะล่าสุดได้',
+      'warn'
+    );
+
+  }
+
+  return canShow;
+
+
+}
+
+// =====================================================
+// ตรวจสอบ Visibility อัตโนมัติทุก 30 วินาที
+// =====================================================
+
+let examEligibilityVisibilityPollTimer = null;
+let examEligibilityVisibilityPollBusy = false;
+
+async function pollExamEligibilityVisibility(){
+
+  // ต้องเข้าสู่ระบบแล้วเท่านั้น
+  if(
+    !state.teacherSessionToken ||
+    !state.currentUser
+  ){
+    return;
+  }
+
+  // ไม่ตรวจเมื่อแท็บอยู่เบื้องหลัง
+  if(document.hidden){
+    return;
+  }
+
+  // ป้องกันการเรียกซ้อนกัน
+  if(examEligibilityVisibilityPollBusy){
+    return;
+  }
+
+  examEligibilityVisibilityPollBusy = true;
+
+  try{
+
+    await refreshExamEligibilityVisibilityFromSupabase();
+
+  }catch(error){
+
+    console.warn(
+      'ตรวจสอบสถานะรายงาน มส อัตโนมัติไม่สำเร็จ',
+      error
+    );
+
+  }finally{
+
+    examEligibilityVisibilityPollBusy = false;
+
+  }
+
+}
+
+// เริ่ม Timer เพียงครั้งเดียว
+if(examEligibilityVisibilityPollTimer === null){
+
+  examEligibilityVisibilityPollTimer =
+    setInterval(
+      pollExamEligibilityVisibility,
+      30000
+    );
+
+}
+
+// กลับมาเปิดแท็บ ให้ตรวจทันที
+document.addEventListener(
+  'visibilitychange',
+  () => {
+
+    if(!document.hidden){
+      pollExamEligibilityVisibility();
+    }
+
+  }
+);
 
 function normalizeGradeReportDefaultPage(raw){
   let value = raw;
@@ -18992,6 +19156,41 @@ state.freePeriodSettings =
   // รายงาน มส
 state.examEligibilitySettings =
   settings.exam_eligibility;
+
+  // =========================================
+// การแสดง/ซ่อนเมนูรายงานไม่มีสิทธิ์สอบ
+// =========================================
+
+const rawVisibility =
+  map.teacher_exam_eligibility_visibility;
+
+// ตรวจสอบว่าค่าจาก Supabase เป็น boolean จริง
+state.examEligibilityVisibilitySetting =
+  rawVisibility &&
+  typeof rawVisibility === 'object' &&
+  !Array.isArray(rawVisibility) &&
+  typeof rawVisibility.visible === 'boolean'
+    ? { visible: rawVisibility.visible }
+    : null;
+
+  // =========================================
+// ควบคุมการแสดงปุ่มรายงานไม่มีสิทธิ์สอบ
+// =========================================
+
+const examEligibilityMenu =
+  el('sideExamEligibilityBtn');
+
+if(examEligibilityMenu){
+
+  const canShow =
+    state.examEligibilityVisibilitySetting?.visible === true;
+
+  examEligibilityMenu.classList.toggle(
+    'hidden',
+    !canShow
+  );
+
+}
 
   state.gradeReportDefaultPage = normalizeGradeReportDefaultPage(
   map.teacher_grade_report_default_page
@@ -53883,6 +54082,25 @@ bindIfExists(
   'sideExamEligibilityBtn',
   'click',
   async () => {
+
+        // =========================================
+    // ตรวจสอบการอนุญาตเข้ารายงานล่าสุดจาก Admin
+    // =========================================
+
+    const canOpenReport =
+      await refreshExamEligibilityVisibilityFromSupabase();
+
+    if(!canOpenReport){
+
+      showToast(
+        'ไม่สามารถเข้าถึงรายงานได้',
+        'ผู้ดูแลระบบปิดรายงานนี้ หรือไม่สามารถตรวจสอบสถานะล่าสุดได้',
+        'warn'
+      );
+
+      return;
+
+    }
 
     try{
 
