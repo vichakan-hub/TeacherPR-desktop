@@ -37857,6 +37857,12 @@ async function fetchTeacherStudentCumulativeSummaryMap(
           safeText(
             row.subject_type,
             ''
+          ),
+
+        class_level:
+          safeText(
+            row.class_level,
+            ''
           )
 
       });
@@ -37880,7 +37886,12 @@ async function fetchTeacherStudentCumulativeSummaryMap(
   ){
 
     const studentRows =
-      item.rows || [];
+      teacherStudentFilterGradeStage(
+        {
+          computed_class_level: classLevel
+        },
+        item.rows || []
+      );
 
 
     const summary =
@@ -37898,10 +37909,38 @@ async function fetchTeacherStudentCumulativeSummaryMap(
       ).length;
 
 
+    const hasNumericGradeForGpa =
+      studentRows.some(row => {
+
+        const subjectType =
+          safeText(row.subject_type, '');
+
+        const credit =
+          safeNum(row.credit) || 0;
+
+        const isCreditSubject =
+          subjectType === 'พื้นฐาน' ||
+          subjectType === 'เพิ่มเติม';
+
+        if(!isCreditSubject || credit <= 0){
+          return false;
+        }
+
+        return getNumericGradeForGpa(
+          getEffectiveGrade(row)
+        ) !== null;
+
+      });
+
     map.set(
       studentId,
       {
         ...summary,
+
+        gpa:
+          hasNumericGradeForGpa
+            ? summary.gpa
+            : null,
 
         grade_count:
           studentRows.length,
@@ -37918,19 +37957,63 @@ async function fetchTeacherStudentCumulativeSummaryMap(
 }
 
 function updateTeacherStudentSummary(rows){
-  const total = rows.length;
-  const gpaRows = rows.filter(row => row.course_gpa !== null && row.course_gpa !== undefined);
-  const avg = gpaRows.length
-    ? gpaRows.reduce((sum, row) => sum + Number(row.course_gpa || 0), 0) / gpaRows.length
-    : 0;
-  const riskCount = rows.filter(row => Number(row.risk_count || 0) > 0).length;
 
-  if(el('teacherStudentTotalCount')) el('teacherStudentTotalCount').textContent = String(total);
-  if(el('teacherStudentAverageGpa')) el('teacherStudentAverageGpa').textContent = formatDecimalFloor(avg, 2);
-  if(el('teacherStudentRiskCount')) el('teacherStudentRiskCount').textContent = String(riskCount);
+  const total = rows.length;
+
+  // เลือกเฉพาะนักเรียนที่มี GPAX คำนวณได้จริง
+  const gpaRows = rows.filter(row =>
+    row.course_gpa !== null &&
+    row.course_gpa !== undefined &&
+    row.course_gpa !== '' &&
+    Number.isFinite(Number(row.course_gpa))
+  );
+
+  // คำนวณ GPA เฉลี่ยของกลุ่ม
+  const avg = gpaRows.length
+    ? gpaRows.reduce(
+        (sum, row) => sum + Number(row.course_gpa),
+        0
+      ) / gpaRows.length
+    : null;
+
+  // นับนักเรียนที่มีวิชาเสี่ยง
+  const riskCount = rows.filter(row =>
+    Number(row.risk_count || 0) > 0
+  ).length;
+
+  // จำนวนนักเรียนทั้งหมด
+  if(el('teacherStudentTotalCount')){
+    el('teacherStudentTotalCount').textContent =
+      String(total);
+  }
+
+  // GPA เฉลี่ยของกลุ่ม
+  if(el('teacherStudentAverageGpa')){
+    el('teacherStudentAverageGpa').textContent =
+      avg !== null
+        ? formatDecimalFloor(avg, 2)
+        : '-';
+  }
+
+  // จำนวนนักเรียนที่มีวิชาเสี่ยง
+  if(el('teacherStudentRiskCount')){
+    el('teacherStudentRiskCount').textContent =
+      String(riskCount);
+  }
+
 }
 
-    function getTeacherStudentGpaClass(gpa){
+function getTeacherStudentGpaClass(gpa){
+
+  // ไม่มี GPAX ให้ใช้สีปกติ
+  if(
+    gpa === null ||
+    gpa === undefined ||
+    String(gpa).trim() === ''
+  ){
+    return '';
+  }
+
   const n = Number(gpa);
   if(!Number.isFinite(n)) return '';
 
@@ -38782,8 +38865,43 @@ state.teacherStudentCompareRows = compareRows;
 
 const riskCount = (rows || []).filter(row => isRiskGrade(getEffectiveGrade(row))).length;
 
-    el('teacherStudentDetailGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
-    el('teacherStudentOvGpa').textContent = formatDecimalFloor(courseSummary.gpa, 2);
+// ตรวจสอบว่ามีเกรดตัวเลขที่ใช้คำนวณ GPA หรือไม่
+const hasNumericGradeForOverlay =
+  (rows || []).some(row => {
+
+    const subjectType =
+      safeText(row.subject_type, '');
+
+    const credit =
+      safeNum(row.credit) || 0;
+
+    const isCreditSubject =
+      subjectType === 'พื้นฐาน' ||
+      subjectType === 'เพิ่มเติม';
+
+    if(!isCreditSubject || credit <= 0){
+      return false;
+    }
+
+    return getNumericGradeForGpa(
+      getEffectiveGrade(row)
+    ) !== null;
+
+  });
+
+// กำหนด GPA ที่ใช้แสดงผล
+const overlayGpaText =
+  hasNumericGradeForOverlay
+    ? formatDecimalFloor(courseSummary.gpa, 2)
+    : '-';
+
+// GPA ในข้อมูลส่วนตัวนักเรียน
+el('teacherStudentDetailGpa').textContent =
+  overlayGpaText;
+
+// GPA ในภาพรวมผลการเรียน
+el('teacherStudentOvGpa').textContent =
+  overlayGpaText;
     el('teacherStudentOvTermCount').textContent = String(termGroups.length);
     el('teacherStudentOvSubjectCount').textContent = String((rows || []).length);
     el('teacherStudentOvRiskCount').textContent = String(riskCount);
