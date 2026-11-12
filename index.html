@@ -18274,19 +18274,26 @@ function enrichTeacherRowsWithStudentMaster(
       return Number.isInteger(n) ? String(n) : String(n);
     }
 
-    function normalizeGradeValue(grade){
-      const g = String(grade || '').trim().toUpperCase();
-      if(!g) return '';
-      if(g === 'ร' || g === 'R') return 'ร';
-      if(g === 'มส') return 'มส';
-      if(g === 'ผ') return 'ผ';
-      if(g === 'มผ') return 'มผ';
-      const n = Number(g);
-      if(!Number.isNaN(n)){
-        return Number.isInteger(n) ? String(n) : String(n);
-      }
-      return String(grade || '').trim();
-    }
+function normalizeGradeValue(grade){
+
+  // เก็บเกรด 0 ไว้ ไม่แปลงเป็นค่าว่าง
+  const g = String(grade ?? '').trim().toUpperCase();
+
+  if(!g) return '';
+
+  if(g === 'ร' || g === 'R') return 'ร';
+  if(g === 'มส') return 'มส';
+  if(g === 'ผ') return 'ผ';
+  if(g === 'มผ') return 'มผ';
+
+  const n = Number(g);
+
+  if(!Number.isNaN(n)){
+    return String(n);
+  }
+
+  return String(grade ?? '').trim();
+}
 
     function isPassingGrade(grade){
       const g = normalizeGradeValue(grade);
