@@ -37755,7 +37755,7 @@ async function fetchTeacherStudentCumulativeSummaryMap(
       () =>
         supabaseClient
           .rpc(
-            'teacher_get_taught_class_cumulative_grade_rows_session',
+            'teacher_get_taught_class_cumulative_grade_rows_v2_session',
             {
               p_token:
                 token,
