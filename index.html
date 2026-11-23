@@ -32635,14 +32635,14 @@ openGradeSaveSuccessModal(
         const year = safeNum(el('adviserYear').value) ?? getCurrentAcademicYear();
         const term = safeNum(el('adviserTerm').value) ?? getCurrentTerm();
 
-        const { data, error } = await supabaseClient
-          .from('teacher_advisers')
-          .select('id, teacher_id, academic_year, term, class_level, room, adviser_role')
-          .eq('teacher_id', state.currentUser.id)
-          .eq('academic_year', year)
-          .eq('term', term)
-          .order('class_level', { ascending:true })
-          .order('room', { ascending:true });
+const { data, error } = await supabaseClient.rpc(
+  'teacher_get_adviser_rooms_session',
+  {
+    p_token: state.teacherSessionToken,
+    p_academic_year: Number(year),
+    p_term: Number(term)
+  }
+);
 
         if(error) throw error;
 
@@ -32748,44 +32748,20 @@ openGradeSaveSuccessModal(
       'กำลังโหลดข้อมูลห้องที่ปรึกษา...'
     );
 
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from('teacher_advisers')
-      .select(`
-        id,
-        teacher_id,
-        academic_year,
-        term,
-        class_level,
-        room,
-        adviser_role
-      `)
-      .eq(
-        'teacher_id',
-        state.currentUser.id
-      )
-      .eq(
-        'academic_year',
-        year
-      )
-      .eq(
-        'term',
-        term
-      )
-      .order(
-        'class_level',
-        {
-          ascending: true
-        }
-      )
-      .order(
-        'room',
-        {
-          ascending: true
-        }
-      );
+
+
+const {
+  data,
+  error
+} = await supabaseClient.rpc(
+  'teacher_get_adviser_rooms_session',
+  {
+    p_token: state.teacherSessionToken,
+    p_academic_year: Number(year),
+    p_term: Number(term)
+  }
+);
+
 
     if(error){
       throw error;
@@ -56239,14 +56215,16 @@ function applyAdviserRetestSettingsToDropdowns(){
     const year = safeNum(el('adviserRetestYear')?.value) ?? getCurrentAcademicYear();
     const term = safeNum(el('adviserRetestTerm')?.value) ?? getCurrentTerm();
 
-    const { data, error } = await supabaseClient
-      .from('teacher_advisers')
-      .select('id, teacher_id, academic_year, term, class_level, room, adviser_role')
-      .eq('teacher_id', state.currentUser.id)
-      .eq('academic_year', year)
-      .eq('term', term)
-      .order('class_level', { ascending:true })
-      .order('room', { ascending:true });
+
+const { data, error } = await supabaseClient.rpc(
+  'teacher_get_adviser_rooms_session',
+  {
+    p_token: state.teacherSessionToken,
+    p_academic_year: Number(year),
+    p_term: Number(term)
+  }
+);
+
 
     if(error) throw error;
 
