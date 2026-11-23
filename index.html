@@ -27361,29 +27361,55 @@ tbody.querySelectorAll('[data-literacy-index]').forEach(btn => {
       setStatus('importListStatus','กำลังโหลดรายการสอน...','info');
 
       try{
-        const data = await fetchAllPages(() => {
-          let query = supabaseClient
-            .from('v_subject_offerings')
-            .select('*')
-            .eq('teacher_id', state.currentUser.id)
-            .order('academic_year',{ascending:false})
-            .order('term',{ascending:true})
-            .order('class_level',{ascending:true})
-            .order('room',{ascending:true})
-            .order('subject_code',{ascending:true});
 
-          const year = el('importFilterYear').value.trim();
-          const term = el('importFilterTerm').value;
-          const classLevel = el('importFilterClass').value;
-          const keyword = el('importFilterKeyword').value.trim();
+const token = String(
+  state.teacherSessionToken || ''
+).trim();
 
-          if(year) query = query.eq('academic_year', Number(year));
-          if(term) query = query.eq('term', Number(term));
-          if(classLevel) query = query.eq('class_level', classLevel);
-          if(keyword) query = query.or(`subject_code.ilike.%${keyword}%,subject_name.ilike.%${keyword}%`);
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
 
-          return query;
-        }, 1000);
+const year = el('importFilterYear').value.trim();
+const term = el('importFilterTerm').value;
+const classLevel = el('importFilterClass').value;
+const keyword = el('importFilterKeyword').value.trim();
+
+// โหลดรายการสอนผ่าน RPC ที่ตรวจสอบ Teacher Session
+const data = await fetchAllPages(() => {
+
+  let query = supabaseClient.rpc(
+    'teacher_get_my_subject_offerings_session',
+    {
+      p_token: token,
+      p_academic_year: year ? Number(year) : null,
+      p_term: term ? Number(term) : null
+    }
+  )
+  .order('academic_year', { ascending: false })
+  .order('term', { ascending: true })
+  .order('class_level', { ascending: true })
+  .order('room', { ascending: true })
+  .order('subject_code', { ascending: true });
+
+  // กรองระดับชั้น
+  if(classLevel){
+    query = query.eq('class_level', classLevel);
+  }
+
+  // ค้นหาจากรหัสวิชาหรือชื่อวิชา
+  if(keyword){
+    query = query.or(
+      `subject_code.ilike.%${keyword}%,subject_name.ilike.%${keyword}%`
+    );
+  }
+
+  return query;
+
+}, 1000);
+
 
         const grouped = groupTeachingRows(data || []);
 
