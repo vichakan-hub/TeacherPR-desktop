@@ -37515,17 +37515,31 @@ async function loadTeacherStudentOptions(){
 
     setStatus('teacherStudentStatus', 'กำลังโหลดรายวิชาที่สอน...', 'info');
 
-    const rows = await fetchAllPages(() => {
-      return supabaseClient
-        .from('v_subject_offerings')
-        .select('*')
-        .eq('teacher_id', state.currentUser.id)
-        .eq('academic_year', academic_year)
-        .eq('term', term)
-        .order('class_level', { ascending:true })
-        .order('room', { ascending:true })
-        .order('subject_code', { ascending:true });
-    }, 1000);
+
+const token = String(
+  state.teacherSessionToken || ''
+).trim();
+
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+const rows = await fetchAllPages(() => {
+  return supabaseClient.rpc(
+    'teacher_get_my_subject_offerings_session',
+    {
+      p_token: token,
+      p_academic_year: Number(academic_year),
+      p_term: Number(term)
+    }
+  )
+  .order('class_level', { ascending: true })
+  .order('room', { ascending: true })
+  .order('subject_code', { ascending: true });
+}, 1000);
+
 
     state.teacherStudentOptions.subjectGroups = teacherStudentGroupOfferings(rows || []);
     renderTeacherStudentSubjectOptions();
@@ -40918,62 +40932,30 @@ async function loadExamEligibilityTeachingList(){
        โหลดรายการสอนเหมือนรายงานกลางภาค
        ===================================================== */
 
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from('v_subject_offerings')
-      .select(`
-        subject_offering_id,
-        subject_id,
-        teacher_id,
-        academic_year,
-        term,
-        class_level,
-        room,
-        credit,
-        section_code,
-        is_active,
-        subject_code,
-        subject_name,
-        subject_type,
-        teacher_code,
-        teacher_name
-      `)
-      .eq(
-        'teacher_id',
-        state.currentUser.id
-      )
-      .eq(
-        'academic_year',
-        Number(year)
-      )
-      .eq(
-        'term',
-        Number(term)
-      )
-      .eq(
-        'is_active',
-        true
-      )
-      .order(
-        'class_level',
-        {
-          ascending:true
-        }
-      )
-      .order(
-        'room',
-        {
-          ascending:true
-        }
-      )
-      .order(
-        'subject_code',
-        {
-          ascending:true
-        }
-      );
+
+const offeringSessionToken = String(
+  state.teacherSessionToken || ''
+).trim();
+
+if(!offeringSessionToken){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+const { data, error } = await supabaseClient.rpc(
+  'teacher_get_my_subject_offerings_session',
+  {
+    p_token: offeringSessionToken,
+    p_academic_year: Number(year),
+    p_term: Number(term)
+  }
+)
+.eq('is_active', true)
+.order('class_level', { ascending: true })
+.order('room', { ascending: true })
+.order('subject_code', { ascending: true });
+
 
 
     if(error){
@@ -42302,62 +42284,43 @@ async function loadMidtermTeachingList(){
      * ยังไม่กรอง class_level ใน Query
      * เพราะต้องนำข้อมูลทั้งหมดมาสร้าง Dropdown ชั้น
      */
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from('v_subject_offerings')
-      .select(`
-        subject_offering_id,
-        subject_id,
-        teacher_id,
-        academic_year,
-        term,
-        class_level,
-        room,
-        credit,
-        section_code,
-        is_active,
-        subject_code,
-        subject_name,
-        subject_type,
-        teacher_code,
-        teacher_name
-      `)
-      .eq(
-        'teacher_id',
-        state.currentUser.id
-      )
-      .eq(
-        'academic_year',
-        Number(year)
-      )
-      .eq(
-        'term',
-        Number(term)
-      )
-      .eq(
-        'is_active',
-        true
-      )
-      .order(
-        'class_level',
-        {
-          ascending: true
-        }
-      )
-      .order(
-        'room',
-        {
-          ascending: true
-        }
-      )
-      .order(
-        'subject_code',
-        {
-          ascending: true
-        }
-      );
+
+const token = String(
+  state.teacherSessionToken || ''
+).trim();
+
+if(!token){
+  throw new Error(
+    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  );
+}
+
+// โหลดรายการสอนผ่าน RPC ที่ตรวจสอบ Teacher Session
+const {
+  data,
+  error
+} = await supabaseClient.rpc(
+  'teacher_get_my_subject_offerings_session',
+  {
+    p_token: token,
+    p_academic_year: Number(year),
+    p_term: Number(term)
+  }
+)
+.eq('is_active', true)
+.order(
+  'class_level',
+  { ascending: true }
+)
+.order(
+  'room',
+  { ascending: true }
+)
+.order(
+  'subject_code',
+  { ascending: true }
+);
+
 
     if(error){
       throw error;
@@ -42432,21 +42395,7 @@ async function loadMidtermTeachingList(){
           })
         : classRows;
 
-/*
- * โหลดข้อมูลกลางภาคของครูคนนี้
- * เพื่อดูว่ารายวิชาใดเคยบันทึกคะแนนแล้ว
- */
-const token =
-  String(
-    state.teacherSessionToken || ''
-  ).trim();
 
-
-if(!token){
-  throw new Error(
-    'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
-  );
-}
 
 
 const reportRows =
