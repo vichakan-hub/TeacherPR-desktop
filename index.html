@@ -30411,38 +30411,24 @@ if(!teacherNumber){
 }
 
 
-  const rows =
-    await fetchAllPages(
-      () => {
 
-        return supabaseClient
-          .from('v_subject_offerings')
-          .select(`
-            subject_code,
-            class_level,
-            academic_year,
-            term
-          `)
-          .eq(
-            'teacher_id',
-            teacherId
-          )
-          .eq(
-            'academic_year',
-            Number(academicYear)
-          )
-          .eq(
-            'term',
-            Number(term)
-          )
-          .eq(
-            'is_active',
-            true
-          );
+const rows = await fetchAllPages(
+  () => {
 
-      },
-      1000
-    );
+    return supabaseClient.rpc(
+      'teacher_get_my_subject_offerings_session',
+      {
+        p_token: token,
+        p_academic_year: Number(academicYear),
+        p_term: Number(term)
+      }
+    )
+    .eq('is_active', true);
+
+  },
+  1000
+);
+
 
 
   if(
