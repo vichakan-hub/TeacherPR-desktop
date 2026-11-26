@@ -26535,30 +26535,6 @@ async function tdRiskProcessDashboard(payload){
 
     }
 
-    // =============================================
-// วิเคราะห์รายวิชาและกลุ่มสาระการเรียนรู้
-// =============================================
-
-await tdRiskLoadSubjectArea(
-
-  snapshot,
-
-  token,
-
-  isCurrentRequest
-
-);
-
-
-if(!isCurrentRequest()) return;
-
-
-if(!tdStatsHasValidSession()){
-
-  throw new Error('Session หมดอายุ');
-
-}
-
 
     // =============================================
     // RPC 2 : Urgent KPI
@@ -26775,6 +26751,31 @@ try{
 // =============================================
 
 await tdRiskLoadHeatmap(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
+
+
+// =============================================
+// วิเคราะห์รายวิชาและกลุ่มสาระการเรียนรู้
+// =============================================
+
+await tdRiskLoadSubjectArea(
 
   snapshot,
 
@@ -29889,54 +29890,7 @@ async function tdRiskLoadSubjectArea(
 
 
       const rows = result.data;
-      /* ===== DEBUG RISK SUBJECT AREA ===== */
-
-console.log(
-  'RISK SUBJECT AREA DEBUG:',
-  JSON.stringify({
-
-    kind:kind,
-
-    rpc:config.rpc,
-
-    is_array:Array.isArray(result.data),
-
-    data_type:typeof result.data,
-
-    is_null:result.data === null,
-
-    summary_exists:!!tdRiskResultState.summary,
-
-    data_keys:
-
-      result.data &&
-      typeof result.data === 'object' &&
-      !Array.isArray(result.data)
-
-        ? Object.keys(result.data)
-
-        : [],
-
-    row_count:
-
-      Array.isArray(result.data)
-
-        ? result.data.length
-
-        : null,
-
-    raw_sample:
-
-      Array.isArray(result.data)
-
-        ? result.data.slice(0,2)
-
-        : result.data
-
-  },null,2)
-);
-
-/* ===== END DEBUG RISK SUBJECT AREA ===== */
+  
 
 
       tdRiskValidateSubjectAreaRows(
