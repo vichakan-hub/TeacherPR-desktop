@@ -3894,6 +3894,79 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK HEATMAP ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK SUBJECT AND AREA
+   ===================================================== */
+
+#tdRiskSubjectAreaSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskSubjectAreaSection .td-sa-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  align-items:start;
+}
+
+#tdRiskSubjectAreaSection .td-sa-card{
+  min-width:0;
+  padding:18px;
+  overflow:hidden;
+}
+
+#tdRiskSubjectAreaSection .td-sa-card h2{
+  font-size:20px;
+  line-height:1.4;
+}
+
+#tdRiskSubjectAreaSection .td-sa-chart-box{
+  position:relative;
+  width:100%;
+  min-width:0;
+  height:420px;
+  margin-top:14px;
+}
+
+#tdRiskSubjectAreaSection .td-sa-summary{
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+  color:#41536c;
+  font-size:14px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:1280px){
+
+  #tdRiskSubjectAreaSection .td-sa-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:720px){
+
+  #tdRiskSubjectAreaSection .td-sa-card{
+    padding:12px;
+  }
+
+  #tdRiskSubjectAreaSection .td-sa-card h2{
+    font-size:18px;
+  }
+
+  #tdRiskSubjectAreaSection .td-sa-summary{
+    font-size:13px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK SUBJECT AND AREA ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -18157,7 +18230,131 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK HEATMAP ===== -->
 
-  <div id="tdRiskSubjectAreaSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK SUBJECT AND AREA
+     ================================================= -->
+
+<div id="tdRiskSubjectAreaSection">
+
+  <div class="td-sa-grid"
+       style="margin-bottom:18px;">
+
+
+    <!-- Top 10 รายวิชา -->
+
+    <section class="card td-sa-card">
+
+      <h2>
+        10 รายวิชาที่พบกลุ่มเสี่ยงมากที่สุด
+      </h2>
+
+      <div class="sub">
+
+        เรียงตามจำนวนรายการผลการเรียนเดิม
+        0 ร มส มผ
+
+      </div>
+
+      <div
+        id="tdRiskSubjectStatus"
+        class="status info"
+        role="status"
+        aria-live="polite">
+
+        ยังไม่ได้ประมวลผลข้อมูล
+
+      </div>
+
+      <div
+        id="tdRiskSubjectContent"
+        class="hidden">
+
+        <div
+          id="tdRiskSubjectChartBox"
+          class="td-sa-chart-box">
+
+          <canvas
+            id="tdRiskSubjectChart"
+            role="img"
+            aria-label="กราฟ 10 รายวิชาที่พบกลุ่มเสี่ยงมากที่สุด">
+          </canvas>
+
+        </div>
+
+        <div
+          id="tdRiskSubjectSummary"
+          class="td-sa-summary">
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- กลุ่มสาระการเรียนรู้ -->
+
+    <section class="card td-sa-card">
+
+      <h2>
+        วิเคราะห์ตามกลุ่มสาระการเรียนรู้
+      </h2>
+
+      <div class="sub">
+
+        จำนวนรายการผลการเรียนเดิม
+        0 ร มส มผ แยกตามกลุ่มสาระ
+
+      </div>
+
+      <div
+        id="tdRiskAreaStatus"
+        class="status info"
+        role="status"
+        aria-live="polite">
+
+        ยังไม่ได้ประมวลผลข้อมูล
+
+      </div>
+
+      <div
+        id="tdRiskAreaContent"
+        class="hidden">
+
+        <div
+          id="tdRiskAreaChartBox"
+          class="td-sa-chart-box">
+
+          <canvas
+            id="tdRiskAreaChart"
+            role="img"
+            aria-label="กราฟผลการเรียนกลุ่มเสี่ยงตามกลุ่มสาระ">
+          </canvas>
+
+        </div>
+
+        <div
+          id="tdRiskAreaSummary"
+          class="td-sa-summary">
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="small"
+       style="margin:0 0 18px;">
+
+    หมายเหตุ: กราฟแสดงจำนวนรายการ
+    ไม่ใช่อัตราความเสี่ยงของรายวิชาหรือกลุ่มสาระ
+    และรวมนักเรียนที่แก้ผลการเรียนสำเร็จแล้ว
+
+  </div>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK SUBJECT AND AREA ===== -->
 
   <div id="tdRiskUrgentStudentsSection"></div>
 
@@ -26062,6 +26259,8 @@ function tdRiskResetResult(){
 
   tdRiskResetHeatmap();
 
+  tdRiskResetSubjectArea();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -26335,6 +26534,30 @@ async function tdRiskProcessDashboard(payload){
       throw new Error('Session หมดอายุ');
 
     }
+
+    // =============================================
+// วิเคราะห์รายวิชาและกลุ่มสาระการเรียนรู้
+// =============================================
+
+await tdRiskLoadSubjectArea(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
 
 
     // =============================================
@@ -28769,6 +28992,1006 @@ function tdRiskResetHeatmap(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK HEATMAP CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK SUBJECT AREA CONTROLLER
+   ===================================================== */
+
+const tdRiskSubjectAreaState = {
+
+  subjectRows: null,
+
+  areaRows: null,
+
+  subjectChart: null,
+
+  areaChart: null
+
+};
+
+
+const tdRiskSubjectAreaConfig = {
+
+  subject:{
+
+    rowsKey:'subjectRows',
+
+    chartKey:'subjectChart',
+
+    statusId:'tdRiskSubjectStatus',
+
+    contentId:'tdRiskSubjectContent',
+
+    canvasId:'tdRiskSubjectChart',
+
+    chartBoxId:'tdRiskSubjectChartBox',
+
+    summaryId:'tdRiskSubjectSummary',
+
+    rpc:'teacher_get_orms_top_subjects_session'
+
+  },
+
+  area:{
+
+    rowsKey:'areaRows',
+
+    chartKey:'areaChart',
+
+    statusId:'tdRiskAreaStatus',
+
+    contentId:'tdRiskAreaContent',
+
+    canvasId:'tdRiskAreaChart',
+
+    chartBoxId:'tdRiskAreaChartBox',
+
+    summaryId:'tdRiskAreaSummary',
+
+    rpc:'teacher_get_orms_by_learning_area_session'
+
+  }
+
+};
+
+
+// =====================================================
+// 1. ตรวจสอบข้อมูลจาก RPC
+// =====================================================
+
+function tdRiskValidateSubjectAreaRows(
+  rows,
+  kind,
+  summary
+){
+
+  if(
+
+    !Array.isArray(rows) ||
+
+    !summary ||
+
+    !['subject','area'].includes(kind)
+
+  ){
+
+    throw new Error(
+      'รูปแบบข้อมูลรายวิชาหรือกลุ่มสาระไม่ถูกต้อง'
+    );
+
+  }
+
+
+  if(kind === 'subject' && rows.length > 10){
+
+    throw new Error(
+      'จำนวนรายวิชาเกิน Top 10'
+    );
+
+  }
+
+
+  const keys = [
+
+    'total_records',
+
+    'unique_students',
+
+    'grade_0_records',
+
+    'grade_r_records',
+
+    'grade_ms_records',
+
+    'grade_mp_records',
+
+    'resolved_records',
+
+    'pending_records',
+
+    'unresolved_records'
+
+  ];
+
+
+  const groups = new Set();
+
+
+  rows.forEach(row => {
+
+    if(
+
+      !row ||
+
+      !keys.every(key =>
+
+        Number.isSafeInteger(row[key]) &&
+
+        row[key] >= 0
+
+      )
+
+    ){
+
+      throw new Error(
+        'ข้อมูลจำนวนรายการไม่ถูกต้อง'
+      );
+
+    }
+
+
+    if(kind === 'subject'){
+
+      if(
+
+        typeof row.subject_code !== 'string' ||
+
+        (
+
+          row.subject_name !== null &&
+
+          typeof row.subject_name !== 'string'
+
+        )
+
+      ){
+
+        throw new Error(
+          'ข้อมูลรายวิชาไม่ถูกต้อง'
+        );
+
+      }
+
+    }else{
+
+      if(
+
+        typeof row.learning_area !== 'string' ||
+
+        !row.learning_area.trim()
+
+      ){
+
+        throw new Error(
+          'ข้อมูลกลุ่มสาระไม่ถูกต้อง'
+        );
+
+      }
+
+    }
+
+
+    // SQL Top Subjects จัดกลุ่มตามรหัสและชื่อวิชา
+    // จึงไม่ใช้รหัสวิชาเพียงอย่างเดียวเป็น Key
+
+    const key = kind === 'subject'
+
+      ? JSON.stringify([
+
+          row.subject_code,
+
+          row.subject_name
+
+        ])
+
+      : row.learning_area;
+
+
+    if(groups.has(key)){
+
+      throw new Error(
+        'พบข้อมูลกลุ่มซ้ำ'
+      );
+
+    }
+
+    groups.add(key);
+
+
+    const gradeTotal =
+
+      tdRiskGradeSeries.reduce(
+
+        (sum,item) => sum + row[item.key],
+
+        0
+
+      );
+
+
+    const statusTotal =
+
+      row.resolved_records +
+
+      row.pending_records +
+
+      row.unresolved_records;
+
+
+    if(
+
+      gradeTotal !== row.total_records ||
+
+      statusTotal !== row.total_records ||
+
+      row.unique_students > row.total_records ||
+
+      row.unique_students >
+        summary.total_risk_students
+
+    ){
+
+      throw new Error(
+        'จำนวนรายการในแต่ละกลุ่มไม่สอดคล้องกัน'
+      );
+
+    }
+
+  });
+
+
+  // ตรวจสอบยอดรวมเทียบกับ Summary
+
+  const compareKeys = [
+
+    ['total_records','total_risk_records'],
+
+    ['grade_0_records','grade_0_records'],
+
+    ['grade_r_records','grade_r_records'],
+
+    ['grade_ms_records','grade_ms_records'],
+
+    ['grade_mp_records','grade_mp_records'],
+
+    ['resolved_records','resolved_records'],
+
+    ['pending_records','pending_records'],
+
+    ['unresolved_records','unresolved_records']
+
+  ];
+
+
+  compareKeys.forEach(([rowKey,summaryKey]) => {
+
+    const sum = rows.reduce(
+
+      (total,row) => total + row[rowKey],
+
+      0
+
+    );
+
+
+    const expected = summary[summaryKey];
+
+
+    // กลุ่มสาระต้องรวมได้ครบทุก Record
+    // Top 10 เป็นเพียงส่วนหนึ่งของทั้งหมด
+
+    const valid = kind === 'area'
+
+      ? sum === expected
+
+      : sum <= expected;
+
+
+    if(!valid){
+
+      throw new Error(
+
+        `ยอดรวม ${rowKey} ไม่ตรงกับ Summary`
+
+      );
+
+    }
+
+  });
+
+
+  if(
+
+    kind === 'subject' &&
+
+    summary.total_risk_records > 0 &&
+
+    rows.length === 0
+
+  ){
+
+    throw new Error(
+      'ไม่พบ Top Subjects ทั้งที่มีรายการกลุ่มเสี่ยง'
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 2. สร้างชื่อที่แสดงในกราฟ
+// =====================================================
+
+function tdRiskGetSubjectAreaLabel(row,kind){
+
+  if(kind === 'area'){
+
+    return row.learning_area ||
+      'ไม่ระบุกลุ่มสาระ';
+
+  }
+
+  const code = String(
+    row.subject_code || ''
+  ).trim();
+
+  const name = String(
+    row.subject_name || ''
+  ).trim();
+
+
+  return [code,name]
+
+    .filter(Boolean)
+
+    .join(' ') || 'ไม่ระบุรายวิชา';
+
+}
+
+
+// =====================================================
+// 3. ทำลาย Chart เดิม
+// =====================================================
+
+function tdRiskDestroySubjectAreaChart(kind){
+
+  const config =
+
+    tdRiskSubjectAreaConfig[kind];
+
+
+  const chart =
+
+    tdRiskSubjectAreaState[config.chartKey];
+
+
+  if(chart){
+
+    chart.destroy();
+
+    tdRiskSubjectAreaState[config.chartKey] =
+      null;
+
+  }
+
+}
+
+
+// =====================================================
+// 4. สร้าง Horizontal Stacked Bar Chart
+// =====================================================
+
+function tdRiskRenderSubjectArea(kind){
+
+  const config =
+
+    tdRiskSubjectAreaConfig[kind];
+
+
+  const rows =
+
+    tdRiskSubjectAreaState[config.rowsKey];
+
+
+  const summary =
+
+    tdRiskResultState.summary;
+
+
+  tdRiskDestroySubjectAreaChart(kind);
+
+
+  if(!rows || !summary) return;
+
+
+  const content = el(config.contentId);
+
+  const chartBox = el(config.chartBoxId);
+
+
+  if(rows.length === 0){
+
+    content.classList.add('hidden');
+
+
+    setStatus(
+
+      config.statusId,
+
+      'ไม่พบรายการกลุ่มเสี่ยงตามเงื่อนไข',
+
+      'success'
+
+    );
+
+    return;
+
+  }
+
+
+  const total = rows.reduce(
+
+    (sum,row) => sum + row.total_records,
+
+    0
+
+  );
+
+
+  const coverage =
+
+    summary.total_risk_records > 0
+
+      ? total /
+        summary.total_risk_records * 100
+
+      : 0;
+
+
+  if(kind === 'subject'){
+
+    tdStatsSetText(
+
+      config.summaryId,
+
+      `แสดง ${tdStatsFmtInt(rows.length)} กลุ่มรายวิชา` +
+
+      ` · รวม ${tdStatsFmtInt(total)} รายการ` +
+
+      ` · คิดเป็น ${tdStatsFmtNumber(coverage)}%` +
+
+      ` ของรายการกลุ่มเสี่ยงทั้งหมด`
+
+    );
+
+  }else{
+
+    tdStatsSetText(
+
+      config.summaryId,
+
+      `พบ ${tdStatsFmtInt(rows.length)} กลุ่มสาระ` +
+
+      ` · รวม ${tdStatsFmtInt(total)} รายการ`
+
+    );
+
+  }
+
+
+  content.classList.remove('hidden');
+
+
+  // ปรับความสูงตามจำนวนแถวจริง
+
+  chartBox.style.height =
+
+    `${Math.max(240,rows.length * 46 + 80)}px`;
+
+
+  if(typeof Chart !== 'function'){
+
+    throw new Error(
+      'ไม่สามารถโหลด Chart.js'
+    );
+
+  }
+
+
+  tdRiskSubjectAreaState[config.chartKey] =
+    new Chart(
+
+      el(config.canvasId),
+
+      {
+
+        type:'bar',
+
+        data:{
+
+          labels:rows.map(row =>
+
+            tdRiskGetSubjectAreaLabel(row,kind)
+
+          ),
+
+          datasets:tdRiskGradeSeries.map(
+            item => ({
+
+              label:item.label,
+
+              data:rows.map(
+                row => row[item.key]
+              ),
+
+              backgroundColor:item.color,
+
+              borderRadius:3,
+
+              borderSkipped:false,
+
+              maxBarThickness:32
+
+            })
+          )
+
+        },
+
+        options:{
+
+          indexAxis:'y',
+
+          responsive:true,
+
+          maintainAspectRatio:false,
+
+          interaction:{
+
+            mode:'index',
+
+            axis:'y',
+
+            intersect:false
+
+          },
+
+          scales:{
+
+            x:{
+
+              stacked:true,
+
+              beginAtZero:true,
+
+              ticks:{precision:0},
+
+              grid:{color:'#edf2f7'}
+
+            },
+
+            y:{
+
+              stacked:true,
+
+              grid:{display:false},
+
+              ticks:{
+
+                autoSkip:false,
+
+                font:{
+
+                  family:'Kanit',
+
+                  size:12
+
+                },
+
+                callback:function(value){
+
+                  const full = String(
+                    this.getLabelForValue(value)
+                  );
+
+                  const max =
+
+                    chartBox.clientWidth < 500
+
+                      ? 19
+
+                      : 35;
+
+
+                  const chars = Array.from(full);
+
+
+                  if(chars.length <= max){
+
+                    return full;
+
+                  }
+
+
+                  return chars
+
+                    .slice(0,max - 1)
+
+                    .join('') + '…';
+
+                }
+
+              }
+
+            }
+
+          },
+
+          plugins:{
+
+            legend:{
+
+              position:'bottom',
+
+              labels:{
+
+                usePointStyle:true,
+
+                boxWidth:10
+
+              }
+
+            },
+
+            tooltip:{
+
+              callbacks:{
+
+                title:items => {
+
+                  const row = rows[
+                    items[0]?.dataIndex
+                  ];
+
+                  return row
+
+                    ? tdRiskGetSubjectAreaLabel(
+                        row,kind
+                      )
+
+                    : '';
+
+                },
+
+                label:context =>
+
+                  `${context.dataset.label}: ${
+                    tdStatsFmtInt(context.raw)
+                  } รายการ`,
+
+                footer:items => {
+
+                  const row = rows[
+                    items[0]?.dataIndex
+                  ];
+
+                  if(!row) return '';
+
+                  return [
+
+                    `รวม ${
+                      tdStatsFmtInt(
+                        row.total_records
+                      )
+                    } รายการ`,
+
+                    `นักเรียนไม่ซ้ำ ${
+                      tdStatsFmtInt(
+                        row.unique_students
+                      )
+                    } คน`,
+
+                    `แก้สำเร็จ ${
+                      tdStatsFmtInt(
+                        row.resolved_records
+                      )
+                    } รายการ`,
+
+                    `คงค้าง ${
+                      tdStatsFmtInt(
+
+                        row.pending_records +
+
+                        row.unresolved_records
+
+                      )
+                    } รายการ`
+
+                  ];
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    );
+
+
+  setStatus(
+
+    config.statusId,
+
+    'แสดงข้อมูลจากผลการประมวลผลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 5. ล้างข้อมูลแต่ละส่วน
+// =====================================================
+
+function tdRiskResetSubjectAreaPart(kind){
+
+  const config =
+
+    tdRiskSubjectAreaConfig[kind];
+
+
+  tdRiskDestroySubjectAreaChart(kind);
+
+
+  tdRiskSubjectAreaState[config.rowsKey] =
+    null;
+
+
+  el(config.contentId)
+
+    ?.classList.add('hidden');
+
+
+  tdStatsSetText(
+
+    config.summaryId,
+
+    ''
+
+  );
+
+
+  setStatus(
+
+    config.statusId,
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+
+function tdRiskResetSubjectArea(){
+
+  tdRiskResetSubjectAreaPart('subject');
+
+  tdRiskResetSubjectAreaPart('area');
+
+}
+
+
+// =====================================================
+// 6. โหลดข้อมูลทีละ RPC
+// =====================================================
+
+async function tdRiskLoadSubjectArea(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+){
+
+  tdRiskResetSubjectArea();
+
+
+  const ensureCurrent = () => {
+
+    if(!isCurrentRequest()) return false;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    return true;
+
+  };
+
+
+  for(const kind of ['subject','area']){
+
+    if(!ensureCurrent()) return;
+
+
+    const config =
+
+      tdRiskSubjectAreaConfig[kind];
+
+
+    setStatus(
+
+      config.statusId,
+
+      'กำลังโหลดข้อมูล...',
+
+      'info'
+
+    );
+
+
+    try{
+
+      const args = {
+
+        p_token:token,
+
+        p_filters:snapshot
+
+      };
+
+
+      if(kind === 'subject'){
+
+        args.p_limit = 10;
+
+      }
+
+
+      const result =
+
+        await supabaseClient.rpc(
+
+          config.rpc,
+
+          args
+
+        );
+
+
+      if(!ensureCurrent()) return;
+
+      if(result.error) throw result.error;
+
+
+      const rows = result.data;
+
+
+      tdRiskValidateSubjectAreaRows(
+
+        rows,
+
+        kind,
+
+        tdRiskResultState.summary
+
+      );
+
+
+      // รักษาลำดับที่ SQL ส่งกลับมา
+      // ไม่จัดอันดับ Top 10 ใหม่ใน JavaScript
+
+      tdRiskSubjectAreaState[config.rowsKey] =
+        rows;
+
+
+      try{
+
+        tdRiskRenderSubjectArea(kind);
+
+      }catch(chartError){
+
+        tdRiskDestroySubjectAreaChart(kind);
+
+        el(config.contentId)
+          .classList.add('hidden');
+
+
+        setStatus(
+
+          config.statusId,
+
+          'โหลดข้อมูลสำเร็จ แต่สร้างกราฟไม่ได้',
+
+          'warn'
+
+        );
+
+
+        console.warn(
+
+          'Teacher Dashboard risk chart:',
+
+          kind,
+
+          chartError?.message ||
+            'Unknown error'
+
+        );
+
+      }
+
+
+    }catch(error){
+
+      if(!isCurrentRequest()) return;
+
+      if(!tdStatsHasValidSession()){
+
+        throw error;
+
+      }
+
+
+      tdRiskResetSubjectAreaPart(kind);
+
+
+      setStatus(
+
+        config.statusId,
+
+        'ไม่สามารถแสดงข้อมูลได้ กรุณาประมวลผลใหม่',
+
+        'error'
+
+      );
+
+
+      console.warn(
+
+        'Teacher Dashboard subject area:',
+
+        kind,
+
+        error?.code ||
+
+        error?.message ||
+
+        'Unknown error'
+
+      );
+
+    }
+
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK SUBJECT AREA CONTROLLER ===== */
 
 
  function setActivePage(page){
