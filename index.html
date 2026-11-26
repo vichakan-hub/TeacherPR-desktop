@@ -3498,6 +3498,73 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK KPI ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK CLASS ROOM CHART
+   ===================================================== */
+
+#tdRiskClassRoomSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskClassRoomSection .td-risk-chart-card{
+  min-width:0;
+  padding:18px;
+
+  border:1px solid #dbe7f3;
+  border-radius:20px;
+  background:#fff;
+
+  overflow:hidden;
+}
+
+#tdRiskClassRoomSection .td-risk-chart-box{
+  position:relative;
+
+  width:100%;
+  min-width:0;
+  height:340px;
+
+  margin-top:16px;
+}
+
+#tdRiskClassRoomChartTitle{
+  font-size:20px;
+  font-weight:800;
+  color:#17324d;
+}
+
+#tdRiskClassRoomChartSummary{
+  margin-top:14px;
+  padding:12px 16px;
+
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+
+  font-size:14px;
+  line-height:1.7;
+  color:#41536c;
+}
+
+@media(max-width:720px){
+
+  #tdRiskClassRoomSection .td-risk-chart-card{
+    padding:12px;
+  }
+
+  #tdRiskClassRoomSection .td-risk-chart-box{
+    height:280px;
+  }
+
+  #tdRiskClassRoomChartTitle{
+    font-size:18px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK CLASS ROOM CHART ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -17436,7 +17503,60 @@ style="
 
   <!-- เตรียมพื้นที่สำหรับขั้นตอนถัดไป -->
 
-  <div id="tdRiskClassRoomSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK CLASS ROOM CHART
+     ================================================= -->
+
+<div id="tdRiskClassRoomSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2 id="tdRiskClassRoomChartTitle">
+
+      วิเคราะห์ความเสี่ยงรายระดับชั้น
+
+    </h2>
+
+    <div class="sub">
+
+      จำนวนรายการผลการเรียนเดิม 0 ร มส มผ
+      แยกตามระดับชั้นหรือห้องเรียน
+
+    </div>
+
+    <div
+      id="tdRiskClassRoomStatus"
+      class="status info"
+      role="status">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div
+      id="tdRiskClassRoomContent"
+      class="td-risk-chart-card hidden">
+
+      <div class="td-risk-chart-box">
+
+        <canvas
+          id="tdRiskClassRoomChart"
+          role="img"
+          aria-label="กราฟวิเคราะห์ความเสี่ยงรายระดับชั้นและห้องเรียน">
+
+        </canvas>
+
+      </div>
+
+      <div id="tdRiskClassRoomChartSummary"></div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK CLASS ROOM CHART ===== -->
 
   <div id="tdRiskResolutionSection"></div>
 
@@ -25341,6 +25461,8 @@ function tdRiskRenderKpis(){
 
 function tdRiskResetResult(){
 
+  tdRiskResetClassRoom();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -25583,7 +25705,7 @@ async function tdRiskProcessDashboard(payload){
 
       'tdRiskResultStatus',
 
-      'กำลังประมวลผลข้อมูลกลุ่มเสี่ยง (1/2)...',
+      'กำลังประมวลผลข้อมูลกลุ่มเสี่ยง (1/3)...',
 
       'info'
 
@@ -25624,7 +25746,7 @@ async function tdRiskProcessDashboard(payload){
 
       'tdRiskResultStatus',
 
-      'กำลังวิเคราะห์นักเรียนที่ต้องติดตาม (2/2)...',
+      'กำลังวิเคราะห์นักเรียนที่ต้องติดตาม (2/3)...',
 
       'info'
 
@@ -25664,15 +25786,136 @@ async function tdRiskProcessDashboard(payload){
 
     // ตรวจสอบก่อนนำไปแสดง
 
-    tdRiskValidateKpis(summary,urgent);
+tdRiskValidateKpis(summary,urgent);
 
 
-    tdRiskResultState.summary = summary;
+// =============================================
+// RPC 3 : Risk By Class / Room
+// =============================================
 
-    tdRiskResultState.urgent = urgent;
+setStatus(
+
+  'tdRiskResultStatus',
+
+  'กำลังวิเคราะห์ความเสี่ยงรายชั้นและรายห้อง (3/3)...',
+
+  'info'
+
+);
 
 
-    tdRiskRenderKpis();
+const classRoomMode =
+
+  tdRiskGetClassRoomMode(snapshot);
+
+
+const classRoomRpc =
+
+  classRoomMode === 'room'
+
+    ? 'teacher_get_orms_by_room_session'
+
+    : 'teacher_get_orms_by_class_session';
+
+
+const classRoomRes = await supabaseClient.rpc(
+
+  classRoomRpc,
+
+  {
+
+    p_token:token,
+
+    p_filters:snapshot
+
+  }
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+if(classRoomRes.error) throw classRoomRes.error;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
+
+
+const classRoomRows = classRoomRes.data;
+
+
+// ตรวจสอบความสอดคล้องกับ Risk Summary
+
+tdRiskValidateClassRoomRows(
+
+  classRoomRows,
+
+  classRoomMode,
+
+  summary
+
+);
+
+
+// =============================================
+// เก็บข้อมูลทั้งหมดใน Memory
+// =============================================
+
+tdRiskResultState.summary = summary;
+
+tdRiskResultState.urgent = urgent;
+
+
+tdRiskClassRoomState.rows = classRoomRows;
+
+tdRiskClassRoomState.mode = classRoomMode;
+
+
+// แสดง KPI
+
+tdRiskRenderKpis();
+
+
+// แสดงกราฟ
+// หาก Chart.js ผิดพลาด KPI ยังแสดงได้
+
+try{
+
+  tdRiskRenderClassRoomChart();
+
+}catch(chartError){
+
+  tdRiskDestroyClassRoomChart();
+
+
+  el('tdRiskClassRoomContent')
+    .classList.add('hidden');
+
+
+  setStatus(
+
+    'tdRiskClassRoomStatus',
+
+    'ไม่สามารถสร้างกราฟได้',
+
+    'error'
+
+  );
+
+
+  console.warn(
+
+    'Teacher Dashboard class room chart:',
+
+    chartError?.message || 'Unknown error'
+
+  );
+
+}
 
 
   }catch(error){
@@ -25719,6 +25962,667 @@ async function tdRiskProcessDashboard(payload){
 }
 
 /* ===== END TEACHER DASHBOARD RISK RESULT CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK CLASS ROOM CONTROLLER
+   ===================================================== */
+
+const tdRiskClassRoomState = {
+
+  rows: null,
+
+  mode: null,
+
+  chart: null
+
+};
+
+
+const tdRiskGradeSeries = [
+
+  {
+    key:'grade_0_records',
+    label:'0',
+    color:'#ef4444'
+  },
+
+  {
+    key:'grade_r_records',
+    label:'ร',
+    color:'#f59e0b'
+  },
+
+  {
+    key:'grade_ms_records',
+    label:'มส',
+    color:'#7c3aed'
+  },
+
+  {
+    key:'grade_mp_records',
+    label:'มผ',
+    color:'#64748b'
+  }
+
+];
+
+
+// =====================================================
+// 1. กำหนดโหมดรายระดับชั้นหรือรายห้อง
+// =====================================================
+
+function tdRiskGetClassRoomMode(payload){
+
+  return (
+
+    payload.class_levels.length > 0 ||
+
+    payload.rooms.length > 0
+
+  ) ? 'room' : 'class';
+
+}
+
+
+// =====================================================
+// 2. ตรวจสอบข้อมูลรายกลุ่ม
+// =====================================================
+
+function tdRiskValidateClassRoomRows(
+  rows,
+  mode,
+  summary
+){
+
+  if(!Array.isArray(rows)){
+
+    throw new Error(
+      'รูปแบบข้อมูลรายชั้นและรายห้องไม่ถูกต้อง'
+    );
+
+  }
+
+  const keys = [
+
+    'total_records',
+
+    'unique_students',
+
+    'grade_0_records',
+
+    'grade_r_records',
+
+    'grade_ms_records',
+
+    'grade_mp_records',
+
+    'resolved_records',
+
+    'pending_records',
+
+    'unresolved_records'
+
+  ];
+
+
+  const labels = new Set();
+
+  let total = 0;
+
+
+  rows.forEach(row => {
+
+    if(
+
+      !row ||
+
+      typeof row.class_level !== 'string' ||
+
+      !row.class_level.trim() ||
+
+      !keys.every(key =>
+
+        Number.isSafeInteger(row[key]) &&
+
+        row[key] >= 0
+
+      )
+
+    ){
+
+      throw new Error(
+        'ข้อมูลสถิติรายกลุ่มไม่ถูกต้อง'
+      );
+
+    }
+
+
+    if(
+
+      mode === 'room' &&
+
+      (
+
+        typeof row.room_label !== 'string' ||
+
+        !row.room_label.trim()
+
+      )
+
+    ){
+
+      throw new Error(
+        'ไม่พบข้อมูลห้องเรียน'
+      );
+
+    }
+
+
+    const label = mode === 'room'
+
+      ? row.room_label
+
+      : row.class_level;
+
+
+    if(labels.has(label)){
+
+      throw new Error(
+        'พบข้อมูลกลุ่มซ้ำกัน'
+      );
+
+    }
+
+    labels.add(label);
+
+
+    const gradeTotal = tdRiskGradeSeries.reduce(
+
+      (sum,item) => sum + row[item.key],
+
+      0
+
+    );
+
+
+    const statusTotal =
+
+      row.resolved_records +
+
+      row.pending_records +
+
+      row.unresolved_records;
+
+
+    if(
+
+      gradeTotal !== row.total_records ||
+
+      statusTotal !== row.total_records ||
+
+      row.unique_students > row.total_records
+
+    ){
+
+      throw new Error(
+        'จำนวนรายการรายกลุ่มไม่สอดคล้องกัน'
+      );
+
+    }
+
+
+    total += row.total_records;
+
+  });
+
+
+  if(total !== summary.total_risk_records){
+
+    throw new Error(
+      'ยอดรวมรายกลุ่มไม่ตรงกับ Risk Summary'
+    );
+
+  }
+
+
+  for(const item of tdRiskGradeSeries){
+
+    const sum = rows.reduce(
+
+      (total,row) => total + row[item.key],
+
+      0
+
+    );
+
+    if(sum !== summary[item.key]){
+
+      throw new Error(
+        `ยอดรวมเกรด ${item.label} ไม่ตรงกับ Summary`
+      );
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// 3. เตรียมข้อมูลสำหรับสร้างกราฟ
+// =====================================================
+
+function tdRiskBuildClassRoomChartRows(
+  rows,
+  mode
+){
+
+  const sortText = (a,b) =>
+
+    String(a).localeCompare(
+      String(b),
+      'th',
+      {numeric:true}
+    );
+
+
+  if(mode === 'class'){
+
+    const classOrder = [
+
+      'ม.1','ม.2','ม.3',
+
+      'ม.4','ม.5','ม.6'
+
+    ];
+
+    const rowMap = new Map(
+
+      rows.map(row => [
+
+        row.class_level,
+
+        row
+
+      ])
+
+    );
+
+
+    // รองรับระดับชั้นอื่น หากมีในฐานข้อมูล
+
+    const extraClasses = rows
+
+      .map(row => row.class_level)
+
+      .filter(level =>
+
+        !classOrder.includes(level)
+
+      )
+
+      .sort(sortText);
+
+
+    return [
+
+      ...classOrder,
+
+      ...extraClasses
+
+    ].map(level => ({
+
+      ...(rowMap.get(level) || {
+
+        total_records:0,
+
+        unique_students:0,
+
+        grade_0_records:0,
+
+        grade_r_records:0,
+
+        grade_ms_records:0,
+
+        grade_mp_records:0
+
+      }),
+
+      label:level
+
+    }));
+
+  }
+
+
+  return rows
+
+    .map(row => ({
+
+      ...row,
+
+      label:row.room_label
+
+    }))
+
+    .sort((a,b) =>
+
+      sortText(a.label,b.label)
+
+    );
+
+}
+
+
+// =====================================================
+// 4. ทำลาย Chart เดิม
+// =====================================================
+
+function tdRiskDestroyClassRoomChart(){
+
+  if(tdRiskClassRoomState.chart){
+
+    tdRiskClassRoomState.chart.destroy();
+
+    tdRiskClassRoomState.chart = null;
+
+  }
+
+}
+
+
+// =====================================================
+// 5. สร้าง Stacked Bar Chart
+// =====================================================
+
+function tdRiskRenderClassRoomChart(){
+
+  tdRiskDestroyClassRoomChart();
+
+
+  const rows = tdRiskClassRoomState.rows;
+
+  const mode = tdRiskClassRoomState.mode;
+
+  const summary = tdRiskResultState.summary;
+
+
+  const content = el(
+    'tdRiskClassRoomContent'
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskClassRoomChartTitle',
+
+    mode === 'room'
+
+      ? 'วิเคราะห์ความเสี่ยงรายห้อง'
+
+      : 'วิเคราะห์ความเสี่ยงรายระดับชั้น'
+
+  );
+
+
+  if(!rows || !summary) return;
+
+
+  if(summary.total_risk_records === 0){
+
+    content.classList.add('hidden');
+
+    setStatus(
+
+      'tdRiskClassRoomStatus',
+
+      'ไม่พบรายการกลุ่มเสี่ยงตามเงื่อนไข',
+
+      'success'
+
+    );
+
+    return;
+
+  }
+
+
+  if(typeof Chart !== 'function'){
+
+    throw new Error(
+      'ไม่สามารถโหลด Chart.js'
+    );
+
+  }
+
+
+  const chartRows =
+
+    tdRiskBuildClassRoomChartRows(
+
+      rows,
+
+      mode
+
+    );
+
+
+  content.classList.remove('hidden');
+
+
+  tdRiskClassRoomState.chart = new Chart(
+
+    el('tdRiskClassRoomChart'),
+
+    {
+
+      type:'bar',
+
+      data:{
+
+        labels:chartRows.map(
+          row => row.label
+        ),
+
+        datasets:tdRiskGradeSeries.map(
+          item => ({
+
+            label:item.label,
+
+            data:chartRows.map(
+              row => row[item.key]
+            ),
+
+            backgroundColor:item.color,
+
+            borderRadius:4,
+
+            borderSkipped:false,
+
+            maxBarThickness:72
+
+          })
+        )
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        interaction:{
+
+          mode:'index',
+
+          intersect:false
+
+        },
+
+        scales:{
+
+          x:{
+
+            stacked:true,
+
+            grid:{display:false}
+
+          },
+
+          y:{
+
+            stacked:true,
+
+            beginAtZero:true,
+
+            ticks:{precision:0},
+
+            grid:{color:'#edf2f7'}
+
+          }
+
+        },
+
+        plugins:{
+
+          legend:{
+
+            position:'bottom',
+
+            labels:{
+
+              usePointStyle:true,
+
+              boxWidth:10
+
+            }
+
+          },
+
+          tooltip:{
+
+            callbacks:{
+
+              label:context =>
+
+                `${context.dataset.label}: ${
+                  tdStatsFmtInt(context.raw)
+                } รายการ`,
+
+              footer:items => {
+
+                const row = chartRows[
+                  items[0]?.dataIndex
+                ];
+
+                if(!row) return '';
+
+                return [
+
+                  `รวม ${
+                    tdStatsFmtInt(row.total_records)
+                  } รายการ`,
+
+                  `นักเรียนไม่ซ้ำ ${
+                    tdStatsFmtInt(row.unique_students)
+                  } คน`
+
+                ];
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskClassRoomChartSummary',
+
+    `นักเรียนกลุ่มเสี่ยง ${
+      tdStatsFmtInt(
+        summary.total_risk_students
+      )
+    } คน · จำนวนรายการกลุ่มเสี่ยง ${
+      tdStatsFmtInt(
+        summary.total_risk_records
+      )
+    } รายการ`
+
+  );
+
+
+  setStatus(
+
+    'tdRiskClassRoomStatus',
+
+    'แสดงกราฟจากผลการประมวลผลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 6. ล้างข้อมูลและกราฟ
+// =====================================================
+
+function tdRiskResetClassRoom(){
+
+  tdRiskDestroyClassRoomChart();
+
+  tdRiskClassRoomState.rows = null;
+
+  tdRiskClassRoomState.mode = null;
+
+
+  el('tdRiskClassRoomContent')
+    ?.classList.add('hidden');
+
+
+  tdStatsSetText(
+
+    'tdRiskClassRoomChartTitle',
+
+    'วิเคราะห์ความเสี่ยงรายระดับชั้น'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskClassRoomChartSummary',
+
+    ''
+
+  );
+
+
+  setStatus(
+
+    'tdRiskClassRoomStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK CLASS ROOM CONTROLLER ===== */
 
 
  function setActivePage(page){
