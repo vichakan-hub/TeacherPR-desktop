@@ -3355,6 +3355,149 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK FILTER OVERLAY ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK KPI
+   ===================================================== */
+
+#tdRiskResultSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskResultSection .td-risk-result-head{
+  padding:16px;
+  margin-bottom:16px;
+
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+#tdRiskAppliedFilters{
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskResultSection .td-risk-kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+
+#tdRiskResultSection .td-risk-kpi{
+  min-width:0;
+  min-height:125px;
+  padding:16px 18px;
+
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+
+  color:#17324d;
+}
+
+#tdRiskResultSection .td-risk-kpi.wide{
+  grid-column:span 2;
+}
+
+#tdRiskResultSection .td-risk-kpi.blue{
+  background:#eff6ff;
+  border-color:#bfdbfe;
+  color:#1d4ed8;
+}
+
+#tdRiskResultSection .td-risk-kpi.red{
+  background:#fff1f2;
+  border-color:#fecaca;
+  color:#dc2626;
+}
+
+#tdRiskResultSection .td-risk-kpi.amber{
+  background:#fffbeb;
+  border-color:#fde68a;
+  color:#b45309;
+}
+
+#tdRiskResultSection .td-risk-kpi.purple{
+  background:#f5f3ff;
+  border-color:#ddd6fe;
+  color:#7c3aed;
+}
+
+#tdRiskResultSection .td-risk-kpi.slate{
+  background:#f1f5f9;
+  border-color:#cbd5e1;
+  color:#475569;
+}
+
+#tdRiskResultSection .td-risk-kpi.orange{
+  background:#fff7ed;
+  border-color:#fed7aa;
+  color:#c2410c;
+}
+
+#tdRiskResultSection .td-risk-kpi.green{
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  color:#15803d;
+}
+
+#tdRiskResultSection .td-risk-kpi-icon{
+  font-size:23px;
+  margin-bottom:8px;
+}
+
+#tdRiskResultSection .td-risk-kpi-label{
+  font-size:14px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+#tdRiskResultSection .td-risk-kpi-value{
+  margin:8px 0;
+
+  font-family:'Sarabun',sans-serif;
+  font-size:clamp(24px,3vw,36px);
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskResultSection .td-risk-kpi-sub{
+  font-size:12px;
+  color:#64748b;
+}
+
+#tdRiskOpenFilterBtn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:720px){
+
+  #tdRiskResultSection .td-risk-kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+
+  #tdRiskResultSection .td-risk-kpi.wide{
+    grid-column:span 1;
+  }
+
+  #tdRiskResultSection .td-risk-kpi{
+    min-height:115px;
+    padding:12px;
+  }
+
+  #tdRiskResultSection .td-risk-kpi-value{
+    font-size:28px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK KPI ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -17068,15 +17211,15 @@ style="
 
     <div class="td-overlay-footer">
 
-      <button
-        id="tdRiskConfirmFilterBtn"
-        class="btn-primary"
-        type="button"
-        disabled>
+<button
+  id="tdRiskConfirmFilterBtn"
+  class="btn-primary"
+  type="button"
+  disabled>
 
-        ✓ ยืนยันตัวเลือก
+  📊 ประมวลผล Dashboard
 
-      </button>
+</button>
 
     </div>
 
@@ -17085,11 +17228,15 @@ style="
   <!-- ===== END RISK FILTER OVERLAY ===== -->
 
 
-  <!-- พื้นที่แสดงผล -->
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK RESULT
+     ================================================= -->
 
-  <div id="tdRiskResultSection">
+<div id="tdRiskResultSection">
 
-    <section class="card">
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="td-risk-result-head">
 
       <div class="small">
         ข้อมูลที่กำลังแสดง
@@ -17106,27 +17253,208 @@ style="
       <div
         id="tdRiskResultStatus"
         class="status info"
-        role="status">
+        role="status"
+        aria-live="polite">
 
-        รอเลือกเงื่อนไข
+        รอประมวลผล Dashboard
 
       </div>
 
-      <div class="empty-state">
+    </div>
 
-        📈 ระบบวิเคราะห์ความเสี่ยง
 
-        <div style="margin-top:8px;">
+    <div class="td-risk-kpi-grid">
 
-          KPI และกราฟจะเพิ่มในขั้นตอนถัดไป
+
+      <!-- นักเรียนกลุ่มเสี่ยง -->
+
+      <div class="td-risk-kpi blue wide">
+
+        <div class="td-risk-kpi-icon">👥</div>
+
+        <div class="td-risk-kpi-label">
+          นักเรียนกลุ่มเสี่ยง
+        </div>
+
+        <div id="tdRiskKpiStudents"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          คน (นับนักเรียนไม่ซ้ำ)
+        </div>
+
+      </div>
+
+
+      <!-- จำนวนรายการกลุ่มเสี่ยง -->
+
+      <div class="td-risk-kpi blue wide">
+
+        <div class="td-risk-kpi-icon">📋</div>
+
+        <div class="td-risk-kpi-label">
+          จำนวนรายการกลุ่มเสี่ยง
+        </div>
+
+        <div id="tdRiskKpiRecords"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          รายการผลการเรียน
+        </div>
+
+      </div>
+
+
+      <!-- เกรด 0 -->
+
+      <div class="td-risk-kpi red">
+
+        <div class="td-risk-kpi-label">
+          เกรด 0
+        </div>
+
+        <div id="tdRiskKpiGrade0"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          รายการ
+        </div>
+
+      </div>
+
+
+      <!-- เกรด ร -->
+
+      <div class="td-risk-kpi amber">
+
+        <div class="td-risk-kpi-label">
+          เกรด ร
+        </div>
+
+        <div id="tdRiskKpiGradeR"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          รายการ
+        </div>
+
+      </div>
+
+
+      <!-- เกรด มส -->
+
+      <div class="td-risk-kpi purple">
+
+        <div class="td-risk-kpi-label">
+          เกรด มส
+        </div>
+
+        <div id="tdRiskKpiGradeMs"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          รายการ
+        </div>
+
+      </div>
+
+
+      <!-- เกรด มผ -->
+
+      <div class="td-risk-kpi slate">
+
+        <div class="td-risk-kpi-label">
+          เกรด มผ
+        </div>
+
+        <div id="tdRiskKpiGradeMp"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          รายการ
+        </div>
+
+      </div>
+
+
+      <!-- นักเรียนที่ต้องติดตามเร่งด่วน -->
+
+      <div class="td-risk-kpi orange wide">
+
+        <div class="td-risk-kpi-icon">⚠️</div>
+
+        <div class="td-risk-kpi-label">
+          นักเรียนที่ยังค้าง ≥ 3 วิชา
+        </div>
+
+        <div id="tdRiskKpi3Plus"
+             class="td-risk-kpi-value">—</div>
+
+        <div class="td-risk-kpi-sub">
+          คน (รวมรายการที่รออนุมัติ)
+        </div>
+
+      </div>
+
+
+      <!-- อัตราการแก้สำเร็จ -->
+
+      <div class="td-risk-kpi green wide">
+
+        <div class="td-risk-kpi-icon">✓</div>
+
+        <div class="td-risk-kpi-label">
+          อัตราการแก้ผลการเรียนสำเร็จ
+        </div>
+
+        <div id="tdRiskKpiResolutionRate"
+             class="td-risk-kpi-value">—</div>
+
+        <div id="tdRiskKpiResolutionSub"
+             class="td-risk-kpi-sub">
+
+          แก้สำเร็จ / รายการกลุ่มเสี่ยงทั้งหมด
 
         </div>
 
       </div>
 
-    </section>
+    </div>
 
-  </div>
+
+    <div class="small" style="margin-top:14px;">
+
+      หมายเหตุ: จำนวนรายการกลุ่มเสี่ยง
+      นับจากผลการเรียนเดิม 0 ร มส มผ
+      รวมทั้งรายการที่แก้ผลการเรียนสำเร็จแล้ว
+
+    </div>
+
+  </section>
+
+
+  <!-- เตรียมพื้นที่สำหรับขั้นตอนถัดไป -->
+
+  <div id="tdRiskClassRoomSection"></div>
+
+  <div id="tdRiskResolutionSection"></div>
+
+  <div id="tdRiskHeatmapSection"></div>
+
+  <div id="tdRiskSubjectAreaSection"></div>
+
+  <div id="tdRiskUrgentStudentsSection"></div>
+
+  <div id="tdRiskTrendSection"></div>
+
+  <div id="tdRiskRepeatedSection"></div>
+
+  <div id="tdRiskInsightsSection"></div>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK RESULT ===== -->
 
 </div>
 
@@ -24610,6 +24938,8 @@ function tdRiskCloseFilterOverlay(){
 
 function tdRiskConfirmFilters(){
 
+  if(tdRiskResultState.loading) return;
+
   try{
 
     const payload = tdRiskBuildPayload();
@@ -24619,27 +24949,11 @@ function tdRiskConfirmFilters(){
       JSON.parse(JSON.stringify(payload));
 
 
-    el('tdRiskResultTitle').textContent =
-
-      'ยืนยันตัวเลือกเรียบร้อยแล้ว';
-
-
-    el('tdRiskAppliedFilters').textContent =
-
-      tdRiskDescribeFilters(payload);
-
-
-    setStatus(
-
-      'tdRiskResultStatus',
-
-      'พร้อมประมวลผลในขั้นตอนถัดไป',
-
-      'success'
-
-    );
-
     tdRiskCloseFilterOverlay();
+
+
+    tdRiskProcessDashboard(payload);
+
 
   }catch(error){
 
@@ -24663,6 +24977,8 @@ function tdRiskConfirmFilters(){
 // =====================================================
 
 function tdRiskReset(){
+
+  tdRiskResetResult();
 
   tdRiskCloseFilterOverlay();
 
@@ -24739,6 +25055,670 @@ function tdRiskReset(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK FILTER CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK RESULT CONTROLLER
+   ===================================================== */
+
+const tdRiskResultState = {
+
+  summary: null,
+
+  urgent: null,
+
+  appliedFilters: null,
+
+  loading: false,
+
+  generation: 0,
+
+  expiryTimer: null
+
+};
+
+
+// =====================================================
+// 1. ตรวจสอบโครงสร้าง Summary และ Urgent KPI
+// =====================================================
+
+function tdRiskValidateKpis(summary,urgent){
+
+  const validCount = value =>
+
+    Number.isSafeInteger(value) &&
+    value >= 0;
+
+
+  const summaryKeys = [
+
+    'total_risk_students',
+
+    'total_risk_records',
+
+    'grade_0_records',
+
+    'grade_r_records',
+
+    'grade_ms_records',
+
+    'grade_mp_records',
+
+    'resolved_records',
+
+    'pending_records',
+
+    'unresolved_records'
+
+  ];
+
+
+  const urgentKeys = [
+
+    'students_1plus',
+
+    'students_2plus',
+
+    'students_3plus',
+
+    'students_5plus',
+
+    'max_subject_count'
+
+  ];
+
+
+  if(
+
+    !summary ||
+
+    !summaryKeys.every(
+      key => validCount(summary[key])
+    ) ||
+
+    !urgent ||
+
+    !urgentKeys.every(
+      key => validCount(urgent[key])
+    )
+
+  ){
+
+    throw new Error(
+      'รูปแบบข้อมูล Risk KPI ไม่ถูกต้อง'
+    );
+
+  }
+
+
+  const gradeTotal =
+
+    summary.grade_0_records +
+
+    summary.grade_r_records +
+
+    summary.grade_ms_records +
+
+    summary.grade_mp_records;
+
+
+  const statusTotal =
+
+    summary.resolved_records +
+
+    summary.pending_records +
+
+    summary.unresolved_records;
+
+
+  if(
+
+    gradeTotal !== summary.total_risk_records ||
+
+    statusTotal !== summary.total_risk_records ||
+
+    summary.total_risk_students >
+      summary.total_risk_records
+
+  ){
+
+    throw new Error(
+      'ข้อมูล Summary ไม่สอดคล้องกัน'
+    );
+
+  }
+
+
+  if(
+
+    urgent.students_5plus >
+      urgent.students_3plus ||
+
+    urgent.students_3plus >
+      urgent.students_2plus ||
+
+    urgent.students_2plus >
+      urgent.students_1plus
+
+  ){
+
+    throw new Error(
+      'ข้อมูล Urgent KPI ไม่สอดคล้องกัน'
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 2. แสดง KPI ทั้ง 8 รายการ
+// =====================================================
+
+function tdRiskRenderKpis(){
+
+  const summary = tdRiskResultState.summary;
+
+  const urgent = tdRiskResultState.urgent;
+
+  if(!summary || !urgent) return;
+
+
+  const items = {
+
+    tdRiskKpiStudents:
+      summary.total_risk_students,
+
+    tdRiskKpiRecords:
+      summary.total_risk_records,
+
+    tdRiskKpiGrade0:
+      summary.grade_0_records,
+
+    tdRiskKpiGradeR:
+      summary.grade_r_records,
+
+    tdRiskKpiGradeMs:
+      summary.grade_ms_records,
+
+    tdRiskKpiGradeMp:
+      summary.grade_mp_records,
+
+    tdRiskKpi3Plus:
+      urgent.students_3plus
+
+  };
+
+
+  Object.entries(items).forEach(([id,value]) => {
+
+    tdStatsSetText(
+      id,
+      tdStatsFmtInt(value)
+    );
+
+  });
+
+
+  const total = summary.total_risk_records;
+
+  const resolved = summary.resolved_records;
+
+  const resolutionRate =
+
+    total > 0
+      ? resolved / total * 100
+      : 0;
+
+
+  tdStatsSetText(
+
+    'tdRiskKpiResolutionRate',
+
+    total > 0
+      ? `${tdStatsFmtNumber(resolutionRate)}%`
+      : '—'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskKpiResolutionSub',
+
+    `แก้สำเร็จ ${tdStatsFmtInt(resolved)} / ${
+      tdStatsFmtInt(total)
+    } รายการ`
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskResultTitle',
+
+    'ภาพรวมผลการเรียนกลุ่มเสี่ยง'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskAppliedFilters',
+
+    tdRiskDescribeFilters(
+      tdRiskResultState.appliedFilters
+    )
+
+  );
+
+
+  setStatus(
+
+    'tdRiskResultStatus',
+
+    total > 0
+
+      ? `ประมวลผลสำเร็จ · ${
+          tdStatsFmtInt(
+            summary.total_risk_students
+          )
+        } คน · ${
+          tdStatsFmtInt(total)
+        } รายการ`
+
+      : 'ไม่พบผลการเรียนกลุ่มเสี่ยงตามเงื่อนไข',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 3. ล้างผลการประมวลผล
+// =====================================================
+
+function tdRiskResetResult(){
+
+  tdRiskResultState.generation++;
+
+  tdRiskResultState.summary = null;
+
+  tdRiskResultState.urgent = null;
+
+  tdRiskResultState.appliedFilters = null;
+
+  tdRiskResultState.loading = false;
+
+
+  clearTimeout(
+    tdRiskResultState.expiryTimer
+  );
+
+  tdRiskResultState.expiryTimer = null;
+
+
+  [
+
+    'tdRiskKpiStudents',
+
+    'tdRiskKpiRecords',
+
+    'tdRiskKpiGrade0',
+
+    'tdRiskKpiGradeR',
+
+    'tdRiskKpiGradeMs',
+
+    'tdRiskKpiGradeMp',
+
+    'tdRiskKpi3Plus',
+
+    'tdRiskKpiResolutionRate'
+
+  ].forEach(id => {
+
+    tdStatsSetText(id,'—');
+
+  });
+
+
+  tdStatsSetText(
+
+    'tdRiskKpiResolutionSub',
+
+    'แก้สำเร็จ / รายการกลุ่มเสี่ยงทั้งหมด'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskResultTitle',
+
+    'ยังไม่ได้ประมวลผล'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskAppliedFilters',
+
+    'กรุณาเลือกข้อมูลที่ต้องการประมวลผล'
+
+  );
+
+
+  el('tdRiskOpenFilterBtn').disabled = false;
+
+
+  setStatus(
+
+    'tdRiskResultStatus',
+
+    'รอประมวลผล Dashboard',
+
+    'info'
+
+  );
+
+}
+
+
+// =====================================================
+// 4. ตรวจสอบการหมดอายุของ Session
+// =====================================================
+
+function tdRiskWatchResultExpiry(token){
+
+  clearTimeout(
+    tdRiskResultState.expiryTimer
+  );
+
+  const expiresAt = Date.parse(
+    state.teacherSessionExpiresAt || ''
+  );
+
+  if(!Number.isFinite(expiresAt)) return;
+
+  const remaining = expiresAt - Date.now();
+
+
+  tdRiskResultState.expiryTimer = setTimeout(() => {
+
+    if(
+
+      token !== String(
+        state.teacherSessionToken || ''
+      ).trim()
+
+    ){
+
+      return;
+
+    }
+
+
+    if(!tdStatsHasValidSession()){
+
+      tdRiskReset();
+
+      setStatus(
+
+        'tdRiskResultStatus',
+
+        'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่',
+
+        'error'
+
+      );
+
+    }else{
+
+      tdRiskWatchResultExpiry(token);
+
+    }
+
+  },Math.max(
+    1,
+    Math.min(remaining,2147483647)
+  ));
+
+}
+
+
+// =====================================================
+// 5. ประมวลผล Risk Dashboard
+// =====================================================
+
+async function tdRiskProcessDashboard(payload){
+
+  // ป้องกันการประมวลผลซ้อน
+
+  if(tdRiskResultState.loading) return;
+
+
+  if(!tdStatsHasValidSession()){
+
+    tdRiskReset();
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'Session ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+
+  const snapshot = JSON.parse(
+    JSON.stringify(payload)
+  );
+
+  const token = String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+  tdRiskResetResult();
+
+
+  const generation =
+    ++tdRiskResultState.generation;
+
+
+  tdRiskResultState.loading = true;
+
+  tdRiskResultState.appliedFilters = snapshot;
+
+
+  const isCurrentRequest = () =>
+
+    generation === tdRiskResultState.generation &&
+
+    token === String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+
+  el('tdRiskOpenFilterBtn').disabled = true;
+
+
+  tdStatsSetText(
+
+    'tdRiskResultTitle',
+
+    'กำลังประมวลผล...'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskAppliedFilters',
+
+    tdRiskDescribeFilters(snapshot)
+
+  );
+
+
+  tdRiskWatchResultExpiry(token);
+
+
+  try{
+
+    // =============================================
+    // RPC 1 : Risk Summary
+    // =============================================
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'กำลังประมวลผลข้อมูลกลุ่มเสี่ยง (1/2)...',
+
+      'info'
+
+    );
+
+
+    const summaryRes = await supabaseClient.rpc(
+
+      'teacher_get_orms_summary_session',
+
+      {
+
+        p_token:token,
+
+        p_filters:snapshot
+
+      }
+
+    );
+
+
+    if(!isCurrentRequest()) return;
+
+    if(summaryRes.error) throw summaryRes.error;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+
+    // =============================================
+    // RPC 2 : Urgent KPI
+    // =============================================
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'กำลังวิเคราะห์นักเรียนที่ต้องติดตาม (2/2)...',
+
+      'info'
+
+    );
+
+
+    const urgentRes = await supabaseClient.rpc(
+
+      'teacher_get_orms_urgent_kpi_session',
+
+      {
+
+        p_token:token,
+
+        p_filters:snapshot
+
+      }
+
+    );
+
+
+    if(!isCurrentRequest()) return;
+
+    if(urgentRes.error) throw urgentRes.error;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+
+    const summary = summaryRes.data;
+
+    const urgent = urgentRes.data;
+
+
+    // ตรวจสอบก่อนนำไปแสดง
+
+    tdRiskValidateKpis(summary,urgent);
+
+
+    tdRiskResultState.summary = summary;
+
+    tdRiskResultState.urgent = urgent;
+
+
+    tdRiskRenderKpis();
+
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+
+    tdRiskResetResult();
+
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'ประมวลผลไม่สำเร็จ กรุณาตรวจสอบ Session แล้วลองอีกครั้ง',
+
+      'error'
+
+    );
+
+
+    console.warn(
+
+      'Teacher Dashboard risk KPI:',
+
+      error?.code || error?.message ||
+      'Unknown error'
+
+    );
+
+
+  }finally{
+
+    if(isCurrentRequest()){
+
+      tdRiskResultState.loading = false;
+
+      el('tdRiskOpenFilterBtn').disabled = false;
+
+    }
+
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK RESULT CONTROLLER ===== */
 
 
  function setActivePage(page){
