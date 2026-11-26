@@ -2454,6 +2454,34 @@ td:first-child{
   gap:8px;
 }
 
+/* ===== DASHBOARD : LEARNING AREA GRID ===== */
+#pageDashboard #tdStatsAreaChecks{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+#pageDashboard #tdStatsAreaChecks .td-filter-check{
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  white-space:normal;
+  line-height:1.4;
+}
+#pageDashboard #tdStatsAreaChecks .td-filter-check span{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#pageDashboard #tdStatsAreaChecks .td-filter-check:has(input:checked){
+  background:#eef4ff;
+  border-color:#93c5fd;
+}
+@media(max-width:720px){
+  #pageDashboard #tdStatsAreaChecks{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
 #pageDashboard .td-filter-check{
   display:inline-flex;
   align-items:center;
@@ -19388,6 +19416,35 @@ function tdStatsRenderRooms(){
 }
 
 
+// ลำดับกลุ่มสาระสำหรับ Dashboard (ไม่เปลี่ยนค่า RPC)
+const tdStatsAreaOrder = [
+  'ภาษาไทย',
+  'คณิตศาสตร์',
+  'วิทยาศาสตร์และเทคโนโลยี',
+  'สังคมศึกษา ศาสนา และวัฒนธรรม',
+  'สุขศึกษาและพลศึกษา',
+  'ศิลปะ',
+  'การงานอาชีพ',
+  'ภาษาต่างประเทศ',
+  'IS',
+  'อื่นๆ'
+];
+
+function tdStatsAreaKey(value){
+  return String(value ?? '').normalize('NFC')
+    .replace(/[\s,]+/g, '').toUpperCase();
+}
+
+function tdStatsSortAreas(values){
+  const order = new Map(tdStatsAreaOrder.map(
+    (name, index) => [tdStatsAreaKey(name), index]
+  ));
+  const rank = value => order.get(tdStatsAreaKey(value)) ?? tdStatsAreaOrder.length;
+  return [...values].sort((a, b) =>
+    rank(a) - rank(b) || String(a).localeCompare(String(b), 'th')
+  );
+}
+
 // แสดงตัวกรองทั้งหมด
 
 function tdStatsRenderOptions(){
@@ -19464,7 +19521,7 @@ function tdStatsRenderOptions(){
 
     'tdStatsAllAreas',
 
-    options.learning_areas
+    tdStatsSortAreas(options.learning_areas)
 
   );
 
