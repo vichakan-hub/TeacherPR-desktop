@@ -3735,6 +3735,165 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK RESOLUTION ===== */
 
+
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK HEATMAP
+   ===================================================== */
+
+#tdRiskHeatmapSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskHeatmapWrap{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  padding:4px 0 12px;
+  -webkit-overflow-scrolling:touch;
+}
+
+#tdRiskHeatmapTable{
+  width:max-content;
+  min-width:100%;
+  border-collapse:separate;
+  border-spacing:8px;
+}
+
+#tdRiskHeatmapTable th{
+  position:static;
+  background:transparent;
+  border:0;
+  padding:8px;
+  font-size:14px;
+  font-weight:800;
+  color:#41536c;
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+
+#tdRiskHeatmapTable td{
+  min-width:86px;
+  height:76px;
+  padding:10px 6px;
+  border:1px solid transparent;
+  border-radius:14px;
+  text-align:center;
+  vertical-align:middle;
+
+  font-family:'Sarabun',sans-serif;
+  font-size:24px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+
+#tdRiskHeatmapTable td small{
+  display:block;
+  margin-top:5px;
+  font-family:'Kanit',sans-serif;
+  font-size:11px;
+  font-weight:500;
+}
+
+#tdRiskHeatmapSection .td-h0{
+  background:#dcfce7;
+  color:#166534;
+}
+
+#tdRiskHeatmapSection .td-h1{
+  background:#ecfccb;
+  color:#3f6212;
+}
+
+#tdRiskHeatmapSection .td-h2{
+  background:#fef9c3;
+  color:#854d0e;
+}
+
+#tdRiskHeatmapSection .td-h3{
+  background:#ffedd5;
+  color:#b45309;
+}
+
+#tdRiskHeatmapSection .td-h4{
+  background:#fee2e2;
+  color:#b91c1c;
+}
+
+#tdRiskHeatmapSection .td-h5{
+  background:#fecaca;
+  color:#991b1b;
+  box-shadow:inset 0 0 0 2px rgba(185,28,28,.08);
+}
+
+#tdRiskHeatmapSection .td-h-missing{
+  background:#f1f5f9;
+  color:#94a3b8;
+  box-shadow:none;
+}
+
+#tdRiskHeatmapSection .td-heat-legend{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px 16px;
+  margin:14px 0;
+}
+
+#tdRiskHeatmapSection .td-heat-legend-item{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  color:#41536c;
+}
+
+#tdRiskHeatmapSection .td-heat-dot{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border-radius:5px;
+  border:1px solid rgba(0,0,0,.08);
+}
+
+#tdRiskHeatmapSummary{
+  padding:12px 16px;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+  font-size:14px;
+  line-height:1.7;
+  color:#41536c;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:720px){
+
+  #tdRiskHeatmapTable{
+    border-spacing:5px;
+  }
+
+  #tdRiskHeatmapTable td{
+    min-width:72px;
+    height:66px;
+    font-size:22px;
+  }
+
+  #tdRiskHeatmapTable th{
+    font-size:13px;
+    padding:6px;
+  }
+
+  #tdRiskHeatmapSection .td-heat-legend{
+    justify-content:flex-start;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK HEATMAP ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -17889,7 +18048,114 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK RESOLUTION ===== -->
 
-  <div id="tdRiskHeatmapSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK HEATMAP
+     ================================================= -->
+
+<div id="tdRiskHeatmapSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>Heatmap ความเสี่ยงรายห้อง</h2>
+
+    <div class="sub">
+      จำนวนนักเรียนไม่ซ้ำที่มีผลการเรียนเดิม
+      0 ร มส มผ ในแต่ละห้องเรียน
+    </div>
+
+    <div
+      id="tdRiskHeatmapStatus"
+      class="status info"
+      role="status"
+      aria-live="polite">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdRiskHeatmapContent" class="hidden">
+
+      <!-- ตาราง Heatmap -->
+
+      <div id="tdRiskHeatmapWrap">
+
+        <table
+          id="tdRiskHeatmapTable"
+          aria-label="Heatmap จำนวนนักเรียนกลุ่มเสี่ยงรายห้อง">
+
+          <thead id="tdRiskHeatmapThead"></thead>
+
+          <tbody id="tdRiskHeatmapTbody"></tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- คำอธิบายระดับสี -->
+
+      <div class="td-heat-legend">
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h0"></i>
+          0 คน
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h1"></i>
+          1–5 คน
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h2"></i>
+          6–10 คน
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h3"></i>
+          11–20 คน
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h4"></i>
+          21–30 คน
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h5"></i>
+          31 คนขึ้นไป
+        </span>
+
+        <span class="td-heat-legend-item">
+          <i class="td-heat-dot td-h-missing"></i>
+          ไม่พบโครงสร้างห้อง
+        </span>
+
+      </div>
+
+
+      <!-- สรุปข้อมูล -->
+
+      <div id="tdRiskHeatmapSummary"></div>
+
+      <div class="small" style="margin-top:12px;">
+
+        หมายเหตุ: ค่า 0 หมายถึงไม่พบรายการกลุ่มเสี่ยง
+        ตามเงื่อนไขที่เลือก
+        ไม่ได้ยืนยันว่ามีการส่งผลการเรียนครบถ้วน
+
+        จำนวนคนรายห้องอาจซ้ำกัน
+        เมื่อเลือกข้อมูลย้อนหลังหลายภาคเรียน
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK HEATMAP ===== -->
 
   <div id="tdRiskSubjectAreaSection"></div>
 
@@ -25794,6 +26060,8 @@ function tdRiskResetResult(){
 
   tdRiskResetResolution();
 
+  tdRiskResetHeatmap();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -26279,6 +26547,29 @@ try{
 
 }
 
+// =============================================
+// โหลดและแสดง Heatmap
+// =============================================
+
+await tdRiskLoadHeatmap(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
 
   }catch(error){
 
@@ -27589,6 +27880,895 @@ function tdRiskResetResolution(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK RESOLUTION CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK HEATMAP CONTROLLER
+   ===================================================== */
+
+const tdRiskHeatmapState = {
+
+  rows: null,
+
+  structure: null,
+
+  model: null,
+
+  source: null
+
+};
+
+
+// =====================================================
+// 1. กำหนดระดับสีตามจำนวนคน
+// =====================================================
+
+function tdRiskGetHeatClass(value){
+
+  if(value === 0) return 'td-h0';
+
+  if(value <= 5) return 'td-h1';
+
+  if(value <= 10) return 'td-h2';
+
+  if(value <= 20) return 'td-h3';
+
+  if(value <= 30) return 'td-h4';
+
+  return 'td-h5';
+
+}
+
+
+// =====================================================
+// 2. สร้าง Heatmap Model
+// =====================================================
+
+function tdRiskBuildHeatmapModel(
+  rows,
+  structure
+){
+
+  if(
+    !Array.isArray(rows) ||
+    !Array.isArray(structure)
+  ){
+
+    throw new Error(
+      'รูปแบบข้อมูล Heatmap ไม่ถูกต้อง'
+    );
+
+  }
+
+
+  const sortText = (a,b) =>
+
+    String(a).localeCompare(
+      String(b),
+      'th',
+      {numeric:true}
+    );
+
+
+  const structureMap = new Map();
+
+  const allRooms = new Set();
+
+  const riskMap = new Map();
+
+
+  // =============================================
+  // สร้างโครงสร้างห้องเรียน
+  // =============================================
+
+  structure.forEach(group => {
+
+    if(
+
+      !group ||
+
+      typeof group.class_level !== 'string' ||
+
+      !group.class_level.trim() ||
+
+      !Array.isArray(group.rooms)
+
+    ){
+
+      throw new Error(
+        'ข้อมูลโครงสร้างห้องเรียนไม่ถูกต้อง'
+      );
+
+    }
+
+
+    const level = group.class_level.trim();
+
+
+    if(structureMap.has(level)){
+
+      throw new Error(
+        'พบระดับชั้นซ้ำในโครงสร้างห้อง'
+      );
+
+    }
+
+
+    const roomSet = new Set();
+
+
+    group.rooms.forEach(rawRoom => {
+
+      if(
+
+        typeof rawRoom !== 'string' ||
+
+        !rawRoom.trim()
+
+      ){
+
+        throw new Error(
+          'หมายเลขห้องเรียนไม่ถูกต้อง'
+        );
+
+      }
+
+
+      const room = rawRoom.trim();
+
+
+      if(roomSet.has(room)){
+
+        throw new Error(
+          'พบหมายเลขห้องซ้ำ'
+        );
+
+      }
+
+
+      roomSet.add(room);
+
+      allRooms.add(room);
+
+    });
+
+
+    structureMap.set(level,roomSet);
+
+  });
+
+
+  // =============================================
+  // Map ข้อมูลกลุ่มเสี่ยงรายห้อง
+  // =============================================
+
+  rows.forEach(row => {
+
+    if(
+
+      typeof row.class_level !== 'string' ||
+
+      typeof row.room !== 'string' ||
+
+      !row.class_level.trim() ||
+
+      !row.room.trim() ||
+
+      !Number.isSafeInteger(
+        row.unique_students
+      ) ||
+
+      row.unique_students < 0
+
+    ){
+
+      throw new Error(
+        'ข้อมูลความเสี่ยงรายห้องไม่ถูกต้อง'
+      );
+
+    }
+
+
+    const level = row.class_level.trim();
+
+    const room = row.room.trim();
+
+    const key = `${level}/${room}`;
+
+
+    if(
+
+      !structureMap.get(level)?.has(room)
+
+    ){
+
+      throw new Error(
+        'พบข้อมูลกลุ่มเสี่ยงที่ไม่อยู่ในโครงสร้างห้อง'
+      );
+
+    }
+
+
+    if(
+
+      riskMap.has(key) ||
+
+      row.room_label !== key
+
+    ){
+
+      throw new Error(
+        'ข้อมูลห้องเรียนกลุ่มเสี่ยงไม่สอดคล้องกัน'
+      );
+
+    }
+
+
+    riskMap.set(key,row);
+
+  });
+
+
+  // =============================================
+  // เรียงระดับชั้นและหมายเลขห้อง
+  // =============================================
+
+  const classLevels =
+
+    Array.from(structureMap.keys())
+
+      .sort(sortText);
+
+
+  const roomNumbers =
+
+    Array.from(allRooms)
+
+      .sort(sortText);
+
+
+  const cells = [];
+
+
+  classLevels.forEach(level => {
+
+    roomNumbers.forEach(room => {
+
+      const key = `${level}/${room}`;
+
+
+      const exists =
+
+        structureMap.get(level).has(room);
+
+
+      if(!exists){
+
+        cells.push({
+
+          class_level:level,
+
+          room,
+
+          room_label:key,
+
+          exists:false,
+
+          unique_students:null,
+
+          total_records:null
+
+        });
+
+        return;
+
+      }
+
+
+      const risk = riskMap.get(key);
+
+
+      cells.push({
+
+        class_level:level,
+
+        room,
+
+        room_label:key,
+
+        exists:true,
+
+        unique_students:
+
+          risk ? risk.unique_students : 0,
+
+        total_records:
+
+          risk ? risk.total_records : 0,
+
+        resolved_records:
+
+          risk ? risk.resolved_records : 0,
+
+        pending_records:
+
+          risk ? risk.pending_records : 0,
+
+        unresolved_records:
+
+          risk ? risk.unresolved_records : 0
+
+      });
+
+    });
+
+  });
+
+
+  return {
+
+    classLevels,
+
+    roomNumbers,
+
+    cells
+
+  };
+
+}
+
+
+// =====================================================
+// 3. สร้าง HTML Table ด้วย DOM
+// =====================================================
+
+function tdRiskRenderHeatmap(){
+
+  const model = tdRiskHeatmapState.model;
+
+  if(!model) return;
+
+
+  const thead = el('tdRiskHeatmapThead');
+
+  const tbody = el('tdRiskHeatmapTbody');
+
+  const content = el('tdRiskHeatmapContent');
+
+
+  thead.replaceChildren();
+
+  tbody.replaceChildren();
+
+
+  if(
+
+    !model.classLevels.length ||
+
+    !model.roomNumbers.length
+
+  ){
+
+    content.classList.add('hidden');
+
+
+    setStatus(
+
+      'tdRiskHeatmapStatus',
+
+      'ไม่พบข้อมูลโครงสร้างห้องเรียนตามเงื่อนไข',
+
+      'warn'
+
+    );
+
+    return;
+
+  }
+
+
+  // =============================================
+  // Header
+  // =============================================
+
+  const header = document.createElement('tr');
+
+
+  header.append(
+
+    tdStatsCreateTableCell(
+      'th',
+      'ระดับชั้น'
+    )
+
+  );
+
+
+  model.roomNumbers.forEach(room => {
+
+    header.append(
+
+      tdStatsCreateTableCell(
+        'th',
+        `ห้อง ${room}`
+      )
+
+    );
+
+  });
+
+
+  thead.append(header);
+
+
+  // =============================================
+  // เตรียม Map สำหรับแสดงผล
+  // =============================================
+
+  const cellMap = new Map(
+
+    model.cells.map(cell => [
+
+      cell.room_label,
+
+      cell
+
+    ])
+
+  );
+
+
+  const fragment =
+
+    document.createDocumentFragment();
+
+
+  model.classLevels.forEach(level => {
+
+    const tr = document.createElement('tr');
+
+
+    const rowHeader =
+
+      tdStatsCreateTableCell(
+        'th',
+        level
+      );
+
+    rowHeader.scope = 'row';
+
+    tr.append(rowHeader);
+
+
+    model.roomNumbers.forEach(room => {
+
+      const key = `${level}/${room}`;
+
+      const cell = cellMap.get(key);
+
+
+      const td = document.createElement('td');
+
+
+      // ไม่พบโครงสร้างห้อง
+
+      if(!cell?.exists){
+
+        td.className = 'td-h-missing';
+
+        td.textContent = '—';
+
+        td.title =
+
+          `${key}: ไม่พบข้อมูลโครงสร้างห้อง`;
+
+
+        tr.append(td);
+
+        return;
+
+      }
+
+
+      // พบข้อมูลโครงสร้างห้อง
+
+      const count = cell.unique_students;
+
+
+      td.className =
+
+        tdRiskGetHeatClass(count);
+
+
+      td.textContent =
+
+        tdStatsFmtInt(count);
+
+
+      const small =
+
+        document.createElement('small');
+
+
+      small.textContent =
+
+        count === 0
+
+          ? 'ไม่พบรายการเสี่ยง'
+
+          : 'คน';
+
+
+      td.append(small);
+
+
+      // Tooltip รายละเอียดของห้อง
+
+      td.title = [
+
+        key,
+
+        `นักเรียนกลุ่มเสี่ยง ${
+          tdStatsFmtInt(count)
+        } คน`,
+
+        `รวม ${
+          tdStatsFmtInt(cell.total_records)
+        } รายการ`,
+
+        `แก้สำเร็จ ${
+          tdStatsFmtInt(cell.resolved_records)
+        } รายการ`,
+
+        `รออนุมัติ ${
+          tdStatsFmtInt(cell.pending_records)
+        } รายการ`,
+
+        `ยังไม่แก้ไข ${
+          tdStatsFmtInt(cell.unresolved_records)
+        } รายการ`
+
+      ].join('\n');
+
+
+      tr.append(td);
+
+    });
+
+
+    fragment.append(tr);
+
+  });
+
+
+  tbody.append(fragment);
+
+
+  // =============================================
+  // สรุปจำนวนห้อง
+  // =============================================
+
+  const realCells =
+
+    model.cells.filter(cell => cell.exists);
+
+
+  const riskCells =
+
+    realCells.filter(
+      cell => cell.unique_students > 0
+    );
+
+
+  const zeroCells =
+
+    realCells.filter(
+      cell => cell.unique_students === 0
+    );
+
+
+  tdStatsSetText(
+
+    'tdRiskHeatmapSummary',
+
+    `พบโครงสร้าง ${
+      tdStatsFmtInt(realCells.length)
+    } ห้อง · พบกลุ่มเสี่ยง ${
+      tdStatsFmtInt(riskCells.length)
+    } ห้อง · ไม่พบรายการเสี่ยง ${
+      tdStatsFmtInt(zeroCells.length)
+    } ห้อง`
+
+  );
+
+
+  content.classList.remove('hidden');
+
+
+  setStatus(
+
+    'tdRiskHeatmapStatus',
+
+    'แสดง Heatmap จากผลการประมวลผลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 4. โหลดข้อมูล Heatmap
+// =====================================================
+
+async function tdRiskLoadHeatmap(
+  snapshot,
+  token,
+  isCurrentRequest
+){
+
+  tdRiskResetHeatmap();
+
+
+  const ensureCurrent = () => {
+
+    if(!isCurrentRequest()) return false;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error(
+        'Session หมดอายุ'
+      );
+
+    }
+
+    return true;
+
+  };
+
+
+  try{
+
+    if(!ensureCurrent()) return;
+
+
+    setStatus(
+
+      'tdRiskHeatmapStatus',
+
+      'กำลังโหลดข้อมูล Heatmap...',
+
+      'info'
+
+    );
+
+
+    let rows;
+
+    let source;
+
+
+    // =============================================
+    // ใช้ข้อมูลรายห้องที่มีอยู่แล้ว
+    // =============================================
+
+    if(
+
+      tdRiskClassRoomState.mode === 'room' &&
+
+      Array.isArray(tdRiskClassRoomState.rows)
+
+    ){
+
+      rows = tdRiskClassRoomState.rows;
+
+      source = 'reused-room-data';
+
+    }else{
+
+
+      // กรณีกราฟหลักแสดงรายระดับชั้น
+      // ต้องโหลดข้อมูลรายห้องเพิ่มเติม
+
+      const riskRes =
+
+        await supabaseClient.rpc(
+
+          'teacher_get_orms_by_room_session',
+
+          {
+
+            p_token:token,
+
+            p_filters:snapshot
+
+          }
+
+        );
+
+
+      if(!ensureCurrent()) return;
+
+      if(riskRes.error) throw riskRes.error;
+
+
+      rows = riskRes.data;
+
+      source = 'room-rpc';
+
+    }
+
+
+    // ตรวจสอบยอดรวมก่อนนำไปใช้
+
+    tdRiskValidateClassRoomRows(
+
+      rows,
+
+      'room',
+
+      tdRiskResultState.summary
+
+    );
+
+
+    // =============================================
+    // โหลดโครงสร้างห้องตามปีและภาคเรียน
+    // =============================================
+
+    const structureRes =
+
+      await supabaseClient.rpc(
+
+        'teacher_get_risk_room_structure_session',
+
+        {
+
+          p_token:token,
+
+          p_filters:snapshot
+
+        }
+
+      );
+
+
+    if(!ensureCurrent()) return;
+
+    if(structureRes.error){
+
+      throw structureRes.error;
+
+    }
+
+
+    const structure = structureRes.data;
+
+
+    // =============================================
+    // สร้าง Model และเก็บข้อมูลใน Memory
+    // =============================================
+
+    const model =
+
+      tdRiskBuildHeatmapModel(
+
+        rows,
+
+        structure
+
+      );
+
+
+    tdRiskHeatmapState.rows = rows;
+
+    tdRiskHeatmapState.structure = structure;
+
+    tdRiskHeatmapState.model = model;
+
+    tdRiskHeatmapState.source = source;
+
+
+    tdRiskRenderHeatmap();
+
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+
+    // Session หมดอายุ ให้ Controller หลักจัดการ
+
+    if(!tdStatsHasValidSession()){
+
+      throw error;
+
+    }
+
+
+    // หาก Heatmap ผิดพลาด
+    // ไม่ล้าง KPI และกราฟส่วนอื่น
+
+    tdRiskResetHeatmap();
+
+
+    setStatus(
+
+      'tdRiskHeatmapStatus',
+
+      'ไม่สามารถแสดง Heatmap ได้ กรุณาประมวลผลใหม่',
+
+      'error'
+
+    );
+
+
+    console.warn(
+
+      'Teacher Dashboard heatmap:',
+
+      error?.code ||
+
+      error?.message ||
+
+      'Unknown error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 5. ล้างข้อมูล Heatmap
+// =====================================================
+
+function tdRiskResetHeatmap(){
+
+  tdRiskHeatmapState.rows = null;
+
+  tdRiskHeatmapState.structure = null;
+
+  tdRiskHeatmapState.model = null;
+
+  tdRiskHeatmapState.source = null;
+
+
+  el('tdRiskHeatmapThead')
+    ?.replaceChildren();
+
+
+  el('tdRiskHeatmapTbody')
+    ?.replaceChildren();
+
+
+  el('tdRiskHeatmapContent')
+    ?.classList.add('hidden');
+
+
+  tdStatsSetText(
+
+    'tdRiskHeatmapSummary',
+
+    ''
+
+  );
+
+
+  setStatus(
+
+    'tdRiskHeatmapStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK HEATMAP CONTROLLER ===== */
 
 
  function setActivePage(page){
