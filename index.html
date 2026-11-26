@@ -15811,6 +15811,23 @@ style="
 
     </div>
 
+    <!-- โหมดการเลือกรายวิชา -->
+
+<label class="td-filter-check" style="margin-bottom:12px;">
+
+  <input
+    id="tdStatsAllSubjectMode"
+    type="checkbox"
+    checked
+    disabled>
+
+  <span>
+    วิเคราะห์ทุกรายวิชา
+    (ไม่จำเป็นต้องโหลดรายการวิชา)
+  </span>
+
+</label>
+
 
     <!-- ช่องค้นหารายวิชา -->
 
@@ -19523,8 +19540,6 @@ function tdStatsSyncAll(boxId, allId){
 }
 
 
-// กำหนด Event ของ Checkbox
-
 function tdStatsBindGroup(boxId, allId, onChange){
 
   const box = el(boxId);
@@ -19545,6 +19560,8 @@ function tdStatsBindGroup(boxId, allId, onChange){
 
     if(onChange) onChange();
 
+    tdStatsInvalidateSubjects();
+
   };
 
   box.onchange = () => {
@@ -19552,6 +19569,8 @@ function tdStatsBindGroup(boxId, allId, onChange){
     tdStatsSyncAll(boxId, allId);
 
     if(onChange) onChange();
+
+    tdStatsInvalidateSubjects();
 
   };
 
@@ -19986,6 +20005,8 @@ async function tdStatsLoadOptions(){
 
       el('tdStatsReloadOptionsBtn').disabled = false;
 
+      tdStatsUpdateSubjectControls();
+
     }
 
   }
@@ -20031,6 +20052,14 @@ function tdStatsReset(){
   tdStatsState.options = null;
 
   tdStatsState.loading = false;
+
+  // คืนค่าโหมดทุกรายวิชา
+
+el('tdStatsAllSubjectMode').checked = true;
+
+// ล้างรายวิชาและผลการยืนยันเดิม
+
+tdStatsInvalidateSubjects();
 
   [
 
@@ -20109,6 +20138,803 @@ function tdStatsReset(){
 }
 
 /* ===== END TEACHER DASHBOARD STATS FILTER CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : FILTER PAYLOAD
+   ===================================================== */
+
+function tdStatsReadBaseFilters(){
+
+  if(!tdStatsHasValidSession()){
+    throw new Error('Session ไม่ถูกต้องหรือหมดอายุ');
+  }
+
+  if(!tdStatsState.options || tdStatsState.loading){
+    throw new Error('กรุณารอให้โหลดตัวเลือกเรียบร้อย');
+  }
+
+  const groups = [
+
+    ['academic_years', 'tdStatsYearChecks', 'ปีการศึกษา'],
+
+    ['terms', 'tdStatsTermChecks', 'ภาคเรียน'],
+
+    ['class_levels', 'tdStatsClassChecks', 'ระดับชั้น'],
+
+    ['learning_areas', 'tdStatsAreaChecks', 'กลุ่มสาระการเรียนรู้'],
+
+    ['subject_types', 'tdStatsTypeChecks', 'ประเภทวิชา'],
+
+    ['rooms', 'tdStatsRoomChecks', 'ห้องเรียน']
+
+  ];
+
+  const payload = {};
+
+  for(const [key, id, label] of groups){
+
+    const checks = tdStatsGetChecks(id);
+
+    const selected = tdStatsGetSelected(id);
+
+    if(!selected.length){
+
+      throw new Error(
+        `กรุณาเลือก${label}อย่างน้อย 1 รายการ`
+      );
+
+    }
+
+    const numeric =
+
+      key === 'academic_years' ||
+      key === 'terms';
+
+    let values = numeric
+
+      ? selected.map(Number)
+
+      : selected;
+
+    if(numeric && !values.every(Number.isInteger)){
+
+      throw new Error(
+        `ข้อมูล${label}ไม่ถูกต้อง`
+      );
+
+    }
+
+    values = [...new Set(values)];
+
+    // เลือกครบทุกตัว ส่ง [] ตามรูปแบบ LeaderPR
+
+    payload[key] =
+
+      selected.length === checks.length
+
+        ? []
+
+        : values.sort(
+            numeric
+              ? (a,b) => a-b
+              : (a,b) => a.localeCompare(b,'th')
+          );
+
+  }
+
+  return payload;
+
+}
+
+
+/* ===== END TEACHER DASHBOARD FILTER PAYLOAD ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : SUBJECT CONTROLLER
+   ===================================================== */
+
+const tdStatsSubjectState = {
+
+  rows: null,
+
+  filterKey: null,
+
+  loading: false,
+
+  generation: 0,
+
+  confirmedFilters: null
+
+};
+
+
+// =====================================================
+// 1. อ่านโหมดการเลือกรายวิชา
+// =====================================================
+
+function tdStatsIsAllSubjectMode(){
+
+  return el('tdStatsAllSubjectMode')?.checked === true;
+
+}
+
+
+// =====================================================
+// 2. สร้าง Payload พร้อมรายวิชา
+// =====================================================
+
+function tdStatsBuildPayload(){
+
+  const payload = tdStatsReadBaseFilters();
+
+  if(tdStatsSubjectState.loading){
+
+    throw new Error('กรุณารอให้โหลดรายวิชาเสร็จ');
+
+  }
+
+  if(tdStatsIsAllSubjectMode()){
+
+    return {
+
+      ...payload,
+
+      subject_codes: []
+
+    };
+
+  }
+
+  const key = JSON.stringify(payload);
+
+  if(
+
+    tdStatsSubjectState.rows === null ||
+
+    tdStatsSubjectState.filterKey !== key
+
+  ){
+
+    throw new Error(
+      'กรุณาโหลดรายวิชาตามเงื่อนไขปัจจุบัน'
+    );
+
+  }
+
+  const selected = tdStatsGetSelected(
+    'tdStatsSubjectChecks'
+  );
+
+  if(!selected.length){
+
+    throw new Error(
+      'กรุณาเลือกรายวิชาอย่างน้อย 1 วิชา'
+    );
+
+  }
+
+  return {
+
+    ...payload,
+
+    subject_codes: [...new Set(selected)]
+      .sort((a,b) => a.localeCompare(b,'th'))
+
+  };
+
+}
+
+
+// =====================================================
+// 3. อัปเดตจำนวนรายวิชา
+// =====================================================
+
+function tdStatsUpdateSubjectCount(){
+
+  const checks = tdStatsGetChecks(
+    'tdStatsSubjectChecks'
+  );
+
+  const selected = checks.filter(
+    input => input.checked
+  ).length;
+
+  const visible = checks.filter(input =>
+
+    !input.closest('.td-subject-check')
+      ?.classList.contains('hidden')
+
+  ).length;
+
+  const count = el('tdStatsSubjectCount');
+
+  if(!count) return;
+
+  if(tdStatsIsAllSubjectMode()){
+
+    count.textContent = 'วิเคราะห์ทุกรายวิชา';
+
+  }else if(tdStatsSubjectState.rows === null){
+
+    count.textContent = 'ยังไม่ได้โหลดรายวิชา';
+
+  }else{
+
+    count.textContent =
+
+      `เลือก ${selected.toLocaleString('th-TH')}` +
+
+      ` / ${checks.length.toLocaleString('th-TH')} วิชา` +
+
+      ` • แสดง ${visible.toLocaleString('th-TH')} วิชา`;
+
+  }
+
+}
+
+
+// =====================================================
+// 4. ควบคุมการเปิดใช้งานปุ่ม
+// =====================================================
+
+function tdStatsUpdateSubjectControls(){
+
+  let validBase = false;
+
+  try{
+
+    tdStatsReadBaseFilters();
+
+    validBase = true;
+
+  }catch(error){
+
+    validBase = false;
+
+  }
+
+  const ready =
+
+    validBase &&
+
+    !tdStatsSubjectState.loading;
+
+  const loaded =
+
+    ready &&
+
+    !tdStatsIsAllSubjectMode() &&
+
+    Array.isArray(tdStatsSubjectState.rows) &&
+
+    tdStatsSubjectState.rows.length > 0;
+
+  el('tdStatsLoadSubjectsBtn').disabled = !ready;
+
+  el('tdStatsAllSubjectMode').disabled = !ready;
+
+  el('tdStatsSubjectSearch').disabled = !loaded;
+
+  el('tdStatsAllSubjects').disabled = !loaded;
+
+  tdStatsGetChecks('tdStatsSubjectChecks')
+    .forEach(input => {
+
+      input.disabled = !loaded;
+
+    });
+
+  let canConfirm = false;
+
+  try{
+
+    tdStatsBuildPayload();
+
+    canConfirm = true;
+
+  }catch(error){
+
+    canConfirm = false;
+
+  }
+
+  el('tdStatsConfirmFilterBtn').disabled = !canConfirm;
+
+  tdStatsUpdateSubjectCount();
+
+}
+
+
+// =====================================================
+// 5. สร้างข้อความ Empty State
+// =====================================================
+
+function tdStatsSubjectMessage(message){
+
+  const box = el('tdStatsSubjectChecks');
+
+  const node = document.createElement('div');
+
+  node.className = 'empty-state';
+
+  node.textContent = message;
+
+  box.replaceChildren(node);
+
+}
+
+
+// =====================================================
+// 6. แสดงรายการรายวิชา
+// =====================================================
+
+function tdStatsRenderSubjects(){
+
+  const box = el('tdStatsSubjectChecks');
+
+  const rows = tdStatsSubjectState.rows || [];
+
+  box.replaceChildren();
+
+  if(!rows.length){
+
+    tdStatsSubjectMessage(
+      'ไม่พบรายวิชาตามเงื่อนไขที่เลือก'
+    );
+
+    tdStatsSyncAll(
+      'tdStatsSubjectChecks',
+      'tdStatsAllSubjects'
+    );
+
+    tdStatsUpdateSubjectControls();
+
+    return;
+
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  rows.forEach(row => {
+
+    const wrapper = document.createElement('label');
+
+    wrapper.className = 'td-subject-check';
+
+    const input = document.createElement('input');
+
+    input.type = 'checkbox';
+
+    input.value = String(row.subject_code);
+
+    input.checked = true;
+
+    const info = document.createElement('div');
+
+    info.className = 'td-subject-info';
+
+    const code = document.createElement('div');
+
+    code.className = 'td-subject-code';
+
+    code.textContent = String(row.subject_code);
+
+    const name = document.createElement('div');
+
+    name.className = 'td-subject-name';
+
+    name.textContent = String(
+      row.subject_name || '-'
+    );
+
+    const meta = document.createElement('div');
+
+    meta.className = 'small';
+
+    meta.textContent = [
+
+      row.learning_area,
+
+      row.subject_type,
+
+      `${Number(row.room_count || 0)} ห้อง`,
+
+      `${Number(row.result_count || 0)
+        .toLocaleString('th-TH')} ผลการเรียน`
+
+    ].filter(Boolean).join(' • ');
+
+    info.append(code, name, meta);
+
+    wrapper.append(input, info);
+
+    wrapper.dataset.search = [
+
+      row.subject_code,
+
+      row.subject_name,
+
+      row.learning_area,
+
+      row.subject_type
+
+    ].filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    fragment.append(wrapper);
+
+  });
+
+  box.append(fragment);
+
+  const empty = document.createElement('div');
+
+  empty.id = 'tdStatsSubjectNoMatch';
+
+  empty.className = 'empty-state hidden';
+
+  empty.textContent = 'ไม่พบรายวิชาตามคำค้น';
+
+  box.append(empty);
+
+  tdStatsSyncAll(
+
+    'tdStatsSubjectChecks',
+
+    'tdStatsAllSubjects'
+
+  );
+
+  tdStatsFilterSubjectSearch();
+
+  tdStatsUpdateSubjectControls();
+
+}
+
+
+// =====================================================
+// 7. ค้นหารายวิชาโดยไม่เรียก RPC
+// =====================================================
+
+function tdStatsFilterSubjectSearch(){
+
+  const search = String(
+
+    el('tdStatsSubjectSearch')?.value || ''
+
+  ).trim().toLowerCase();
+
+  const items = Array.from(
+
+    el('tdStatsSubjectChecks')
+      .querySelectorAll('.td-subject-check')
+
+  );
+
+  let visible = 0;
+
+  items.forEach(item => {
+
+    const matched =
+
+      !search ||
+
+      item.dataset.search.includes(search);
+
+    item.classList.toggle(
+      'hidden',
+      !matched
+    );
+
+    if(matched) visible++;
+
+  });
+
+  el('tdStatsSubjectNoMatch')
+    ?.classList.toggle('hidden', visible > 0);
+
+  tdStatsUpdateSubjectCount();
+
+}
+
+
+// =====================================================
+// 8. ล้างรายการรายวิชาเดิม
+// =====================================================
+
+function tdStatsInvalidateSubjects(){
+
+  tdStatsSubjectState.generation++;
+
+  tdStatsSubjectState.rows = null;
+
+  tdStatsSubjectState.filterKey = null;
+
+  tdStatsSubjectState.loading = false;
+
+  tdStatsSubjectState.confirmedFilters = null;
+
+  el('tdStatsSubjectSearch').value = '';
+
+  el('tdStatsAllSubjects').checked = false;
+
+  el('tdStatsAllSubjects').indeterminate = false;
+
+  tdStatsSubjectMessage(
+
+    tdStatsIsAllSubjectMode()
+
+      ? 'กำลังเลือกทุกรายวิชา หากต้องการเลือกเฉพาะวิชา ให้กดโหลดรายวิชา'
+
+      : 'กรุณากดโหลดรายวิชาตามเงื่อนไขปัจจุบัน'
+
+  );
+
+  setStatus(
+
+    'tdStatsSubjectStatus',
+
+    tdStatsIsAllSubjectMode()
+
+      ? 'เลือกทุกรายวิชา'
+
+      : 'ยังไม่ได้โหลดรายวิชา',
+
+    'info'
+
+  );
+
+  tdStatsUpdateSubjectControls();
+
+}
+
+
+// =====================================================
+// 9. โหลดรายวิชาจาก Supabase
+// =====================================================
+
+async function tdStatsLoadSubjects(){
+
+  if(tdStatsSubjectState.loading) return;
+
+  let payload;
+
+  try{
+
+    payload = tdStatsReadBaseFilters();
+
+  }catch(error){
+
+    setStatus(
+
+      'tdStatsSubjectStatus',
+
+      error.message,
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+  const key = JSON.stringify(payload);
+
+  // หากโหลดชุดนี้สำเร็จแล้ว ให้ใช้ชุดเดิม
+
+  if(
+
+    !tdStatsIsAllSubjectMode() &&
+
+    tdStatsSubjectState.rows !== null &&
+
+    tdStatsSubjectState.filterKey === key
+
+  ){
+
+    return;
+
+  }
+
+  el('tdStatsAllSubjectMode').checked = false;
+
+  tdStatsInvalidateSubjects();
+
+  const token = String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+  const generation =
+
+    ++tdStatsSubjectState.generation;
+
+  const isCurrentRequest = () =>
+
+    generation === tdStatsSubjectState.generation &&
+
+    token === String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+  tdStatsSubjectState.loading = true;
+
+  tdStatsUpdateSubjectControls();
+
+  tdStatsSubjectMessage(
+    'กำลังโหลดรายวิชา...'
+  );
+
+  setStatus(
+
+    'tdStatsSubjectStatus',
+
+    'กำลังโหลดรายวิชาตามเงื่อนไขที่เลือก...',
+
+    'info'
+
+  );
+
+  try{
+
+    const {data,error} = await supabaseClient.rpc(
+
+      'teacher_get_dashboard_checkbox_subject_options_session',
+
+      {
+
+        p_token: token,
+
+        p_filters: payload
+
+      }
+
+    );
+
+    if(!isCurrentRequest()) return;
+
+    if(error) throw error;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    if(!Array.isArray(data?.subjects)){
+
+      throw new Error(
+        'รูปแบบข้อมูลรายวิชาไม่ถูกต้อง'
+      );
+
+    }
+
+    const unique = new Map();
+
+    data.subjects.forEach(row => {
+
+      const code = String(
+        row.subject_code || ''
+      );
+
+      if(!code.trim()) return;
+
+      if(!unique.has(code)){
+
+        unique.set(code, row);
+
+      }
+
+    });
+
+    const rows = Array.from(unique.values())
+
+      .sort((a,b) =>
+
+        String(a.subject_code).localeCompare(
+
+          String(b.subject_code),
+
+          'th',
+
+          {numeric:true}
+
+        )
+
+      );
+
+    tdStatsSubjectState.rows = rows;
+
+    tdStatsSubjectState.filterKey = key;
+
+    tdStatsRenderSubjects();
+
+    setStatus(
+
+      'tdStatsSubjectStatus',
+
+      rows.length
+
+        ? `โหลดสำเร็จ พบ ${rows.length.toLocaleString('th-TH')} วิชา`
+
+        : 'ไม่พบรายวิชาตามเงื่อนไขที่เลือก',
+
+      rows.length ? 'success' : 'warn'
+
+    );
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+    tdStatsSubjectState.rows = null;
+
+    tdStatsSubjectState.filterKey = null;
+
+    tdStatsSubjectMessage(
+      'โหลดรายวิชาไม่สำเร็จ กรุณาลองใหม่'
+    );
+
+    setStatus(
+
+      'tdStatsSubjectStatus',
+
+      'โหลดรายวิชาไม่สำเร็จ กรุณาลองใหม่',
+
+      'error'
+
+    );
+
+  }finally{
+
+    if(isCurrentRequest()){
+
+      tdStatsSubjectState.loading = false;
+
+      tdStatsUpdateSubjectControls();
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// 10. ยืนยันตัวเลือก
+// =====================================================
+
+function tdStatsConfirmFilters(){
+
+  try{
+
+    const payload = tdStatsBuildPayload();
+
+    tdStatsSubjectState.confirmedFilters =
+
+      JSON.parse(JSON.stringify(payload));
+
+    tdStatsCloseFilterOverlay();
+
+  }catch(error){
+
+    setStatus(
+
+      'tdStatsSubjectStatus',
+
+      error.message,
+
+      'error'
+
+    );
+
+  }
+
+}
+
+
+/* ===== END TEACHER DASHBOARD SUBJECT CONTROLLER ===== */
 
 /* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY CONTROLLER
@@ -55974,11 +56800,131 @@ bindIfExists(
 /* ===== STATS FILTER OVERLAY EVENTS ===== */
 bindIfExists('tdStatsOpenFilterBtn', 'click', tdStatsOpenFilterOverlay);
 bindIfExists('tdStatsCloseFilterBtn', 'click', tdStatsCloseFilterOverlay);
-bindIfExists('tdStatsConfirmFilterBtn', 'click', tdStatsCloseFilterOverlay);
+bindIfExists(
+  'tdStatsConfirmFilterBtn',
+  'click',
+  tdStatsConfirmFilters
+);
 bindIfExists('tdStatsFilterOverlay', 'close', () => {
   el('tdStatsOpenFilterBtn')?.setAttribute('aria-expanded','false');
 });
 /* ===== END STATS FILTER OVERLAY EVENTS ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : SUBJECT EVENTS
+   ===================================================== */
+
+
+// โหลดรายวิชา
+
+bindIfExists(
+
+  'tdStatsLoadSubjectsBtn',
+
+  'click',
+
+  tdStatsLoadSubjects
+
+);
+
+
+// ค้นหารายวิชา
+
+bindIfExists(
+
+  'tdStatsSubjectSearch',
+
+  'input',
+
+  tdStatsFilterSubjectSearch
+
+);
+
+
+// เปลี่ยนโหมดการเลือกรายวิชา
+
+bindIfExists(
+
+  'tdStatsAllSubjectMode',
+
+  'change',
+
+  () => {
+
+    tdStatsInvalidateSubjects();
+
+  }
+
+);
+
+
+// เลือกรายวิชาทั้งหมด
+// ครอบคลุมวิชาที่ถูกซ่อนจากการค้นหาด้วย
+
+bindIfExists(
+
+  'tdStatsAllSubjects',
+
+  'change',
+
+  () => {
+
+    const checked =
+
+      el('tdStatsAllSubjects').checked;
+
+    tdStatsGetChecks('tdStatsSubjectChecks')
+      .forEach(input => {
+
+        input.checked = checked;
+
+      });
+
+    tdStatsSubjectState.confirmedFilters = null;
+
+    tdStatsSyncAll(
+
+      'tdStatsSubjectChecks',
+
+      'tdStatsAllSubjects'
+
+    );
+
+    tdStatsUpdateSubjectControls();
+
+  }
+
+);
+
+
+// เลือกรายวิชาแต่ละวิชา
+
+bindIfExists(
+
+  'tdStatsSubjectChecks',
+
+  'change',
+
+  () => {
+
+    tdStatsSubjectState.confirmedFilters = null;
+
+    tdStatsSyncAll(
+
+      'tdStatsSubjectChecks',
+
+      'tdStatsAllSubjects'
+
+    );
+
+    tdStatsUpdateSubjectControls();
+
+  }
+
+);
+
+
+/* ===== END TEACHER DASHBOARD SUBJECT EVENTS ===== */
 
 
   bindIfExists(
