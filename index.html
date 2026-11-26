@@ -2305,6 +2305,111 @@ td:first-child{
   }
 }
 
+/* =====================================================
+   TEACHER DASHBOARD : TAB MENU
+   ===================================================== */
+
+#pageDashboard{
+  min-width:0;
+}
+
+#pageDashboard .dashboard-tab-menu{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+  margin-top:16px;
+}
+
+#pageDashboard .dashboard-tab-btn{
+  width:100%;
+  min-width:0;
+  height:auto;
+  min-height:46px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  padding:10px 16px;
+
+  border:1px solid #d6e2ee;
+  border-radius:14px;
+
+  background:#ecf2f8;
+  color:#41536c;
+
+  font-family:inherit;
+  font-size:15px;
+  font-weight:700;
+
+  white-space:normal;
+  cursor:pointer;
+
+  transition:
+    background .16s ease,
+    color .16s ease,
+    box-shadow .16s ease;
+}
+
+#pageDashboard .dashboard-tab-btn:hover{
+  background:#e2ebf8;
+  color:#1d4ed8;
+}
+
+#pageDashboard .dashboard-tab-btn.active{
+  background:linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+
+  color:#fff;
+  border-color:transparent;
+
+  box-shadow:0 8px 18px rgba(37,99,235,.18);
+}
+
+#pageDashboard .dashboard-tab-btn:focus-visible{
+  outline:3px solid #93c5fd;
+  outline-offset:2px;
+}
+
+#pageDashboard .dashboard-tab-icon{
+  font-size:19px;
+  flex:0 0 auto;
+}
+
+#pageDashboard .dashboard-tab-panel{
+  min-width:0;
+}
+
+#pageDashboard .dashboard-tab-panel.hidden{
+  display:none !important;
+}
+
+@media (max-width:720px){
+
+  #pageDashboard .dashboard-tab-menu{
+    gap:7px;
+    margin-top:12px;
+  }
+
+  #pageDashboard .dashboard-tab-btn{
+    min-height:46px;
+    padding:8px 6px;
+    font-size:13px;
+    gap:5px;
+  }
+
+  #pageDashboard .dashboard-tab-icon{
+    font-size:16px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD TAB MENU ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -14978,33 +15083,150 @@ style="
 
 <div id="pageDashboard" class="hidden">
 
+  <!-- DASHBOARD HEADER / TAB MENU -->
+
   <section class="card" style="margin-bottom:18px;">
 
     <div class="preview-topbar">
+
       <div>
+
         <h2>Dashboard</h2>
 
         <div class="sub" style="margin-bottom:0;">
-          สถิติและการวิเคราะห์ผลการเรียนทั้งโรงเรียน
+          ภาพรวมผลการเรียนทั้งโรงเรียน
         </div>
+
       </div>
+
     </div>
 
-    <div class="empty-state">
-      <div style="font-size:48px; margin-bottom:12px;">
-        📊
-      </div>
 
-      <div style="font-size:20px; font-weight:700; color:#17324d;">
-        Dashboard
-      </div>
+    <div class="dashboard-tab-menu"
+         role="group"
+         aria-label="เลือกประเภท Dashboard">
 
-      <div style="margin-top:8px;">
-        อยู่ระหว่างพัฒนาหน้า Dashboard
-      </div>
+      <button
+        id="teacherDashboardStatsTab"
+        class="dashboard-tab-btn active"
+        type="button"
+        aria-controls="teacherDashboardStatsPanel"
+        aria-pressed="true">
+
+        <span class="dashboard-tab-icon">
+          📊
+        </span>
+
+        <span>สถิติผลการเรียน</span>
+
+      </button>
+
+
+      <button
+        id="teacherDashboardRiskTab"
+        class="dashboard-tab-btn"
+        type="button"
+        aria-controls="teacherDashboardRiskPanel"
+        aria-pressed="false">
+
+        <span class="dashboard-tab-icon">
+          📈
+        </span>
+
+        <span>วิเคราะห์ 0 ร มส มผ</span>
+
+      </button>
+
     </div>
 
   </section>
+
+
+  <!-- ===============================================
+       TAB 1 : สถิติผลการเรียน
+       =============================================== -->
+
+  <div
+    id="teacherDashboardStatsPanel"
+    class="dashboard-tab-panel"
+    role="region"
+    aria-labelledby="teacherDashboardStatsTab">
+
+    <section class="card">
+
+      <div class="empty-state">
+
+        <div style="font-size:48px; margin-bottom:12px;">
+          📊
+        </div>
+
+        <div style="
+          font-size:20px;
+          font-weight:700;
+          color:#17324d;
+        ">
+          สถิติผลการเรียน
+        </div>
+
+        <div style="margin-top:8px;">
+          วิเคราะห์ผลการเรียนภาพรวมทั้งโรงเรียน
+        </div>
+
+        <div style="margin-top:8px;">
+          อยู่ระหว่างพัฒนา
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- ===== END TAB 1 ===== -->
+
+
+  <!-- ===============================================
+       TAB 2 : วิเคราะห์ 0 ร มส มผ
+       =============================================== -->
+
+  <div
+    id="teacherDashboardRiskPanel"
+    class="dashboard-tab-panel hidden"
+    role="region"
+    aria-labelledby="teacherDashboardRiskTab">
+
+    <section class="card">
+
+      <div class="empty-state">
+
+        <div style="font-size:48px; margin-bottom:12px;">
+          📈
+        </div>
+
+        <div style="
+          font-size:20px;
+          font-weight:700;
+          color:#17324d;
+        ">
+          วิเคราะห์ 0 ร มส มผ
+        </div>
+
+        <div style="margin-top:8px;">
+          ติดตามผลการเรียนที่มีปัญหา
+          และความเสี่ยงต่อเนื่อง
+        </div>
+
+        <div style="margin-top:8px;">
+          อยู่ระหว่างพัฒนา
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- ===== END TAB 2 ===== -->
 
 </div>
 
@@ -18397,6 +18619,59 @@ function normalizeGradeValue(grade){
   el('sidebarFreePeriodGroup')?.classList.remove('open');
   el('sidebarGradeReportGroup')?.classList.remove('open');
 }
+
+/* =====================================================
+   TEACHER DASHBOARD : TAB CONTROLLER
+   ===================================================== */
+
+function setTeacherDashboardTab(tab){
+
+  if(!['stats', 'risk'].includes(tab)){
+    return false;
+  }
+
+  const isStats = tab === 'stats';
+
+  const isRisk = tab === 'risk';
+
+
+  // 1. เปลี่ยนสถานะปุ่ม
+
+  el('teacherDashboardStatsTab')
+    ?.classList.toggle('active', isStats);
+
+  el('teacherDashboardRiskTab')
+    ?.classList.toggle('active', isRisk);
+
+
+  // 2. แสดงและซ่อน Panel
+
+  el('teacherDashboardStatsPanel')
+    ?.classList.toggle('hidden', !isStats);
+
+  el('teacherDashboardRiskPanel')
+    ?.classList.toggle('hidden', !isRisk);
+
+
+  // 3. Accessibility
+
+  el('teacherDashboardStatsTab')
+    ?.setAttribute(
+      'aria-pressed',
+      String(isStats)
+    );
+
+  el('teacherDashboardRiskTab')
+    ?.setAttribute(
+      'aria-pressed',
+      String(isRisk)
+    );
+
+  return true;
+
+}
+
+/* ===== END TEACHER DASHBOARD TAB CONTROLLER ===== */
 
  function setActivePage(page){
 
@@ -54199,6 +54474,23 @@ if(
     'click',
     () => setActivePage('dashboard')
   );
+
+  /* ===== TEACHER DASHBOARD TAB EVENTS ===== */
+
+bindIfExists(
+  'teacherDashboardStatsTab',
+  'click',
+  () => setTeacherDashboardTab('stats')
+);
+
+bindIfExists(
+  'teacherDashboardRiskTab',
+  'click',
+  () => setTeacherDashboardTab('risk')
+);
+
+/* ===== END TEACHER DASHBOARD TAB EVENTS ===== */
+
   bindIfExists(
   'menuQrGeneratorBtn',
   'click',
