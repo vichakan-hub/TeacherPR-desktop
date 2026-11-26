@@ -2542,6 +2542,69 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD FILTER BUILDER ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : FILTER OVERLAY
+   ===================================================== */
+#pageDashboard .td-filter-open-card{ margin-bottom:18px; }
+#pageDashboard .td-filter-open-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; min-height:44px; height:auto; padding:10px 18px;
+  white-space:normal;
+}
+#tdStatsFilterOverlay{
+  position:fixed; inset:0; margin:auto;
+  width:min(1180px,calc(100vw - 32px)); max-width:none;
+  max-height:90vh; max-height:90dvh;
+  padding:0; border:1px solid #dbe7f3; border-radius:24px;
+  background:#fff; color:var(--text); font-family:inherit;
+  box-shadow:0 24px 70px rgba(15,23,42,.25);
+  overflow:hidden;
+}
+#tdStatsFilterOverlay:not([open]){ display:none!important; }
+#tdStatsFilterOverlay[open]{ display:flex; flex-direction:column; }
+#tdStatsFilterOverlay::backdrop{
+  background:rgba(15,23,42,.48); backdrop-filter:blur(3px);
+}
+#tdStatsFilterOverlay .td-overlay-head{
+  flex:0 0 auto; display:flex; align-items:flex-start;
+  justify-content:space-between; gap:12px;
+  padding:20px 24px; border-bottom:1px solid #e5e7eb;
+}
+#tdStatsFilterOverlay .td-overlay-head h2{
+  margin:0 0 5px; font-size:23px; color:#17324d;
+}
+#tdStatsFilterOverlay .td-overlay-close{
+  flex:0 0 38px; width:38px; height:38px; padding:0;
+  border:0; border-radius:12px; background:#ecf2f8;
+  color:#41536c; font-size:24px;
+}
+#tdStatsFilterOverlay .td-overlay-body{
+  flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  padding:16px 24px 24px;
+}
+#tdStatsFilterOverlay .td-overlay-footer{
+  flex:0 0 auto; display:flex; justify-content:flex-end; gap:10px;
+  padding:16px 24px; border-top:1px solid #e5e7eb; background:#fff;
+}
+#tdStatsFilterOverlay button:disabled{ opacity:.55; cursor:not-allowed; }
+@media(max-width:720px){
+  #pageDashboard .td-filter-open-btn{ width:100%; font-size:14px; }
+  #tdStatsFilterOverlay{
+    width:calc(100vw - 16px); max-height:94vh; max-height:94dvh;
+    border-radius:20px;
+  }
+  #tdStatsFilterOverlay .td-overlay-head{ padding:16px; }
+  #tdStatsFilterOverlay .td-overlay-head h2{ font-size:18px; }
+  #tdStatsFilterOverlay .td-overlay-body{ padding:12px 14px 16px; }
+  #tdStatsFilterOverlay .td-overlay-footer{
+    padding:12px 14px; padding-bottom:max(12px,env(safe-area-inset-bottom));
+  }
+  #tdStatsFilterOverlay .td-overlay-footer button{ flex:1; }
+}
+/* ===== END TEACHER DASHBOARD FILTER OVERLAY ===== */
+
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -15284,20 +15347,29 @@ style="
   role="region"
   aria-labelledby="teacherDashboardStatsTab">
 
-  <section class="card" style="margin-bottom:18px;">
+  <!-- ===== FILTER OPEN BUTTON ===== -->
+  <section class="card td-filter-open-card">
+    <button id="tdStatsOpenFilterBtn"
+      class="btn-primary td-filter-open-btn" type="button"
+      aria-haspopup="dialog" aria-controls="tdStatsFilterOverlay"
+      aria-expanded="false">
+      ⚙️ เลือกข้อมูลที่ต้องการประมวลผล
+    </button>
+  </section>
 
-    <div class="preview-topbar">
-
+  <!-- ===== FILTER CARD OVERLAY ===== -->
+  <dialog id="tdStatsFilterOverlay" aria-labelledby="tdStatsFilterOverlayTitle">
+    <div class="td-overlay-head">
       <div>
-        <h2>เลือกข้อมูลที่ต้องการประมวลผล</h2>
-
+        <h2 id="tdStatsFilterOverlayTitle">เลือกข้อมูลที่ต้องการประมวลผล</h2>
         <div class="sub" style="margin-bottom:0;">
           กำหนดเงื่อนไขการวิเคราะห์ผลการเรียนทั้งโรงเรียน
         </div>
       </div>
-
+      <button id="tdStatsCloseFilterBtn" class="td-overlay-close"
+        type="button" aria-label="ปิดตัวกรอง">×</button>
     </div>
-
+    <div class="td-overlay-body">
     <div
       id="tdStatsFilterStatus"
       class="status info"
@@ -15484,12 +15556,15 @@ style="
 
     </fieldset>
 
-  </section>
-
-
-  <!-- ส่วนเลือกรายวิชา จะเพิ่มในขั้นตอน 3.4.2 -->
-
-  <div id="tdStatsSubjectSection"></div>
+    <!-- ส่วนเลือกรายวิชา จะเพิ่มในขั้นตอน 3.4.2 -->
+    <div id="tdStatsSubjectSection"></div>
+    </div>
+    <div class="td-overlay-footer">
+      <button id="tdStatsConfirmFilterBtn" class="btn-primary"
+        type="button" disabled>✓ ยืนยันตัวเลือก</button>
+    </div>
+  </dialog>
+  <!-- ===== END FILTER CARD OVERLAY ===== -->
 
 
   <!-- ส่วนแสดงผล จะเพิ่มในขั้นตอน 3.4.3 -->
@@ -18983,10 +19058,13 @@ function setTeacherDashboardTab(tab){
       String(isRisk)
     );
 
-      if(isStats){
-
-    tdStatsEnsureOptions();
-
+  if(isStats){
+    // ไม่โหลดตัวเลือกขณะ Logout/reset Tab
+    if(state.currentUser && state.teacherSessionToken){
+      tdStatsEnsureOptions();
+    }
+  }else{
+    tdStatsCloseFilterOverlay();
   }
 
   return true;
@@ -19447,6 +19525,7 @@ async function tdStatsLoadOptions(){
   tdStatsState.loading = true;
 
   el('tdStatsFilterFields').disabled = true;
+  el('tdStatsConfirmFilterBtn').disabled = true;
 
   el('tdStatsReloadOptionsBtn').disabled = true;
 
@@ -19517,6 +19596,7 @@ async function tdStatsLoadOptions(){
     tdStatsRenderOptions();
 
     el('tdStatsFilterFields').disabled = false;
+    el('tdStatsConfirmFilterBtn').disabled = false;
 
     el('tdStatsReloadOptionsBtn')
       .classList.add('hidden');
@@ -19656,6 +19736,8 @@ function tdStatsReset(){
   const fields = el('tdStatsFilterFields');
 
   if(fields) fields.disabled = true;
+  const confirm = el('tdStatsConfirmFilterBtn');
+  if(confirm) confirm.disabled = true;
 
   const button = el('tdStatsReloadOptionsBtn');
 
@@ -19680,6 +19762,29 @@ function tdStatsReset(){
 }
 
 /* ===== END TEACHER DASHBOARD STATS FILTER CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : FILTER OVERLAY CONTROLLER
+   ===================================================== */
+function tdStatsOpenFilterOverlay(){
+  const overlay = el('tdStatsFilterOverlay');
+  if(!overlay || overlay.open) return;
+  if(typeof overlay.showModal !== 'function'){
+    alert('เบราว์เซอร์นี้ไม่รองรับหน้าต่างตัวกรอง กรุณาอัปเดตเบราว์เซอร์');
+    return;
+  }
+  overlay.showModal();
+  el('tdStatsOpenFilterBtn')?.setAttribute('aria-expanded','true');
+  tdStatsEnsureOptions();
+}
+
+function tdStatsCloseFilterOverlay(){
+  const overlay = el('tdStatsFilterOverlay');
+  if(overlay?.open) overlay.close();
+  el('tdStatsOpenFilterBtn')?.setAttribute('aria-expanded','false');
+}
+/* ===== END TEACHER DASHBOARD FILTER OVERLAY CONTROLLER ===== */
+
 
  function setActivePage(page){
 
@@ -19749,11 +19854,11 @@ if(
       el('pageDashboard')
     ?.classList.toggle('hidden', !isDashboard);
 
-    if(isDashboard){
-
-  tdStatsEnsureOptions();
-
-}
+  if(isDashboard){
+    tdStatsEnsureOptions();
+  }else{
+    tdStatsCloseFilterOverlay();
+  }
 
 el('pageMidtermReport')
   ?.classList.toggle(
@@ -23121,9 +23226,9 @@ async function logout(){
   state.teacherSessionToken = null;
   state.teacherSessionExpiresAt = null;
 
+  tdStatsCloseFilterOverlay();
   tdStatsReset();
-
-setTeacherDashboardTab('stats');
+  setTeacherDashboardTab('stats');
 
   state.groupedOfferings = [];
   state.selectedTeachingGroup = null;
@@ -55518,6 +55623,16 @@ bindIfExists(
   tdStatsEnsureOptions
 
 );
+
+/* ===== STATS FILTER OVERLAY EVENTS ===== */
+bindIfExists('tdStatsOpenFilterBtn', 'click', tdStatsOpenFilterOverlay);
+bindIfExists('tdStatsCloseFilterBtn', 'click', tdStatsCloseFilterOverlay);
+bindIfExists('tdStatsConfirmFilterBtn', 'click', tdStatsCloseFilterOverlay);
+bindIfExists('tdStatsFilterOverlay', 'close', () => {
+  el('tdStatsOpenFilterBtn')?.setAttribute('aria-expanded','false');
+});
+/* ===== END STATS FILTER OVERLAY EVENTS ===== */
+
 
   bindIfExists(
   'menuQrGeneratorBtn',
