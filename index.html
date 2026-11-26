@@ -15584,8 +15584,119 @@ style="
 
     </fieldset>
 
-    <!-- ส่วนเลือกรายวิชา จะเพิ่มในขั้นตอน 3.4.2 -->
-    <div id="tdStatsSubjectSection"></div>
+<!-- =================================================
+     TEACHER DASHBOARD : SUBJECT SELECTOR
+     ================================================= -->
+
+<div id="tdStatsSubjectSection">
+
+  <div class="td-filter-card" style="margin-top:12px;">
+
+    <div class="td-filter-head">
+
+      <div class="td-filter-title">
+        รายวิชา
+      </div>
+
+      <button
+        id="tdStatsLoadSubjectsBtn"
+        class="btn-primary"
+        type="button"
+        disabled>
+
+        📚 โหลดรายวิชา
+
+      </button>
+
+    </div>
+
+
+    <!-- คำอธิบาย -->
+
+    <div class="small" style="margin-bottom:12px;">
+
+      โหลดรายวิชาตามเงื่อนไขที่เลือก
+      หรือประมวลผลทุกรายวิชา
+
+    </div>
+
+
+    <!-- สถานะการโหลด -->
+
+    <div
+      id="tdStatsSubjectStatus"
+      class="status info"
+      role="status">
+
+      ยังไม่ได้โหลดรายวิชา
+
+    </div>
+
+
+    <!-- ช่องค้นหารายวิชา -->
+
+    <input
+      id="tdStatsSubjectSearch"
+      class="std"
+      type="search"
+      placeholder="ค้นหารหัสวิชาหรือชื่อวิชา..."
+      aria-label="ค้นหารายวิชา"
+      autocomplete="off"
+      disabled>
+
+
+    <!-- เลือกทั้งหมด / จำนวนรายวิชา -->
+
+    <div
+      class="td-subject-toolbar"
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:10px;
+        margin:12px 0;
+      ">
+
+      <label class="td-filter-all">
+
+        <input
+          id="tdStatsAllSubjects"
+          type="checkbox"
+          disabled>
+
+        เลือกทั้งหมด
+
+      </label>
+
+      <span
+        id="tdStatsSubjectCount"
+        class="small">
+
+        ยังไม่ได้โหลดรายวิชา
+
+      </span>
+
+    </div>
+
+
+    <!-- รายการรายวิชา -->
+
+    <div id="tdStatsSubjectChecks">
+
+      <div class="empty-state">
+
+        กรุณากดปุ่มโหลดรายวิชา
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD SUBJECT SELECTOR ===== -->
     </div>
     <div class="td-overlay-footer">
       <button id="tdStatsConfirmFilterBtn" class="btn-primary"
