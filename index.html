@@ -3966,6 +3966,163 @@ td:first-child{
 }
 
 /* ===== END TEACHER DASHBOARD RISK SUBJECT AND AREA ===== */
+/* =====================================================
+   TEACHER DASHBOARD : RISK URGENT STUDENTS
+   ===================================================== */
+
+#tdRiskUrgentStudentsSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskUrgentStudentsSection .td-urgent-kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+
+#tdRiskUrgentStudentsSection .td-urgent-kpi{
+  min-width:0;
+  padding:16px;
+  border:1px solid #fecaca;
+  border-radius:16px;
+  background:#fff1f2;
+  color:#991b1b;
+}
+
+#tdRiskUrgentStudentsSection .td-urgent-value{
+  margin-top:6px;
+  font-family:'Sarabun',sans-serif;
+  font-size:30px;
+  font-weight:900;
+  color:#dc2626;
+}
+
+#tdRiskUrgentStudentsWrap{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  border:1px solid #dbe7f3;
+  border-radius:16px;
+  -webkit-overflow-scrolling:touch;
+}
+
+#tdRiskUrgentStudentsTable{
+  width:100%;
+  min-width:1100px;
+  border-collapse:collapse;
+}
+
+#tdRiskUrgentStudentsTable th,
+#tdRiskUrgentStudentsTable td{
+  padding:12px 10px;
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+#tdRiskUrgentStudentsTable th{
+  background:#edf5ff;
+  color:#17324d;
+  font-weight:800;
+}
+
+#tdRiskUrgentStudentsTable td{
+  background:#fff;
+}
+
+#tdRiskUrgentStudentsTable tbody tr:nth-child(even) td{
+  background:#f8fbff;
+}
+
+#tdRiskUrgentStudentsTable .td-urgent-name{
+  text-align:left;
+  min-width:220px;
+  font-weight:700;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskUrgentStudentsTable .td-urgent-code{
+  font-size:12px;
+  font-weight:500;
+  color:#64748b;
+  margin-top:4px;
+}
+
+#tdRiskUrgentStudentsTable .td-urgent-count{
+  font-family:'Sarabun',sans-serif;
+  font-weight:800;
+  color:#dc2626;
+}
+
+#tdRiskUrgentStudentsSection .td-urgent-level{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+}
+
+#tdRiskUrgentStudentsSection .critical{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+#tdRiskUrgentStudentsSection .high{
+  background:#ffedd5;
+  color:#c2410c;
+}
+
+#tdRiskUrgentStudentsSection .watch{
+  background:#fef9c3;
+  color:#854d0e;
+}
+
+#tdRiskUrgentStudentsSection .follow{
+  background:#f1f5f9;
+  color:#475569;
+}
+
+#tdRiskUrgentStudentsTable .td-urgent-status{
+  min-width:150px;
+  text-align:left;
+  white-space:normal;
+  line-height:1.6;
+}
+
+#tdRiskUrgentStudentsSummary{
+  margin-top:12px;
+  padding:12px 14px;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+  color:#41536c;
+  font-size:14px;
+  line-height:1.7;
+}
+
+@media(max-width:720px){
+
+  #tdRiskUrgentStudentsSection .td-urgent-kpi-grid{
+    gap:8px;
+  }
+
+  #tdRiskUrgentStudentsSection .td-urgent-kpi{
+    padding:10px;
+    font-size:12px;
+  }
+
+  #tdRiskUrgentStudentsSection .td-urgent-value{
+    font-size:24px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK URGENT STUDENTS ===== */
 
 .fp-submenu{
   display:flex;
@@ -18356,7 +18513,123 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK SUBJECT AND AREA ===== -->
 
-  <div id="tdRiskUrgentStudentsSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK URGENT STUDENTS
+     ================================================= -->
+
+<div id="tdRiskUrgentStudentsSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>🚨 นักเรียนที่ควรติดตามเร่งด่วน</h2>
+
+    <div class="sub">
+      เรียงตามจำนวนรายวิชาที่ยังแก้ผลการเรียน
+      0 ร มส มผ ไม่สำเร็จ
+    </div>
+
+    <div
+      id="tdRiskUrgentStudentsStatus"
+      class="status info"
+      role="status"
+      aria-live="polite">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdRiskUrgentStudentsContent"
+         class="hidden">
+
+      <!-- Urgent KPI -->
+
+      <div class="td-urgent-kpi-grid">
+
+        <div class="td-urgent-kpi">
+
+          <div>ค้าง ≥ 3 วิชา</div>
+
+          <div id="tdRiskUrgent3Plus"
+               class="td-urgent-value">—</div>
+
+          <div class="small">คน</div>
+
+        </div>
+
+        <div class="td-urgent-kpi">
+
+          <div>ค้าง ≥ 5 วิชา</div>
+
+          <div id="tdRiskUrgent5Plus"
+               class="td-urgent-value">—</div>
+
+          <div class="small">คน</div>
+
+        </div>
+
+        <div class="td-urgent-kpi">
+
+          <div>ค้างสูงสุดต่อคน</div>
+
+          <div id="tdRiskUrgentMax"
+               class="td-urgent-value">—</div>
+
+          <div class="small">วิชา</div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ตารางรายชื่อนักเรียน -->
+
+      <div id="tdRiskUrgentStudentsWrap">
+
+        <table id="tdRiskUrgentStudentsTable">
+
+          <thead>
+            <tr>
+              <th scope="col">ที่</th>
+              <th scope="col">นักเรียน</th>
+              <th scope="col">ชั้น/ห้อง</th>
+              <th scope="col">0</th>
+              <th scope="col">ร</th>
+              <th scope="col">มส</th>
+              <th scope="col">มผ</th>
+              <th scope="col">วิชาที่ค้าง</th>
+              <th scope="col">ระดับ</th>
+              <th scope="col">สถานะ</th>
+            </tr>
+          </thead>
+
+          <tbody id="tdRiskUrgentStudentsBody">
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div id="tdRiskUrgentStudentsSummary">
+      </div>
+
+      <div class="small" style="margin-top:12px;">
+
+        หมายเหตุ: แสดงสูงสุด 20 คน
+        นับเฉพาะรายการที่ยังแก้ไม่สำเร็จ
+        รวมรายการที่รออนุมัติผลสอบแก้ตัว
+
+        จำนวนวิชานับรายวิชาไม่ซ้ำ
+        จึงอาจแตกต่างจากจำนวนรายการผลการเรียน
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK URGENT STUDENTS ===== -->
 
   <div id="tdRiskTrendSection"></div>
 
@@ -26261,6 +26534,8 @@ function tdRiskResetResult(){
 
   tdRiskResetSubjectArea();
 
+  tdRiskResetUrgentStudents();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -26776,6 +27051,31 @@ if(!tdStatsHasValidSession()){
 // =============================================
 
 await tdRiskLoadSubjectArea(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
+
+
+// =============================================
+// รายชื่อนักเรียนที่ต้องติดตามเร่งด่วน
+// =============================================
+
+await tdRiskLoadUrgentStudents(
 
   snapshot,
 
@@ -29994,6 +30294,771 @@ async function tdRiskLoadSubjectArea(
 }
 
 /* ===== END TEACHER DASHBOARD RISK SUBJECT AREA CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK URGENT STUDENTS CONTROLLER
+   ===================================================== */
+
+const tdRiskUrgentStudentsState = {
+
+  rows: null,
+
+  limit: 20
+
+};
+
+
+// =====================================================
+// 1. ระดับความเสี่ยงตาม LeaderPR
+// =====================================================
+
+function tdRiskGetUrgentLevel(subjectCount){
+
+  if(subjectCount >= 5){
+
+    return {
+      label:'สูงมาก',
+      css:'critical'
+    };
+
+  }
+
+  if(subjectCount >= 3){
+
+    return {
+      label:'สูง',
+      css:'high'
+    };
+
+  }
+
+  if(subjectCount === 2){
+
+    return {
+      label:'เฝ้าระวัง',
+      css:'watch'
+    };
+
+  }
+
+  return {
+    label:'ติดตาม',
+    css:'follow'
+  };
+
+}
+
+
+// =====================================================
+// 2. ตรวจสอบข้อมูลนักเรียน
+// =====================================================
+
+function tdRiskValidateUrgentStudents(rows){
+
+  if(
+
+    !Array.isArray(rows) ||
+
+    rows.length >
+      tdRiskUrgentStudentsState.limit
+
+  ){
+
+    throw new Error(
+      'รูปแบบข้อมูลนักเรียนไม่ถูกต้อง'
+    );
+
+  }
+
+
+  const keys = [
+
+    'subject_count',
+
+    'total_records',
+
+    'grade_0_records',
+
+    'grade_r_records',
+
+    'grade_ms_records',
+
+    'grade_mp_records',
+
+    'pending_records',
+
+    'unresolved_records'
+
+  ];
+
+
+  const seen = new Set();
+
+
+  rows.forEach((row,index) => {
+
+    if(
+
+      !row ||
+
+      !keys.every(key =>
+
+        Number.isSafeInteger(row[key]) &&
+
+        row[key] >= 0
+
+      )
+
+    ){
+
+      throw new Error(
+        'ข้อมูลจำนวนวิชาคงค้างไม่ถูกต้อง'
+      );
+
+    }
+
+
+    if(
+
+      typeof row.student_code !== 'string' ||
+
+      !row.student_code.trim() ||
+
+      typeof row.room_label !== 'string'
+
+    ){
+
+      throw new Error(
+        'ข้อมูลนักเรียนหรือห้องเรียนไม่ถูกต้อง'
+      );
+
+    }
+
+
+    // ใช้ Key ตาม GROUP BY ของ SQL ต้นฉบับ
+
+    const key = JSON.stringify([
+
+      row.student_id ?? null,
+
+      row.student_code
+
+    ]);
+
+
+    if(seen.has(key)){
+
+      throw new Error(
+        'พบข้อมูลนักเรียนซ้ำ'
+      );
+
+    }
+
+    seen.add(key);
+
+
+    const gradeTotal =
+
+      tdRiskGradeSeries.reduce(
+
+        (sum,item) => sum + row[item.key],
+
+        0
+
+      );
+
+
+    const statusTotal =
+
+      row.pending_records +
+
+      row.unresolved_records;
+
+
+    if(
+
+      row.subject_count < 1 ||
+
+      row.subject_count > row.total_records ||
+
+      gradeTotal !== row.total_records ||
+
+      statusTotal !== row.total_records
+
+    ){
+
+      throw new Error(
+        'จำนวนวิชาและรายการคงค้างไม่สอดคล้องกัน'
+      );
+
+    }
+
+
+    const level = tdRiskGetUrgentLevel(
+      row.subject_count
+    );
+
+
+    if(row.risk_level !== level.label){
+
+      throw new Error(
+        'ระดับความเสี่ยงไม่ตรงตามเกณฑ์'
+      );
+
+    }
+
+
+    // ตรวจสอบลำดับจาก SQL
+
+    if(index > 0){
+
+      const prev = rows[index - 1];
+
+
+      const wrongOrder =
+
+        prev.subject_count < row.subject_count ||
+
+        (
+
+          prev.subject_count ===
+            row.subject_count &&
+
+          prev.unresolved_records <
+            row.unresolved_records
+
+        ) ||
+
+        (
+
+          prev.subject_count ===
+            row.subject_count &&
+
+          prev.unresolved_records ===
+            row.unresolved_records &&
+
+          prev.total_records <
+            row.total_records
+
+        );
+
+
+      if(wrongOrder){
+
+        throw new Error(
+          'ลำดับนักเรียนกลุ่มเสี่ยงไม่ถูกต้อง'
+        );
+
+      }
+
+    }
+
+  });
+
+}
+
+
+// =====================================================
+// 3. แสดงข้อมูล Urgent KPI และรายชื่อนักเรียน
+// =====================================================
+
+function tdRiskRenderUrgentStudents(){
+
+  const rows = tdRiskUrgentStudentsState.rows;
+
+  const urgent = tdRiskResultState.urgent;
+
+
+  if(!rows || !urgent) return;
+
+
+  tdStatsSetText(
+
+    'tdRiskUrgent3Plus',
+
+    tdStatsFmtInt(urgent.students_3plus)
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskUrgent5Plus',
+
+    tdStatsFmtInt(urgent.students_5plus)
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskUrgentMax',
+
+    tdStatsFmtInt(urgent.max_subject_count)
+
+  );
+
+
+  const tbody = el(
+    'tdRiskUrgentStudentsBody'
+  );
+
+
+  tbody.replaceChildren();
+
+
+  const fragment =
+    document.createDocumentFragment();
+
+
+  rows.forEach((row,index) => {
+
+    const tr = document.createElement('tr');
+
+
+    // ลำดับ
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+        'td',
+        index + 1
+      )
+
+    );
+
+
+    // ชื่อนักเรียนและรหัสนักเรียน
+
+    const nameCell =
+
+      document.createElement('td');
+
+    nameCell.className = 'td-urgent-name';
+
+
+    const name =
+
+      document.createElement('div');
+
+    name.textContent =
+      row.student_name || '—';
+
+
+    const code =
+
+      document.createElement('div');
+
+    code.className = 'td-urgent-code';
+
+    code.textContent =
+      `รหัสนักเรียน ${row.student_code}`;
+
+
+    nameCell.append(name,code);
+
+    tr.append(nameCell);
+
+
+    // ชั้น / ห้อง
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+
+        'td',
+
+        row.room_label || '—'
+
+      )
+
+    );
+
+
+    // 0 / ร / มส / มผ
+
+    tdRiskGradeSeries.forEach(item => {
+
+      const count = row[item.key];
+
+
+      tr.append(
+
+        tdStatsCreateTableCell(
+
+          'td',
+
+          count > 0
+
+            ? tdStatsFmtInt(count)
+
+            : '—'
+
+        )
+
+      );
+
+    });
+
+
+    // จำนวนวิชาค้าง
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+
+        'td',
+
+        tdStatsFmtInt(row.subject_count),
+
+        'td-urgent-count'
+
+      )
+
+    );
+
+
+    // ระดับความเสี่ยง
+
+    const level = tdRiskGetUrgentLevel(
+      row.subject_count
+    );
+
+
+    const levelCell =
+
+      document.createElement('td');
+
+
+    const levelBadge =
+
+      document.createElement('span');
+
+    levelBadge.className =
+
+      `td-urgent-level ${level.css}`;
+
+    levelBadge.textContent = level.label;
+
+
+    levelCell.append(levelBadge);
+
+    tr.append(levelCell);
+
+
+    // สถานะการแก้
+
+    const statusCell =
+
+      document.createElement('td');
+
+    statusCell.className =
+      'td-urgent-status';
+
+
+    const pending =
+
+      document.createElement('div');
+
+    pending.textContent =
+
+      `รออนุมัติ ${
+        tdStatsFmtInt(row.pending_records)
+      } รายการ`;
+
+
+    const unresolved =
+
+      document.createElement('div');
+
+    unresolved.textContent =
+
+      `ยังไม่แก้ ${
+        tdStatsFmtInt(row.unresolved_records)
+      } รายการ`;
+
+
+    statusCell.append(
+      pending,
+      unresolved
+    );
+
+
+    tr.append(statusCell);
+
+    fragment.append(tr);
+
+  });
+
+
+  // กรณีไม่มีนักเรียนคงค้าง
+
+  if(rows.length === 0){
+
+    const tr =
+
+      document.createElement('tr');
+
+
+    const td =
+
+      tdStatsCreateTableCell(
+
+        'td',
+
+        'ไม่พบนักเรียนที่ยังมีผลการเรียนคงค้าง'
+
+      );
+
+
+    td.colSpan = 10;
+
+    tr.append(td);
+
+    fragment.append(tr);
+
+  }
+
+
+  tbody.append(fragment);
+
+
+  tdStatsSetText(
+
+    'tdRiskUrgentStudentsSummary',
+
+    `แสดง ${
+      tdStatsFmtInt(rows.length)
+    } คนแรก · นักเรียนที่ยังมีวิชาค้างทั้งหมด ${
+      tdStatsFmtInt(urgent.students_1plus)
+    } คน`
+
+  );
+
+
+  el('tdRiskUrgentStudentsContent')
+
+    .classList.remove('hidden');
+
+
+  setStatus(
+
+    'tdRiskUrgentStudentsStatus',
+
+    rows.length > 0
+
+      ? 'แสดงรายชื่อนักเรียนจากผลประมวลผลล่าสุด'
+
+      : 'ไม่พบรายการคงค้างตามเงื่อนไข',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 4. โหลดรายชื่อนักเรียนจาก RPC
+// =====================================================
+
+async function tdRiskLoadUrgentStudents(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+){
+
+  if(!isCurrentRequest()) return;
+
+
+  tdRiskResetUrgentStudents();
+
+
+  try{
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+
+    if(
+
+      !tdRiskResultState.summary ||
+
+      !tdRiskResultState.urgent
+
+    ){
+
+      throw new Error(
+        'Summary หรือ Urgent KPI ยังไม่พร้อม'
+      );
+
+    }
+
+
+    setStatus(
+
+      'tdRiskUrgentStudentsStatus',
+
+      'กำลังโหลดรายชื่อนักเรียน...',
+
+      'info'
+
+    );
+
+
+    const result =
+
+      await supabaseClient.rpc(
+
+        'teacher_get_orms_top_students_session',
+
+        {
+
+          p_token:token,
+
+          p_filters:snapshot,
+
+          p_limit:
+            tdRiskUrgentStudentsState.limit
+
+        }
+
+      );
+
+
+    if(!isCurrentRequest()) return;
+
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+
+    if(result.error) throw result.error;
+
+
+    const rows = result.data;
+
+
+    tdRiskValidateUrgentStudents(rows);
+
+
+    tdRiskUrgentStudentsState.rows = rows;
+
+
+    tdRiskRenderUrgentStudents();
+
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+
+    if(!tdStatsHasValidSession()){
+
+      throw error;
+
+    }
+
+
+    tdRiskResetUrgentStudents();
+
+
+    setStatus(
+
+      'tdRiskUrgentStudentsStatus',
+
+      'ไม่สามารถแสดงรายชื่อนักเรียนได้ กรุณาประมวลผลใหม่',
+
+      'error'
+
+    );
+
+
+    // ไม่แสดงรายชื่อนักเรียนหรือ Token ใน Console
+
+    console.warn(
+
+      'Teacher Dashboard urgent students:',
+
+      error?.code ||
+
+      error?.message ||
+
+      'Unknown error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 5. ล้างข้อมูล
+// =====================================================
+
+function tdRiskResetUrgentStudents(){
+
+  tdRiskUrgentStudentsState.rows = null;
+
+
+  [
+
+    'tdRiskUrgent3Plus',
+
+    'tdRiskUrgent5Plus',
+
+    'tdRiskUrgentMax'
+
+  ].forEach(id => {
+
+    tdStatsSetText(id,'—');
+
+  });
+
+
+  el('tdRiskUrgentStudentsBody')
+
+    ?.replaceChildren();
+
+
+  el('tdRiskUrgentStudentsContent')
+
+    ?.classList.add('hidden');
+
+
+  tdStatsSetText(
+
+    'tdRiskUrgentStudentsSummary',
+
+    ''
+
+  );
+
+
+  setStatus(
+
+    'tdRiskUrgentStudentsStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK URGENT STUDENTS CONTROLLER ===== */
 
 
  function setActivePage(page){
