@@ -11898,6 +11898,12 @@ td{
     <span class="sidebar-label">หน้าแรก</span>
   </button>
 
+    <!-- ===== SCHOOL DASHBOARD ===== -->
+  <button id="menuDashboardBtn" class="sidebar-link" type="button" data-side-page="dashboard">
+    <span class="sidebar-icon">📊</span>
+    <span class="sidebar-label">Dashboard</span>
+  </button>
+
   <div class="sidebar-section-label">
     <span class="sidebar-section-dot"></span>
     <span>ครูผู้สอน</span>
@@ -14965,6 +14971,44 @@ style="
     </div>
   </section>
 </div>
+
+<!-- =====================================================
+     PAGE DASHBOARD : ภาพรวมผลการเรียนทั้งโรงเรียน
+     ===================================================== -->
+
+<div id="pageDashboard" class="hidden">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="preview-topbar">
+      <div>
+        <h2>Dashboard</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          สถิติและการวิเคราะห์ผลการเรียนทั้งโรงเรียน
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state">
+      <div style="font-size:48px; margin-bottom:12px;">
+        📊
+      </div>
+
+      <div style="font-size:20px; font-weight:700; color:#17324d;">
+        Dashboard
+      </div>
+
+      <div style="margin-top:8px;">
+        อยู่ระหว่างพัฒนาหน้า Dashboard
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END PAGE DASHBOARD ===== -->
 
 <!-- PAGE GRADE STATS : สถิติผลการเรียน -->
 <div id="pageGradeStats" class="hidden">
@@ -18387,6 +18431,8 @@ if(
 
 const isHome = page === 'home';
 
+const isDashboard = page === 'dashboard';
+
 const isMidtermReport =
   page === 'midtermReport';
 
@@ -18416,6 +18462,9 @@ if(
 
   el('pageHome')
     ?.classList.toggle('hidden', !isHome);
+
+      el('pageDashboard')
+    ?.classList.toggle('hidden', !isDashboard);
 
 el('pageMidtermReport')
   ?.classList.toggle(
@@ -18543,6 +18592,7 @@ if(
 
 const map = {
   home: 'menuHomeBtn',
+  dashboard: 'menuDashboardBtn',
   retest: 'menuRetestBtn',
   adviser: 'menuAdviserBtn',
   adviserrisk: 'menuAdviserRiskBtn',
@@ -18604,6 +18654,7 @@ function setSidebarActiveFpSubPage(page){
 function updateAppTopbarTitle(page){
 const titleMap = {
   home: ['หน้าแรก', 'ระบบงานวิชาการสำหรับครู'],
+    dashboard: ['Dashboard', 'ภาพรวมผลการเรียนทั้งโรงเรียน'],
   retest: ['ส่งผลสอบแก้ตัว', 'บันทึกผลสอบแก้ตัวและรออนุมัติ'],
   gradestats: ['สถิติผลการเรียน', 'ดู Dashboard ผลการเรียนเฉพาะรายวิชาที่ครูมีสิทธิ์ดู'],
   teacherstudent: ['ข้อมูลนักเรียนที่สอน', 'ดูผลการเรียนย้อนหลังของนักเรียนในรายวิชาที่ครูสอน'],
@@ -54143,6 +54194,11 @@ if(
    ===================================================== */
 
   bindIfExists('menuHomeBtn', 'click', () => setActivePage('home'));
+    bindIfExists(
+    'menuDashboardBtn',
+    'click',
+    () => setActivePage('dashboard')
+  );
   bindIfExists(
   'menuQrGeneratorBtn',
   'click',
