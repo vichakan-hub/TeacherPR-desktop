@@ -3565,6 +3565,176 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK CLASS ROOM CHART ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK RESOLUTION
+   ===================================================== */
+
+#tdRiskResolutionSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskResolutionSection .td-resolution-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+
+#tdRiskResolutionSection .td-resolution-card{
+  min-width:0;
+  padding:16px;
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+#tdRiskResolutionSection .td-resolution-card.resolved{
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  color:#15803d;
+}
+
+#tdRiskResolutionSection .td-resolution-card.pending{
+  background:#fffbeb;
+  border-color:#fde68a;
+  color:#b45309;
+}
+
+#tdRiskResolutionSection .td-resolution-card.unresolved{
+  background:#fff1f2;
+  border-color:#fecaca;
+  color:#dc2626;
+}
+
+#tdRiskResolutionSection .td-resolution-label{
+  font-size:14px;
+  font-weight:700;
+}
+
+#tdRiskResolutionSection .td-resolution-value{
+  margin:8px 0 4px;
+  font-family:'Sarabun',sans-serif;
+  font-size:clamp(24px,3vw,34px);
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskResolutionSection .td-resolution-percent{
+  font-size:15px;
+  font-weight:700;
+  margin-top:6px;
+}
+
+#tdRiskResolutionSection .td-resolution-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:center;
+  gap:24px;
+  margin-top:18px;
+}
+
+#tdRiskResolutionSection .td-resolution-chart-box{
+  position:relative;
+  width:100%;
+  min-width:0;
+  height:300px;
+}
+
+#tdRiskResolutionSection .td-resolution-progress{
+  min-width:0;
+  padding:18px;
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+#tdRiskResolutionSection .td-resolution-progress-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:14px;
+  font-weight:700;
+}
+
+#tdRiskResolutionProgressRate{
+  font-size:24px;
+  font-weight:900;
+  color:#15803d;
+}
+
+#tdRiskResolutionProgressTrack{
+  height:14px;
+  border-radius:999px;
+  background:#e2e8f0;
+  overflow:hidden;
+}
+
+#tdRiskResolutionProgressFill{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:#22c55e;
+  transition:width .3s ease;
+}
+
+#tdRiskResolutionProgressText{
+  margin-top:12px;
+  font-size:13px;
+  line-height:1.6;
+  color:#64748b;
+}
+
+@media(max-width:900px){
+
+  #tdRiskResolutionSection .td-resolution-layout{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+}
+
+@media(max-width:720px){
+
+  #tdRiskResolutionSection .td-resolution-grid{
+    gap:8px;
+  }
+
+  #tdRiskResolutionSection .td-resolution-card{
+    padding:10px;
+  }
+
+  #tdRiskResolutionSection .td-resolution-label{
+    font-size:12px;
+  }
+
+  #tdRiskResolutionSection .td-resolution-value{
+    font-size:25px;
+  }
+
+  #tdRiskResolutionSection .td-resolution-percent{
+    font-size:13px;
+  }
+
+  #tdRiskResolutionSection .td-resolution-chart-box{
+    height:260px;
+  }
+
+}
+
+@media(max-width:360px){
+
+  #tdRiskResolutionSection .td-resolution-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK RESOLUTION ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -17558,7 +17728,166 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK CLASS ROOM CHART ===== -->
 
-  <div id="tdRiskResolutionSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK RESOLUTION
+     ================================================= -->
+
+<div id="tdRiskResolutionSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>สถานะการแก้ผลการเรียน</h2>
+
+    <div class="sub">
+      ติดตามความก้าวหน้าในการแก้ผลการเรียน
+      0 ร มส มผ
+    </div>
+
+    <div
+      id="tdRiskResolutionStatus"
+      class="status info"
+      role="status"
+      aria-live="polite">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdRiskResolutionContent" class="hidden">
+
+      <div class="td-resolution-grid">
+
+        <!-- แก้สำเร็จ -->
+
+        <div class="td-resolution-card resolved">
+
+          <div class="td-resolution-label">
+            ✓ แก้สำเร็จ
+          </div>
+
+          <div
+            id="tdRiskResolutionResolved"
+            class="td-resolution-value">—</div>
+
+          <div class="small">รายการ</div>
+
+          <div
+            id="tdRiskResolutionResolvedPct"
+            class="td-resolution-percent">—</div>
+
+        </div>
+
+
+        <!-- รออนุมัติ -->
+
+        <div class="td-resolution-card pending">
+
+          <div class="td-resolution-label">
+            ⏳ รออนุมัติ
+          </div>
+
+          <div
+            id="tdRiskResolutionPending"
+            class="td-resolution-value">—</div>
+
+          <div class="small">รายการ</div>
+
+          <div
+            id="tdRiskResolutionPendingPct"
+            class="td-resolution-percent">—</div>
+
+        </div>
+
+
+        <!-- ยังไม่แก้ไข -->
+
+        <div class="td-resolution-card unresolved">
+
+          <div class="td-resolution-label">
+            ⚠ ยังไม่แก้ไข
+          </div>
+
+          <div
+            id="tdRiskResolutionUnresolved"
+            class="td-resolution-value">—</div>
+
+          <div class="small">รายการ</div>
+
+          <div
+            id="tdRiskResolutionUnresolvedPct"
+            class="td-resolution-percent">—</div>
+
+        </div>
+
+      </div>
+
+
+      <!-- กราฟและความก้าวหน้า -->
+
+      <div class="td-resolution-layout">
+
+        <div
+          id="tdRiskResolutionChartWrap"
+          class="td-resolution-chart-box">
+
+          <canvas
+            id="tdRiskResolutionChart"
+            role="img"
+            aria-label="กราฟสัดส่วนสถานะการแก้ผลการเรียน">
+
+          </canvas>
+
+        </div>
+
+
+        <div class="td-resolution-progress">
+
+          <div class="td-resolution-progress-head">
+
+            <span>ความก้าวหน้าในการแก้ผลการเรียน</span>
+
+            <span id="tdRiskResolutionProgressRate">
+              —
+            </span>
+
+          </div>
+
+          <div
+            id="tdRiskResolutionProgressTrack"
+            role="progressbar"
+            aria-label="อัตราการแก้ผลการเรียนสำเร็จ"
+            aria-valuemin="0"
+            aria-valuemax="100">
+
+            <div id="tdRiskResolutionProgressFill">
+            </div>
+
+          </div>
+
+          <div id="tdRiskResolutionProgressText">
+            ยังไม่ได้ประมวลผลข้อมูล
+          </div>
+
+          <div
+            id="tdRiskResolutionOutstandingText"
+            class="small"
+            style="margin-top:12px;">
+
+            —
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK RESOLUTION ===== -->
 
   <div id="tdRiskHeatmapSection"></div>
 
@@ -25463,6 +25792,8 @@ function tdRiskResetResult(){
 
   tdRiskResetClassRoom();
 
+  tdRiskResetResolution();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -25878,6 +26209,37 @@ tdRiskClassRoomState.mode = classRoomMode;
 // แสดง KPI
 
 tdRiskRenderKpis();
+
+// แสดงสถานะการแก้ผลการเรียน
+// ใช้ Summary เดิม ไม่เรียก RPC เพิ่ม
+
+try{
+
+  tdRiskRenderResolution();
+
+}catch(error){
+
+  tdRiskResetResolution();
+
+  setStatus(
+
+    'tdRiskResolutionStatus',
+
+    'ไม่สามารถแสดงสถานะการแก้ผลการเรียนได้',
+
+    'error'
+
+  );
+
+  console.warn(
+
+    'Teacher Dashboard resolution:',
+
+    error?.message || 'Unknown error'
+
+  );
+
+}
 
 
 // แสดงกราฟ
@@ -26623,6 +26985,610 @@ function tdRiskResetClassRoom(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK CLASS ROOM CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK RESOLUTION CONTROLLER
+   ===================================================== */
+
+const tdRiskResolutionState = {
+
+  chart: null
+
+};
+
+
+// =====================================================
+// 1. กำหนดสถานะการแก้ผลการเรียน
+// =====================================================
+
+const tdRiskResolutionSeries = [
+
+  {
+    key:'resolved_records',
+    label:'แก้สำเร็จ',
+    color:'#22c55e',
+    valueId:'tdRiskResolutionResolved',
+    percentId:'tdRiskResolutionResolvedPct'
+  },
+
+  {
+    key:'pending_records',
+    label:'รออนุมัติ',
+    color:'#f59e0b',
+    valueId:'tdRiskResolutionPending',
+    percentId:'tdRiskResolutionPendingPct'
+  },
+
+  {
+    key:'unresolved_records',
+    label:'ยังไม่แก้ไข',
+    color:'#ef4444',
+    valueId:'tdRiskResolutionUnresolved',
+    percentId:'tdRiskResolutionUnresolvedPct'
+  }
+
+];
+
+
+// =====================================================
+// 2. ทำลายกราฟเดิม
+// =====================================================
+
+function tdRiskDestroyResolutionChart(){
+
+  if(tdRiskResolutionState.chart){
+
+    tdRiskResolutionState.chart.destroy();
+
+    tdRiskResolutionState.chart = null;
+
+  }
+
+}
+
+
+// =====================================================
+// 3. แสดงจำนวนและร้อยละ
+// =====================================================
+
+function tdRiskRenderResolution(){
+
+  tdRiskResetResolution();
+
+  const summary = tdRiskResultState.summary;
+
+  if(!summary) return;
+
+
+  const total = summary.total_risk_records;
+
+  const resolved = summary.resolved_records;
+
+  const pending = summary.pending_records;
+
+  const unresolved = summary.unresolved_records;
+
+
+  // ตรวจสอบข้อมูลก่อนแสดงผล
+
+  const validCount = value =>
+
+    Number.isSafeInteger(value) &&
+    value >= 0;
+
+
+  if(
+
+    ![total,resolved,pending,unresolved]
+      .every(validCount) ||
+
+    resolved + pending + unresolved !== total
+
+  ){
+
+    throw new Error(
+      'ข้อมูลสถานะการแก้ผลการเรียนไม่ถูกต้อง'
+    );
+
+  }
+
+
+  // คำนวณร้อยละจาก Summary
+
+  const getPercent = value =>
+
+    total > 0
+      ? value / total * 100
+      : null;
+
+
+  tdRiskResolutionSeries.forEach(item => {
+
+    const count = summary[item.key];
+
+    const percent = getPercent(count);
+
+
+    tdStatsSetText(
+
+      item.valueId,
+
+      tdStatsFmtInt(count)
+
+    );
+
+
+    tdStatsSetText(
+
+      item.percentId,
+
+      percent === null
+        ? '—'
+        : `${tdStatsFmtNumber(percent)}%`
+
+    );
+
+  });
+
+
+  // =============================================
+  // Progress Bar
+  // =============================================
+
+  const rate = getPercent(resolved);
+
+  const outstanding = pending + unresolved;
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionProgressRate',
+
+    rate === null
+      ? '—'
+      : `${tdStatsFmtNumber(rate)}%`
+
+  );
+
+
+  el('tdRiskResolutionProgressFill')
+    .style.width = `${rate ?? 0}%`;
+
+
+  const track = el(
+    'tdRiskResolutionProgressTrack'
+  );
+
+
+  if(rate === null){
+
+    track.removeAttribute('aria-valuenow');
+
+    track.setAttribute(
+      'aria-valuetext',
+      'ไม่มีรายการกลุ่มเสี่ยง'
+    );
+
+  }else{
+
+    track.setAttribute(
+      'aria-valuenow',
+      String(Number(rate.toFixed(2)))
+    );
+
+    track.setAttribute(
+      'aria-valuetext',
+      `${tdStatsFmtNumber(rate)} เปอร์เซ็นต์`
+    );
+
+  }
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionProgressText',
+
+    `แก้สำเร็จ ${
+      tdStatsFmtInt(resolved)
+    } จากทั้งหมด ${
+      tdStatsFmtInt(total)
+    } รายการ`
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionOutstandingText',
+
+    `ยังคงค้าง ${
+      tdStatsFmtInt(outstanding)
+    } รายการ · รออนุมัติ ${
+      tdStatsFmtInt(pending)
+    } · ยังไม่แก้ไข ${
+      tdStatsFmtInt(unresolved)
+    }`
+
+  );
+
+
+  el('tdRiskResolutionContent')
+    .classList.remove('hidden');
+
+
+  // =============================================
+  // กรณีไม่มีรายการกลุ่มเสี่ยง
+  // =============================================
+
+  if(total === 0){
+
+    el('tdRiskResolutionChartWrap')
+      .classList.add('hidden');
+
+
+    setStatus(
+
+      'tdRiskResolutionStatus',
+
+      'ไม่พบรายการกลุ่มเสี่ยงตามเงื่อนไข',
+
+      'success'
+
+    );
+
+    return;
+
+  }
+
+
+  // =============================================
+  // สร้างกราฟ
+  // =============================================
+
+  try{
+
+    tdRiskRenderResolutionChart(summary);
+
+
+    setStatus(
+
+      'tdRiskResolutionStatus',
+
+      'แสดงสถานะจากผลการประมวลผลล่าสุด',
+
+      'success'
+
+    );
+
+  }catch(error){
+
+    tdRiskDestroyResolutionChart();
+
+
+    el('tdRiskResolutionChartWrap')
+      .classList.add('hidden');
+
+
+    setStatus(
+
+      'tdRiskResolutionStatus',
+
+      'แสดงข้อมูลสำเร็จ แต่ไม่สามารถสร้างกราฟได้',
+
+      'warn'
+
+    );
+
+
+    console.warn(
+
+      'Teacher Dashboard resolution chart:',
+
+      error?.message || 'Unknown error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 4. สร้าง Doughnut Chart
+// =====================================================
+
+function tdRiskRenderResolutionChart(summary){
+
+  tdRiskDestroyResolutionChart();
+
+
+  if(typeof Chart !== 'function'){
+
+    throw new Error(
+      'ไม่สามารถโหลด Chart.js'
+    );
+
+  }
+
+
+  el('tdRiskResolutionChartWrap')
+    .classList.remove('hidden');
+
+
+  const total = summary.total_risk_records;
+
+
+  // Plugin แสดงยอดรวมตรงกลาง Doughnut
+  // ใช้เฉพาะกราฟนี้ ไม่ลงทะเบียนแบบ Global
+
+  const centerTextPlugin = {
+
+    id:'tdRiskResolutionCenterText',
+
+    afterDraw(chart){
+
+      const area = chart.chartArea;
+
+      if(!area) return;
+
+
+      const ctx = chart.ctx;
+
+      const x = (area.left + area.right) / 2;
+
+      const y = (area.top + area.bottom) / 2;
+
+      const fontSize = Math.max(
+
+        16,
+
+        Math.min(
+          32,
+          (area.right - area.left) * 0.11
+        )
+
+      );
+
+
+      ctx.save();
+
+      ctx.textAlign = 'center';
+
+      ctx.textBaseline = 'middle';
+
+      ctx.fillStyle = '#17324d';
+
+      ctx.font =
+
+        `800 ${fontSize}px Sarabun, sans-serif`;
+
+
+      ctx.fillText(
+
+        tdStatsFmtInt(total),
+
+        x,
+
+        y - 8
+
+      );
+
+
+      ctx.fillStyle = '#64748b';
+
+      ctx.font = '12px Kanit, sans-serif';
+
+
+      ctx.fillText(
+
+        'รายการทั้งหมด',
+
+        x,
+
+        y + 18
+
+      );
+
+
+      ctx.restore();
+
+    }
+
+  };
+
+
+  tdRiskResolutionState.chart = new Chart(
+
+    el('tdRiskResolutionChart'),
+
+    {
+
+      type:'doughnut',
+
+      data:{
+
+        labels:tdRiskResolutionSeries.map(
+
+          item => item.label
+
+        ),
+
+        datasets:[{
+
+          data:tdRiskResolutionSeries.map(
+
+            item => summary[item.key]
+
+          ),
+
+          backgroundColor:
+
+            tdRiskResolutionSeries.map(
+
+              item => item.color
+
+            ),
+
+          borderColor:'#ffffff',
+
+          borderWidth:2,
+
+          hoverOffset:6
+
+        }]
+
+      },
+
+      plugins:[centerTextPlugin],
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        cutout:'68%',
+
+        plugins:{
+
+          legend:{
+
+            position:'bottom',
+
+            // ไม่ซ่อนสถานะเมื่อกด Legend
+
+            onClick:() => {},
+
+            labels:{
+
+              usePointStyle:true,
+
+              boxWidth:12
+
+            }
+
+          },
+
+          tooltip:{
+
+            callbacks:{
+
+              label:context => {
+
+                const count = Number(
+                  context.raw
+                );
+
+                const percent =
+
+                  total > 0
+
+                    ? count / total * 100
+
+                    : 0;
+
+
+                return `${context.label}: ${
+                  tdStatsFmtInt(count)
+                } รายการ (${
+                  tdStatsFmtNumber(percent)
+                }%)`;
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+}
+
+
+// =====================================================
+// 5. ล้างผลการประมวลผล
+// =====================================================
+
+function tdRiskResetResolution(){
+
+  tdRiskDestroyResolutionChart();
+
+
+  tdRiskResolutionSeries.forEach(item => {
+
+    tdStatsSetText(item.valueId,'—');
+
+    tdStatsSetText(item.percentId,'—');
+
+  });
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionProgressRate',
+
+    '—'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionProgressText',
+
+    'ยังไม่ได้ประมวลผลข้อมูล'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdRiskResolutionOutstandingText',
+
+    '—'
+
+  );
+
+
+  el('tdRiskResolutionProgressFill')
+    .style.width = '0%';
+
+
+  el('tdRiskResolutionProgressTrack')
+    .removeAttribute('aria-valuenow');
+
+
+  el('tdRiskResolutionProgressTrack')
+    .removeAttribute('aria-valuetext');
+
+
+  el('tdRiskResolutionContent')
+    .classList.add('hidden');
+
+
+  el('tdRiskResolutionChartWrap')
+    .classList.add('hidden');
+
+
+  setStatus(
+
+    'tdRiskResolutionStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK RESOLUTION CONTROLLER ===== */
 
 
  function setActivePage(page){
