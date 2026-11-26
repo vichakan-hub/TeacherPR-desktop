@@ -2410,6 +2410,138 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD TAB MENU ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : FILTER BUILDER
+   ===================================================== */
+
+#pageDashboard .td-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+#pageDashboard .td-filter-card{
+  min-width:0;
+  padding:14px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+}
+
+#pageDashboard .td-filter-card.full{
+  grid-column:1 / -1;
+}
+
+#pageDashboard .td-filter-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+#pageDashboard .td-filter-title{
+  font-size:16px;
+  font-weight:700;
+  color:#17324d;
+}
+
+#pageDashboard .td-filter-options{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+#pageDashboard .td-filter-check{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:36px;
+  padding:7px 12px;
+  border:1px solid #dbe7f3;
+  border-radius:12px;
+  background:#f8fbff;
+  font-size:14px;
+  cursor:pointer;
+}
+
+#pageDashboard .td-filter-check input{
+  width:16px;
+  height:16px;
+  flex:0 0 auto;
+  accent-color:#2563eb;
+}
+
+#pageDashboard .td-filter-all{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  color:#2563eb;
+  cursor:pointer;
+}
+
+#pageDashboard .td-filter-all input{
+  accent-color:#2563eb;
+}
+
+#pageDashboard .td-room-group{
+  width:100%;
+  min-width:0;
+  padding:12px;
+  background:#f8fbff;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+}
+
+#pageDashboard .td-room-title{
+  margin-bottom:10px;
+  color:#17324d;
+  font-weight:800;
+}
+
+#pageDashboard #tdStatsRoomChecks{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+#pageDashboard #tdStatsFilterFields{
+  min-width:0;
+  border:0;
+  padding:0;
+  margin:0;
+}
+
+@media(max-width:720px){
+
+  #pageDashboard .td-filter-grid{
+    grid-template-columns:1fr;
+  }
+
+  #pageDashboard #tdStatsRoomChecks{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  #pageDashboard .td-filter-check{
+    font-size:13px;
+    padding:7px 9px;
+  }
+
+}
+
+@media(max-width:420px){
+
+  #pageDashboard #tdStatsRoomChecks{
+    grid-template-columns:1fr;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD FILTER BUILDER ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -15142,47 +15274,231 @@ style="
   </section>
 
 
-  <!-- ===============================================
-       TAB 1 : สถิติผลการเรียน
-       =============================================== -->
+<!-- ===============================================
+     TAB 1 : สถิติผลการเรียน
+     =============================================== -->
 
-  <div
-    id="teacherDashboardStatsPanel"
-    class="dashboard-tab-panel"
-    role="region"
-    aria-labelledby="teacherDashboardStatsTab">
+<div
+  id="teacherDashboardStatsPanel"
+  class="dashboard-tab-panel"
+  role="region"
+  aria-labelledby="teacherDashboardStatsTab">
 
-    <section class="card">
+  <section class="card" style="margin-bottom:18px;">
 
-      <div class="empty-state">
+    <div class="preview-topbar">
 
-        <div style="font-size:48px; margin-bottom:12px;">
-          📊
+      <div>
+        <h2>เลือกข้อมูลที่ต้องการประมวลผล</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          กำหนดเงื่อนไขการวิเคราะห์ผลการเรียนทั้งโรงเรียน
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      id="tdStatsFilterStatus"
+      class="status info"
+      role="status">
+      ยังไม่ได้โหลดตัวเลือก
+    </div>
+
+    <button
+      id="tdStatsReloadOptionsBtn"
+      class="btn-secondary"
+      type="button">
+      โหลดตัวเลือก
+    </button>
+
+
+    <fieldset id="tdStatsFilterFields" disabled>
+
+      <div class="td-filter-grid">
+
+        <!-- ปีการศึกษา -->
+
+        <div class="td-filter-card">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              ปีการศึกษา
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllYears"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div
+            id="tdStatsYearChecks"
+            class="td-filter-options">
+          </div>
+
         </div>
 
-        <div style="
-          font-size:20px;
-          font-weight:700;
-          color:#17324d;
-        ">
-          สถิติผลการเรียน
+
+        <!-- ภาคเรียน -->
+
+        <div class="td-filter-card">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              ภาคเรียน
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllTerms"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div
+            id="tdStatsTermChecks"
+            class="td-filter-options">
+          </div>
+
         </div>
 
-        <div style="margin-top:8px;">
-          วิเคราะห์ผลการเรียนภาพรวมทั้งโรงเรียน
+
+        <!-- ระดับชั้น -->
+
+        <div class="td-filter-card">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              ระดับชั้น
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllClasses"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div
+            id="tdStatsClassChecks"
+            class="td-filter-options">
+          </div>
+
         </div>
 
-        <div style="margin-top:8px;">
-          อยู่ระหว่างพัฒนา
+
+        <!-- ประเภทวิชา -->
+
+        <div class="td-filter-card">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              ประเภทวิชา
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllTypes"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div
+            id="tdStatsTypeChecks"
+            class="td-filter-options">
+          </div>
+
+        </div>
+
+
+        <!-- กลุ่มสาระ -->
+
+        <div class="td-filter-card full">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              กลุ่มสาระการเรียนรู้
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllAreas"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div
+            id="tdStatsAreaChecks"
+            class="td-filter-options">
+          </div>
+
+        </div>
+
+
+        <!-- ห้องเรียน -->
+
+        <div class="td-filter-card full">
+
+          <div class="td-filter-head">
+
+            <div class="td-filter-title">
+              ห้องเรียน
+            </div>
+
+            <label class="td-filter-all">
+              <input
+                id="tdStatsAllRooms"
+                type="checkbox">
+              เลือกทั้งหมด
+            </label>
+
+          </div>
+
+          <div class="small" style="margin-bottom:12px;">
+            เมื่อเปลี่ยนระดับชั้น
+            ระบบจะเลือกห้องทั้งหมดของระดับชั้นนั้นใหม่
+          </div>
+
+          <div id="tdStatsRoomChecks"></div>
+
         </div>
 
       </div>
 
-    </section>
+    </fieldset>
 
-  </div>
+  </section>
 
-  <!-- ===== END TAB 1 ===== -->
+
+  <!-- ส่วนเลือกรายวิชา จะเพิ่มในขั้นตอน 3.4.2 -->
+
+  <div id="tdStatsSubjectSection"></div>
+
+
+  <!-- ส่วนแสดงผล จะเพิ่มในขั้นตอน 3.4.3 -->
+
+  <div id="tdStatsResultSection"></div>
+
+</div>
+
+<!-- ===== END TAB 1 ===== -->
 
 
   <!-- ===============================================
@@ -18667,11 +18983,703 @@ function setTeacherDashboardTab(tab){
       String(isRisk)
     );
 
+      if(isStats){
+
+    tdStatsEnsureOptions();
+
+  }
+
   return true;
 
 }
 
 /* ===== END TEACHER DASHBOARD TAB CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : STATS FILTER CONTROLLER
+   ===================================================== */
+
+const tdStatsState = {
+
+  options: null,
+
+  loading: false,
+
+  generation: 0
+
+};
+
+
+// ตรวจสอบ Session ปัจจุบัน
+
+function tdStatsHasValidSession(){
+
+  const token = String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+  const code = String(
+    state.currentUser?.teacher_code || ''
+  ).trim().toUpperCase();
+
+  const expiresAt = Date.parse(
+    state.teacherSessionExpiresAt || ''
+  );
+
+  return (
+
+    token.length >= 32 &&
+
+    code.startsWith('T') &&
+
+    (
+      !Number.isFinite(expiresAt) ||
+      expiresAt > Date.now()
+    )
+
+  );
+
+}
+
+
+// สร้าง Checkbox ด้วย DOM
+// ไม่ใช้ innerHTML กับข้อมูลจากฐานข้อมูล
+
+function tdStatsCreateCheck(value, label, checked){
+
+  const wrapper = document.createElement('label');
+
+  wrapper.className = 'td-filter-check';
+
+  const input = document.createElement('input');
+
+  input.type = 'checkbox';
+
+  input.value = String(value);
+
+  input.checked = Boolean(checked);
+
+  const text = document.createElement('span');
+
+  text.textContent = String(label);
+
+  wrapper.append(input, text);
+
+  return wrapper;
+
+}
+
+
+// อ่านรายการ Checkbox
+
+function tdStatsGetChecks(boxId){
+
+  return Array.from(
+
+    el(boxId)?.querySelectorAll(
+      'input[type="checkbox"]'
+    ) || []
+
+  );
+
+}
+
+
+// อ่านค่าที่เลือก
+
+function tdStatsGetSelected(boxId){
+
+  return tdStatsGetChecks(boxId)
+
+    .filter(input => input.checked)
+
+    .map(input => input.value);
+
+}
+
+
+// อัปเดตสถานะเลือกทั้งหมด
+
+function tdStatsSyncAll(boxId, allId){
+
+  const all = el(allId);
+
+  const checks = tdStatsGetChecks(boxId);
+
+  if(!all) return;
+
+  const selected = checks.filter(
+    input => input.checked
+  ).length;
+
+  all.disabled = checks.length === 0;
+
+  all.checked =
+
+    checks.length > 0 &&
+    selected === checks.length;
+
+  all.indeterminate =
+
+    selected > 0 &&
+    selected < checks.length;
+
+}
+
+
+// กำหนด Event ของ Checkbox
+
+function tdStatsBindGroup(boxId, allId, onChange){
+
+  const box = el(boxId);
+
+  const all = el(allId);
+
+  if(!box || !all) return;
+
+  all.onchange = () => {
+
+    tdStatsGetChecks(boxId).forEach(input => {
+
+      input.checked = all.checked;
+
+    });
+
+    tdStatsSyncAll(boxId, allId);
+
+    if(onChange) onChange();
+
+  };
+
+  box.onchange = () => {
+
+    tdStatsSyncAll(boxId, allId);
+
+    if(onChange) onChange();
+
+  };
+
+  tdStatsSyncAll(boxId, allId);
+
+}
+
+
+// สร้างตัวกรองทั่วไป
+
+function tdStatsRenderGroup(
+  boxId,
+  allId,
+  values,
+  defaultValues = null,
+  labelBuilder = value => value,
+  onChange = null
+){
+
+  const box = el(boxId);
+
+  if(!box) return;
+
+  box.replaceChildren();
+
+  values.forEach(value => {
+
+    const checked =
+
+      defaultValues === null ||
+
+      defaultValues.includes(String(value));
+
+    box.append(
+
+      tdStatsCreateCheck(
+
+        value,
+
+        labelBuilder(value),
+
+        checked
+
+      )
+
+    );
+
+  });
+
+  if(values.length === 0){
+
+    box.textContent = 'ไม่พบข้อมูลตัวเลือก';
+
+  }
+
+  tdStatsBindGroup(boxId, allId, onChange);
+
+}
+
+
+// สร้างตัวเลือกห้องเรียนตามระดับชั้น
+
+function tdStatsRenderRooms(){
+
+  const box = el('tdStatsRoomChecks');
+
+  if(!box) return;
+
+  box.replaceChildren();
+
+  const selectedClasses = tdStatsGetSelected(
+    'tdStatsClassChecks'
+  );
+
+  const groups =
+
+    tdStatsState.options?.rooms_by_class || [];
+
+  groups.forEach(group => {
+
+    const classLevel = String(
+      group.class_level || ''
+    ).trim();
+
+    if(!selectedClasses.includes(classLevel)){
+      return;
+    }
+
+    const rooms = Array.isArray(group.rooms)
+
+      ? group.rooms
+
+          .map(room => String(room).trim())
+
+          .filter(Boolean)
+
+          .sort((a,b) =>
+            a.localeCompare(b,'th',{numeric:true})
+          )
+
+      : [];
+
+    if(!rooms.length) return;
+
+    const roomGroup = document.createElement('div');
+
+    roomGroup.className = 'td-room-group';
+
+    const title = document.createElement('div');
+
+    title.className = 'td-room-title';
+
+    title.textContent = classLevel;
+
+    const options = document.createElement('div');
+
+    options.className = 'td-filter-options';
+
+    rooms.forEach(room => {
+
+      const value = `${classLevel}/${room}`;
+
+      options.append(
+
+        tdStatsCreateCheck(value, value, true)
+
+      );
+
+    });
+
+    roomGroup.append(title, options);
+
+    box.append(roomGroup);
+
+  });
+
+  if(!box.children.length){
+
+    box.textContent =
+      'ไม่พบห้องเรียนตามระดับชั้นที่เลือก';
+
+  }
+
+  tdStatsBindGroup(
+
+    'tdStatsRoomChecks',
+
+    'tdStatsAllRooms'
+
+  );
+
+}
+
+
+// แสดงตัวกรองทั้งหมด
+
+function tdStatsRenderOptions(){
+
+  const options = tdStatsState.options;
+
+  if(!options) return;
+
+  const years = options.years
+
+    .map(String)
+
+    .sort((a,b) => Number(b) - Number(a));
+
+  tdStatsRenderGroup(
+
+    'tdStatsYearChecks',
+
+    'tdStatsAllYears',
+
+    years,
+
+    years.length ? [years[0]] : []
+
+  );
+
+
+  tdStatsRenderGroup(
+
+    'tdStatsTermChecks',
+
+    'tdStatsAllTerms',
+
+    options.terms,
+
+    null,
+
+    value => `เทอม ${value}`
+
+  );
+
+
+  tdStatsRenderGroup(
+
+    'tdStatsClassChecks',
+
+    'tdStatsAllClasses',
+
+    options.class_levels,
+
+    null,
+
+    value => value,
+
+    tdStatsRenderRooms
+
+  );
+
+
+  tdStatsRenderGroup(
+
+    'tdStatsTypeChecks',
+
+    'tdStatsAllTypes',
+
+    options.subject_types
+
+  );
+
+
+  tdStatsRenderGroup(
+
+    'tdStatsAreaChecks',
+
+    'tdStatsAllAreas',
+
+    options.learning_areas
+
+  );
+
+
+  tdStatsRenderRooms();
+
+}
+
+
+// โหลดตัวเลือกจาก Supabase
+
+async function tdStatsLoadOptions(){
+
+  // ป้องกันการโหลดซ้ำ
+
+  if(tdStatsState.loading){
+    return;
+  }
+
+  if(!tdStatsHasValidSession()){
+
+    tdStatsReset();
+
+    setStatus(
+
+      'tdStatsFilterStatus',
+
+      'Session ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+  // ใช้ตัวเลือกเดิมที่โหลดสำเร็จแล้ว
+
+  if(tdStatsState.options){
+    return;
+  }
+
+  const token = String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+  const generation = ++tdStatsState.generation;
+
+  const isCurrentRequest = () =>
+
+    generation === tdStatsState.generation &&
+
+    token === String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+  tdStatsState.loading = true;
+
+  el('tdStatsFilterFields').disabled = true;
+
+  el('tdStatsReloadOptionsBtn').disabled = true;
+
+  setStatus(
+
+    'tdStatsFilterStatus',
+
+    'กำลังโหลดตัวเลือกจากฐานข้อมูล...',
+
+    'info'
+
+  );
+
+  try{
+
+    const {data,error} = await supabaseClient.rpc(
+
+      'teacher_get_dashboard_checkbox_filter_options_session',
+
+      {
+        p_token: token
+      }
+
+    );
+
+    if(!isCurrentRequest()) return;
+
+    if(error) throw error;
+
+    if(!tdStatsHasValidSession()){
+      throw new Error('Session หมดอายุ');
+    }
+
+    const requiredKeys = [
+
+      'years',
+
+      'terms',
+
+      'class_levels',
+
+      'learning_areas',
+
+      'subject_types',
+
+      'rooms_by_class'
+
+    ];
+
+    if(
+
+      !data ||
+
+      !requiredKeys.every(
+        key => Array.isArray(data[key])
+      )
+
+    ){
+
+      throw new Error(
+        'รูปแบบข้อมูลตัวเลือกไม่ถูกต้อง'
+      );
+
+    }
+
+    tdStatsState.options = data;
+
+    tdStatsRenderOptions();
+
+    el('tdStatsFilterFields').disabled = false;
+
+    el('tdStatsReloadOptionsBtn')
+      .classList.add('hidden');
+
+    setStatus(
+
+      'tdStatsFilterStatus',
+
+      'โหลดตัวเลือกเรียบร้อยแล้ว',
+
+      'success'
+
+    );
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+    tdStatsState.options = null;
+
+    setStatus(
+
+      'tdStatsFilterStatus',
+
+      'โหลดตัวเลือกไม่สำเร็จ: ' +
+      (error?.message || 'กรุณาลองใหม่'),
+
+      'error'
+
+    );
+
+    el('tdStatsReloadOptionsBtn')
+      .classList.remove('hidden');
+
+  }finally{
+
+    if(isCurrentRequest()){
+
+      tdStatsState.loading = false;
+
+      el('tdStatsReloadOptionsBtn').disabled = false;
+
+    }
+
+  }
+
+}
+
+
+// โหลดเฉพาะเมื่อเข้าหน้า Stats Dashboard
+
+function tdStatsEnsureOptions(){
+
+  const page = el('pageDashboard');
+
+  const panel = el('teacherDashboardStatsPanel');
+
+  if(
+
+    !page ||
+
+    !panel ||
+
+    page.classList.contains('hidden') ||
+
+    panel.classList.contains('hidden')
+
+  ){
+
+    return;
+
+  }
+
+  tdStatsLoadOptions();
+
+}
+
+
+// ล้างข้อมูลเมื่อ Logout
+
+function tdStatsReset(){
+
+  tdStatsState.generation++;
+
+  tdStatsState.options = null;
+
+  tdStatsState.loading = false;
+
+  [
+
+    'tdStatsYearChecks',
+
+    'tdStatsTermChecks',
+
+    'tdStatsClassChecks',
+
+    'tdStatsTypeChecks',
+
+    'tdStatsAreaChecks',
+
+    'tdStatsRoomChecks'
+
+  ].forEach(id => {
+
+    el(id)?.replaceChildren();
+
+  });
+
+  [
+
+    'tdStatsAllYears',
+
+    'tdStatsAllTerms',
+
+    'tdStatsAllClasses',
+
+    'tdStatsAllTypes',
+
+    'tdStatsAllAreas',
+
+    'tdStatsAllRooms'
+
+  ].forEach(id => {
+
+    const input = el(id);
+
+    if(input){
+
+      input.checked = false;
+
+      input.indeterminate = false;
+
+    }
+
+  });
+
+  const fields = el('tdStatsFilterFields');
+
+  if(fields) fields.disabled = true;
+
+  const button = el('tdStatsReloadOptionsBtn');
+
+  if(button){
+
+    button.disabled = false;
+
+    button.classList.remove('hidden');
+
+  }
+
+  setStatus(
+
+    'tdStatsFilterStatus',
+
+    'ยังไม่ได้โหลดตัวเลือก',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD STATS FILTER CONTROLLER ===== */
 
  function setActivePage(page){
 
@@ -18740,6 +19748,12 @@ if(
 
       el('pageDashboard')
     ?.classList.toggle('hidden', !isDashboard);
+
+    if(isDashboard){
+
+  tdStatsEnsureOptions();
+
+}
 
 el('pageMidtermReport')
   ?.classList.toggle(
@@ -22106,6 +23120,10 @@ async function logout(){
 
   state.teacherSessionToken = null;
   state.teacherSessionExpiresAt = null;
+
+  tdStatsReset();
+
+setTeacherDashboardTab('stats');
 
   state.groupedOfferings = [];
   state.selectedTeachingGroup = null;
@@ -54490,6 +55508,16 @@ bindIfExists(
 );
 
 /* ===== END TEACHER DASHBOARD TAB EVENTS ===== */
+
+bindIfExists(
+
+  'tdStatsReloadOptionsBtn',
+
+  'click',
+
+  tdStatsEnsureOptions
+
+);
 
   bindIfExists(
   'menuQrGeneratorBtn',
