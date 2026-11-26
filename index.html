@@ -2964,6 +2964,132 @@ td:first-child{
 /* ===== END TEACHER DASHBOARD STATS RESULT ===== */
 
 /* =====================================================
+   TEACHER DASHBOARD : CHARTS AND SUMMARY TABLE
+   ===================================================== */
+
+#tdStatsChartSection,
+#tdStatsSummaryTableSection{
+  min-width:0;
+  max-width:100%;
+}
+
+#tdStatsChartSection .td-chart-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+
+#tdStatsChartSection .td-chart-card{
+  min-width:0;
+  padding:16px;
+  background:#fff;
+  border:1px solid #dbe7f3;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+#tdStatsChartSection .td-chart-card h3{
+  margin:0 0 5px;
+  font-size:18px;
+  color:#17324d;
+}
+
+#tdStatsChartSection .td-chart-box{
+  position:relative;
+  width:100%;
+  min-width:0;
+  height:280px;
+  margin-top:14px;
+}
+
+#tdStatsSummaryTableSection .td-table-wrap{
+  width:100%;
+  max-width:100%;
+  overflow:auto;
+  border:1px solid #dbe7f3;
+  border-radius:16px;
+}
+
+#tdStatsSummaryTable{
+  width:100%;
+  min-width:1100px;
+  border-collapse:collapse;
+}
+
+#tdStatsSummaryTable th,
+#tdStatsSummaryTable td{
+  padding:11px 8px;
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+  font-size:14px;
+  border:1px solid #e5edf7;
+}
+
+#tdStatsSummaryTable th{
+  background:#edf5ff;
+  color:#17324d;
+  font-weight:800;
+}
+
+#tdStatsSummaryTable td{
+  background:#fff;
+  font-family:'Sarabun',sans-serif;
+  font-variant-numeric:tabular-nums;
+}
+
+#tdStatsSummaryTable tbody tr:nth-child(even) td{
+  background:#f8fbff;
+}
+
+#tdStatsSummaryTable .td-table-total td{
+  background:#eaf2ff;
+  color:#1d4ed8;
+  font-weight:800;
+  border-top:2px solid #93c5fd;
+}
+
+#tdStatsSummaryTable .td-table-risk{
+  color:#dc2626;
+  font-weight:800;
+}
+
+#tdStatsSummaryTable .td-table-teacher{
+  min-width:180px;
+  max-width:260px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:left;
+}
+
+@media(max-width:1280px){
+
+  #tdStatsChartSection .td-chart-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  #tdStatsChartSection .td-chart-card:first-child{
+    grid-column:1 / -1;
+  }
+
+}
+
+@media(max-width:900px){
+
+  #tdStatsChartSection .td-chart-grid{
+    grid-template-columns:1fr;
+  }
+
+  #tdStatsChartSection .td-chart-box{
+    height:260px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD CHARTS AND SUMMARY TABLE ===== */
+
+/* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY
    ===================================================== */
 #pageDashboard .td-filter-open-card{ margin-bottom:18px; }
@@ -16351,11 +16477,172 @@ style="
   </section>
 
 
-  <!-- เตรียมสำหรับขั้นตอน 3.4.4 -->
+<!-- =================================================
+     TEACHER DASHBOARD : CHARTS
+     ================================================= -->
 
-  <div id="tdStatsChartSection"></div>
+<div id="tdStatsChartSection">
 
-  <div id="tdStatsSummaryTableSection"></div>
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>กราฟสถิติผลการเรียน</h2>
+
+    <div
+      id="tdStatsChartsStatus"
+      class="status info"
+      role="status">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdStatsChartsContent"
+         class="td-chart-grid hidden">
+
+      <!-- กราฟการกระจายระดับผลการเรียน -->
+
+      <div class="td-chart-card">
+
+        <h3>การกระจายผลการเรียน</h3>
+
+        <div class="small">
+          จำนวนรายการแยกตามระดับผลการเรียน
+        </div>
+
+        <div class="td-chart-box">
+
+          <canvas
+            id="tdStatsGradeChart"
+            role="img"
+            aria-label="กราฟการกระจายผลการเรียน">
+          </canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- กราฟค่าเฉลี่ย -->
+
+      <div class="td-chart-card">
+
+        <h3 id="tdStatsMeanChartTitle">
+          ค่าเฉลี่ยรายชั้น / รายห้อง
+        </h3>
+
+        <div class="small">
+          ค่าเฉลี่ยระดับผลการเรียน
+        </div>
+
+        <div class="td-chart-box">
+
+          <canvas
+            id="tdStatsMeanChart"
+            role="img"
+            aria-label="กราฟค่าเฉลี่ยรายชั้นหรือรายห้อง">
+          </canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- กราฟ Doughnut -->
+
+      <div class="td-chart-card">
+
+        <h3>สัดส่วนผลการเรียน</h3>
+
+        <div class="small">
+          ร้อยละของผลการเรียนแต่ละระดับ
+        </div>
+
+        <div class="td-chart-box">
+
+          <canvas
+            id="tdStatsDonutChart"
+            role="img"
+            aria-label="กราฟสัดส่วนผลการเรียน">
+          </canvas>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD CHARTS ===== -->
+
+
+<!-- =================================================
+     TEACHER DASHBOARD : SUMMARY TABLE
+     ================================================= -->
+
+<div id="tdStatsSummaryTableSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="preview-topbar">
+
+      <div>
+
+        <h2>ตารางสรุปสถิติผลการเรียน</h2>
+
+        <div class="sub" style="margin-bottom:0;">
+          สรุปผลการเรียนตามระดับชั้นหรือห้องเรียน
+        </div>
+
+      </div>
+
+      <span id="tdStatsTableCount" class="badge">
+
+        0 รายการ
+
+      </span>
+
+    </div>
+
+    <div id="tdStatsTableStatus"
+         class="small"
+         style="margin-bottom:10px;"
+         role="status">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdStatsTableWrap"
+         class="td-table-wrap hidden">
+
+      <table id="tdStatsSummaryTable">
+
+        <thead id="tdStatsSummaryThead"></thead>
+
+        <tbody id="tdStatsSummaryTbody"></tbody>
+
+        <tfoot id="tdStatsSummaryTfoot"></tfoot>
+
+      </table>
+
+    </div>
+
+    <div class="small" style="margin-top:12px;">
+
+      X̄ = ค่าเฉลี่ยระดับผลการเรียน<br>
+      S.D. = ส่วนเบี่ยงเบนมาตรฐาน<br>
+      ∑fx = ผลรวมคะแนนระดับผลการเรียน
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD SUMMARY TABLE ===== -->
 
 </div>
 
@@ -21937,6 +22224,8 @@ function tdStatsRenderResult(){
     data.learning_area_kpis
   );
 
+  tdStatsRenderDetails();
+
 
   setStatus(
 
@@ -21964,6 +22253,8 @@ function tdStatsRenderResult(){
 // =====================================================
 
 function tdStatsResetResult(){
+
+  tdStatsResetDetails();
 
   tdStatsResultState.generation++;
 
@@ -22241,6 +22532,974 @@ async function tdStatsProcessDashboard(payload){
 }
 
 /* ===== END TEACHER DASHBOARD STATS RESULT CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : CHART AND TABLE CONTROLLER
+   ===================================================== */
+
+const tdStatsGradeKeys = [
+
+  '4', '3.5', '3', '2.5',
+  '2', '1.5', '1', '0',
+  'ร', 'มส', 'ผ', 'มผ'
+
+];
+
+const tdStatsGradeColors = [
+
+  '#2563eb',
+  '#60a5fa',
+  '#38bdf8',
+  '#22c55e',
+  '#f59e0b',
+  '#f97316',
+  '#ef4444',
+  '#dc2626',
+  '#a855f7',
+  '#64748b',
+  '#14b8a6',
+  '#ec4899'
+
+];
+
+const tdStatsCharts = {
+
+  grade: null,
+  mean: null,
+  donut: null
+
+};
+
+
+// =====================================================
+// 1. ทำลาย Chart เดิม
+// =====================================================
+
+function tdStatsDestroyCharts(){
+
+  Object.keys(tdStatsCharts).forEach(key => {
+
+    tdStatsCharts[key]?.destroy();
+
+    tdStatsCharts[key] = null;
+
+  });
+
+}
+
+
+// =====================================================
+// 2. ตรวจสอบข้อมูลแต่ละแถว
+// =====================================================
+
+function tdStatsValidateSummaryRows(data){
+
+  const validCount = n =>
+    Number.isSafeInteger(n) && n >= 0;
+
+  const validNumber = n =>
+    typeof n === 'number' &&
+    Number.isFinite(n) && n >= 0;
+
+  let total = 0;
+
+  data.rows.forEach(row => {
+
+    if(
+
+      typeof row.room_label !== 'string' ||
+
+      !validCount(row.total_students) ||
+
+      !validCount(row.unique_students) ||
+
+      row.unique_students > row.total_students ||
+
+      !validNumber(row.fx) ||
+
+      !validNumber(row.average) ||
+
+      row.average > 4 ||
+
+      !validNumber(row.sd) ||
+
+      !row.grades ||
+
+      !tdStatsGradeKeys.every(
+        key => validCount(row.grades[key])
+      )
+
+    ){
+
+      throw new Error(
+        'รูปแบบข้อมูลรายชั้นหรือรายห้องไม่ถูกต้อง'
+      );
+
+    }
+
+    const count = tdStatsGradeKeys.reduce(
+
+      (sum,key) => sum + row.grades[key],
+
+      0
+
+    );
+
+    if(count > row.total_students){
+
+      throw new Error(
+        'จำนวนเกรดรายห้องไม่สอดคล้องกัน'
+      );
+
+    }
+
+    total += row.total_students;
+
+  });
+
+
+  if(total !== data.total_students){
+
+    throw new Error(
+      'ผลรวมจำนวนรายการรายห้องไม่ตรงกับยอดรวม'
+    );
+
+  }
+
+
+  for(const key of tdStatsGradeKeys){
+
+    const sum = data.rows.reduce(
+
+      (n,row) => n + row.grades[key],
+
+      0
+
+    );
+
+    if(sum !== data.grade_totals[key]){
+
+      throw new Error(
+        `ผลรวมเกรด ${key} ไม่ตรงกับยอดรวม`
+      );
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// 3. เตรียมข้อมูลสำหรับกราฟ
+// =====================================================
+
+function tdStatsGetGradeDistribution(data){
+
+  const labels = [...tdStatsGradeKeys];
+
+  const values = labels.map(
+    key => data.grade_totals[key]
+  );
+
+  const colors = [...tdStatsGradeColors];
+
+  const counted = values.reduce(
+    (sum,value) => sum + value,
+    0
+  );
+
+  const other = data.total_students - counted;
+
+  // รองรับกรณีรายการที่ไม่ได้อยู่ใน 12 ระดับเกรด
+
+  if(other > 0){
+
+    labels.push('อื่น / ไม่ระบุ');
+
+    values.push(other);
+
+    colors.push('#94a3b8');
+
+  }
+
+  return {labels,values,colors};
+
+}
+
+
+// =====================================================
+// 4. สร้างกราฟทั้ง 3 ประเภท
+// =====================================================
+
+function tdStatsRenderCharts(data){
+
+  tdStatsDestroyCharts();
+
+  if(!data.total_students){
+
+    el('tdStatsChartsContent')
+      .classList.add('hidden');
+
+    setStatus(
+      'tdStatsChartsStatus',
+      'ไม่พบข้อมูลสำหรับสร้างกราฟ',
+      'warn'
+    );
+
+    return;
+
+  }
+
+  if(typeof Chart !== 'function'){
+
+    throw new Error('ไม่สามารถโหลด Chart.js');
+
+  }
+
+  el('tdStatsChartsContent')
+    .classList.remove('hidden');
+
+  const {labels,values,colors} =
+    tdStatsGetGradeDistribution(data);
+
+
+  // ============================================
+  // กราฟที่ 1 : การกระจายระดับผลการเรียน
+  // ============================================
+
+  tdStatsCharts.grade = new Chart(
+
+    el('tdStatsGradeChart'),
+
+    {
+
+      type:'bar',
+
+      data:{
+
+        labels,
+
+        datasets:[{
+
+          label:'จำนวนผลการเรียน',
+
+          data:values,
+
+          backgroundColor:colors,
+
+          borderRadius:8,
+
+          borderSkipped:false
+
+        }]
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        plugins:{
+
+          legend:{display:false}
+
+        },
+
+        scales:{
+
+          y:{
+            beginAtZero:true,
+            ticks:{precision:0}
+          },
+
+          x:{
+            grid:{display:false}
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+
+  // ============================================
+  // กราฟที่ 2 : ค่าเฉลี่ยรายชั้นหรือรายห้อง
+  // ============================================
+
+  const rows = data.rows;
+
+  const roomLabels = rows.map(
+    row => row.room_label
+  );
+
+  const means = rows.map(
+    row => row.average
+  );
+
+  const byRoom = roomLabels.some(
+    label => label.includes('/')
+  );
+
+  tdStatsSetText(
+
+    'tdStatsMeanChartTitle',
+
+    byRoom
+      ? 'ค่าเฉลี่ยรายห้อง'
+      : 'ค่าเฉลี่ยรายระดับชั้น'
+
+  );
+
+  tdStatsCharts.mean = new Chart(
+
+    el('tdStatsMeanChart'),
+
+    {
+
+      type:'bar',
+
+      data:{
+
+        labels:roomLabels,
+
+        datasets:[{
+
+          label:'ค่าเฉลี่ย',
+
+          data:means,
+
+          backgroundColor:means.map(
+            value => value < 3.5
+              ? '#f59e0b'
+              : '#2563eb'
+          ),
+
+          borderRadius:8,
+
+          borderSkipped:false
+
+        }]
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        plugins:{
+
+          legend:{display:false},
+
+          tooltip:{
+
+            callbacks:{
+
+              label:context =>
+                `ค่าเฉลี่ย ${tdStatsFmtNumber(
+                  context.parsed.y
+                )}`
+
+            }
+
+          }
+
+        },
+
+        scales:{
+
+          y:{
+
+            beginAtZero:true,
+
+            max:4,
+
+            ticks:{stepSize:0.5}
+
+          },
+
+          x:{
+
+            grid:{display:false}
+
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+
+  // ============================================
+  // กราฟที่ 3 : สัดส่วนผลการเรียน
+  // ============================================
+
+  const donutItems = labels.map(
+
+    (label,i) => ({
+
+      label,
+
+      value:values[i],
+
+      color:colors[i]
+
+    })
+
+  ).filter(item => item.value > 0);
+
+  tdStatsCharts.donut = new Chart(
+
+    el('tdStatsDonutChart'),
+
+    {
+
+      type:'doughnut',
+
+      data:{
+
+        labels:donutItems.map(
+          item => item.label
+        ),
+
+        datasets:[{
+
+          data:donutItems.map(
+            item => item.value
+          ),
+
+          backgroundColor:donutItems.map(
+            item => item.color
+          ),
+
+          borderColor:'#fff',
+
+          borderWidth:3,
+
+          hoverOffset:6
+
+        }]
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        cutout:'62%',
+
+        plugins:{
+
+          legend:{
+
+            position:'bottom',
+
+            labels:{
+
+              boxWidth:12,
+
+              usePointStyle:true
+
+            }
+
+          },
+
+          tooltip:{
+
+            callbacks:{
+
+              label:context => {
+
+                const count = Number(
+                  context.raw
+                );
+
+                const pct =
+                  count / data.total_students * 100;
+
+                return `${context.label}: ${
+                  tdStatsFmtInt(count)
+                } รายการ (${
+                  tdStatsFmtNumber(pct)
+                }%)`;
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+
+  setStatus(
+
+    'tdStatsChartsStatus',
+
+    'แสดงกราฟจากผลการประมวลผลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 5. สร้าง Cell ตารางด้วย DOM
+// =====================================================
+
+function tdStatsCreateTableCell(
+  tag,
+  value,
+  className = ''
+){
+
+  const cell = document.createElement(tag);
+
+  cell.textContent = String(value ?? '—');
+
+  if(className){
+
+    cell.className = className;
+
+  }
+
+  if(tag === 'th'){
+
+    cell.scope = 'col';
+
+  }
+
+  return cell;
+
+}
+
+
+// =====================================================
+// 6. แสดงตารางสรุปผลการเรียน
+// =====================================================
+
+function tdStatsRenderSummaryTable(data){
+
+  const thead = el('tdStatsSummaryThead');
+
+  const tbody = el('tdStatsSummaryTbody');
+
+  const tfoot = el('tdStatsSummaryTfoot');
+
+  thead.replaceChildren();
+
+  tbody.replaceChildren();
+
+  tfoot.replaceChildren();
+
+
+  const rows = data.rows;
+
+  tdStatsSetText(
+
+    'tdStatsTableCount',
+
+    `${tdStatsFmtInt(rows.length)} รายการ`
+
+  );
+
+
+  if(!rows.length){
+
+    el('tdStatsTableWrap')
+      .classList.add('hidden');
+
+    tdStatsSetText(
+
+      'tdStatsTableStatus',
+
+      'ไม่พบข้อมูลตามเงื่อนไขที่เลือก'
+
+    );
+
+    return;
+
+  }
+
+
+  const showTeacher = data.mode === 'subject';
+
+  const showOther = data.total_students >
+
+    tdStatsGradeKeys.reduce(
+
+      (sum,key) => sum + data.grade_totals[key],
+
+      0
+
+    );
+
+
+  // หัวตาราง
+
+  const headings = [
+
+    'ชั้น / ห้อง',
+
+    'จำนวนรายการ',
+
+    ...tdStatsGradeKeys,
+
+    ...(showOther ? ['อื่น / ไม่ระบุ'] : []),
+
+    '∑fx',
+
+    'X̄',
+
+    'S.D.',
+
+    ...(showTeacher ? ['ครูผู้สอน'] : [])
+
+  ];
+
+  const header = document.createElement('tr');
+
+  headings.forEach(label => {
+
+    header.append(
+
+      tdStatsCreateTableCell('th',label)
+
+    );
+
+  });
+
+  thead.append(header);
+
+
+  // ฟังก์ชันสร้างแถว
+
+  function createRow(row,isTotal = false){
+
+    const tr = document.createElement('tr');
+
+    if(isTotal){
+
+      tr.className = 'td-table-total';
+
+    }
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+        'td',
+        row.room_label
+      ),
+
+      tdStatsCreateTableCell(
+        'td',
+        tdStatsFmtInt(row.total_students)
+      )
+
+    );
+
+
+    tdStatsGradeKeys.forEach(key => {
+
+      const count = row.grades[key];
+
+      const isRisk =
+
+        ['0','ร','มส','มผ'].includes(key) &&
+        count > 0;
+
+      tr.append(
+
+        tdStatsCreateTableCell(
+
+          'td',
+
+          count === 0
+            ? '–'
+            : tdStatsFmtInt(count),
+
+          isRisk ? 'td-table-risk' : ''
+
+        )
+
+      );
+
+    });
+
+
+    if(showOther){
+
+      const other = row.total_students -
+
+        tdStatsGradeKeys.reduce(
+
+          (sum,key) => sum + row.grades[key],
+
+          0
+
+        );
+
+      tr.append(
+
+        tdStatsCreateTableCell(
+
+          'td',
+
+          other ? tdStatsFmtInt(other) : '–'
+
+        )
+
+      );
+
+    }
+
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+        'td',
+        tdStatsFmtNumber(row.fx)
+      ),
+
+      tdStatsCreateTableCell(
+        'td',
+        tdStatsFmtNumber(row.average)
+      ),
+
+      tdStatsCreateTableCell(
+        'td',
+        tdStatsFmtNumber(row.sd)
+      )
+
+    );
+
+
+    if(showTeacher){
+
+      tr.append(
+
+        tdStatsCreateTableCell(
+
+          'td',
+
+          isTotal
+            ? '–'
+            : row.teacher_name || '–',
+
+          'td-table-teacher'
+
+        )
+
+      );
+
+    }
+
+    return tr;
+
+  }
+
+
+  // แถวรายระดับชั้นหรือรายห้อง
+
+  const fragment =
+    document.createDocumentFragment();
+
+  rows.forEach(row => {
+
+    fragment.append(createRow(row));
+
+  });
+
+  tbody.append(fragment);
+
+
+  // แถวรวม ใช้ค่าจาก RPC โดยตรง
+  // ไม่เฉลี่ยค่าเฉลี่ยรายห้องหรือ SD รายห้อง
+
+  tfoot.append(
+
+    createRow({
+
+      room_label:'รวม',
+
+      total_students:data.total_students,
+
+      grades:data.grade_totals,
+
+      fx:data.total_fx,
+
+      average:data.average,
+
+      sd:data.sd
+
+    },true)
+
+  );
+
+
+  el('tdStatsTableWrap')
+    .classList.remove('hidden');
+
+  tdStatsSetText(
+
+    'tdStatsTableStatus',
+
+    `แสดง ${tdStatsFmtInt(rows.length)} กลุ่ม · ${
+      tdStatsFmtInt(data.total_students)
+    } รายการผลการเรียน`
+
+  );
+
+}
+
+
+// =====================================================
+// 7. แสดงกราฟและตาราง
+// =====================================================
+
+function tdStatsRenderDetails(){
+
+  const data = tdStatsResultState.data;
+
+  if(!data) return;
+
+  tdStatsResetDetails();
+
+  try{
+
+    tdStatsValidateSummaryRows(data);
+
+    tdStatsRenderSummaryTable(data);
+
+  }catch(error){
+
+    tdStatsResetDetails();
+
+    tdStatsSetText(
+
+      'tdStatsTableStatus',
+
+      error.message
+
+    );
+
+    setStatus(
+
+      'tdStatsChartsStatus',
+
+      'ข้อมูลสถิติรายกลุ่มไม่สอดคล้องกัน',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+
+  // หากกราฟผิดพลาด ตารางและ KPI ยังแสดงได้
+
+  try{
+
+    tdStatsRenderCharts(data);
+
+  }catch(error){
+
+    tdStatsDestroyCharts();
+
+    el('tdStatsChartsContent')
+      .classList.add('hidden');
+
+    setStatus(
+
+      'tdStatsChartsStatus',
+
+      'ไม่สามารถสร้างกราฟได้',
+
+      'error'
+
+    );
+
+    console.warn(
+      'Teacher Dashboard charts:',
+      error.message
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 8. ล้างกราฟและตาราง
+// =====================================================
+
+function tdStatsResetDetails(){
+
+  tdStatsDestroyCharts();
+
+  el('tdStatsChartsContent')
+    ?.classList.add('hidden');
+
+  el('tdStatsTableWrap')
+    ?.classList.add('hidden');
+
+  el('tdStatsSummaryThead')?.replaceChildren();
+
+  el('tdStatsSummaryTbody')?.replaceChildren();
+
+  el('tdStatsSummaryTfoot')?.replaceChildren();
+
+  tdStatsSetText(
+
+    'tdStatsTableCount',
+
+    '0 รายการ'
+
+  );
+
+  tdStatsSetText(
+
+    'tdStatsTableStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล'
+
+  );
+
+  setStatus(
+
+    'tdStatsChartsStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD CHART AND TABLE CONTROLLER ===== */
 
 /* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY CONTROLLER
