@@ -2751,6 +2751,219 @@ td:first-child{
 /* ===== END TEACHER DASHBOARD SUBJECT SELECTOR ===== */
 
 /* =====================================================
+   TEACHER DASHBOARD : STATS RESULT
+   ===================================================== */
+
+#tdStatsResultSection{
+  min-width:0;
+  width:100%;
+}
+
+#tdStatsResultSection .td-result-head{
+  padding:16px;
+  margin-bottom:16px;
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+}
+
+#tdStatsResultTitle{
+  font-size:22px;
+  font-weight:800;
+  color:#17324d;
+  overflow-wrap:anywhere;
+}
+
+#tdStatsAppliedFilters{
+  margin-top:6px;
+  font-size:14px;
+  line-height:1.6;
+  color:#64748b;
+  overflow-wrap:anywhere;
+}
+
+#tdStatsResultSection .td-kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+#tdStatsResultSection .td-kpi-card{
+  min-width:0;
+  min-height:140px;
+  padding:16px 18px;
+
+  background:#f8fbff;
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+}
+
+#tdStatsResultSection .td-kpi-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:38px;
+  height:38px;
+
+  margin-bottom:10px;
+  border-radius:12px;
+
+  background:#dbeafe;
+  color:#2563eb;
+
+  font-size:20px;
+  font-weight:800;
+}
+
+#tdStatsResultSection .td-kpi-label{
+  font-size:14px;
+  font-weight:600;
+  color:#64748b;
+}
+
+#tdStatsResultSection .td-kpi-value{
+  margin:6px 0;
+
+  font-family:'Sarabun',sans-serif;
+  font-size:clamp(24px,2.5vw,34px);
+  font-weight:900;
+  line-height:1.2;
+
+  color:#17324d;
+  overflow-wrap:anywhere;
+}
+
+#tdStatsResultSection .td-kpi-sub{
+  font-size:12px;
+  color:#64748b;
+}
+
+#tdStatsResultSection .td-kpi-card.success{
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+}
+
+#tdStatsResultSection .td-kpi-card.success .td-kpi-value{
+  color:#15803d;
+}
+
+#tdStatsResultSection .td-kpi-card.violet{
+  background:#f5f3ff;
+  border-color:#ddd6fe;
+}
+
+#tdStatsResultSection .td-kpi-card.violet .td-kpi-value{
+  color:#7c3aed;
+}
+
+#tdStatsResultSection .td-kpi-card.warning{
+  background:#fffbeb;
+  border-color:#fde68a;
+}
+
+#tdStatsResultSection .td-kpi-card.warning .td-kpi-value{
+  color:#b45309;
+}
+
+#tdStatsResultSection .td-kpi-card.danger{
+  background:#fff1f2;
+  border-color:#fecaca;
+}
+
+#tdStatsResultSection .td-kpi-card.danger .td-kpi-value{
+  color:#dc2626;
+}
+
+#tdStatsResultSection .td-kpi-card.full{
+  grid-column:1 / -1;
+}
+
+#tdStatsAreaKpiGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+
+#tdStatsAreaKpiGrid .td-area-kpi{
+  min-width:0;
+  padding:16px;
+
+  border:1px solid #dbe7f3;
+  border-radius:16px;
+  background:#f8fbff;
+}
+
+#tdStatsAreaKpiGrid .td-area-name{
+  font-size:15px;
+  font-weight:700;
+  color:#17324d;
+}
+
+#tdStatsAreaKpiGrid .td-area-percent{
+  margin:8px 0;
+
+  font-family:'Sarabun',sans-serif;
+  font-size:28px;
+  font-weight:900;
+  color:#2563eb;
+}
+
+#tdStatsAreaKpiGrid .td-area-track{
+  height:8px;
+  margin:10px 0;
+  border-radius:999px;
+  background:#e2e8f0;
+  overflow:hidden;
+}
+
+#tdStatsAreaKpiGrid .td-area-fill{
+  height:100%;
+  border-radius:999px;
+  background:#3b82f6;
+}
+
+#tdStatsAreaKpiGrid .empty-state{
+  grid-column:1 / -1;
+}
+
+@media(max-width:1000px){
+
+  #tdStatsAreaKpiGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:720px){
+
+  #tdStatsResultSection .td-kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+
+  #tdStatsResultSection .td-kpi-card{
+    padding:12px;
+    min-height:120px;
+  }
+
+  #tdStatsResultSection .td-kpi-value{
+    font-size:26px;
+  }
+
+}
+
+@media(max-width:380px){
+
+  #tdStatsAreaKpiGrid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD STATS RESULT ===== */
+
+/* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY
    ===================================================== */
 #pageDashboard .td-filter-open-card{ margin-bottom:18px; }
@@ -15898,16 +16111,253 @@ style="
 
     </div>
     <div class="td-overlay-footer">
-      <button id="tdStatsConfirmFilterBtn" class="btn-primary"
-        type="button" disabled>✓ ยืนยันตัวเลือก</button>
+<button
+  id="tdStatsConfirmFilterBtn"
+  class="btn-primary"
+  type="button"
+  disabled>
+
+  📊 ประมวลผล Dashboard
+
+</button>
     </div>
   </dialog>
   <!-- ===== END FILTER CARD OVERLAY ===== -->
 
 
-  <!-- ส่วนแสดงผล จะเพิ่มในขั้นตอน 3.4.3 -->
+<!-- =================================================
+     TEACHER DASHBOARD : STATS RESULT
+     ================================================= -->
 
-  <div id="tdStatsResultSection"></div>
+<div id="tdStatsResultSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <div class="td-result-head">
+
+      <div class="small">
+        ข้อมูลที่กำลังแสดง
+      </div>
+
+      <div id="tdStatsResultTitle">
+        ยังไม่ได้ประมวลผล
+      </div>
+
+      <div id="tdStatsAppliedFilters">
+        กรุณาเลือกข้อมูลที่ต้องการประมวลผล
+      </div>
+
+      <div
+        id="tdStatsResultStatus"
+        class="status info"
+        role="status"
+        aria-live="polite">
+
+        รอประมวลผล Dashboard
+
+      </div>
+
+    </div>
+
+
+    <!-- KPI CARDS -->
+
+    <div class="td-kpi-grid">
+
+      <!-- นักเรียนไม่ซ้ำ -->
+
+      <div class="td-kpi-card">
+
+        <div class="td-kpi-icon">👥</div>
+
+        <div class="td-kpi-label">
+          จำนวนนักเรียนไม่ซ้ำ
+        </div>
+
+        <div id="tdStatsKpiUniqueStudents"
+             class="td-kpi-value">—</div>
+
+        <div class="td-kpi-sub">
+          คน
+        </div>
+
+      </div>
+
+
+      <!-- จำนวนผลการเรียน -->
+
+      <div class="td-kpi-card">
+
+        <div class="td-kpi-icon">📋</div>
+
+        <div class="td-kpi-label">
+          จำนวนผลการเรียน
+        </div>
+
+        <div id="tdStatsKpiResults"
+             class="td-kpi-value">—</div>
+
+        <div class="td-kpi-sub">
+          รายการผลการเรียน
+        </div>
+
+      </div>
+
+
+      <!-- ค่าเฉลี่ย -->
+
+      <div class="td-kpi-card success">
+
+        <div class="td-kpi-icon">⭐</div>
+
+        <div class="td-kpi-label">
+          ค่าเฉลี่ยรวม
+        </div>
+
+        <div id="tdStatsKpiMean"
+             class="td-kpi-value">—</div>
+
+        <div class="td-kpi-sub">
+          ค่าเฉลี่ยระดับผลการเรียน
+        </div>
+
+      </div>
+
+
+      <!-- คะแนนรวม -->
+
+      <div class="td-kpi-card violet">
+
+        <div class="td-kpi-icon">Σ</div>
+
+        <div class="td-kpi-label">
+          คะแนนรวม ∑fx
+        </div>
+
+        <div id="tdStatsKpiFx"
+             class="td-kpi-value">—</div>
+
+        <div class="td-kpi-sub">
+          ผลรวมคะแนนระดับผลการเรียน
+        </div>
+
+      </div>
+
+
+      <!-- S.D. -->
+
+      <div class="td-kpi-card warning">
+
+        <div class="td-kpi-icon">↔</div>
+
+        <div class="td-kpi-label">
+          S.D. รวม
+        </div>
+
+        <div id="tdStatsKpiSd"
+             class="td-kpi-value">—</div>
+
+        <div class="td-kpi-sub">
+          การกระจายของผลการเรียน
+        </div>
+
+      </div>
+
+
+      <!-- เกรด 4 -->
+
+      <div class="td-kpi-card success">
+
+        <div class="td-kpi-icon">4</div>
+
+        <div class="td-kpi-label">
+          เกรด 4
+        </div>
+
+        <div id="tdStatsKpiGrade4"
+             class="td-kpi-value">—</div>
+
+        <div id="tdStatsKpiGrade4Pct"
+             class="td-kpi-sub">
+
+          — % ของผลการเรียนทั้งหมด
+
+        </div>
+
+      </div>
+
+
+      <!-- กลุ่มเสี่ยง -->
+
+      <div class="td-kpi-card danger full">
+
+        <div class="td-kpi-icon">!</div>
+
+        <div class="td-kpi-label">
+          กลุ่มเสี่ยง 0 / ร / มส / มผ
+        </div>
+
+        <div id="tdStatsKpiRisk"
+             class="td-kpi-value">—</div>
+
+        <div id="tdStatsKpiRiskPct"
+             class="td-kpi-sub">
+
+          จำนวนรายการที่ต้องติดตาม
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="small" style="margin-top:14px;">
+
+      หมายเหตุ: ค่าเฉลี่ยรวมไม่ใช่ GPA
+      ที่ถ่วงน้ำหนักด้วยหน่วยกิต
+
+      ระบบใช้ผลการเรียนหลังพิจารณาเกรดแก้ตัว
+      ตามหลักการเดียวกับ LeaderPR
+
+    </div>
+
+  </section>
+
+
+  <!-- LEARNING AREA KPI -->
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>เป้าหมายผลการเรียนตามกลุ่มสาระ</h2>
+
+    <div class="sub">
+
+      เปรียบเทียบผลการเรียนกับเกณฑ์เป้าหมาย
+      ของแต่ละกลุ่มสาระการเรียนรู้
+
+    </div>
+
+    <div id="tdStatsAreaKpiGrid">
+
+      <div class="empty-state">
+        ยังไม่ได้ประมวลผลข้อมูล
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- เตรียมสำหรับขั้นตอน 3.4.4 -->
+
+  <div id="tdStatsChartSection"></div>
+
+  <div id="tdStatsSummaryTableSection"></div>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD STATS RESULT ===== -->
 
 </div>
 
@@ -20050,6 +20500,8 @@ function tdStatsEnsureOptions(){
 
 function tdStatsReset(){
 
+  tdStatsResetResult();
+
   tdStatsState.generation++;
 
   tdStatsState.options = null;
@@ -20910,6 +21362,8 @@ async function tdStatsLoadSubjects(){
 
 function tdStatsConfirmFilters(){
 
+  if(tdStatsResultState.loading) return;
+
   try{
 
     const payload = tdStatsBuildPayload();
@@ -20919,6 +21373,8 @@ function tdStatsConfirmFilters(){
       JSON.parse(JSON.stringify(payload));
 
     tdStatsCloseFilterOverlay();
+
+    tdStatsProcessDashboard(payload);
 
   }catch(error){
 
@@ -20938,6 +21394,851 @@ function tdStatsConfirmFilters(){
 
 
 /* ===== END TEACHER DASHBOARD SUBJECT CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : STATS RESULT CONTROLLER
+   ===================================================== */
+
+const tdStatsResultState = {
+
+  data: null,
+
+  appliedFilters: null,
+
+  loading: false,
+
+  generation: 0,
+
+  expiryTimer: null
+
+};
+
+
+// =====================================================
+// 1. จัดรูปแบบตัวเลข
+// =====================================================
+
+function tdStatsFmtInt(value){
+
+  return Number(value).toLocaleString('th-TH', {
+    maximumFractionDigits: 0
+  });
+
+}
+
+
+function tdStatsFmtNumber(value){
+
+  return Number(value).toLocaleString('th-TH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+}
+
+
+// =====================================================
+// 2. แสดงข้อความ
+// =====================================================
+
+function tdStatsSetText(id, value){
+
+  const node = el(id);
+
+  if(node){
+
+    node.textContent = String(value);
+
+  }
+
+}
+
+
+// =====================================================
+// 3. สรุปตัวกรองที่ใช้ประมวลผล
+// =====================================================
+
+function tdStatsDescribeAppliedFilters(payload){
+
+  const describe = (values, fallback) => {
+
+    if(!values.length){
+
+      return fallback;
+
+    }
+
+    if(values.length > 6){
+
+      return `${values.length} รายการ`;
+
+    }
+
+    return values.join(', ');
+
+  };
+
+  return [
+
+    `ปี ${describe(payload.academic_years, 'ทั้งหมด')}`,
+
+    `ภาคเรียน ${describe(payload.terms, 'ทั้งหมด')}`,
+
+    describe(payload.class_levels, 'ทุกระดับชั้น'),
+
+    describe(payload.subject_types, 'ทุกประเภทวิชา'),
+
+    describe(payload.learning_areas, 'ทุกกลุ่มสาระ'),
+
+    describe(payload.rooms, 'ทุกห้องตามระดับชั้น'),
+
+    describe(payload.subject_codes, 'ทุกรายวิชา')
+
+  ].join(' · ');
+
+}
+
+
+// =====================================================
+// 4. ตรวจสอบข้อมูลที่ได้รับจาก RPC
+// =====================================================
+
+function tdStatsValidateResult(raw){
+
+  if(!raw || typeof raw !== 'object'){
+
+    throw new Error('ไม่พบข้อมูลผลการประมวลผล');
+
+  }
+
+  const validNumber = value =>
+
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value >= 0;
+
+  const validCount = value =>
+
+    Number.isSafeInteger(value) &&
+    value >= 0;
+
+  const numericKeys = [
+
+    'total_fx',
+
+    'average',
+
+    'sd'
+
+  ];
+
+  const countKeys = [
+
+    'total_students',
+
+    'unique_students'
+
+  ];
+
+  const gradeKeys = [
+
+    '4', '3.5', '3', '2.5',
+
+    '2', '1.5', '1', '0',
+
+    'ร', 'มส', 'ผ', 'มผ'
+
+  ];
+
+  if(
+
+    !numericKeys.every(
+      key => validNumber(raw[key])
+    ) ||
+
+    !countKeys.every(
+      key => validCount(raw[key])
+    ) ||
+
+    raw.unique_students > raw.total_students ||
+
+    !raw.grade_totals ||
+
+    !gradeKeys.every(
+      key => validCount(raw.grade_totals[key])
+    ) ||
+
+    !Array.isArray(raw.rows) ||
+
+    !Array.isArray(raw.learning_area_kpis)
+
+  ){
+
+    throw new Error(
+      'รูปแบบข้อมูลผลการประมวลผลไม่ถูกต้อง'
+    );
+
+  }
+
+  const gradeCount = gradeKeys.reduce(
+
+    (sum,key) => sum + raw.grade_totals[key],
+
+    0
+
+  );
+
+  if(gradeCount > raw.total_students){
+
+    throw new Error(
+      'จำนวนผลการเรียนไม่สอดคล้องกัน'
+    );
+
+  }
+
+  return raw;
+
+}
+
+
+// =====================================================
+// 5. แสดง KPI กลุ่มสาระการเรียนรู้
+// =====================================================
+
+function tdStatsRenderAreaKpis(items){
+
+  const box = el('tdStatsAreaKpiGrid');
+
+  box.replaceChildren();
+
+  // ใช้ 8 กลุ่มสาระหลักเช่นเดียวกับ LeaderPR
+
+  const allowedAreas = tdStatsAreaOrder.slice(0, 8);
+
+  function normalizeArea(name){
+
+    const text = String(name || '')
+      .replace(/\s+/g, '');
+
+    if(text.includes('ภาษาไทย'))
+      return allowedAreas[0];
+
+    if(text.includes('คณิต'))
+      return allowedAreas[1];
+
+    if(text.includes('วิทย'))
+      return allowedAreas[2];
+
+    if(text.includes('สังคม'))
+      return allowedAreas[3];
+
+    if(
+      text.includes('สุขศึกษา') ||
+      text.includes('พลศึกษา')
+    )
+      return allowedAreas[4];
+
+    if(text.includes('ศิลปะ'))
+      return allowedAreas[5];
+
+    if(text.includes('การงาน'))
+      return allowedAreas[6];
+
+    if(
+      text.includes('ต่างประเทศ') ||
+      text.includes('ภาษาอังกฤษ')
+    )
+      return allowedAreas[7];
+
+    return '';
+
+  }
+
+
+  const grouped = new Map();
+
+  items.forEach(item => {
+
+    const name = normalizeArea(
+      item.learning_area
+    );
+
+    if(!name) return;
+
+    const total = Number(item.total_results);
+
+    const passed = Number(item.passed_results);
+
+    const failed = Number(item.failed_results);
+
+    const target = Number(item.target_grade);
+
+    if(
+
+      ![total,passed,failed].every(
+        value => Number.isSafeInteger(value) &&
+                 value >= 0
+      ) ||
+
+      passed + failed !== total ||
+
+      !Number.isFinite(target)
+
+    ){
+
+      throw new Error(
+        'ข้อมูล KPI กลุ่มสาระไม่ถูกต้อง'
+      );
+
+    }
+
+    if(!grouped.has(name)){
+
+      grouped.set(name, {
+
+        total: 0,
+
+        passed: 0,
+
+        failed: 0,
+
+        targets: new Set()
+
+      });
+
+    }
+
+    const row = grouped.get(name);
+
+    row.total += total;
+
+    row.passed += passed;
+
+    row.failed += failed;
+
+    row.targets.add(target);
+
+  });
+
+
+  allowedAreas.forEach(name => {
+
+    const item = grouped.get(name);
+
+    if(!item) return;
+
+    const percent = item.total
+
+      ? item.passed / item.total * 100
+
+      : 0;
+
+    const card = document.createElement('div');
+
+    card.className = 'td-area-kpi';
+
+    const title = document.createElement('div');
+
+    title.className = 'td-area-name';
+
+    title.textContent = name;
+
+    const value = document.createElement('div');
+
+    value.className = 'td-area-percent';
+
+    value.textContent = item.total
+
+      ? `${tdStatsFmtNumber(percent)}%`
+
+      : '—';
+
+    const target = document.createElement('div');
+
+    target.className = 'small';
+
+    target.textContent =
+
+      item.targets.size === 1
+
+        ? `เป้าหมาย ≥ ${
+            tdStatsFmtNumber(
+              [...item.targets][0]
+            )
+          }`
+
+        : 'ใช้หลายเกณฑ์เป้าหมาย';
+
+
+    const track = document.createElement('div');
+
+    track.className = 'td-area-track';
+
+    const fill = document.createElement('div');
+
+    fill.className = 'td-area-fill';
+
+    fill.style.width =
+      `${Math.max(0,Math.min(100,percent))}%`;
+
+    track.append(fill);
+
+
+    const detail = document.createElement('div');
+
+    detail.className = 'small';
+
+    detail.textContent =
+
+      `ถึงเป้าหมาย ${
+        tdStatsFmtInt(item.passed)
+      } / ${
+        tdStatsFmtInt(item.total)
+      } รายการ`;
+
+    card.append(
+
+      title,
+
+      value,
+
+      target,
+
+      track,
+
+      detail
+
+    );
+
+    box.append(card);
+
+  });
+
+
+  if(!box.children.length){
+
+    const empty = document.createElement('div');
+
+    empty.className = 'empty-state';
+
+    empty.textContent =
+      'ไม่พบข้อมูล KPI ของ 8 กลุ่มสาระหลัก';
+
+    box.append(empty);
+
+  }
+
+}
+
+
+// =====================================================
+// 6. แสดง KPI หลัก
+// =====================================================
+
+function tdStatsRenderResult(){
+
+  const data = tdStatsResultState.data;
+
+  if(!data) return;
+
+  const total = data.total_students;
+
+  const unique = data.unique_students;
+
+  const grade4 = data.grade_totals['4'];
+
+  const risk = ['0','ร','มส','มผ'].reduce(
+
+    (sum,key) => sum + data.grade_totals[key],
+
+    0
+
+  );
+
+  const percent = count =>
+
+    total ? tdStatsFmtNumber(count / total * 100)
+          : '—';
+
+
+  tdStatsSetText(
+
+    'tdStatsResultTitle',
+
+    data.mode === 'subject' && data.subject_code
+
+      ? `${data.subject_code} · ${data.subject_name}`
+
+      : 'ภาพรวมผลการเรียน'
+
+  );
+
+
+  tdStatsSetText(
+
+    'tdStatsAppliedFilters',
+
+    tdStatsDescribeAppliedFilters(
+      tdStatsResultState.appliedFilters
+    )
+
+  );
+
+
+  tdStatsSetText(
+    'tdStatsKpiUniqueStudents',
+    tdStatsFmtInt(unique)
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiResults',
+    tdStatsFmtInt(total)
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiMean',
+    total ? tdStatsFmtNumber(data.average) : '—'
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiFx',
+    tdStatsFmtNumber(data.total_fx)
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiSd',
+    total ? tdStatsFmtNumber(data.sd) : '—'
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiGrade4',
+    tdStatsFmtInt(grade4)
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiGrade4Pct',
+    `${percent(grade4)}% ของผลการเรียนทั้งหมด`
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiRisk',
+    tdStatsFmtInt(risk)
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiRiskPct',
+    `${percent(risk)}% ของผลการเรียนทั้งหมด`
+  );
+
+
+  tdStatsRenderAreaKpis(
+    data.learning_area_kpis
+  );
+
+
+  setStatus(
+
+    'tdStatsResultStatus',
+
+    total
+
+      ? `ประมวลผลสำเร็จ · ${
+          tdStatsFmtInt(total)
+        } รายการ · ${
+          tdStatsFmtInt(unique)
+        } คน`
+
+      : 'ไม่พบผลการเรียนตามเงื่อนไขที่เลือก',
+
+    total ? 'success' : 'warn'
+
+  );
+
+}
+
+
+// =====================================================
+// 7. ล้างผลการประมวลผล
+// =====================================================
+
+function tdStatsResetResult(){
+
+  tdStatsResultState.generation++;
+
+  tdStatsResultState.data = null;
+
+  tdStatsResultState.appliedFilters = null;
+
+  tdStatsResultState.loading = false;
+
+  clearTimeout(tdStatsResultState.expiryTimer);
+
+  tdStatsResultState.expiryTimer = null;
+
+
+  [
+
+    'tdStatsKpiUniqueStudents',
+
+    'tdStatsKpiResults',
+
+    'tdStatsKpiMean',
+
+    'tdStatsKpiFx',
+
+    'tdStatsKpiSd',
+
+    'tdStatsKpiGrade4',
+
+    'tdStatsKpiRisk'
+
+  ].forEach(id => tdStatsSetText(id,'—'));
+
+
+  tdStatsSetText(
+    'tdStatsKpiGrade4Pct',
+    '— % ของผลการเรียนทั้งหมด'
+  );
+
+  tdStatsSetText(
+    'tdStatsKpiRiskPct',
+    'จำนวนรายการที่ต้องติดตาม'
+  );
+
+  tdStatsSetText(
+    'tdStatsResultTitle',
+    'ยังไม่ได้ประมวลผล'
+  );
+
+  tdStatsSetText(
+    'tdStatsAppliedFilters',
+    'กรุณาเลือกข้อมูลที่ต้องการประมวลผล'
+  );
+
+
+  tdStatsRenderAreaKpis([]);
+
+
+  el('tdStatsOpenFilterBtn').disabled = false;
+
+  setStatus(
+
+    'tdStatsResultStatus',
+
+    'รอประมวลผล Dashboard',
+
+    'info'
+
+  );
+
+}
+
+
+// =====================================================
+// 8. ล้างผลเมื่อ Session หมดอายุ
+// =====================================================
+
+function tdStatsWatchResultExpiry(token){
+
+  clearTimeout(tdStatsResultState.expiryTimer);
+
+  const expiresAt = Date.parse(
+    state.teacherSessionExpiresAt || ''
+  );
+
+  if(!Number.isFinite(expiresAt)) return;
+
+  const remaining = expiresAt - Date.now();
+
+  tdStatsResultState.expiryTimer = setTimeout(() => {
+
+    if(
+      token !== String(
+        state.teacherSessionToken || ''
+      ).trim()
+    ){
+
+      return;
+
+    }
+
+    if(!tdStatsHasValidSession()){
+
+      tdStatsResetResult();
+
+      setStatus(
+
+        'tdStatsResultStatus',
+
+        'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่',
+
+        'error'
+
+      );
+
+    }else{
+
+      tdStatsWatchResultExpiry(token);
+
+    }
+
+  }, Math.max(1,Math.min(remaining,2147483647)));
+
+}
+
+
+// =====================================================
+// 9. เรียก RPC ประมวลผล Dashboard
+// =====================================================
+
+async function tdStatsProcessDashboard(payload){
+
+  if(tdStatsResultState.loading) return;
+
+  if(!tdStatsHasValidSession()){
+
+    tdStatsResetResult();
+
+    setStatus(
+
+      'tdStatsResultStatus',
+
+      'Session ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+
+  // เก็บตัวกรองของ Request นี้โดยเฉพาะ
+
+  const snapshot = JSON.parse(
+    JSON.stringify(payload)
+  );
+
+  const token = String(
+    state.teacherSessionToken || ''
+  ).trim();
+
+
+  tdStatsResetResult();
+
+  const generation = ++tdStatsResultState.generation;
+
+  tdStatsResultState.loading = true;
+
+  tdStatsResultState.appliedFilters = snapshot;
+
+
+  const isCurrentRequest = () =>
+
+    generation === tdStatsResultState.generation &&
+
+    token === String(
+      state.teacherSessionToken || ''
+    ).trim();
+
+
+  el('tdStatsOpenFilterBtn').disabled = true;
+
+  tdStatsSetText(
+    'tdStatsResultTitle',
+    'กำลังประมวลผล...'
+  );
+
+  tdStatsSetText(
+
+    'tdStatsAppliedFilters',
+
+    tdStatsDescribeAppliedFilters(snapshot)
+
+  );
+
+  setStatus(
+
+    'tdStatsResultStatus',
+
+    'กำลังประมวลผล Dashboard กรุณารอสักครู่...',
+
+    'info'
+
+  );
+
+  tdStatsWatchResultExpiry(token);
+
+
+  try{
+
+    const {data,error} = await supabaseClient.rpc(
+
+      'teacher_get_dashboard_checkbox_summary_session',
+
+      {
+
+        p_token: token,
+
+        p_filters: snapshot
+
+      }
+
+    );
+
+
+    if(!isCurrentRequest()) return;
+
+    if(error) throw error;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+
+    const raw = data?.data || data;
+
+    tdStatsResultState.data =
+      tdStatsValidateResult(raw);
+
+
+    tdStatsRenderResult();
+
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+    tdStatsResetResult();
+
+    setStatus(
+
+      'tdStatsResultStatus',
+
+      'ประมวลผลไม่สำเร็จ กรุณาตรวจสอบ Session หรือเลือกข้อมูลใหม่แล้วลองอีกครั้ง',
+
+      'error'
+
+    );
+
+  }finally{
+
+    if(isCurrentRequest()){
+
+      tdStatsResultState.loading = false;
+
+      el('tdStatsOpenFilterBtn').disabled = false;
+
+    }
+
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD STATS RESULT CONTROLLER ===== */
 
 /* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY CONTROLLER
