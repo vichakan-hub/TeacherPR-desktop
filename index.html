@@ -3150,7 +3150,210 @@ td:first-child{
   #tdStatsFilterOverlay .td-overlay-footer button{ flex:1; }
 }
 /* ===== END TEACHER DASHBOARD FILTER OVERLAY ===== */
+/* =====================================================
+   TEACHER DASHBOARD : RISK FILTER OVERLAY
+   ===================================================== */
 
+#tdRiskFilterOverlay{
+  position:fixed;
+  inset:0;
+  margin:auto;
+
+  width:min(900px,calc(100vw - 32px));
+  max-width:none;
+  max-height:90vh;
+  max-height:90dvh;
+
+  padding:0;
+  border:1px solid #dbe7f3;
+  border-radius:24px;
+
+  background:#fff;
+  color:var(--text);
+  font-family:inherit;
+
+  box-shadow:0 24px 70px rgba(15,23,42,.25);
+  overflow:hidden;
+}
+
+#tdRiskFilterOverlay:not([open]){
+  display:none!important;
+}
+
+#tdRiskFilterOverlay[open]{
+  display:flex;
+  flex-direction:column;
+}
+
+#tdRiskFilterOverlay::backdrop{
+  background:rgba(15,23,42,.48);
+  backdrop-filter:blur(3px);
+}
+
+#tdRiskFilterOverlay .td-overlay-head{
+  flex:0 0 auto;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:20px 24px;
+  border-bottom:1px solid #e5e7eb;
+}
+
+#tdRiskFilterOverlay .td-overlay-head h2{
+  margin:0 0 5px;
+  font-size:23px;
+  color:#17324d;
+}
+
+#tdRiskFilterOverlay .td-overlay-close{
+  flex:0 0 38px;
+  width:38px;
+  height:38px;
+  padding:0;
+  border:0;
+  border-radius:12px;
+  background:#ecf2f8;
+  color:#41536c;
+  font-size:24px;
+}
+
+#tdRiskFilterOverlay .td-overlay-body{
+  flex:1 1 auto;
+  min-height:0;
+
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+
+  -webkit-overflow-scrolling:touch;
+  padding:16px 24px 24px;
+}
+
+#tdRiskFilterOverlay .td-overlay-footer{
+  flex:0 0 auto;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+
+  padding:16px 24px;
+  border-top:1px solid #e5e7eb;
+  background:#fff;
+}
+
+#tdRiskFilterOverlay button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+#tdRiskFilterFields{
+  border:0;
+  padding:0;
+  margin:0;
+  min-width:0;
+}
+
+#tdRiskFilterOverlay .td-risk-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+#tdRiskFilterOverlay .td-risk-field{
+  min-width:0;
+  padding:14px;
+
+  border:1px solid #dbe7f3;
+  border-radius:16px;
+  background:#f8fbff;
+}
+
+#tdRiskFilterOverlay .td-risk-field.full{
+  grid-column:1 / -1;
+}
+
+#tdRiskFilterOverlay .td-risk-field label{
+  display:block;
+  margin-bottom:8px;
+
+  font-size:15px;
+  font-weight:700;
+  color:#17324d;
+}
+
+#tdRiskFilterOverlay .td-risk-field select{
+  width:100%;
+  min-width:0;
+  height:46px;
+}
+
+#tdRiskFilterSummary{
+  margin-top:16px;
+  padding:14px 16px;
+
+  background:#eef4ff;
+  border:1px solid #dbeafe;
+  border-radius:14px;
+
+  font-size:14px;
+  color:#1d4ed8;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:720px){
+
+  #tdRiskFilterOverlay{
+    width:calc(100vw - 16px);
+    max-height:94vh;
+    max-height:94dvh;
+    border-radius:20px;
+  }
+
+  #tdRiskFilterOverlay .td-overlay-head{
+    padding:16px;
+  }
+
+  #tdRiskFilterOverlay .td-overlay-head h2{
+    font-size:18px;
+  }
+
+  #tdRiskFilterOverlay .td-overlay-body{
+    padding:12px 14px 16px;
+  }
+
+  #tdRiskFilterOverlay .td-overlay-footer{
+    padding:12px 14px;
+    padding-bottom:max(
+      12px,
+      env(safe-area-inset-bottom)
+    );
+  }
+
+  #tdRiskFilterOverlay .td-overlay-footer button{
+    flex:1;
+  }
+
+  #tdRiskFilterOverlay .td-risk-field{
+    padding:10px;
+  }
+
+  #tdRiskFilterOverlay .td-risk-field select{
+    font-size:16px;
+  }
+
+}
+
+@media(max-width:420px){
+
+  #tdRiskFilterOverlay .td-risk-filter-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK FILTER OVERLAY ===== */
 
 .fp-submenu{
   display:flex;
@@ -15875,7 +16078,7 @@ style="
           📈
         </span>
 
-        <span>วิเคราะห์ 0 ร มส มผ</span>
+        <span>ผลการเรียน 0 ร มส มผ</span>
 
       </button>
 
@@ -16654,38 +16857,269 @@ style="
 
 
   <!-- ===============================================
-       TAB 2 : วิเคราะห์ 0 ร มส มผ
-       =============================================== -->
+     TAB 2 : วิเคราะห์ 0 ร มส มผ
+     =============================================== -->
 
-  <div
-    id="teacherDashboardRiskPanel"
-    class="dashboard-tab-panel hidden"
-    role="region"
-    aria-labelledby="teacherDashboardRiskTab">
+<div
+  id="teacherDashboardRiskPanel"
+  class="dashboard-tab-panel hidden"
+  role="region"
+  aria-labelledby="teacherDashboardRiskTab">
+
+
+  <!-- ปุ่มเปิดตัวกรอง -->
+
+  <section class="card td-filter-open-card">
+
+    <h2>วิเคราะห์ 0 ร มส มผ</h2>
+
+    <div class="sub">
+      วิเคราะห์และติดตามผลการเรียน
+      กลุ่มเสี่ยงทั้งโรงเรียน
+    </div>
+
+    <button
+      id="tdRiskOpenFilterBtn"
+      class="btn-primary td-filter-open-btn"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="tdRiskFilterOverlay"
+      aria-expanded="false">
+
+      ⚙️ เลือกข้อมูลที่ต้องการประมวลผล
+
+    </button>
+
+  </section>
+
+
+  <!-- =============================================
+       RISK FILTER OVERLAY
+       ============================================= -->
+
+  <dialog
+    id="tdRiskFilterOverlay"
+    aria-labelledby="tdRiskFilterOverlayTitle">
+
+
+    <!-- Header -->
+
+    <div class="td-overlay-head">
+
+      <div>
+
+        <h2 id="tdRiskFilterOverlayTitle">
+          วิเคราะห์ 0 ร มส มผ
+        </h2>
+
+        <div class="small">
+          กำหนดเงื่อนไขสำหรับประมวลผลข้อมูล
+        </div>
+
+      </div>
+
+      <button
+        id="tdRiskCloseFilterBtn"
+        class="td-overlay-close"
+        type="button"
+        aria-label="ปิดหน้าต่าง">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- Body -->
+
+    <div class="td-overlay-body">
+
+      <div
+        id="tdRiskFilterStatus"
+        class="status info"
+        role="status"
+        aria-live="polite">
+
+        ยังไม่ได้โหลดตัวเลือก
+
+      </div>
+
+      <button
+        id="tdRiskReloadOptionsBtn"
+        class="btn-secondary hidden"
+        type="button">
+
+        🔄 ลองโหลดตัวเลือกอีกครั้ง
+
+      </button>
+
+
+      <fieldset id="tdRiskFilterFields" disabled>
+
+        <div class="td-risk-filter-grid">
+
+
+          <!-- ปีการศึกษา -->
+
+          <div class="td-risk-field">
+
+            <label for="tdRiskYear">
+              ปีการศึกษา
+            </label>
+
+            <select id="tdRiskYear" class="std">
+
+              <option value="">
+                ยังไม่ได้โหลดข้อมูล
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ภาคเรียน -->
+
+          <div class="td-risk-field">
+
+            <label for="tdRiskTerm">
+              ภาคเรียน
+            </label>
+
+            <select id="tdRiskTerm" class="std">
+            </select>
+
+          </div>
+
+
+          <!-- ระดับชั้น -->
+
+          <div class="td-risk-field">
+
+            <label for="tdRiskClass">
+              ระดับชั้น
+            </label>
+
+            <select id="tdRiskClass" class="std">
+            </select>
+
+          </div>
+
+
+          <!-- ห้องเรียน -->
+
+          <div class="td-risk-field">
+
+            <label for="tdRiskRoom">
+              ห้องเรียน
+            </label>
+
+            <select id="tdRiskRoom" class="std">
+            </select>
+
+          </div>
+
+
+          <!-- กลุ่มสาระ -->
+
+          <div class="td-risk-field full">
+
+            <label for="tdRiskArea">
+              กลุ่มสาระการเรียนรู้
+            </label>
+
+            <select id="tdRiskArea" class="std">
+            </select>
+
+          </div>
+
+
+          <!-- ประเภทวิชา -->
+
+          <div class="td-risk-field full">
+
+            <label for="tdRiskType">
+              ประเภทวิชา
+            </label>
+
+            <select id="tdRiskType" class="std">
+            </select>
+
+          </div>
+
+        </div>
+
+      </fieldset>
+
+
+      <!-- สรุปตัวกรอง -->
+
+      <div id="tdRiskFilterSummary">
+
+        กรุณารอให้โหลดตัวเลือกเรียบร้อย
+
+      </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <div class="td-overlay-footer">
+
+      <button
+        id="tdRiskConfirmFilterBtn"
+        class="btn-primary"
+        type="button"
+        disabled>
+
+        ✓ ยืนยันตัวเลือก
+
+      </button>
+
+    </div>
+
+  </dialog>
+
+  <!-- ===== END RISK FILTER OVERLAY ===== -->
+
+
+  <!-- พื้นที่แสดงผล -->
+
+  <div id="tdRiskResultSection">
 
     <section class="card">
 
+      <div class="small">
+        ข้อมูลที่กำลังแสดง
+      </div>
+
+      <h2 id="tdRiskResultTitle">
+        ยังไม่ได้ประมวลผล
+      </h2>
+
+      <div id="tdRiskAppliedFilters" class="sub">
+        กรุณาเลือกข้อมูลที่ต้องการประมวลผล
+      </div>
+
+      <div
+        id="tdRiskResultStatus"
+        class="status info"
+        role="status">
+
+        รอเลือกเงื่อนไข
+
+      </div>
+
       <div class="empty-state">
 
-        <div style="font-size:48px; margin-bottom:12px;">
-          📈
-        </div>
-
-        <div style="
-          font-size:20px;
-          font-weight:700;
-          color:#17324d;
-        ">
-          วิเคราะห์ 0 ร มส มผ
-        </div>
+        📈 ระบบวิเคราะห์ความเสี่ยง
 
         <div style="margin-top:8px;">
-          ติดตามผลการเรียนที่มีปัญหา
-          และความเสี่ยงต่อเนื่อง
-        </div>
 
-        <div style="margin-top:8px;">
-          อยู่ระหว่างพัฒนา
+          KPI และกราฟจะเพิ่มในขั้นตอนถัดไป
+
         </div>
 
       </div>
@@ -16694,7 +17128,9 @@ style="
 
   </div>
 
-  <!-- ===== END TAB 2 ===== -->
+</div>
+
+<!-- ===== END TAB 2 ===== -->
 
 </div>
 
@@ -20135,16 +20571,23 @@ function setTeacherDashboardTab(tab){
       String(isRisk)
     );
 
-  if(isStats){
-    // ไม่โหลดตัวเลือกขณะ Logout/reset Tab
-    if(state.currentUser && state.teacherSessionToken){
-      tdStatsEnsureOptions();
-    }
-  }else{
-    tdStatsCloseFilterOverlay();
+if(isStats){
+
+  tdRiskCloseFilterOverlay();
+
+  if(state.currentUser && state.teacherSessionToken){
+
+    tdStatsEnsureOptions();
+
   }
 
-  return true;
+}else{
+
+  tdStatsCloseFilterOverlay();
+
+}
+
+return true;
 
 }
 
@@ -20743,11 +21186,16 @@ async function tdStatsLoadOptions(){
 
     if(isCurrentRequest()){
 
-      tdStatsState.loading = false;
+tdStatsState.loading = false;
 
-      el('tdStatsReloadOptionsBtn').disabled = false;
+el('tdStatsReloadOptionsBtn').disabled = false;
 
-      tdStatsUpdateSubjectControls();
+tdStatsUpdateSubjectControls();
+
+// ส่งต่อข้อมูลตัวเลือกให้ Risk Overlay
+// หากกำลังเปิดใช้งานอยู่
+
+tdRiskSyncOptions();
 
     }
 
@@ -20788,6 +21236,8 @@ function tdStatsEnsureOptions(){
 // ล้างข้อมูลเมื่อ Logout
 
 function tdStatsReset(){
+
+  tdRiskReset();
 
   tdStatsResetResult();
 
@@ -23524,6 +23974,773 @@ function tdStatsCloseFilterOverlay(){
 /* ===== END TEACHER DASHBOARD FILTER OVERLAY CONTROLLER ===== */
 
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK FILTER CONTROLLER
+   ===================================================== */
+
+const tdRiskState = {
+
+  options: null,
+
+  confirmedFilters: null
+
+};
+
+
+// =====================================================
+// 1. สร้างตัวเลือก Dropdown
+// =====================================================
+
+function tdRiskSetSelect(
+  id,
+  values,
+  allLabel = null,
+  selectedValue = null
+){
+
+  const select = el(id);
+
+  select.replaceChildren();
+
+  if(allLabel !== null){
+
+    const option = document.createElement('option');
+
+    option.value = '';
+
+    option.textContent = allLabel;
+
+    select.append(option);
+
+  }
+
+  const unique = [...new Set(
+    values.map(String).filter(
+      value => value.trim() !== ''
+    )
+  )];
+
+  unique.forEach(value => {
+
+    const option = document.createElement('option');
+
+    option.value = value;
+
+    option.textContent = value;
+
+    select.append(option);
+
+  });
+
+  if(selectedValue !== null){
+
+    const value = String(selectedValue);
+
+    if(
+      Array.from(select.options)
+        .some(option => option.value === value)
+    ){
+
+      select.value = value;
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// 2. สร้างรายการห้องเรียนตามระดับชั้น
+// =====================================================
+
+function tdRiskRenderRooms(){
+
+  const classLevel = el('tdRiskClass').value;
+
+  const groups =
+
+    tdRiskState.options?.rooms_by_class || [];
+
+  const rooms = [];
+
+  groups.forEach(group => {
+
+    const groupClass = String(
+      group.class_level || ''
+    ).trim();
+
+    if(!groupClass) return;
+
+    if(classLevel && groupClass !== classLevel){
+
+      return;
+
+    }
+
+    if(!Array.isArray(group.rooms)) return;
+
+    group.rooms.forEach(room => {
+
+      const roomNo = String(room).trim();
+
+      if(roomNo){
+
+        rooms.push(
+          `${groupClass}/${roomNo}`
+        );
+
+      }
+
+    });
+
+  });
+
+  rooms.sort((a,b) =>
+
+    a.localeCompare(
+      b,
+      'th',
+      {numeric:true}
+    )
+
+  );
+
+  tdRiskSetSelect(
+
+    'tdRiskRoom',
+
+    rooms,
+
+    classLevel
+      ? `ทุกห้องของ ${classLevel}`
+      : 'ทุกห้อง',
+
+    ''
+
+  );
+
+}
+
+
+// =====================================================
+// 3. สร้างตัวกรองจากข้อมูลที่โหลดไว้
+// =====================================================
+
+function tdRiskRenderOptions(options){
+
+  tdRiskState.options = options;
+
+  const years = options.years
+
+    .map(String)
+
+    .filter(value =>
+      Number.isInteger(Number(value)) &&
+      Number(value) > 0
+    )
+
+    .sort((a,b) => Number(b) - Number(a));
+
+  const terms = options.terms
+
+    .map(String)
+
+    .filter(value =>
+      ['1','2'].includes(value)
+    );
+
+
+  tdRiskSetSelect(
+
+    'tdRiskYear',
+
+    years,
+
+    null,
+
+    years[0] ?? null
+
+  );
+
+
+  tdRiskSetSelect(
+
+    'tdRiskTerm',
+
+    terms,
+
+    'ทุกภาคเรียน',
+
+    terms[0] ?? ''
+
+  );
+
+
+  tdRiskSetSelect(
+
+    'tdRiskClass',
+
+    options.class_levels,
+
+    'ทุกระดับชั้น',
+
+    ''
+
+  );
+
+
+  tdRiskSetSelect(
+
+    'tdRiskArea',
+
+    tdStatsSortAreas(options.learning_areas),
+
+    'ทุกกลุ่มสาระ',
+
+    ''
+
+  );
+
+
+  tdRiskSetSelect(
+
+    'tdRiskType',
+
+    options.subject_types,
+
+    'ทุกประเภทวิชา',
+
+    ''
+
+  );
+
+
+  tdRiskRenderRooms();
+
+}
+
+
+// =====================================================
+// 4. สร้าง Risk Filter Payload
+// =====================================================
+
+function tdRiskBuildPayload(){
+
+  if(!tdStatsHasValidSession()){
+
+    throw new Error(
+      'Session ไม่ถูกต้องหรือหมดอายุ'
+    );
+
+  }
+
+  if(
+
+    !tdRiskState.options ||
+
+    tdRiskState.options !== tdStatsState.options ||
+
+    tdStatsState.loading
+
+  ){
+
+    throw new Error(
+      'กรุณารอให้โหลดตัวเลือกเรียบร้อย'
+    );
+
+  }
+
+
+  const read = id => {
+
+    const select = el(id);
+
+    if(!select || select.selectedIndex < 0){
+
+      throw new Error(
+        'ข้อมูลตัวเลือกไม่สมบูรณ์'
+      );
+
+    }
+
+    return select.value;
+
+  };
+
+
+  const year = Number(read('tdRiskYear'));
+
+  const term = read('tdRiskTerm');
+
+  const classLevel = read('tdRiskClass');
+
+  const room = read('tdRiskRoom');
+
+  const area = read('tdRiskArea');
+
+  const type = read('tdRiskType');
+
+
+  if(!Number.isInteger(year) || year <= 0){
+
+    throw new Error(
+      'กรุณาเลือกปีการศึกษา'
+    );
+
+  }
+
+  if(term && !['1','2'].includes(term)){
+
+    throw new Error(
+      'ภาคเรียนไม่ถูกต้อง'
+    );
+
+  }
+
+  if(
+
+    classLevel &&
+
+    room &&
+
+    !room.startsWith(`${classLevel}/`)
+
+  ){
+
+    throw new Error(
+      'ห้องเรียนไม่ตรงกับระดับชั้น'
+    );
+
+  }
+
+
+  return {
+
+    academic_years: [year],
+
+    terms:
+      term ? [Number(term)] : [],
+
+    class_levels:
+      classLevel ? [classLevel] : [],
+
+    rooms:
+      room ? [room] : [],
+
+    learning_areas:
+      area ? [area] : [],
+
+    subject_types:
+      type ? [type] : [],
+
+    subject_ids: []
+
+  };
+
+}
+
+
+// =====================================================
+// 5. สรุปเงื่อนไขที่เลือก
+// =====================================================
+
+function tdRiskDescribeFilters(payload){
+
+  return [
+
+    `ปีการศึกษา ${payload.academic_years[0]}`,
+
+    payload.terms.length
+      ? `ภาคเรียน ${payload.terms[0]}`
+      : 'ทุกภาคเรียน',
+
+    payload.class_levels[0]
+      || 'ทุกระดับชั้น',
+
+    payload.rooms[0]
+      || 'ทุกห้อง',
+
+    payload.learning_areas[0]
+      || 'ทุกกลุ่มสาระ',
+
+    payload.subject_types[0]
+      || 'ทุกประเภทวิชา'
+
+  ].join(' · ');
+
+}
+
+
+function tdRiskUpdateFilterSummary(){
+
+  const confirm = el('tdRiskConfirmFilterBtn');
+
+  try{
+
+    const payload = tdRiskBuildPayload();
+
+    el('tdRiskFilterSummary').textContent =
+
+      tdRiskDescribeFilters(payload);
+
+    confirm.disabled = false;
+
+  }catch(error){
+
+    el('tdRiskFilterSummary').textContent =
+
+      error.message;
+
+    confirm.disabled = true;
+
+  }
+
+}
+
+
+// =====================================================
+// 6. ใช้ตัวเลือกชุดเดียวกับ Stats Dashboard
+// =====================================================
+
+function tdRiskSyncOptions(){
+
+  if(!el('tdRiskFilterOverlay')?.open) return;
+
+  const fields = el('tdRiskFilterFields');
+
+  const retry = el('tdRiskReloadOptionsBtn');
+
+  const confirm = el('tdRiskConfirmFilterBtn');
+
+  fields.disabled = true;
+
+  confirm.disabled = true;
+
+  retry.classList.add('hidden');
+
+
+  if(!tdStatsHasValidSession()){
+
+    setStatus(
+
+      'tdRiskFilterStatus',
+
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+
+  if(tdStatsState.loading){
+
+    setStatus(
+
+      'tdRiskFilterStatus',
+
+      'กำลังโหลดตัวเลือกจากฐานข้อมูล...',
+
+      'info'
+
+    );
+
+    return;
+
+  }
+
+
+  if(!tdStatsState.options){
+
+    tdRiskState.options = null;
+
+    retry.classList.remove('hidden');
+
+    setStatus(
+
+      'tdRiskFilterStatus',
+
+      'ยังไม่มีตัวเลือก กรุณาลองโหลดอีกครั้ง',
+
+      'warn'
+
+    );
+
+    return;
+
+  }
+
+
+  // สร้าง Dropdown เฉพาะเมื่อเป็นข้อมูลชุดใหม่
+
+  if(tdRiskState.options !== tdStatsState.options){
+
+    tdRiskRenderOptions(
+      tdStatsState.options
+    );
+
+  }
+
+
+  fields.disabled = false;
+
+  setStatus(
+
+    'tdRiskFilterStatus',
+
+    'โหลดตัวเลือกเรียบร้อยแล้ว',
+
+    'success'
+
+  );
+
+  tdRiskUpdateFilterSummary();
+
+}
+
+
+// =====================================================
+// 7. โหลดตัวเลือกเมื่อจำเป็นเท่านั้น
+// =====================================================
+
+function tdRiskEnsureOptions(){
+
+  if(!el('tdRiskFilterOverlay')?.open) return;
+
+  if(!tdStatsHasValidSession()){
+
+    tdRiskSyncOptions();
+
+    return;
+
+  }
+
+
+  // มีข้อมูลแล้ว หรือ Stats กำลังโหลดอยู่
+
+  if(tdStatsState.options || tdStatsState.loading){
+
+    tdRiskSyncOptions();
+
+    return;
+
+  }
+
+
+  // เรียก Loader เดิม ไม่สร้าง RPC ซ้ำอีกชุด
+
+  tdStatsLoadOptions();
+
+  tdRiskSyncOptions();
+
+}
+
+
+// =====================================================
+// 8. เปิดและปิด Overlay
+// =====================================================
+
+function tdRiskOpenFilterOverlay(){
+
+  const overlay = el('tdRiskFilterOverlay');
+
+  if(!overlay || overlay.open) return;
+
+  if(typeof overlay.showModal !== 'function'){
+
+    alert(
+      'กรุณาอัปเดตเบราว์เซอร์เพื่อใช้งานตัวกรอง'
+    );
+
+    return;
+
+  }
+
+  if(!tdStatsHasValidSession()){
+
+    tdRiskReset();
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่',
+
+      'error'
+
+    );
+
+    return;
+
+  }
+
+  overlay.showModal();
+
+  el('tdRiskOpenFilterBtn')
+    .setAttribute('aria-expanded','true');
+
+  tdRiskEnsureOptions();
+
+}
+
+
+function tdRiskCloseFilterOverlay(){
+
+  const overlay = el('tdRiskFilterOverlay');
+
+  if(overlay?.open){
+
+    overlay.close();
+
+  }
+
+  el('tdRiskOpenFilterBtn')
+    ?.setAttribute('aria-expanded','false');
+
+}
+
+
+// =====================================================
+// 9. ยืนยันตัวกรอง
+// =====================================================
+
+function tdRiskConfirmFilters(){
+
+  try{
+
+    const payload = tdRiskBuildPayload();
+
+    tdRiskState.confirmedFilters =
+
+      JSON.parse(JSON.stringify(payload));
+
+
+    el('tdRiskResultTitle').textContent =
+
+      'ยืนยันตัวเลือกเรียบร้อยแล้ว';
+
+
+    el('tdRiskAppliedFilters').textContent =
+
+      tdRiskDescribeFilters(payload);
+
+
+    setStatus(
+
+      'tdRiskResultStatus',
+
+      'พร้อมประมวลผลในขั้นตอนถัดไป',
+
+      'success'
+
+    );
+
+    tdRiskCloseFilterOverlay();
+
+  }catch(error){
+
+    setStatus(
+
+      'tdRiskFilterStatus',
+
+      error.message,
+
+      'error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 10. ล้างตัวกรอง Risk
+// =====================================================
+
+function tdRiskReset(){
+
+  tdRiskCloseFilterOverlay();
+
+  tdRiskState.options = null;
+
+  tdRiskState.confirmedFilters = null;
+
+
+  [
+
+    'tdRiskYear',
+
+    'tdRiskTerm',
+
+    'tdRiskClass',
+
+    'tdRiskRoom',
+
+    'tdRiskArea',
+
+    'tdRiskType'
+
+  ].forEach(id => {
+
+    el(id)?.replaceChildren();
+
+  });
+
+
+  el('tdRiskFilterFields').disabled = true;
+
+  el('tdRiskConfirmFilterBtn').disabled = true;
+
+  el('tdRiskReloadOptionsBtn')
+    .classList.add('hidden');
+
+
+  el('tdRiskFilterSummary').textContent =
+
+    'กรุณารอให้โหลดตัวเลือกเรียบร้อย';
+
+
+  el('tdRiskResultTitle').textContent =
+
+    'ยังไม่ได้ประมวลผล';
+
+
+  el('tdRiskAppliedFilters').textContent =
+
+    'กรุณาเลือกข้อมูลที่ต้องการประมวลผล';
+
+
+  setStatus(
+
+    'tdRiskFilterStatus',
+
+    'ยังไม่ได้โหลดตัวเลือก',
+
+    'info'
+
+  );
+
+
+  setStatus(
+
+    'tdRiskResultStatus',
+
+    'รอเลือกเงื่อนไข',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK FILTER CONTROLLER ===== */
+
+
  function setActivePage(page){
 
 // =========================================
@@ -23592,11 +24809,17 @@ if(
       el('pageDashboard')
     ?.classList.toggle('hidden', !isDashboard);
 
-  if(isDashboard){
-    tdStatsEnsureOptions();
-  }else{
-    tdStatsCloseFilterOverlay();
-  }
+if(isDashboard){
+
+  tdStatsEnsureOptions();
+
+}else{
+
+  tdStatsCloseFilterOverlay();
+
+  tdRiskCloseFilterOverlay();
+
+}
 
 el('pageMidtermReport')
   ?.classList.toggle(
@@ -59374,6 +60597,122 @@ bindIfExists('tdStatsFilterOverlay', 'close', () => {
   el('tdStatsOpenFilterBtn')?.setAttribute('aria-expanded','false');
 });
 /* ===== END STATS FILTER OVERLAY EVENTS ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK FILTER EVENTS
+   ===================================================== */
+
+bindIfExists(
+
+  'tdRiskOpenFilterBtn',
+
+  'click',
+
+  tdRiskOpenFilterOverlay
+
+);
+
+
+bindIfExists(
+
+  'tdRiskCloseFilterBtn',
+
+  'click',
+
+  tdRiskCloseFilterOverlay
+
+);
+
+
+bindIfExists(
+
+  'tdRiskReloadOptionsBtn',
+
+  'click',
+
+  tdRiskEnsureOptions
+
+);
+
+
+bindIfExists(
+
+  'tdRiskConfirmFilterBtn',
+
+  'click',
+
+  tdRiskConfirmFilters
+
+);
+
+
+// ปิดด้วย Escape หรือ dialog.close()
+
+bindIfExists(
+
+  'tdRiskFilterOverlay',
+
+  'close',
+
+  () => {
+
+    el('tdRiskOpenFilterBtn')
+      ?.setAttribute('aria-expanded','false');
+
+  }
+
+);
+
+
+// เมื่อเปลี่ยนระดับชั้น
+// สร้างตัวเลือกห้องเรียนใหม่
+
+bindIfExists(
+
+  'tdRiskClass',
+
+  'change',
+
+  () => {
+
+    tdRiskRenderRooms();
+
+    tdRiskUpdateFilterSummary();
+
+  }
+
+);
+
+
+// เมื่อเปลี่ยนตัวกรองอื่น
+
+[
+
+  'tdRiskYear',
+
+  'tdRiskTerm',
+
+  'tdRiskRoom',
+
+  'tdRiskArea',
+
+  'tdRiskType'
+
+].forEach(id => {
+
+  bindIfExists(
+
+    id,
+
+    'change',
+
+    tdRiskUpdateFilterSummary
+
+  );
+
+});
+
+/* ===== END TEACHER DASHBOARD RISK FILTER EVENTS ===== */
 
 /* =====================================================
    TEACHER DASHBOARD : SUBJECT EVENTS
