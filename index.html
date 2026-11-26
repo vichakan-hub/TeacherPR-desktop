@@ -2569,6 +2569,185 @@ td:first-child{
 }
 
 /* ===== END TEACHER DASHBOARD FILTER BUILDER ===== */
+/* =====================================================
+   TEACHER DASHBOARD : SUBJECT SELECTOR
+   ===================================================== */
+
+#tdStatsSubjectSection{
+  min-width:0;
+  width:100%;
+}
+
+/* ช่องค้นหารายวิชา */
+
+#tdStatsSubjectSearch{
+  width:100%;
+  min-width:0;
+  height:44px;
+  font-size:15px;
+}
+
+/* Grid รายวิชา */
+
+#tdStatsSubjectChecks{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+
+  max-height:340px;
+
+  padding:8px;
+
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+}
+
+/* Card รายวิชา */
+
+#tdStatsSubjectChecks .td-subject-check{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  min-width:0;
+  min-height:68px;
+
+  padding:10px 12px;
+
+  border:1px solid #dbe7f3;
+  border-radius:12px;
+
+  background:#ffffff;
+
+  cursor:pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+/* เมื่อเลือกรายวิชา */
+
+#tdStatsSubjectChecks .td-subject-check:has(input:checked){
+  background:#eff6ff;
+  border-color:#93c5fd;
+}
+
+#tdStatsSubjectChecks .td-subject-check:hover{
+  border-color:#60a5fa;
+}
+
+#tdStatsSubjectChecks .td-subject-check.hidden{
+  display:none !important;
+}
+
+/* Checkbox */
+
+#tdStatsSubjectChecks .td-subject-check input{
+  width:17px;
+  height:17px;
+  flex:0 0 auto;
+  accent-color:#2563eb;
+}
+
+/* กล่องข้อความรายวิชา */
+
+#tdStatsSubjectChecks .td-subject-info{
+  min-width:0;
+  flex:1;
+}
+
+/* รหัสวิชา */
+
+#tdStatsSubjectChecks .td-subject-code{
+  font-family:'Sarabun',sans-serif;
+  font-size:14px;
+  font-weight:800;
+  color:#1d4ed8;
+}
+
+/* ชื่อวิชา */
+
+#tdStatsSubjectChecks .td-subject-name{
+  margin-top:3px;
+
+  font-size:14px;
+  line-height:1.45;
+  font-weight:500;
+  color:#17324d;
+
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+/* กรณีไม่มีข้อมูล */
+
+#tdStatsSubjectChecks .empty-state{
+  grid-column:1 / -1;
+  padding:24px 12px;
+}
+
+/* จำนวนรายวิชาที่เลือก */
+
+#tdStatsSubjectCount{
+  font-size:13px;
+  font-weight:700;
+  color:#2563eb;
+}
+
+/* ปุ่มโหลดรายวิชา */
+
+#tdStatsLoadSubjectsBtn{
+  height:auto;
+  min-height:40px;
+  padding:8px 14px;
+}
+
+#tdStatsSubjectSection button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+/* Tablet */
+
+@media(max-width:1000px){
+
+  #tdStatsSubjectChecks{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+}
+
+/* Mobile */
+
+@media(max-width:600px){
+
+  #tdStatsSubjectChecks{
+    grid-template-columns:1fr;
+    max-height:300px;
+  }
+
+  #tdStatsSubjectChecks .td-subject-check{
+    min-height:56px;
+    padding:8px 10px;
+  }
+
+  #tdStatsSubjectChecks .td-subject-name{
+    font-size:13px;
+  }
+
+  #tdStatsSubjectSearch{
+    font-size:16px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD SUBJECT SELECTOR ===== */
 
 /* =====================================================
    TEACHER DASHBOARD : FILTER OVERLAY
