@@ -4124,6 +4124,63 @@ td:first-child{
 
 /* ===== END TEACHER DASHBOARD RISK URGENT STUDENTS ===== */
 
+/* =====================================================
+   TEACHER DASHBOARD : RISK TREND
+   ===================================================== */
+
+#tdRiskTrendSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskTrendSection .td-trend-chart-box{
+  position:relative;
+  width:100%;
+  min-width:0;
+  height:360px;
+  margin-top:16px;
+}
+
+#tdRiskTrendScope{
+  padding:12px 14px;
+  margin:12px 0;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#eef4ff;
+  color:#1d4ed8;
+  font-size:14px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskTrendSummary{
+  margin-top:16px;
+  padding:14px;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#f8fbff;
+  color:#41536c;
+  font-size:14px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:720px){
+
+  #tdRiskTrendSection .td-trend-chart-box{
+    height:280px;
+  }
+
+  #tdRiskTrendScope,
+  #tdRiskTrendSummary{
+    font-size:13px;
+    padding:10px;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK TREND ===== */
+
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -18631,7 +18688,76 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK URGENT STUDENTS ===== -->
 
-  <div id="tdRiskTrendSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : RISK TREND
+     ================================================= -->
+
+<div id="tdRiskTrendSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>📈 แนวโน้มความเสี่ยงย้อนหลัง</h2>
+
+    <div class="sub">
+
+      เปรียบเทียบจำนวนรายการผลการเรียนเดิม
+      0 ร มส มผ ในแต่ละปีการศึกษาและภาคเรียน
+
+    </div>
+
+    <div
+      id="tdRiskTrendStatus"
+      class="status info"
+      role="status"
+      aria-live="polite">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdRiskTrendContent" class="hidden">
+
+      <div id="tdRiskTrendScope"></div>
+
+      <div
+        id="tdRiskTrendChartWrap"
+        class="td-trend-chart-box">
+
+        <canvas
+          id="tdRiskTrendChart"
+          role="img"
+          aria-label="กราฟแนวโน้มผลการเรียนกลุ่มเสี่ยงย้อนหลัง">
+        </canvas>
+
+      </div>
+
+      <div id="tdRiskTrendSummary"></div>
+
+      <div class="small" style="margin-top:12px;">
+
+        หมายเหตุ: แสดงข้อมูลทุกปีการศึกษา
+        และทุกภาคเรียนที่พบรายการกลุ่มเสี่ยง
+        โดยยังคงตัวกรองระดับชั้น ห้องเรียน
+        กลุ่มสาระ และประเภทวิชา
+
+        ภาคเรียนที่ไม่มีข้อมูลจาก RPC
+        จะไม่ถูกตีความว่ามีความเสี่ยงเป็นศูนย์
+
+        สถานะการแก้ผลการเรียนเป็นสถานะล่าสุด
+        ไม่ใช่สถานะ ณ วันสิ้นภาคเรียนในอดีต
+
+        จำนวนรายการไม่ใช่อัตราความเสี่ยง
+        เมื่อเทียบกับจำนวนนักเรียนทั้งหมด
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD RISK TREND ===== -->
 
   <div id="tdRiskRepeatedSection"></div>
 
@@ -26536,6 +26662,8 @@ function tdRiskResetResult(){
 
   tdRiskResetUrgentStudents();
 
+  tdRiskResetTrend();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -27095,7 +27223,33 @@ if(!tdStatsHasValidSession()){
 
 }
 
+
+// =============================================
+// กราฟแนวโน้มความเสี่ยงย้อนหลัง
+// =============================================
+
+await tdRiskLoadTrend(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
+
   }catch(error){
+
 
     if(!isCurrentRequest()) return;
 
@@ -31059,6 +31213,809 @@ function tdRiskResetUrgentStudents(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK URGENT STUDENTS CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : RISK TREND CONTROLLER
+   ===================================================== */
+
+const tdRiskTrendState = {
+
+  rows: null,
+
+  filters: null,
+
+  chart: null
+
+};
+
+
+// =====================================================
+// 1. สร้าง Payload สำหรับ Trend
+// =====================================================
+
+function tdRiskBuildTrendPayload(snapshot){
+
+  return {
+
+    ...JSON.parse(JSON.stringify(snapshot)),
+
+    academic_years:[],
+
+    terms:[]
+
+  };
+
+}
+
+
+// =====================================================
+// 2. ตรวจสอบข้อมูล Trend
+// =====================================================
+
+function tdRiskValidateTrendRows(rows){
+
+  if(!Array.isArray(rows)){
+
+    throw new Error(
+      'รูปแบบข้อมูล Trend ไม่ถูกต้อง'
+    );
+
+  }
+
+  const keys = [
+
+    'total_records',
+
+    'unique_students',
+
+    'grade_0_records',
+
+    'grade_r_records',
+
+    'grade_ms_records',
+
+    'grade_mp_records',
+
+    'resolved_records',
+
+    'pending_records',
+
+    'unresolved_records'
+
+  ];
+
+  let previousPeriod = null;
+
+  rows.forEach(row => {
+
+    if(
+
+      !row ||
+
+      !Number.isSafeInteger(row.academic_year) ||
+
+      row.academic_year <= 0 ||
+
+      ![1,2].includes(row.term) ||
+
+      row.period_label !==
+        `${row.academic_year}/${row.term}` ||
+
+      !keys.every(key =>
+
+        Number.isSafeInteger(row[key]) &&
+
+        row[key] >= 0
+
+      )
+
+    ){
+
+      throw new Error(
+        'ข้อมูลปีการศึกษาหรือจำนวนรายการไม่ถูกต้อง'
+      );
+
+    }
+
+    const period =
+      row.academic_year * 2 + row.term;
+
+    if(
+
+      previousPeriod !== null &&
+
+      period <= previousPeriod
+
+    ){
+
+      throw new Error(
+        'พบภาคเรียนซ้ำหรือลำดับภาคเรียนไม่ถูกต้อง'
+      );
+
+    }
+
+    previousPeriod = period;
+
+    const gradeTotal = tdRiskGradeSeries.reduce(
+
+      (sum,item) => sum + row[item.key],
+
+      0
+
+    );
+
+    const statusTotal =
+
+      row.resolved_records +
+
+      row.pending_records +
+
+      row.unresolved_records;
+
+    if(
+
+      row.total_records <= 0 ||
+
+      gradeTotal !== row.total_records ||
+
+      statusTotal !== row.total_records ||
+
+      row.unique_students > row.total_records
+
+    ){
+
+      throw new Error(
+        'จำนวนรายการ Trend ไม่สอดคล้องกัน'
+      );
+
+    }
+
+  });
+
+}
+
+
+// =====================================================
+// 3. ตรวจสอบ Trend เทียบกับ Summary
+// =====================================================
+
+function tdRiskValidateTrendAgainstSummary(
+  rows,
+  snapshot,
+  summary
+){
+
+  if(!summary){
+
+    throw new Error('Summary ยังไม่พร้อม');
+
+  }
+
+  // เลือกเฉพาะช่วงเวลาที่ตรงกับ Summary
+
+  const selectedRows = rows.filter(row =>
+
+    (
+
+      snapshot.academic_years.length === 0 ||
+
+      snapshot.academic_years.includes(
+        row.academic_year
+      )
+
+    ) && (
+
+      snapshot.terms.length === 0 ||
+
+      snapshot.terms.includes(row.term)
+
+    )
+
+  );
+
+  const compareKeys = [
+
+    ['total_records','total_risk_records'],
+
+    ['grade_0_records','grade_0_records'],
+
+    ['grade_r_records','grade_r_records'],
+
+    ['grade_ms_records','grade_ms_records'],
+
+    ['grade_mp_records','grade_mp_records'],
+
+    ['resolved_records','resolved_records'],
+
+    ['pending_records','pending_records'],
+
+    ['unresolved_records','unresolved_records']
+
+  ];
+
+  compareKeys.forEach(([rowKey,summaryKey]) => {
+
+    const total = selectedRows.reduce(
+
+      (sum,row) => sum + row[rowKey],
+
+      0
+
+    );
+
+    if(total !== summary[summaryKey]){
+
+      throw new Error(
+
+        `Trend ${rowKey} ไม่ตรงกับ Summary`
+
+      );
+
+    }
+
+  });
+
+  // เปรียบเทียบจำนวนนักเรียนไม่ซ้ำ
+  // เฉพาะกรณีที่เลือกปีและภาคเรียนเดียว
+
+  if(
+
+    snapshot.academic_years.length === 1 &&
+
+    snapshot.terms.length === 1
+
+  ){
+
+    const students =
+      selectedRows[0]?.unique_students ?? 0;
+
+    if(students !== summary.total_risk_students){
+
+      throw new Error(
+        'จำนวนนักเรียน Trend ไม่ตรงกับ Summary'
+      );
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// 4. ทำลาย Chart เดิม
+// =====================================================
+
+function tdRiskDestroyTrendChart(){
+
+  if(tdRiskTrendState.chart){
+
+    tdRiskTrendState.chart.destroy();
+
+    tdRiskTrendState.chart = null;
+
+  }
+
+}
+
+
+// =====================================================
+// 5. แสดงกราฟแนวโน้มย้อนหลัง
+// =====================================================
+
+function tdRiskRenderTrend(){
+
+  tdRiskDestroyTrendChart();
+
+  const rows = tdRiskTrendState.rows;
+
+  const filters = tdRiskTrendState.filters;
+
+  if(!rows || !filters) return;
+
+  const content = el('tdRiskTrendContent');
+
+  const wrap = el('tdRiskTrendChartWrap');
+
+  const scopeText = [
+
+    'ทุกปีการศึกษา',
+
+    'ทุกภาคเรียน',
+
+    filters.class_levels.join(', ') ||
+      'ทุกระดับชั้น',
+
+    filters.rooms.join(', ') ||
+      'ทุกห้อง',
+
+    filters.learning_areas.join(', ') ||
+      'ทุกกลุ่มสาระ',
+
+    filters.subject_types.join(', ') ||
+      'ทุกประเภทวิชา'
+
+  ].join(' · ');
+
+  tdStatsSetText(
+    'tdRiskTrendScope',
+    scopeText
+  );
+
+  content.classList.remove('hidden');
+
+  if(rows.length === 0){
+
+    wrap.classList.add('hidden');
+
+    tdStatsSetText(
+
+      'tdRiskTrendSummary',
+
+      'ไม่พบรายการกลุ่มเสี่ยงย้อนหลัง'
+
+    );
+
+    setStatus(
+
+      'tdRiskTrendStatus',
+
+      'ไม่พบรายการกลุ่มเสี่ยงตามเงื่อนไข',
+
+      'success'
+
+    );
+
+    return;
+
+  }
+
+  // สรุปช่วงเวลาที่พบข้อมูล
+
+  const first = rows[0];
+
+  const last = rows[rows.length - 1];
+
+  const peak = rows.reduce(
+
+    (best,row) =>
+
+      row.total_records > best.total_records
+        ? row
+        : best,
+
+    first
+
+  );
+
+  tdStatsSetText(
+
+    'tdRiskTrendSummary',
+
+    `พบข้อมูล ${tdStatsFmtInt(rows.length)} ภาคเรียน` +
+
+    ` · ตั้งแต่ ${first.period_label}` +
+
+    ` ถึง ${last.period_label}` +
+
+    ` · จำนวนรายการสูงสุด ${
+      tdStatsFmtInt(peak.total_records)
+    } รายการ ใน ${peak.period_label}`
+
+  );
+
+  wrap.classList.remove('hidden');
+
+  if(typeof Chart !== 'function'){
+
+    throw new Error(
+      'ไม่สามารถโหลด Chart.js'
+    );
+
+  }
+
+  tdRiskTrendState.chart = new Chart(
+
+    el('tdRiskTrendChart'),
+
+    {
+
+      type:'line',
+
+      data:{
+
+        labels:rows.map(
+          row => row.period_label
+        ),
+
+        datasets:tdRiskGradeSeries.map(
+          item => ({
+
+            label:item.label,
+
+            data:rows.map(
+              row => row[item.key]
+            ),
+
+            borderColor:item.color,
+
+            backgroundColor:item.color,
+
+            borderWidth:2.5,
+
+            pointRadius:4,
+
+            pointHoverRadius:6,
+
+            tension:.3,
+
+            fill:false,
+
+            spanGaps:false,
+
+            // ใช้เส้นประเมื่อช่วงเวลาขาดหาย
+            // ไม่เติมข้อมูลเป็นศูนย์เอง
+
+            segment:{
+
+              borderDash:context => {
+
+                const a = rows[
+                  context.p0DataIndex
+                ];
+
+                const b = rows[
+                  context.p1DataIndex
+                ];
+
+                if(!a || !b) return [];
+
+                const diff =
+
+                  (b.academic_year * 2 + b.term) -
+
+                  (a.academic_year * 2 + a.term);
+
+                return diff > 1
+                  ? [6,6]
+                  : [];
+
+              }
+
+            }
+
+          })
+        )
+
+      },
+
+      options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        interaction:{
+
+          mode:'index',
+
+          intersect:false
+
+        },
+
+        scales:{
+
+          x:{
+
+            grid:{display:false}
+
+          },
+
+          y:{
+
+            beginAtZero:true,
+
+            ticks:{precision:0},
+
+            grid:{color:'#edf2f7'},
+
+            title:{
+
+              display:true,
+
+              text:'จำนวนรายการ'
+
+            }
+
+          }
+
+        },
+
+        plugins:{
+
+          legend:{
+
+            position:'bottom',
+
+            labels:{
+
+              usePointStyle:true,
+
+              boxWidth:10
+
+            }
+
+          },
+
+          tooltip:{
+
+            callbacks:{
+
+              label:context =>
+
+                `${context.dataset.label}: ${
+                  tdStatsFmtInt(context.raw)
+                } รายการ`,
+
+              footer:items => {
+
+                const row = rows[
+                  items[0]?.dataIndex
+                ];
+
+                if(!row) return '';
+
+                return [
+
+                  `รวม ${
+                    tdStatsFmtInt(row.total_records)
+                  } รายการ`,
+
+                  `นักเรียนไม่ซ้ำ ${
+                    tdStatsFmtInt(row.unique_students)
+                  } คน`,
+
+                  `แก้สำเร็จ ${
+                    tdStatsFmtInt(row.resolved_records)
+                  } รายการ`,
+
+                  `รออนุมัติ ${
+                    tdStatsFmtInt(row.pending_records)
+                  } รายการ`,
+
+                  `ยังไม่แก้ ${
+                    tdStatsFmtInt(row.unresolved_records)
+                  } รายการ`
+
+                ];
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  );
+
+  setStatus(
+
+    'tdRiskTrendStatus',
+
+    'แสดงแนวโน้มย้อนหลังจากข้อมูลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 6. โหลดข้อมูล Trend จาก RPC
+// =====================================================
+
+async function tdRiskLoadTrend(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+){
+
+  if(!isCurrentRequest()) return;
+
+  tdRiskResetTrend();
+
+  try{
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    if(!tdRiskResultState.summary){
+
+      throw new Error('Summary ยังไม่พร้อม');
+
+    }
+
+    const trendPayload =
+      tdRiskBuildTrendPayload(snapshot);
+
+    setStatus(
+
+      'tdRiskTrendStatus',
+
+      'กำลังโหลดข้อมูลย้อนหลัง...',
+
+      'info'
+
+    );
+
+    const result = await supabaseClient.rpc(
+
+      'teacher_get_orms_trend_session',
+
+      {
+
+        p_token:token,
+
+        p_filters:trendPayload
+
+      }
+
+    );
+
+    if(!isCurrentRequest()) return;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    if(result.error) throw result.error;
+
+    const rows = result.data;
+
+    tdRiskValidateTrendRows(rows);
+
+    tdRiskValidateTrendAgainstSummary(
+
+      rows,
+
+      snapshot,
+
+      tdRiskResultState.summary
+
+    );
+
+    // เก็บข้อมูลจริงไว้ใน Memory
+
+    tdRiskTrendState.rows = rows;
+
+    tdRiskTrendState.filters = trendPayload;
+
+    try{
+
+      tdRiskRenderTrend();
+
+    }catch(chartError){
+
+      tdRiskDestroyTrendChart();
+
+      el('tdRiskTrendChartWrap')
+        .classList.add('hidden');
+
+      setStatus(
+
+        'tdRiskTrendStatus',
+
+        'โหลดข้อมูลสำเร็จ แต่สร้างกราฟไม่ได้',
+
+        'warn'
+
+      );
+
+      console.warn(
+
+        'Teacher Dashboard trend chart:',
+
+        chartError?.message || 'Unknown error'
+
+      );
+
+    }
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+    if(!tdStatsHasValidSession()){
+
+      throw error;
+
+    }
+
+    tdRiskResetTrend();
+
+    setStatus(
+
+      'tdRiskTrendStatus',
+
+      'ไม่สามารถแสดงแนวโน้มย้อนหลังได้ กรุณาประมวลผลใหม่',
+
+      'error'
+
+    );
+
+    console.warn(
+
+      'Teacher Dashboard trend:',
+
+      error?.code ||
+
+      error?.message ||
+
+      'Unknown error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 7. ล้างข้อมูล Trend
+// =====================================================
+
+function tdRiskResetTrend(){
+
+  tdRiskDestroyTrendChart();
+
+  tdRiskTrendState.rows = null;
+
+  tdRiskTrendState.filters = null;
+
+  el('tdRiskTrendContent')
+    ?.classList.add('hidden');
+
+  el('tdRiskTrendChartWrap')
+    ?.classList.add('hidden');
+
+  tdStatsSetText(
+    'tdRiskTrendScope',
+    ''
+  );
+
+  tdStatsSetText(
+    'tdRiskTrendSummary',
+    ''
+  );
+
+  setStatus(
+
+    'tdRiskTrendStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD RISK TREND CONTROLLER ===== */
 
 
  function setActivePage(page){
