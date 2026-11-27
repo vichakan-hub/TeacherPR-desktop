@@ -4180,7 +4180,239 @@ td:first-child{
 }
 
 /* ===== END TEACHER DASHBOARD RISK TREND ===== */
+/* =====================================================
+   TEACHER DASHBOARD : REPEATED RISK
+   ===================================================== */
 
+#tdRiskRepeatedSection{
+  width:100%;
+  min-width:0;
+}
+
+#tdRiskRepeatedReference{
+  padding:12px 14px;
+  margin:12px 0;
+  border:1px solid #dbe7f3;
+  border-radius:14px;
+  background:#eef4ff;
+  color:#1d4ed8;
+  font-size:14px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskRepeatedSection .td-repeat-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+
+#tdRiskRepeatedSection .td-repeat-kpi{
+  min-width:0;
+  padding:16px;
+  border:1px solid transparent;
+  border-radius:18px;
+}
+
+#tdRiskRepeatedSection .td-repeat-kpi.level2{
+  background:#fffbeb;
+  border-color:#fde68a;
+  color:#b45309;
+}
+
+#tdRiskRepeatedSection .td-repeat-kpi.level3{
+  background:#fff7ed;
+  border-color:#fed7aa;
+  color:#c2410c;
+}
+
+#tdRiskRepeatedSection .td-repeat-kpi.level4{
+  background:#fff1f2;
+  border-color:#fecaca;
+  color:#dc2626;
+}
+
+#tdRiskRepeatedSection .td-repeat-value{
+  margin:8px 0;
+  font-family:'Sarabun',sans-serif;
+  font-size:clamp(24px,3vw,36px);
+  font-weight:900;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskRepeatedSection .td-repeat-overview{
+  padding:18px;
+  border:1px solid #dbe7f3;
+  border-radius:18px;
+  background:#f8fbff;
+  margin-bottom:18px;
+}
+
+#tdRiskRepeatedSection .td-repeat-track{
+  display:flex;
+  width:100%;
+  height:24px;
+  border-radius:999px;
+  background:#e2e8f0;
+  overflow:hidden;
+  margin:14px 0;
+}
+
+#tdRiskRepeatedOutstandingBar{
+  width:0%;
+  background:#ef4444;
+}
+
+#tdRiskRepeatedClearedBar{
+  width:0%;
+  background:#22c55e;
+}
+
+#tdRiskRepeatedSection .td-repeat-legend{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  font-size:14px;
+}
+
+#tdRiskRepeatedSection .td-repeat-red{
+  color:#dc2626;
+  font-weight:700;
+}
+
+#tdRiskRepeatedSection .td-repeat-green{
+  color:#15803d;
+  font-weight:700;
+}
+
+#tdRiskRepeatedNotice{
+  padding:12px 14px;
+  margin:14px 0;
+  border:1px solid #fde68a;
+  border-radius:14px;
+  background:#fffbeb;
+  color:#92400e;
+  font-size:13px;
+  line-height:1.7;
+  white-space:pre-line;
+}
+
+#tdRiskRepeatedTableWrap{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  border:1px solid #dbe7f3;
+  border-radius:16px;
+  -webkit-overflow-scrolling:touch;
+}
+
+#tdRiskRepeatedTable{
+  width:100%;
+  min-width:1120px;
+  border-collapse:collapse;
+}
+
+#tdRiskRepeatedTable th,
+#tdRiskRepeatedTable td{
+  padding:12px 10px;
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+  border-bottom:1px solid #e5edf7;
+  font-size:14px;
+}
+
+#tdRiskRepeatedTable th{
+  background:#edf5ff;
+  color:#17324d;
+  font-weight:800;
+}
+
+#tdRiskRepeatedTable td{
+  background:#fff;
+}
+
+#tdRiskRepeatedTable tbody tr:nth-child(even) td{
+  background:#f8fbff;
+}
+
+#tdRiskRepeatedTable .td-repeat-name{
+  min-width:220px;
+  text-align:left;
+  font-weight:700;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+#tdRiskRepeatedSection .td-repeat-code{
+  margin-top:4px;
+  font-size:12px;
+  font-weight:500;
+  color:#64748b;
+}
+
+#tdRiskRepeatedSection .td-repeat-level{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+}
+
+#tdRiskRepeatedSection .td-repeat-level.level2{
+  background:#fef9c3;
+  color:#854d0e;
+}
+
+#tdRiskRepeatedSection .td-repeat-level.level3{
+  background:#ffedd5;
+  color:#c2410c;
+}
+
+#tdRiskRepeatedSection .td-repeat-level.level4{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+#tdRiskRepeatedSummary{
+  margin-top:14px;
+  font-size:14px;
+  line-height:1.7;
+  color:#41536c;
+}
+
+@media(max-width:720px){
+
+  #tdRiskRepeatedSection .td-repeat-grid{
+    gap:8px;
+  }
+
+  #tdRiskRepeatedSection .td-repeat-kpi{
+    padding:10px;
+    font-size:12px;
+  }
+
+  #tdRiskRepeatedSection .td-repeat-overview{
+    padding:12px;
+  }
+
+  #tdRiskRepeatedSection .td-repeat-legend{
+    font-size:12px;
+  }
+
+}
+
+@media(max-width:360px){
+
+  #tdRiskRepeatedSection .td-repeat-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+/* ===== END TEACHER DASHBOARD REPEATED RISK ===== */
 .fp-submenu{
   display:flex;
   gap:10px;
@@ -18759,7 +18991,204 @@ style="
 
 <!-- ===== END TEACHER DASHBOARD RISK TREND ===== -->
 
-  <div id="tdRiskRepeatedSection"></div>
+  <!-- =================================================
+     TEACHER DASHBOARD : REPEATED RISK
+     ================================================= -->
+
+<div id="tdRiskRepeatedSection">
+
+  <section class="card" style="margin-bottom:18px;">
+
+    <h2>🔁 นักเรียนที่มีความเสี่ยงต่อเนื่อง</h2>
+
+    <div class="sub">
+      ติดตามนักเรียนคนเดิมที่มีผลการเรียน
+      0 ร มส มผ ต่อเนื่องหลายภาคเรียน
+      จนถึงภาคเรียนอ้างอิง
+    </div>
+
+    <div
+      id="tdRiskRepeatedStatus"
+      class="status info"
+      role="status"
+      aria-live="polite">
+
+      ยังไม่ได้ประมวลผลข้อมูล
+
+    </div>
+
+    <div id="tdRiskRepeatedContent" class="hidden">
+
+      <div id="tdRiskRepeatedReference"></div>
+
+      <!-- KPI ความเสี่ยงต่อเนื่อง -->
+
+      <div class="td-repeat-grid">
+
+        <div class="td-repeat-kpi level2">
+
+          <div>ต่อเนื่อง 2 ภาคเรียน</div>
+
+          <div id="tdRiskRepeated2"
+               class="td-repeat-value">—</div>
+
+          <div>คน</div>
+
+        </div>
+
+        <div class="td-repeat-kpi level3">
+
+          <div>ต่อเนื่อง 3 ภาคเรียน</div>
+
+          <div id="tdRiskRepeated3"
+               class="td-repeat-value">—</div>
+
+          <div>คน</div>
+
+        </div>
+
+        <div class="td-repeat-kpi level4">
+
+          <div>ต่อเนื่อง ≥ 4 ภาคเรียน</div>
+
+          <div id="tdRiskRepeated4Plus"
+               class="td-repeat-value">—</div>
+
+          <div>คน</div>
+
+        </div>
+
+      </div>
+
+      <!-- ภาพรวมสถานะการแก้ -->
+
+      <div class="td-repeat-overview">
+
+        <div>นักเรียนที่มีความเสี่ยงต่อเนื่องทั้งหมด</div>
+
+        <div id="tdRiskRepeatedTotal"
+             class="td-repeat-value">—</div>
+
+        <div id="tdRiskRepeatedCohort"
+             class="small"></div>
+
+        <div class="td-repeat-track">
+
+          <div id="tdRiskRepeatedOutstandingBar"></div>
+
+          <div id="tdRiskRepeatedClearedBar"></div>
+
+        </div>
+
+        <div class="td-repeat-legend">
+
+          <div class="td-repeat-red">
+
+            ยังมีรายการคงค้าง
+
+            <span id="tdRiskRepeatedOutstanding">
+              —
+            </span>
+
+            คน
+
+          </div>
+
+          <div class="td-repeat-green">
+
+            ไม่มีรายการคงค้างแล้ว
+
+            <span id="tdRiskRepeatedCleared">
+              —
+            </span>
+
+            คน
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- แจ้งข้อจำกัดของข้อมูล -->
+
+      <div id="tdRiskRepeatedNotice"
+           class="hidden"></div>
+
+      <!-- รายชื่อนักเรียน -->
+
+      <h3 style="margin:16px 0 12px;">
+
+        รายชื่อนักเรียนที่มีความเสี่ยงต่อเนื่อง
+
+      </h3>
+
+      <div id="tdRiskRepeatedTableWrap">
+
+        <table id="tdRiskRepeatedTable">
+
+          <thead>
+
+            <tr>
+
+              <th scope="col">ที่</th>
+
+              <th scope="col">นักเรียน</th>
+
+              <th scope="col">ชั้น/ห้อง</th>
+
+              <th scope="col">ต่อเนื่อง</th>
+
+              <th scope="col">เริ่ม–สิ้นสุด</th>
+
+              <th scope="col">รายการเสี่ยงสะสม</th>
+
+              <th scope="col">แก้สำเร็จ</th>
+
+              <th scope="col">รออนุมัติ</th>
+
+              <th scope="col">ยังไม่แก้</th>
+
+              <th scope="col">คงค้าง</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="tdRiskRepeatedBody"></tbody>
+
+        </table>
+
+      </div>
+
+      <div id="tdRiskRepeatedSummary"></div>
+
+      <div class="small"
+           style="margin-top:14px;line-height:1.8;">
+
+        หมายเหตุ: กลุ่มต่อเนื่อง 2 และ 3 ภาคเรียน
+        เป็นกลุ่มที่นับตามจำนวนภาคเรียนพอดี
+        ไม่ซ้ำกับกลุ่มอื่น
+
+        ชั้นและห้องเรียนอ้างอิงจากภาคเรียนที่กำหนด
+        โดยติดตามนักเรียนคนเดิมย้อนหลังผ่าน student_id
+
+        ประวัติความเสี่ยงรวมรายการที่แก้สำเร็จแล้ว
+        ส่วนสถานะคงค้างเป็นสถานะล่าสุดของรายการ
+        ภายในขอบเขตข้อมูลที่นำมาวิเคราะห์
+
+        กรณีข้อมูลย้อนหลังขาดหาย
+        จะไม่ถือว่าเป็นภาคเรียนที่ไม่มีความเสี่ยง
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ===== END TEACHER DASHBOARD REPEATED RISK ===== -->
 
   <div id="tdRiskInsightsSection"></div>
 
@@ -26664,6 +27093,8 @@ function tdRiskResetResult(){
 
   tdRiskResetTrend();
 
+  tdRiskResetRepeated();
+
   tdRiskResultState.generation++;
 
   tdRiskResultState.summary = null;
@@ -27229,6 +27660,31 @@ if(!tdStatsHasValidSession()){
 // =============================================
 
 await tdRiskLoadTrend(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+);
+
+
+if(!isCurrentRequest()) return;
+
+
+if(!tdStatsHasValidSession()){
+
+  throw new Error('Session หมดอายุ');
+
+}
+
+
+// =============================================
+// นักเรียนที่มีความเสี่ยงต่อเนื่อง
+// =============================================
+
+await tdRiskLoadRepeated(
 
   snapshot,
 
@@ -32016,6 +32472,996 @@ function tdRiskResetTrend(){
 }
 
 /* ===== END TEACHER DASHBOARD RISK TREND CONTROLLER ===== */
+
+/* =====================================================
+   TEACHER DASHBOARD : REPEATED RISK CONTROLLER
+   ===================================================== */
+
+const tdRiskRepeatedState = {
+
+  data:null,
+
+  filters:null,
+
+  limit:20
+
+};
+
+
+// =====================================================
+// 1. ตรวจสอบ Response และ KPI
+// =====================================================
+
+function tdRiskValidateRepeatedResponse(
+  data,
+  filters,
+  limit
+){
+
+  if(
+    !data ||
+    typeof data !== 'object' ||
+    Array.isArray(data)
+  ){
+    throw new Error(
+      'รูปแบบ Repeated Risk Response ไม่ถูกต้อง'
+    );
+  }
+
+  if(![
+    'ok',
+    'no_reference_data',
+    'no_cohort'
+  ].includes(data.status)){
+    throw new Error(
+      'สถานะ Repeated Risk ไม่ถูกต้อง'
+    );
+  }
+
+  // กรณีไม่มีข้อมูลอ้างอิงหรือไม่มีกลุ่มนักเรียน
+  // ให้แสดงสถานะโดยไม่สร้าง KPI สมมติ
+
+  if(data.status !== 'ok'){
+    return;
+  }
+
+  const ref = data.reference_period;
+
+  const k = data.kpi;
+
+  const rows = data.students;
+
+  if(
+    !ref ||
+    !k ||
+    !Array.isArray(rows)
+  ){
+    throw new Error(
+      'Repeated Risk Response ไม่ครบถ้วน'
+    );
+  }
+
+  const isCount = value =>
+    Number.isSafeInteger(value) &&
+    value >= 0;
+
+  // ตรวจสอบภาคเรียนอ้างอิง
+
+  if(
+    !Number.isSafeInteger(ref.academic_year) ||
+    ref.academic_year <= 0 ||
+    ![1,2].includes(ref.term) ||
+
+    ref.label !==
+      `${ref.academic_year}/${ref.term}` ||
+
+    ref.period_index !==
+      ref.academic_year * 2 + ref.term
+  ){
+    throw new Error(
+      'ภาคเรียนอ้างอิงไม่ถูกต้อง'
+    );
+  }
+
+  if(
+    (
+      filters.academic_years.length > 0 &&
+      !filters.academic_years.includes(
+        ref.academic_year
+      )
+    ) ||
+    (
+      filters.terms.length > 0 &&
+      !filters.terms.includes(ref.term)
+    )
+  ){
+    throw new Error(
+      'ภาคเรียนอ้างอิงไม่ตรงกับตัวกรอง'
+    );
+  }
+
+  // ตรวจสอบ KPI ทุกฟิลด์
+
+  const kpiKeys = [
+
+    'cohort_students',
+
+    'reference_risk_students',
+
+    'reference_no_risk_students',
+
+    'reference_unknown_students',
+
+    'repeat_2_students',
+
+    'repeat_3_students',
+
+    'repeat_4plus_students',
+
+    'total_repeated_students',
+
+    'repeated_with_outstanding_students',
+
+    'repeated_without_outstanding_students',
+
+    'repeated_unknown_boundary_students',
+
+    'room_conflict_students',
+
+    'room_ambiguous_students'
+
+  ];
+
+  if(!kpiKeys.every(key => isCount(k[key]))){
+    throw new Error(
+      'Repeated Risk KPI ไม่ถูกต้อง'
+    );
+  }
+
+  if(
+    !isCount(data.reference_total_students) ||
+
+    k.cohort_students >
+      data.reference_total_students ||
+
+    k.reference_risk_students +
+    k.reference_no_risk_students +
+    k.reference_unknown_students !==
+      k.cohort_students ||
+
+    k.repeat_2_students +
+    k.repeat_3_students +
+    k.repeat_4plus_students !==
+      k.total_repeated_students ||
+
+    k.repeated_with_outstanding_students +
+    k.repeated_without_outstanding_students !==
+      k.total_repeated_students ||
+
+    k.total_repeated_students >
+      k.reference_risk_students ||
+
+    k.repeated_unknown_boundary_students >
+      k.total_repeated_students ||
+
+    k.room_conflict_students >
+      k.cohort_students ||
+
+    k.room_ambiguous_students >
+      k.cohort_students
+  ){
+    throw new Error(
+      'ยอดรวม Repeated Risk KPI ไม่สอดคล้องกัน'
+    );
+  }
+
+  // ตรวจสอบ List Limit
+
+  const expectedCount = Math.min(
+    k.total_repeated_students,
+    limit
+  );
+
+  if(
+    data.list_limit !== limit ||
+
+    data.returned_students !== rows.length ||
+
+    rows.length !== expectedCount ||
+
+    data.list_truncated !==
+      (k.total_repeated_students > limit)
+  ){
+    throw new Error(
+      'จำนวนรายชื่อนักเรียนไม่สอดคล้องกับ KPI'
+    );
+  }
+
+  // ตรวจสอบข้อมูลรายบุคคล
+
+  const rowKeys = [
+
+    'current_consecutive_periods',
+
+    'total_risk_records',
+
+    'resolved_records',
+
+    'pending_records',
+
+    'unresolved_records',
+
+    'outstanding_records',
+
+    'outstanding_subjects'
+
+  ];
+
+  const seen = new Set();
+
+  const periodIndex = label => {
+
+    const match = /^(\d+)\/([12])$/.exec(
+      String(label ?? '')
+    );
+
+    return match
+      ? Number(match[1]) * 2 + Number(match[2])
+      : null;
+
+  };
+
+  rows.forEach((row,index) => {
+
+    if(
+      !row ||
+
+      typeof row.student_id !== 'string' ||
+
+      !row.student_id.trim() ||
+
+      !rowKeys.every(key => isCount(row[key]))
+    ){
+      throw new Error(
+        'ข้อมูลนักเรียน Repeated Risk ไม่ถูกต้อง'
+      );
+    }
+
+    if(seen.has(row.student_id)){
+      throw new Error(
+        'พบ student_id ซ้ำใน Repeated Risk'
+      );
+    }
+
+    seen.add(row.student_id);
+
+    const start = periodIndex(
+      row.streak_start_period
+    );
+
+    const end = periodIndex(
+      row.streak_end_period
+    );
+
+    if(
+      row.current_consecutive_periods < 2 ||
+
+      start === null ||
+
+      end !== ref.period_index ||
+
+      end - start + 1 !==
+        row.current_consecutive_periods ||
+
+      row.total_risk_records <
+        row.current_consecutive_periods ||
+
+      row.resolved_records +
+      row.pending_records +
+      row.unresolved_records !==
+        row.total_risk_records ||
+
+      row.pending_records +
+      row.unresolved_records !==
+        row.outstanding_records ||
+
+      row.outstanding_subjects >
+        row.outstanding_records
+    ){
+      throw new Error(
+        'ข้อมูลความต่อเนื่องหรือสถานะคงค้างไม่ถูกต้อง'
+      );
+    }
+
+    if(
+      index > 0 &&
+      rows[index-1].current_consecutive_periods <
+        row.current_consecutive_periods
+    ){
+      throw new Error(
+        'ลำดับความเสี่ยงต่อเนื่องไม่ถูกต้อง'
+      );
+    }
+
+  });
+
+}
+
+
+// =====================================================
+// 2. กำหนดสีตามจำนวนภาคเรียน
+// =====================================================
+
+function tdRiskGetRepeatedLevel(periods){
+
+  if(periods >= 4) return 'level4';
+
+  if(periods === 3) return 'level3';
+
+  return 'level2';
+
+}
+
+
+// =====================================================
+// 3. แสดง KPI และรายชื่อนักเรียน
+// =====================================================
+
+function tdRiskRenderRepeated(){
+
+  const d = tdRiskRepeatedState.data;
+
+  if(!d) return;
+
+  const content = el('tdRiskRepeatedContent');
+
+  if(d.status !== 'ok'){
+
+    content.classList.add('hidden');
+
+    const message =
+      d.status === 'no_reference_data'
+
+        ? 'ไม่พบข้อมูลภาคเรียนอ้างอิง'
+
+        : 'ไม่พบกลุ่มนักเรียนตามเงื่อนไข';
+
+    setStatus(
+      'tdRiskRepeatedStatus',
+      message,
+      'info'
+    );
+
+    return;
+
+  }
+
+  const k = d.kpi;
+
+  const rows = d.students;
+
+  const ref = d.reference_period;
+
+  // ภาคเรียนอ้างอิงจริงจาก Backend
+
+  tdStatsSetText(
+
+    'tdRiskRepeatedReference',
+
+    `ภาคเรียนอ้างอิง ${ref.label}` +
+
+    ` · นักเรียนตามตัวกรอง ${
+      tdStatsFmtInt(k.cohort_students)
+    } คน` +
+
+    ` · นักเรียนอ้างอิงทั้งโรงเรียน ${
+      tdStatsFmtInt(d.reference_total_students)
+    } คน`
+
+  );
+
+  // KPI จากนักเรียนทั้งหมด
+
+  const values = {
+
+    tdRiskRepeated2:
+      k.repeat_2_students,
+
+    tdRiskRepeated3:
+      k.repeat_3_students,
+
+    tdRiskRepeated4Plus:
+      k.repeat_4plus_students,
+
+    tdRiskRepeatedTotal:
+      k.total_repeated_students,
+
+    tdRiskRepeatedOutstanding:
+      k.repeated_with_outstanding_students,
+
+    tdRiskRepeatedCleared:
+      k.repeated_without_outstanding_students
+
+  };
+
+  Object.entries(values).forEach(([id,value]) => {
+
+    tdStatsSetText(
+      id,
+      tdStatsFmtInt(value)
+    );
+
+  });
+
+  const repeatedPercent = k.cohort_students > 0
+
+    ? k.total_repeated_students /
+      k.cohort_students * 100
+
+    : null;
+
+  tdStatsSetText(
+
+    'tdRiskRepeatedCohort',
+
+    `จากนักเรียนในกลุ่มอ้างอิง ${
+      tdStatsFmtInt(k.cohort_students)
+    } คน` +
+
+    (
+      repeatedPercent !== null
+
+        ? ` · คิดเป็น ${
+            tdStatsFmtNumber(repeatedPercent)
+          }%`
+
+        : ''
+    )
+
+  );
+
+  // Progress Bar
+
+  const total = k.total_repeated_students;
+
+  const outstandingPercent = total > 0
+
+    ? k.repeated_with_outstanding_students /
+      total * 100
+
+    : 0;
+
+  const clearedPercent = total > 0
+
+    ? k.repeated_without_outstanding_students /
+      total * 100
+
+    : 0;
+
+  el('tdRiskRepeatedOutstandingBar').style.width =
+    `${outstandingPercent}%`;
+
+  el('tdRiskRepeatedClearedBar').style.width =
+    `${clearedPercent}%`;
+
+  // แจ้งข้อจำกัดของข้อมูลย้อนหลัง
+
+  const notices = [];
+
+  if(k.reference_unknown_students > 0){
+
+    notices.push(
+
+      `• นักเรียน ${
+        tdStatsFmtInt(k.reference_unknown_students)
+      } คน มีข้อมูลไม่เพียงพอที่จะสรุปความเสี่ยง` +
+      ` ในภาคเรียนอ้างอิง`
+
+    );
+
+  }
+
+  if(k.repeated_unknown_boundary_students > 0){
+
+    notices.push(
+
+      `• นักเรียนเสี่ยงต่อเนื่อง ${
+        tdStatsFmtInt(
+          k.repeated_unknown_boundary_students
+        )
+      } คน มีขอบเขตข้อมูลย้อนหลังที่ยังยืนยัน` +
+      `ความต่อเนื่องเพิ่มเติมไม่ได้`
+
+    );
+
+  }
+
+  if(k.room_conflict_students > 0){
+
+    notices.push(
+
+      `• พบข้อมูลชั้นหรือห้องเรียนหลายค่า ${
+        tdStatsFmtInt(k.room_conflict_students)
+      } คน`
+
+    );
+
+  }
+
+  if(k.room_ambiguous_students > 0){
+
+    notices.push(
+
+      `• ไม่สามารถยืนยันชั้นหรือห้องเรียน` +
+      `ที่แน่นอนได้ ${
+        tdStatsFmtInt(k.room_ambiguous_students)
+      } คน`
+
+    );
+
+  }
+
+  const notice = el('tdRiskRepeatedNotice');
+
+  notice.textContent = notices.join('\n');
+
+  notice.classList.toggle(
+    'hidden',
+    notices.length === 0
+  );
+
+  // สร้างตารางด้วย DOM และ textContent
+
+  const tbody = el('tdRiskRepeatedBody');
+
+  tbody.replaceChildren();
+
+  const fragment =
+    document.createDocumentFragment();
+
+  rows.forEach((row,index) => {
+
+    const tr = document.createElement('tr');
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+        'td',
+        index + 1
+      )
+
+    );
+
+    // ชื่อและรหัสนักเรียน
+
+    const nameCell =
+      document.createElement('td');
+
+    nameCell.className = 'td-repeat-name';
+
+    const name =
+      document.createElement('div');
+
+    name.textContent =
+      row.student_name || '—';
+
+    const code =
+      document.createElement('div');
+
+    code.className = 'td-repeat-code';
+
+    code.textContent =
+      `รหัสนักเรียน ${row.student_code || '—'}`;
+
+    nameCell.append(name,code);
+
+    tr.append(nameCell);
+
+    // ห้องเรียนอ้างอิง
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+
+        'td',
+
+        row.room_ambiguous
+
+          ? 'ไม่ยืนยันห้อง'
+
+          : row.room_label || '—'
+
+      )
+
+    );
+
+    // จำนวนภาคเรียนต่อเนื่อง
+
+    const levelCell =
+      document.createElement('td');
+
+    const level =
+      document.createElement('span');
+
+    level.className =
+
+      'td-repeat-level ' +
+
+      tdRiskGetRepeatedLevel(
+        row.current_consecutive_periods
+      );
+
+    level.textContent =
+
+      `${row.current_consecutive_periods} ภาคเรียน`;
+
+    levelCell.append(level);
+
+    tr.append(levelCell);
+
+    // ช่วงความต่อเนื่อง
+
+    tr.append(
+
+      tdStatsCreateTableCell(
+
+        'td',
+
+        `${row.streak_start_period}` +
+
+        `–${row.streak_end_period}`
+
+      )
+
+    );
+
+    // จำนวนรายการและสถานะ
+
+    [
+
+      row.total_risk_records,
+
+      row.resolved_records,
+
+      row.pending_records,
+
+      row.unresolved_records
+
+    ].forEach(value => {
+
+      tr.append(
+
+        tdStatsCreateTableCell(
+          'td',
+          tdStatsFmtInt(value)
+        )
+
+      );
+
+    });
+
+    // รายการคงค้าง
+
+    const outstandingCell =
+      document.createElement('td');
+
+    outstandingCell.className =
+      row.outstanding_records > 0
+
+        ? 'td-repeat-red'
+
+        : 'td-repeat-green';
+
+    const outstanding =
+      document.createElement('div');
+
+    outstanding.textContent =
+
+      `${
+        tdStatsFmtInt(row.outstanding_records)
+      } รายการ`;
+
+    const subjects =
+      document.createElement('div');
+
+    subjects.className = 'small';
+
+    subjects.textContent =
+
+      `${
+        tdStatsFmtInt(row.outstanding_subjects)
+      } วิชา`;
+
+    outstandingCell.append(
+      outstanding,
+      subjects
+    );
+
+    tr.append(outstandingCell);
+
+    fragment.append(tr);
+
+  });
+
+  // กรณีไม่พบนักเรียนเสี่ยงต่อเนื่อง
+
+  if(rows.length === 0){
+
+    const tr =
+      document.createElement('tr');
+
+    const td =
+      tdStatsCreateTableCell(
+
+        'td',
+
+        'ไม่พบนักเรียนที่มีความเสี่ยงต่อเนื่อง'
+
+      );
+
+    td.colSpan = 10;
+
+    tr.append(td);
+
+    fragment.append(tr);
+
+  }
+
+  tbody.append(fragment);
+
+  // สรุปจำนวนรายชื่อ
+
+  tdStatsSetText(
+
+    'tdRiskRepeatedSummary',
+
+    `แสดง ${
+      tdStatsFmtInt(d.returned_students)
+    } จาก ${
+      tdStatsFmtInt(k.total_repeated_students)
+    } คน` +
+
+    (
+      d.list_truncated
+
+        ? ` · จำกัดรายชื่อสูงสุด ${
+            tdStatsFmtInt(d.list_limit)
+          } คน โดย KPI คำนวณจากทั้งหมด`
+
+        : ' · แสดงรายชื่อครบทั้งหมด'
+    )
+
+  );
+
+  content.classList.remove('hidden');
+
+  setStatus(
+
+    'tdRiskRepeatedStatus',
+
+    'แสดงข้อมูลความเสี่ยงต่อเนื่องจากผลประมวลผลล่าสุด',
+
+    'success'
+
+  );
+
+}
+
+
+// =====================================================
+// 4. เรียก Repeated Risk RPC
+// =====================================================
+
+async function tdRiskLoadRepeated(
+
+  snapshot,
+
+  token,
+
+  isCurrentRequest
+
+){
+
+  if(!isCurrentRequest()) return;
+
+  tdRiskResetRepeated();
+
+  try{
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    if(!tdRiskResultState.summary){
+
+      throw new Error('Summary ยังไม่พร้อม');
+
+    }
+
+    const filters =
+      JSON.parse(JSON.stringify(snapshot));
+
+    setStatus(
+
+      'tdRiskRepeatedStatus',
+
+      'กำลังวิเคราะห์ความเสี่ยงต่อเนื่อง...',
+
+      'info'
+
+    );
+
+    const result = await supabaseClient.rpc(
+
+      'teacher_get_dashboard_repeated_risk_session',
+
+      {
+
+        p_token:token,
+
+        p_filters:filters,
+
+        p_limit:tdRiskRepeatedState.limit
+
+      }
+
+    );
+
+    if(!isCurrentRequest()) return;
+
+    if(!tdStatsHasValidSession()){
+
+      throw new Error('Session หมดอายุ');
+
+    }
+
+    if(result.error) throw result.error;
+
+    const data = result.data;
+
+    tdRiskValidateRepeatedResponse(
+
+      data,
+
+      filters,
+
+      tdRiskRepeatedState.limit
+
+    );
+
+    // เก็บไว้ใน Memory สำหรับ Auto Insight
+
+    tdRiskRepeatedState.data = data;
+
+    tdRiskRepeatedState.filters = filters;
+
+    tdRiskRenderRepeated();
+
+  }catch(error){
+
+    if(!isCurrentRequest()) return;
+
+    if(!tdStatsHasValidSession()){
+
+      throw error;
+
+    }
+
+    tdRiskResetRepeated();
+
+    setStatus(
+
+      'tdRiskRepeatedStatus',
+
+      'ไม่สามารถวิเคราะห์ความเสี่ยงต่อเนื่องได้ กรุณาประมวลผลใหม่',
+
+      'error'
+
+    );
+
+    // ไม่แสดงชื่อ รหัสนักเรียน หรือ Token
+
+    console.warn(
+
+      'Teacher Dashboard repeated risk:',
+
+      error?.code ||
+
+      error?.message ||
+
+      'Unknown error'
+
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// 5. ล้างข้อมูล Repeated Risk
+// =====================================================
+
+function tdRiskResetRepeated(){
+
+  tdRiskRepeatedState.data = null;
+
+  tdRiskRepeatedState.filters = null;
+
+  [
+
+    'tdRiskRepeated2',
+
+    'tdRiskRepeated3',
+
+    'tdRiskRepeated4Plus',
+
+    'tdRiskRepeatedTotal',
+
+    'tdRiskRepeatedOutstanding',
+
+    'tdRiskRepeatedCleared'
+
+  ].forEach(id => {
+
+    tdStatsSetText(id,'—');
+
+  });
+
+  [
+
+    'tdRiskRepeatedReference',
+
+    'tdRiskRepeatedCohort',
+
+    'tdRiskRepeatedSummary',
+
+    'tdRiskRepeatedNotice'
+
+  ].forEach(id => {
+
+    tdStatsSetText(id,'');
+
+  });
+
+  [
+
+    'tdRiskRepeatedOutstandingBar',
+
+    'tdRiskRepeatedClearedBar'
+
+  ].forEach(id => {
+
+    const node = el(id);
+
+    if(node) node.style.width = '0%';
+
+  });
+
+  el('tdRiskRepeatedBody')
+    ?.replaceChildren();
+
+  el('tdRiskRepeatedNotice')
+    ?.classList.add('hidden');
+
+  el('tdRiskRepeatedContent')
+    ?.classList.add('hidden');
+
+  setStatus(
+
+    'tdRiskRepeatedStatus',
+
+    'ยังไม่ได้ประมวลผลข้อมูล',
+
+    'info'
+
+  );
+
+}
+
+/* ===== END TEACHER DASHBOARD REPEATED RISK CONTROLLER ===== */
 
 
  function setActivePage(page){
