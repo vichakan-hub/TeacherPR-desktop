@@ -21811,6 +21811,49 @@ function teacherGetStudentClassLevel(
  *
  * ห้ามใช้ is_active แทนสถานะลาออก
  */
+
+/* TeacherPR student status guard (2026-11-28)
+ * Student status is not account is_active. Read only the identities
+ * already returned to this screen; never use cached status for a save.
+ * Current rosters use เรียนอยู่; historical/retest rows exclude ลาออก
+ * without dropping other known statuses such as graduated students.
+ */
+async function teacherFilterStudentStatusRows(rows, { currentOnly = false } = {}){
+  const source = Array.isArray(rows) ? rows : [];
+  if(!source.length) return [];
+  const key = value => String(value ?? '').trim();
+  const sidKey = value => key(value).replace(/\.0$/, '');
+  const ids = [...new Set(source.map(row => key(row.student_id)).filter(Boolean))];
+  const sids = [...new Set(source.filter(row => !key(row.student_id))
+    .map(row => sidKey(row.student_code ?? row.sid)).filter(Boolean))];
+  const byId = new Map(), bySid = new Map();
+  for(const [field, values] of [['id', ids], ['sid', sids]]){
+    for(let offset = 0; offset < values.length; offset += 100){
+      const {data, error} = await supabaseClient.from('students')
+        .select('id,sid,student_status').in(field, values.slice(offset, offset + 100));
+      if(error) throw new Error('ตรวจสอบสถานะนักเรียนไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
+      for(const student of (data || [])){
+        byId.set(key(student.id), student);
+        bySid.set(sidKey(student.sid), student);
+      }
+    }
+  }
+  return source.filter(row => {
+    const id = key(row.student_id);
+    const student = id ? byId.get(id) : bySid.get(sidKey(row.student_code ?? row.sid));
+    const status = key(student?.student_status);
+    if(!status) return false;
+    return currentOnly ? status === 'เรียนอยู่' : status !== 'ลาออก';
+  });
+}
+
+async function teacherAssertStudentStatusRows(rows, options = {}){
+  const allowed = await teacherFilterStudentStatusRows(rows, options);
+  if(allowed.length !== rows.length){
+    throw new Error('มีนักเรียนลาออกหรือไม่สามารถยืนยันสถานะได้ กรุณาโหลดรายชื่อใหม่ก่อนบันทึก');
+  }
+}
+
 function teacherIsCurrentStudent(
   student
 ){
@@ -36399,9 +36442,7 @@ async function loadAdviserMsRows(){
 
 
     state.adviserMsRowsRaw =
-      Array.isArray(data)
-        ? data
-        : [];
+      await teacherFilterStudentStatusRows(data, {currentOnly:true});
 
 
     state.adviserMsRowsFiltered =
@@ -37300,7 +37341,7 @@ async function fetchAdviserRiskStudentsForRoom(
         entry_level,
         is_active
       `)
-      .eq('is_active', true)
+      .eq('student_status', 'เรียนอยู่')
       .eq('current_room', room)
       .order(
         'current_no',
@@ -39157,6 +39198,8 @@ async function cancelRetestSubmission(row){
    * =====================================================
    */
 
+  await teacherAssertStudentStatusRows([row]);
+
   const { data, error } =
     await supabaseClient.rpc(
       'teacher_cancel_retest_request_session',
@@ -39417,7 +39460,9 @@ async function saveRetestRequest(rowKey){
     );
 
 
-    const { data, error } =
+    await teacherAssertStudentStatusRows([row]);
+
+  const { data, error } =
       await supabaseClient.rpc(
         'teacher_submit_retest_request_session',
         {
@@ -40404,7 +40449,9 @@ async function loadRetestRows(){
 
     setStatus('retestStatus', 'กำลังโหลดรายการสอบแก้ตัว...', 'info');
 
-    const baseRows = await fetchRetestBaseRows(academicYear, term, studentCodeKeyword);
+    const baseRows = await teacherFilterStudentStatusRows(
+      await fetchRetestBaseRows(academicYear, term, studentCodeKeyword)
+    );
     const gradeResultIds = baseRows.map(r => r.id).filter(Boolean);
     const requestMap = await fetchRetestRequestsByGradeResultIds(gradeResultIds);
 
@@ -42371,10 +42418,12 @@ tbody.querySelectorAll('[data-view-grade-index]').forEach(btn => {
 // -----------------------------------------------
 // เปิด Modal แสดงคะแนนที่ส่งแล้ว
 // -----------------------------------------------
-openSubmittedGradesModal(
-  group,
-  data.rows
-);
+const visibleSubmittedRows = await teacherFilterStudentStatusRows(data.rows);
+if(!visibleSubmittedRows.length){
+  showToast('ยังไม่มีข้อมูล', 'ไม่พบผลการเรียนของนักเรียนที่ไม่ลาออก', 'info');
+  return;
+}
+openSubmittedGradesModal(group, visibleSubmittedRows);
 
       }finally{
 
@@ -46973,7 +47022,8 @@ async function mapStudentsForPreview(rows){
         current_room,
         current_no,
         entry_academic_year,
-        entry_level
+        entry_level,
+        student_status
       `)
       .in(
         'sid',
@@ -47057,6 +47107,10 @@ async function mapStudentsForPreview(rows){
       /*
        * พบ SID
        */
+      if(!teacherIsCurrentStudent(matched)){
+        throw new Error(`นักเรียน ${studentCode} ไม่ได้อยู่ในสถานะเรียนอยู่ กรุณาตรวจสอบไฟล์ก่อนนำเข้า`);
+      }
+
       next.student_id =
         matched.id;
 
@@ -47606,6 +47660,7 @@ async function doSaveImportedPreview(){
      */
 
     const payload = buildUpsertPayload();
+    await teacherAssertStudentStatusRows(payload, {currentOnly:true});
 
 
     if(!payload.length){
@@ -48481,7 +48536,7 @@ async function loadAdviserStudents(){
     let query = supabaseClient
       .from('students')
       .select('id, sid, raw_full_name, current_room, current_no, entry_academic_year, entry_level, is_active')
-      .eq('is_active', true)
+      .eq('student_status', 'เรียนอยู่')
       .eq('current_room', targetRoom)
       .order('current_no', { ascending:true })
       .order('raw_full_name', { ascending:true });
@@ -49402,7 +49457,7 @@ async function fetchTeacherStudentClassGradesTaughtSecure(
       );
 
 
-    (rows || []).forEach(row => {
+    (await teacherFilterStudentStatusRows(rows)).forEach(row => {
 
       allRows.push({
 
@@ -49678,7 +49733,7 @@ async function fetchTeacherStudentClassGrades(
       );
 
 
-    (rows || []).forEach(row => {
+    (await teacherFilterStudentStatusRows(rows)).forEach(row => {
 
       allRows.push({
 
@@ -63366,6 +63421,7 @@ async function saveMidtermReport(){
       throw new Error('ยังไม่มีรายชื่อนักเรียน');
     }
 
+    await teacherAssertStudentStatusRows(state.midtermRows, {currentOnly:true});
     validateMidtermRows();
     calculateAllMidtermRows();
 
@@ -72576,7 +72632,7 @@ async function fetchAdviserRetestStudents(selectedRoom){
       entry_level,
       is_active
     `)
-    .eq('is_active', true)
+    .eq('student_status', 'เรียนอยู่')
     .eq('current_room', targetRoom)
     .eq(
       'entry_academic_year',
